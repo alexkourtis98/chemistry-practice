@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Nuclear Binding Energy & Dating</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Nuclear Binding Energy & Dating</h1>
+<p class="subtitle">Deep practice &mdash; mass defect, binding energy, carbon-14 dating, nuclear stability</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_91';
+const SECTIONS = [
+  {
+    id:1, title:"Fill: Mass defect fundamentals",
+    instruction:"Complete each statement about mass defect.",
+    rows:[
+      ["1","Mass defect is the difference between the ___ mass and the actual mass of a nucleus","predicted / calculated / expected"],
+      ["2","The predicted mass equals the sum of ___ of individual protons and neutrons","masses / the masses"],
+      ["3","\u0394m = (Z \u00D7 m_p + N \u00D7 m_n) \u2212 ___","actual nuclear mass / m_nucleus / nuclear mass"],
+      ["4","The mass defect is always ___ (positive/negative) for stable nuclei","positive"],
+      ["5","The missing mass has been converted to ___ according to E = mc\u00B2","energy / binding energy"],
+      ["6","1 amu of mass is equivalent to ___ MeV of energy","931.5 / 931.5 MeV"],
+      ["7","The mass of a proton is approximately ___ amu","1.00728 / 1.0073"],
+      ["8","The mass of a neutron is approximately ___ amu","1.00866 / 1.0087"],
+      ["9","A larger mass defect indicates a ___ stable nucleus","more"],
+      ["10","The mass defect for He-4 (actual mass 4.00260 amu, predicted 4.03188 amu) is ___ amu","0.02928 / 0.0293"],
+      ["11","Mass defect is also called mass ___","loss / deficit"],
+      ["12","Einstein's equation relating mass and energy is ___","E = mc\u00B2 / E=mc2"],
+      ["13","The speed of light c = ___ \u00D7 10\u2078 m/s","3.00 / 3 / 2.998"],
+      ["14","If a nucleus has 6 protons and 6 neutrons, Z = ___ and N = ___","6, 6"],
+      ["15","The predicted mass of C-12 (6p + 6n) = 6(1.00728) + 6(1.00866) = ___ amu","12.09564 / 12.0956"]
+    ]
+  },
+  {
+    id:2, title:"Fill: Binding energy calculations",
+    instruction:"Calculate the binding energy or binding energy per nucleon.",
+    rows:[
+      ["1","Binding energy (BE) = \u0394m \u00D7 ___ MeV/amu","931.5"],
+      ["2","For He-4, \u0394m = 0.02928 amu. BE = 0.02928 \u00D7 931.5 = ___ MeV","27.28 / 27.3"],
+      ["3","BE per nucleon for He-4 = 27.28 \u00F7 4 = ___ MeV/nucleon","6.82 / 6.8"],
+      ["4","For Fe-56, \u0394m = 0.52846 amu. BE = ___ MeV","492.3 / 492"],
+      ["5","BE per nucleon for Fe-56 = 492.3 \u00F7 56 = ___ MeV/nucleon","8.79 / 8.8"],
+      ["6","For U-238, \u0394m = 1.93420 amu. BE = ___ MeV","1802 / 1801.8 / 1802.0"],
+      ["7","BE per nucleon for U-238 = 1802 \u00F7 238 = ___ MeV/nucleon","7.57 / 7.6"],
+      ["8","The element with the highest BE/nucleon is ___ (symbol)","Fe / Fe-56 / iron-56"],
+      ["9","Fe-56 has a BE/nucleon of approximately ___ MeV/nucleon","8.8 / 8.79 / 8.8 MeV/nucleon"],
+      ["10","Elements lighter than Fe release energy by ___ (fusion/fission)","fusion"],
+      ["11","Elements heavier than Fe release energy by ___ (fusion/fission)","fission"],
+      ["12","If \u0394m = 0.00867 amu, BE = ___ MeV","8.08 / 8.1"],
+      ["13","A nucleus with BE/nucleon = 8.5 MeV is ___ (more/less) stable than one with 7.2 MeV","more"],
+      ["14","The total BE of O-16 (\u0394m = 0.13700 amu) = ___ MeV","127.6 / 127.62"],
+      ["15","BE/nucleon of O-16 = 127.6 \u00F7 16 = ___ MeV/nucleon","7.98 / 8.0 / 7.97"]
+    ]
+  },
+  {
+    id:3, title:"MC: Nuclear stability concepts", type:"mc",
+    instruction:"Select the correct answer about nuclear stability.",
+    questions:[
+      {q:"Which nucleus has the highest binding energy per nucleon?", options:["H-2 (deuterium)","He-4","Fe-56","U-238"], correct:2},
+      {q:"Why is iron-56 considered the most stable nucleus?", options:["It has the most protons","It has the highest BE/nucleon (~8.8 MeV)","It is the heaviest element","It has the most neutrons"], correct:1},
+      {q:"Nuclear fusion of light elements releases energy because:", options:["Mass increases","Products have higher BE/nucleon than reactants","Products are radioactive","Neutrons are absorbed"], correct:1},
+      {q:"Nuclear fission of heavy elements releases energy because:", options:["Mass is created","Products have lower BE/nucleon","Products have higher BE/nucleon than parent","Protons are destroyed"], correct:2},
+      {q:"The mass defect is caused by:", options:["Measurement error","Conversion of mass to binding energy","Loss of electrons","Nuclear decay"], correct:1},
+      {q:"Which has a larger mass defect per nucleon: He-4 or Fe-56?", options:["He-4","Fe-56","They are equal","Cannot determine"], correct:1},
+      {q:"On the BE/nucleon curve, the peak occurs near:", options:["A = 4","A = 56","A = 120","A = 238"], correct:1},
+      {q:"Which process powers the Sun?", options:["Nuclear fission of uranium","Nuclear fusion of hydrogen","Chemical combustion","Radioactive decay"], correct:1},
+      {q:"The belt of stability relates nuclear stability to:", options:["Temperature and pressure","Neutron-to-proton ratio","Electron configuration","Atomic radius"], correct:1},
+      {q:"For light nuclei (Z < 20), the stable N/Z ratio is approximately:", options:["0.5","1.0","1.5","2.0"], correct:1},
+      {q:"For heavy nuclei (Z > 83), all isotopes are:", options:["Stable","Radioactive / unstable","Inert","Fissile"], correct:1},
+      {q:"Which statement about binding energy is FALSE?", options:["Higher BE/nucleon = more stable","BE is always positive for stable nuclei","BE equals mass gained by nucleus","BE is energy needed to break nucleus apart"], correct:2},
+      {q:"The mass of a nucleus is always ___ the sum of its individual nucleon masses:", options:["Greater than","Equal to","Less than","Unrelated to"], correct:2},
+      {q:"Ni-62 actually has the highest BE/nucleon. In practice, which is commonly cited?", options:["He-4","Fe-56","Ni-62","U-235"], correct:1},
+      {q:"A magic number nucleus (e.g., O-16, Ca-40) is especially stable because:", options:["It has extra electrons","Nucleons fill complete nuclear shells","It is radioactive","It has no neutrons"], correct:1}
+    ]
+  },
+  {
+    id:4, title:"Fill: Carbon-14 dating basics",
+    instruction:"Complete each statement about radiocarbon dating.",
+    rows:[
+      ["1","Carbon-14 has a half-life of ___ years","5730"],
+      ["2","C-14 is produced in the atmosphere by ___ bombardment of nitrogen-14","neutron / cosmic ray"],
+      ["3","The nuclear reaction: \u00B9\u2074N + \u00B9n \u2192 ___ + \u00B9H","\u00B9\u2074C / C-14 / carbon-14"],
+      ["4","C-14 decays by ___ emission (type of decay)","beta / \u03B2\u207B / beta minus"],
+      ["5","C-14 \u2192 ___ + \u03B2\u207B + antineutrino","\u00B9\u2074N / N-14 / nitrogen-14"],
+      ["6","Living organisms have a constant C-14/C-12 ratio because they continuously ___","exchange carbon / take in carbon / absorb carbon"],
+      ["7","When an organism dies, C-14 begins to ___ without replacement","decay / decrease"],
+      ["8","After 1 half-life (5730 years), ___ % of original C-14 remains","50"],
+      ["9","After 2 half-lives (11,460 years), ___ % of original C-14 remains","25"],
+      ["10","After 3 half-lives (17,190 years), ___ % of original C-14 remains","12.5"],
+      ["11","The maximum reliable age for C-14 dating is approximately ___ years","50000 / 50,000 / ~50000"],
+      ["12","The formula for remaining amount is N = N\u2080 \u00D7 (1/2)^(t/___)","t\u00BD / half-life / 5730"],
+      ["13","If a sample has 1/8 of original C-14, it has undergone ___ half-lives","3"],
+      ["14","If 1/8 remains, the age is 3 \u00D7 5730 = ___ years","17190 / 17,190"],
+      ["15","C-14 dating works best on ___ (organic/inorganic) materials","organic"]
+    ]
+  },
+  {
+    id:5, title:"MC: Carbon-14 and radioactive decay calculations", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"A fossil has 25% of its original C-14. Its age is:", options:["5,730 years","11,460 years","17,190 years","22,920 years"], correct:1},
+      {q:"A sample has 1/16 of original C-14. How many half-lives?", options:["2","3","4","5"], correct:2},
+      {q:"1/16 of original C-14 corresponds to an age of:", options:["17,190 years","22,920 years","28,650 years","34,380 years"], correct:1},
+      {q:"A 100 g sample of a radioactive isotope (t\u00BD = 10 days) after 30 days:", options:["50 g remains","25 g remains","12.5 g remains","6.25 g remains"], correct:2},
+      {q:"After 5 half-lives, what fraction of original sample remains?", options:["1/8","1/16","1/32","1/64"], correct:2},
+      {q:"C-14 dating cannot be used for:", options:["Wood artifacts","Ancient cloth","Dinosaur fossils (65 million years old)","Mummy wrappings"], correct:2},
+      {q:"Which material CANNOT be dated with C-14?", options:["Bone","Charcoal","Limestone rock","Leather"], correct:2},
+      {q:"If a sample shows 6.25% of original C-14, how old is it?", options:["11,460 years","17,190 years","22,920 years","28,650 years"], correct:2},
+      {q:"The decay constant \u03BB relates to half-life by:", options:["\u03BB = ln(2)/t\u00BD","\u03BB = t\u00BD/ln(2)","\u03BB = 2/t\u00BD","\u03BB = t\u00BD \u00D7 ln(2)"], correct:0},
+      {q:"A sample originally had 800 atoms. After 4 half-lives:", options:["200 remain","100 remain","50 remain","25 remain"], correct:2},
+      {q:"K-40 (t\u00BD = 1.25 billion years) is used to date:", options:["Wood and bone","Very old rocks and minerals","Ocean water","Atmospheric gases"], correct:1},
+      {q:"U-238 decays ultimately to:", options:["Pb-206","Pb-207","Pb-208","Bi-209"], correct:0},
+      {q:"The N/Z ratio of C-14 (6 protons, 8 neutrons) is:", options:["0.75","1.0","1.33","1.5"], correct:2},
+      {q:"C-14 is unstable because it has:", options:["Too many protons","Too many neutrons relative to protons","Too few electrons","Too many electrons"], correct:1},
+      {q:"In first-order decay, the rate depends on:", options:["Temperature only","Concentration of reactant","Surface area","Pressure"], correct:1}
+    ]
+  },
+  {
+    id:6, title:"Fill: Half-life calculations",
+    instruction:"Calculate the remaining amount or age.",
+    rows:[
+      ["1","Start: 200 g, t\u00BD = 5 days. After 15 days (3 half-lives), remaining = ___ g","25"],
+      ["2","Start: 400 g, t\u00BD = 8 hours. After 32 hours, remaining = ___ g","25"],
+      ["3","Start: 1000 atoms, t\u00BD = 2 min. After 10 min, remaining = ___ atoms","31.25 / 31"],
+      ["4","If 12.5% remains, number of half-lives = ___","3"],
+      ["5","If 3.125% remains, number of half-lives = ___","5"],
+      ["6","Start: 80 g, after 4 half-lives, remaining = ___ g","5"],
+      ["7","A C-14 sample has 1/4 of original. Age = ___ years","11460 / 11,460"],
+      ["8","A C-14 sample has 1/32 of original. Number of half-lives = ___","5"],
+      ["9","1/32 of C-14 remaining. Age = 5 \u00D7 5730 = ___ years","28650 / 28,650"],
+      ["10","t\u00BD = 20 years. After 80 years, fraction remaining = ___","1/16"],
+      ["11","Start: 64 g, remaining: 2 g. Number of half-lives = ___","5"],
+      ["12","If t\u00BD = 12 hours and 5 half-lives pass, total time = ___ hours","60"],
+      ["13","Start: 500 g, t\u00BD = 6 years. After 24 years, remaining = ___ g","31.25 / 31.3"],
+      ["14","A fossil has 50% of original C-14. Age = ___ years","5730"],
+      ["15","Start: 160 g. After 3 half-lives, remaining = ___ g","20"]
+    ]
+  },
+  {
+    id:7, title:"MC: Nuclear reactions and decay types", type:"mc",
+    instruction:"Select the correct answer about nuclear reactions.",
+    questions:[
+      {q:"In alpha decay, the mass number decreases by:", options:["1","2","4","0"], correct:2},
+      {q:"In beta-minus decay, a neutron converts to:", options:["A proton + electron + antineutrino","A proton + positron + neutrino","Two protons","A neutron + photon"], correct:0},
+      {q:"In positron emission (\u03B2\u207A), a proton converts to:", options:["A neutron + positron + neutrino","A neutron + electron + antineutrino","Two neutrons","A proton + photon"], correct:0},
+      {q:"Gamma radiation involves:", options:["Change in mass number","Change in atomic number","Release of energy without particle emission","Electron capture"], correct:2},
+      {q:"Which type of radiation has the highest penetrating power?", options:["Alpha","Beta","Gamma","All equal"], correct:2},
+      {q:"Alpha particles are identical to:", options:["Electrons","Neutrons","He-4 nuclei","Protons"], correct:2},
+      {q:"In electron capture, the atomic number:", options:["Increases by 1","Decreases by 1","Stays the same","Increases by 2"], correct:1},
+      {q:"U-238 undergoes alpha decay to form:", options:["Th-234","Pa-234","Ra-226","Th-232"], correct:0},
+      {q:"C-14 undergoes beta decay to form:", options:["B-14","N-14","C-13","O-14"], correct:1},
+      {q:"Which decay mode increases the N/Z ratio?", options:["Alpha decay","Beta-minus decay","Positron emission","Gamma emission"], correct:2},
+      {q:"Which decay mode decreases the N/Z ratio?", options:["Alpha decay","Beta-minus decay","Positron emission","Gamma emission"], correct:1},
+      {q:"In nuclear fission, a heavy nucleus splits into:", options:["Two lighter nuclei + neutrons","Many alpha particles","Protons only","Electrons only"], correct:0},
+      {q:"The chain reaction in nuclear fission is sustained by:", options:["Gamma rays","Released neutrons causing more fissions","Alpha particles","Beta particles"], correct:1},
+      {q:"Nuclear fusion requires extremely high ___ to overcome proton repulsion:", options:["Pressure only","Temperature","Voltage","Magnetism"], correct:1},
+      {q:"The most common fissile isotope in nuclear reactors is:", options:["U-238","U-235","Pu-239","Th-232"], correct:1}
+    ]
+  },
+  {
+    id:8, title:"Fill: Nuclear stability and the belt of stability",
+    instruction:"Complete each statement about nuclear stability.",
+    rows:[
+      ["1","The belt (band) of stability is a plot of ___ vs protons","neutrons / number of neutrons / N"],
+      ["2","For light stable nuclei (Z \u2264 20), the N/Z ratio is approximately ___","1 / 1:1 / 1.0"],
+      ["3","For heavy stable nuclei, the N/Z ratio is approximately ___","1.5 / 1.5:1"],
+      ["4","Nuclei above the belt (too many neutrons) tend to undergo ___ decay","beta-minus / \u03B2\u207B / beta"],
+      ["5","Nuclei below the belt (too few neutrons) tend to undergo ___ emission or electron capture","positron / \u03B2\u207A"],
+      ["6","Very heavy nuclei (Z > 83) tend to undergo ___ decay","alpha / \u03B1"],
+      ["7","Magic numbers for protons or neutrons are: 2, 8, 20, 28, 50, 82, ___","126"],
+      ["8","Nuclei with magic numbers of both protons and neutrons are called ___ magic","doubly"],
+      ["9","He-4 (2p, 2n) is doubly magic and exceptionally ___","stable"],
+      ["10","O-16 (8p, 8n) is a ___ magic nucleus","doubly"],
+      ["11","Ca-40 (20p, 20n) is a ___ magic nucleus","doubly"],
+      ["12","Pb-208 (82p, 126n) is the heaviest ___ stable nucleus","doubly magic"],
+      ["13","Even-even nuclei (even Z, even N) are generally ___ stable than odd-odd","more"],
+      ["14","There are only ___ stable odd-odd nuclei (approximately)","4 / four"],
+      ["15","The four stable odd-odd nuclei are H-2, Li-6, B-10, and ___","N-14 / nitrogen-14"]
+    ]
+  },
+  {
+    id:9, title:"Arrange: Steps in binding energy calculation", type:"arrange",
+    instruction:"Click the words in the correct order to describe the process.",
+    sentences:[
+      {prompt:"Find the number of protons and neutrons in the nucleus", words:["Find","the number of","protons and neutrons","in the","nucleus"]},
+      {prompt:"Calculate predicted mass from individual nucleon masses", words:["Calculate","predicted mass","from","individual","nucleon masses"]},
+      {prompt:"Subtract actual nuclear mass from predicted mass to get mass defect", words:["Subtract","actual nuclear mass","from","predicted mass","to get","mass defect"]},
+      {prompt:"Multiply mass defect by 931.5 MeV per amu for binding energy", words:["Multiply","mass defect","by 931.5","MeV per amu","for binding energy"]},
+      {prompt:"Divide total binding energy by mass number for BE per nucleon", words:["Divide","total binding energy","by mass number","for","BE per nucleon"]},
+      {prompt:"Higher binding energy per nucleon means greater nuclear stability", words:["Higher","binding energy","per nucleon","means","greater","nuclear stability"]},
+      {prompt:"Iron-56 has the highest binding energy per nucleon of all elements", words:["Iron-56","has the highest","binding energy","per nucleon","of all elements"]},
+      {prompt:"Carbon-14 decays by beta emission with a half-life of 5730 years", words:["Carbon-14","decays by","beta emission","with a half-life","of 5730 years"]}
+    ]
+  },
+  {
+    id:10, title:"MC: Binding energy per nucleon curve", type:"mc",
+    instruction:"Questions about the BE/nucleon vs mass number curve.",
+    questions:[
+      {q:"The BE/nucleon curve rises steeply for light nuclei and peaks near:", options:["A = 4","A = 16","A = 56","A = 200"], correct:2},
+      {q:"After the peak at A \u2248 56, the curve:", options:["Rises sharply","Gradually decreases","Stays constant","Drops to zero"], correct:1},
+      {q:"H-1 (single proton) has a BE/nucleon of:", options:["0 MeV (no binding)","1 MeV","4 MeV","8 MeV"], correct:0},
+      {q:"He-4 shows an unusually high BE/nucleon because:", options:["It is very heavy","It is doubly magic (2p, 2n)","It has no neutrons","It is radioactive"], correct:1},
+      {q:"The Sun fuses H into He because He has ___ BE/nucleon than H:", options:["Lower","The same","Higher","Cannot compare"], correct:2},
+      {q:"Nuclear power plants use fission of U-235 because products have ___ BE/nucleon:", options:["Lower","The same","Higher","Zero"], correct:2},
+      {q:"The energy released in fusion comes from:", options:["Breaking electron bonds","Increasing mass","Decreasing mass (mass defect of products > reactants)","Adding neutrons"], correct:2},
+      {q:"Fusing two Fe-56 nuclei would:", options:["Release enormous energy","Require energy input (endothermic)","Release moderate energy","Have no effect"], correct:1},
+      {q:"Which pair would release the most energy in fusion?", options:["He-4 + He-4","H-2 + H-3","Fe-56 + Fe-56","U-235 + U-235"], correct:1},
+      {q:"The curve shows that elements near A = 56 are:", options:["The least stable","The most stable","Radioactive","Non-existent"], correct:1}
+    ]
+  },
+  {
+    id:11, title:"Fill: Decay equations and products",
+    instruction:"Complete the nuclear decay equation or identify the product.",
+    rows:[
+      ["1","U-238 \u2192 ___ + He-4 (alpha decay)","Th-234 / thorium-234"],
+      ["2","Ra-226 \u2192 ___ + He-4 (alpha decay)","Rn-222 / radon-222"],
+      ["3","C-14 \u2192 ___ + \u03B2\u207B (beta decay)","N-14 / nitrogen-14"],
+      ["4","Co-60 \u2192 Ni-60 + ___ (beta decay)","\u03B2\u207B / beta particle / electron"],
+      ["5","Na-22 \u2192 Ne-22 + ___ (positron emission)","\u03B2\u207A / positron"],
+      ["6","Po-210 \u2192 ___ + He-4","Pb-206 / lead-206"],
+      ["7","Th-232 \u2192 ___ + He-4","Ra-228 / radium-228"],
+      ["8","I-131 \u2192 Xe-131 + ___ (beta decay)","\u03B2\u207B / beta particle / electron"],
+      ["9","In alpha decay, Z decreases by ___ and A decreases by ___","2, 4"],
+      ["10","In beta-minus decay, Z increases by ___ and A stays ___","1, the same / 1, same / 1, unchanged"],
+      ["11","In positron emission, Z decreases by ___ and A stays ___","1, the same / 1, same / 1, unchanged"],
+      ["12","K-40 \u2192 Ca-40 + ___ (beta decay)","\u03B2\u207B / beta particle / electron"],
+      ["13","K-40 \u2192 Ar-40 + ___ (electron capture)","neutrino / \u03BD"],
+      ["14","Tc-99m \u2192 Tc-99 + ___ (isomeric transition)","\u03B3 / gamma ray / gamma"],
+      ["15","Tritium (H-3) \u2192 ___ + \u03B2\u207B","He-3 / helium-3"]
+    ]
+  },
+  {
+    id:12, title:"MC: Advanced nuclear stability and dating", type:"mc",
+    instruction:"Think carefully about these challenging questions.",
+    questions:[
+      {q:"A sample has a C-14 activity of 3.75 dpm/g. Living organisms have 15 dpm/g. The age is:", options:["5,730 years","11,460 years","17,190 years","22,920 years"], correct:1},
+      {q:"3.75/15 = 0.25 = (1/2)^n. Solving: n = 2 half-lives = 11,460 years. This uses:", options:["Zero-order kinetics","First-order kinetics","Second-order kinetics","Third-order kinetics"], correct:1},
+      {q:"A rock contains equal amounts of U-238 and Pb-206. Approximately how old is it?", options:["4.5 billion years (one half-life of U-238)","2.25 billion years","9 billion years","1 billion years"], correct:0},
+      {q:"The N/Z ratio of U-238 (92p, 146n) is:", options:["1.0","1.25","1.59","2.0"], correct:2},
+      {q:"Tc-99m is used in medical imaging because:", options:["It is stable","It emits gamma rays with short half-life (6 hr)","It emits alpha particles","It is naturally occurring"], correct:1},
+      {q:"Why is U-235 fissile but U-238 is not (with thermal neutrons)?", options:["U-235 has odd mass number (more easily excited)","U-238 is too light","U-235 has more protons","U-238 is synthetic"], correct:0},
+      {q:"The critical mass is:", options:["The minimum mass for a sustained chain reaction","The maximum mass of a reactor","The mass of one neutron","The mass of the coolant"], correct:0},
+      {q:"In the belt of stability, where do alpha emitters appear?", options:["Below the belt","Above the belt","At the top right (Z > 83)","At Z = 1"], correct:2},
+      {q:"Binding energy per nucleon of H-2 (deuterium) is about 1.1 MeV. This means:", options:["Deuterium is very stable","Deuterium is relatively weakly bound compared to Fe","Deuterium cannot undergo fusion","Deuterium has no mass defect"], correct:1},
+      {q:"The total mass of 6 separate protons + 6 separate neutrons is ___ the mass of a C-12 nucleus:", options:["Less than","Equal to","Greater than","Unrelated to"], correct:2},
+      {q:"When C-14 is used to date a 60,000-year-old sample, the problem is:", options:["Too much C-14 remains","Too little C-14 remains for accurate measurement","C-14 has fully decayed","The sample is too heavy"], correct:1},
+      {q:"Electron capture produces the same daughter as:", options:["Alpha decay","Beta-minus decay","Positron emission","Gamma emission"], correct:2},
+      {q:"The binding energy of He-4 (28.3 MeV) means you need ___ MeV to completely separate it:", options:["7.07 MeV","14.15 MeV","28.3 MeV","56.6 MeV"], correct:2},
+      {q:"Spontaneous fission occurs only in nuclei heavier than:", options:["Iron (Z=26)","Tin (Z=50)","Lead (Z=82)","Uranium (Z=92) and beyond"], correct:3},
+      {q:"The mass-energy equivalence E=mc\u00B2 was proposed by:", options:["Bohr","Rutherford","Einstein","Curie"], correct:2}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Nuclear Binding Energy & Dating \u2014 Complete Reference</h3>' +
+'<h3>Mass Defect</h3>' +
+'<p><span class="rule">\u0394m = (Z \u00D7 m_p + N \u00D7 m_n) \u2212 m_nucleus</span></p>' +
+'<p>m_p = 1.00728 amu, m_n = 1.00866 amu</p>' +
+'<p>The "missing" mass has been converted to binding energy via E = mc\u00B2.</p>' +
+'<h3>Binding Energy</h3>' +
+'<p><span class="rule">BE = \u0394m \u00D7 931.5 MeV/amu</span></p>' +
+'<p>BE per nucleon = BE \u00F7 A (mass number)</p>' +
+'<table><tr><th>Nucleus</th><th>\u0394m (amu)</th><th>BE (MeV)</th><th>BE/A (MeV)</th></tr>' +
+'<tr><td>H-2</td><td>0.00239</td><td>2.22</td><td>1.11</td></tr>' +
+'<tr><td>He-4</td><td>0.02928</td><td>28.3</td><td>7.07</td></tr>' +
+'<tr><td>Fe-56</td><td>0.52846</td><td>492</td><td><span class="rule">8.79 (peak)</span></td></tr>' +
+'<tr><td>U-238</td><td>1.93420</td><td>1802</td><td>7.57</td></tr></table>' +
+'<h3>Nuclear Stability</h3>' +
+'<ul>' +
+'<li>Higher BE/nucleon = more stable</li>' +
+'<li>Fe-56 / Ni-62 = peak stability</li>' +
+'<li>Light elements: fusion releases energy (moving toward Fe)</li>' +
+'<li>Heavy elements: fission releases energy (moving toward Fe)</li>' +
+'</ul>' +
+'<h3>Belt of Stability</h3>' +
+'<ul>' +
+'<li>Light nuclei: N/Z \u2248 1</li>' +
+'<li>Heavy nuclei: N/Z \u2248 1.5</li>' +
+'<li>Above belt (n-rich): \u03B2\u207B decay</li>' +
+'<li>Below belt (p-rich): \u03B2\u207A or electron capture</li>' +
+'<li>Z > 83: \u03B1 decay</li>' +
+'<li>Magic numbers: 2, 8, 20, 28, 50, 82, 126</li>' +
+'</ul>' +
+'<h3>Carbon-14 Dating</h3>' +
+'<p>t\u00BD = <span class="rule">5730 years</span></p>' +
+'<p>N = N\u2080 \u00D7 (1/2)^(t/t\u00BD)</p>' +
+'<p>C-14 \u2192 N-14 + \u03B2\u207B</p>' +
+'<table><tr><th>Half-lives</th><th>% Remaining</th><th>Age (years)</th></tr>' +
+'<tr><td>1</td><td>50%</td><td>5,730</td></tr>' +
+'<tr><td>2</td><td>25%</td><td>11,460</td></tr>' +
+'<tr><td>3</td><td>12.5%</td><td>17,190</td></tr>' +
+'<tr><td>4</td><td>6.25%</td><td>22,920</td></tr>' +
+'<tr><td>5</td><td>3.125%</td><td>28,650</td></tr></table>' +
+'<h3>Decay Types</h3>' +
+'<table><tr><th>Type</th><th>\u0394Z</th><th>\u0394A</th><th>Particle</th></tr>' +
+'<tr><td>\u03B1</td><td>\u22122</td><td>\u22124</td><td>He-4</td></tr>' +
+'<tr><td>\u03B2\u207B</td><td>+1</td><td>0</td><td>electron</td></tr>' +
+'<tr><td>\u03B2\u207A</td><td>\u22121</td><td>0</td><td>positron</td></tr>' +
+'<tr><td>\u03B3</td><td>0</td><td>0</td><td>photon</td></tr>' +
+'<tr><td>EC</td><td>\u22121</td><td>0</td><td>neutrino</td></tr></table>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 mass defect, binding energy, carbon-14 dating, nuclear stability \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

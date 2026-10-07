@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Percent Composition & Empirical Formulas</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Percent Composition & Empirical Formulas</h1>
+<p class="subtitle">Deep practice &mdash; percent composition, empirical formula, molecular formula</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_72';
+const SECTIONS = [
+  {
+    id:1, title:"Fill: Percent composition",
+    instruction:"Calculate the percent composition by mass. Round to 1 decimal place. Use atomic masses: H=1, C=12, N=14, O=16, Na=23, Cl=35.5, S=32, Ca=40, K=39, Fe=56, Mg=24.",
+    rows:[
+      ["1","% of O in H\u2082O (molar mass = 18)","88.9 / 88.9%"],
+      ["2","% of H in H\u2082O","11.1 / 11.1%"],
+      ["3","% of Na in NaCl (molar mass = 58.5)","39.3 / 39.3%"],
+      ["4","% of Cl in NaCl","60.7 / 60.7%"],
+      ["5","% of C in CO\u2082 (molar mass = 44)","27.3 / 27.3%"],
+      ["6","% of O in CO\u2082","72.7 / 72.7%"],
+      ["7","% of N in NH\u2083 (molar mass = 17)","82.4 / 82.4%"],
+      ["8","% of H in NH\u2083","17.6 / 17.6%"],
+      ["9","% of C in CH\u2084 (molar mass = 16)","75.0 / 75.0% / 75"],
+      ["10","% of H in CH\u2084","25.0 / 25.0% / 25"],
+      ["11","% of Ca in CaCO\u2083 (molar mass = 100)","40.0 / 40.0% / 40"],
+      ["12","% of C in CaCO\u2083","12.0 / 12.0% / 12"],
+      ["13","% of O in CaCO\u2083","48.0 / 48.0% / 48"],
+      ["14","% of Fe in Fe\u2082O\u2083 (molar mass = 160)","70.0 / 70.0% / 70"],
+      ["15","% of O in Fe\u2082O\u2083","30.0 / 30.0% / 30"],
+      ["16","% of S in H\u2082SO\u2084 (molar mass = 98)","32.7 / 32.7%"],
+      ["17","% of O in H\u2082SO\u2084","65.3 / 65.3%"],
+      ["18","% of K in KCl (molar mass = 74.5)","52.3 / 52.3%"],
+      ["19","% of Mg in MgO (molar mass = 40)","60.0 / 60.0% / 60"],
+      ["20","% of N in N\u2082O (molar mass = 44)","63.6 / 63.6%"]
+    ]
+  },
+  {
+    id:2, title:"Fill: Mass of element in a sample",
+    instruction:"Calculate the mass of the specified element in the given sample. Round to 1 decimal.",
+    rows:[
+      ["1","Mass of O in 50g H\u2082O","44.4 / 44.4g / 44.5"],
+      ["2","Mass of Na in 100g NaCl","39.3 / 39.3g"],
+      ["3","Mass of C in 200g CO\u2082","54.5 / 54.5g / 54.6"],
+      ["4","Mass of Fe in 80g Fe\u2082O\u2083","56.0 / 56.0g / 56"],
+      ["5","Mass of O in 25g H\u2082O","22.2 / 22.2g"],
+      ["6","Mass of H in 36g H\u2082O","4.0 / 4.0g / 4"],
+      ["7","Mass of Ca in 500g CaCO\u2083","200.0 / 200.0g / 200"],
+      ["8","Mass of C in 50g CH\u2084","37.5 / 37.5g"],
+      ["9","Mass of Cl in 117g NaCl","72.0 / 72.0g / 72"],
+      ["10","Mass of S in 49g H\u2082SO\u2084","16.0 / 16.0g / 16"],
+      ["11","Mass of N in 34g NH\u2083","28.0 / 28.0g / 28"],
+      ["12","Mass of O in 100g CaCO\u2083","48.0 / 48.0g / 48"],
+      ["13","Mass of K in 149g KCl","78.0 / 78.0g / 78"],
+      ["14","Mass of Mg in 80g MgO","48.0 / 48.0g / 48"],
+      ["15","Mass of C in 88g CO\u2082","24.0 / 24.0g / 24"]
+    ]
+  },
+  {
+    id:3, title:"MC: Percent composition concepts", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"The formula for percent composition of an element is:", options:["(atomic mass / molar mass) \u00D7 100","(atoms \u00D7 atomic mass / molar mass) \u00D7 100","(molar mass / atomic mass) \u00D7 100","(atoms / molar mass) \u00D7 100"], correct:1},
+      {q:"Which has the highest % of oxygen: H\u2082O, CO\u2082, or SO\u2082?", options:["H\u2082O (88.9%)","CO\u2082 (72.7%)","SO\u2082 (50%)","They are all equal"], correct:0},
+      {q:"The percent composition of ALL elements in a compound must add up to:", options:["50%","75%","100%","It varies"], correct:2},
+      {q:"Which compound has the highest % of carbon: CH\u2084, C\u2082H\u2086, or CO\u2082?", options:["CH\u2084 (75%)","C\u2082H\u2086 (80%)","CO\u2082 (27.3%)","They are equal"], correct:1},
+      {q:"If a compound is 40% C and 6.7% H, the % of O is:", options:["46.7%","53.3%","60%","Cannot determine"], correct:1},
+      {q:"% of Na in Na\u2082O (Na=23, O=16) is:", options:["59.0%","74.2%","41.0%","25.8%"], correct:1},
+      {q:"Two different compounds CAN have the same % composition if:", options:["Never possible","They have the same empirical formula","They have the same molar mass","They have the same color"], correct:1},
+      {q:"Which has more iron per gram: FeO or Fe\u2082O\u2083?", options:["FeO (77.8%)","Fe\u2082O\u2083 (70.0%)","They are equal","Cannot determine"], correct:0},
+      {q:"% of H in C\u2086H\u2082O\u2086 (molar mass = 180) is:", options:["1.1%","6.7%","33.3%","40%"], correct:0},
+      {q:"If you know % of all elements except one, you can find the last by:", options:["Subtracting from 100%","Multiplying the others","Dividing by the molar mass","You cannot"], correct:0},
+      {q:"Which has higher % of chlorine: NaCl or KCl?", options:["NaCl","KCl","They are equal","Cannot determine"], correct:0},
+      {q:"In a hydrate like CuSO\u2084\u00B75H\u2082O, water is included in:", options:["Neither numerator nor denominator","Only numerator","Both numerator and denominator of % calc","Only denominator"], correct:2},
+      {q:"Percent composition is an ___ property.", options:["Extensive","Intensive","Neither","Both"], correct:1},
+      {q:"% of C in glucose (C\u2086H\u2082O\u2086, MW=180) is:", options:["40.0%","6.7%","53.3%","72.0%"], correct:0},
+      {q:"Which is NOT needed to calculate % composition?", options:["Number of atoms of element","Atomic mass of element","Molar mass of compound","Density of compound"], correct:3},
+      {q:"If compound X is 50% S and 50% O, its empirical formula is:", options:["SO","SO\u2082","SO\u2083","S\u2082O\u2083"], correct:0},
+      {q:"The molar mass of a compound with empirical formula CH\u2082O could be:", options:["30, 60, 90, 120...","Only 30","12, 24, 36...","Any value"], correct:0},
+      {q:"% O in water vs % O in hydrogen peroxide (H\u2082O\u2082):", options:["Water has more % O","H\u2082O\u2082 has more % O","They are equal","Cannot compare"], correct:1},
+      {q:"Doubling the sample mass changes the % composition:", options:["Doubles it","Halves it","Does not change it","Depends on the compound"], correct:2},
+      {q:"% of N in urea CO(NH\u2082)\u2082 (MW=60) is:", options:["23.3%","46.7%","14.0%","28.0%"], correct:1}
+    ]
+  },
+  {
+    id:4, title:"Fill: Empirical formula from percent composition",
+    instruction:"Determine the empirical formula. Use H=1, C=12, N=14, O=16, S=32, Cl=35.5, Ca=40.",
+    rows:[
+      ["1","40.0% C, 6.7% H, 53.3% O","CH2O / CH\u2082O"],
+      ["2","92.3% C, 7.7% H","CH / CH"],
+      ["3","75.0% C, 25.0% H","CH4 / CH\u2084"],
+      ["4","27.3% C, 72.7% O","CO2 / CO\u2082"],
+      ["5","82.4% N, 17.6% H","NH3 / NH\u2083"],
+      ["6","50.0% S, 50.0% O","SO / SO"],
+      ["7","43.6% P, 56.4% O (P=31)","P2O5 / P\u2082O\u2085"],
+      ["8","40.0% Ca, 12.0% C, 48.0% O","CaCO3 / CaCO\u2083"],
+      ["9","52.2% C, 13.0% H, 34.8% O","C2H6O / C\u2082H\u2086O"],
+      ["10","26.6% K, 35.4% Cr, 38.0% O (K=39, Cr=52)","K2Cr2O7 / K\u2082Cr\u2082O\u2087 / K2CrO4 / KCrO4"],
+      ["11","63.6% N, 36.4% O","N2O / N\u2082O"],
+      ["12","30.4% N, 69.6% O","NO2 / NO\u2082"],
+      ["13","46.7% N, 53.3% O","NO / NO"],
+      ["14","11.2% H, 88.8% O","HO / HO"],
+      ["15","85.7% C, 14.3% H","CH2 / CH\u2082"],
+      ["16","36.5% Na, 25.4% S, 38.1% O","Na2SO3 / Na\u2082SO\u2083"],
+      ["17","32.4% Na, 22.5% S, 45.1% O","Na2SO4 / Na\u2082SO\u2084"],
+      ["18","74.0% C, 8.7% H, 17.3% N","C3H4N / C\u2083H\u2084N"],
+      ["19","38.7% C, 9.7% H, 51.6% O","CH3O / CH\u2083O"],
+      ["20","60.0% C, 4.4% H, 35.6% O","C3H2O / C\u2083H\u2082O / C3H3O2 / C\u2083H\u2083O\u2082"]
+    ]
+  },
+  {
+    id:5, title:"MC: Empirical formula problems", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"A compound is 40% C, 6.7% H, 53.3% O. Its empirical formula is:", options:["CHO","CH\u2082O","C\u2082H\u2084O\u2082","CO\u2082"], correct:1},
+      {q:"Combustion of a hydrocarbon produces 44g CO\u2082 and 18g H\u2082O. The empirical formula is:", options:["CH\u2082","CH\u2084","C\u2082H\u2086","CH"], correct:0},
+      {q:"The first step in finding empirical formula from % is:", options:["Divide by molar mass","Assume 100g sample","Find the molecular formula","Balance the equation"], correct:1},
+      {q:"After converting g to mol, you divide all by:", options:["The largest mol value","The smallest mol value","100","The molar mass"], correct:1},
+      {q:"If mol ratios give C:H:O = 1:2.5:1, you should:", options:["Round down to 1:2:1","Multiply all by 2 to get 2:5:2","Leave as is","Divide by 2.5"], correct:1},
+      {q:"An empirical formula of CH\u2082O with molar mass 180 gives molecular formula:", options:["C\u2082H\u2084O\u2082","C\u2083H\u2086O\u2083","C\u2086H\u2082O\u2086","C\u2086H\u2082\u2082O\u2086"], correct:2},
+      {q:"n (multiplier) = molecular mass / empirical mass. If empirical is CH\u2082O (30) and molecular mass is 90, n=:", options:["2","3","4","6"], correct:1},
+      {q:"Combustion analysis can directly determine the mass of:", options:["C and H from CO\u2082 and H\u2082O produced","O directly","N directly","All elements directly"], correct:0},
+      {q:"A compound has empirical formula NO\u2082. Which could be its molecular formula?", options:["N\u2082O","N\u2082O\u2084","NO\u2083","N\u2083O\u2086"], correct:1},
+      {q:"If % don't add to 100%, the missing element is usually:", options:["Carbon","Hydrogen","Oxygen","Nitrogen"], correct:2},
+      {q:"A 10.0g sample of a compound contains 4.0g C and 0.67g H. The rest is O. Mass of O:", options:["5.33g","6.0g","14.0g","3.33g"], correct:0},
+      {q:"Which pair has the same empirical formula?", options:["H\u2082O and H\u2082O\u2082","CH\u2084 and C\u2082H\u2086","C\u2082H\u2082 and C\u2086H\u2086","CO and CO\u2082"], correct:2},
+      {q:"The empirical formula mass of C\u2082H\u2084O\u2082 is:", options:["30","44","60","90"], correct:0},
+      {q:"What information do you need besides empirical formula to find molecular formula?", options:["Density","Molar mass","Melting point","Color"], correct:1},
+      {q:"A compound is 100% carbon. Its empirical formula is:", options:["C","CO\u2082","CH\u2084","Cannot determine"], correct:0}
+    ]
+  },
+  {
+    id:6, title:"Fill: Molecular formula from empirical",
+    instruction:"Given empirical formula and molar mass, find the molecular formula.",
+    rows:[
+      ["1","Empirical CH\u2082O, molar mass 180 g/mol","C6H12O6 / C\u2086H\u2082\u2082O\u2086"],
+      ["2","Empirical CH\u2082O, molar mass 60 g/mol","C2H4O2 / C\u2082H\u2084O\u2082"],
+      ["3","Empirical CH\u2082O, molar mass 30 g/mol","CH2O / CH\u2082O"],
+      ["4","Empirical CH\u2082, molar mass 28 g/mol","C2H4 / C\u2082H\u2084"],
+      ["5","Empirical CH\u2082, molar mass 42 g/mol","C3H6 / C\u2083H\u2086"],
+      ["6","Empirical CH, molar mass 78 g/mol","C6H6 / C\u2086H\u2086"],
+      ["7","Empirical CH, molar mass 26 g/mol","C2H2 / C\u2082H\u2082"],
+      ["8","Empirical NO\u2082, molar mass 92 g/mol","N2O4 / N\u2082O\u2084"],
+      ["9","Empirical HO, molar mass 34 g/mol","H2O2 / H\u2082O\u2082"],
+      ["10","Empirical P\u2082O\u2085, molar mass 284 g/mol","P4O10 / P\u2084O\u2082\u2080"],
+      ["11","Empirical CH\u2083, molar mass 30 g/mol","C2H6 / C\u2082H\u2086"],
+      ["12","Empirical BH\u2083 (B=11), molar mass 28 g/mol","B2H6 / B\u2082H\u2086"],
+      ["13","Empirical CHCl, molar mass 98 g/mol (Cl=35.5)","C2H2Cl2 / C\u2082H\u2082Cl\u2082"],
+      ["14","Empirical CH\u2082O, molar mass 120 g/mol","C4H8O4 / C\u2084H\u2088O\u2084"],
+      ["15","Empirical NH\u2082, molar mass 32 g/mol","N2H4 / N\u2082H\u2084"]
+    ]
+  },
+  {
+    id:7, title:"MC: Empirical vs molecular formula", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"The empirical formula shows:", options:["The exact number of atoms","The simplest whole-number ratio","The molecular weight","The structural arrangement"], correct:1},
+      {q:"When are empirical and molecular formulas the same?", options:["Always","Never","When n = 1 (the ratio is already simplest)","Only for ionic compounds"], correct:2},
+      {q:"Which IS an empirical formula?", options:["C\u2086H\u2082\u2082O\u2086","C\u2082H\u2084O\u2082","CH\u2082O","C\u2083H\u2086O\u2083"], correct:2},
+      {q:"The molecular formula is always a ___ of the empirical formula.", options:["Fraction","Whole number multiple","Square root","Logarithm"], correct:1},
+      {q:"H\u2082O: is this empirical or molecular?", options:["Empirical only","Molecular only","Both (they are the same)","Neither"], correct:2},
+      {q:"C\u2086H\u2082\u2082O\u2086 has empirical formula:", options:["CHO","CH\u2082O","C\u2082H\u2084O\u2082","C\u2083H\u2086O\u2083"], correct:1},
+      {q:"Ionic compounds are typically written as ___ formulas.", options:["Molecular","Empirical","Structural","Lewis"], correct:1},
+      {q:"Two compounds with the same empirical formula but different molecular formulas are:", options:["Isomers","Allotropes","Different compounds with different properties","Identical compounds"], correct:2},
+      {q:"The ratio n = molecular mass / empirical mass must be:", options:["A decimal","A whole number","Less than 1","Exactly 2"], correct:1},
+      {q:"CH\u2084 cannot be simplified further, so it is:", options:["Only a molecular formula","Only an empirical formula","Both empirical and molecular","Neither"], correct:2}
+    ]
+  },
+  {
+    id:8, title:"Fill: Mole ratios from mass data",
+    instruction:"Convert masses to moles and find the simplest ratio. Use H=1, C=12, N=14, O=16.",
+    rows:[
+      ["1","6g C, 1g H \u2192 mol C=? (6/12)","0.5"],
+      ["2","6g C, 1g H \u2192 mol H=? (1/1)","1.0 / 1"],
+      ["3","6g C, 1g H \u2192 simplest ratio C:H","1:2"],
+      ["4","24g C, 4g H \u2192 ratio C:H","1:2"],
+      ["5","12g C, 4g H, 16g O \u2192 mol C","1.0 / 1"],
+      ["6","12g C, 4g H, 16g O \u2192 mol H","4.0 / 4"],
+      ["7","12g C, 4g H, 16g O \u2192 mol O","1.0 / 1"],
+      ["8","12g C, 4g H, 16g O \u2192 ratio C:H:O","1:4:1"],
+      ["9","36g C, 6g H, 48g O \u2192 ratio C:H:O","1:2:1"],
+      ["10","14g N, 16g O \u2192 ratio N:O","1:1"]
+    ]
+  },
+  {
+    id:9, title:"Arrange: Build the empirical formula method", type:"arrange",
+    instruction:"Click the words in the correct order to describe each step.",
+    sentences:[
+      {prompt:"Step 1: Assume a 100 gram sample", words:["Assume","a 100","gram","sample"]},
+      {prompt:"Step 2: Convert grams to moles using atomic mass", words:["Convert","grams","to moles","using","atomic mass"]},
+      {prompt:"Step 3: Divide all moles by the smallest value", words:["Divide","all moles","by the","smallest value"]},
+      {prompt:"Step 4: Multiply to get whole number ratios", words:["Multiply","to get","whole number","ratios"]},
+      {prompt:"Step 5: Write the empirical formula from the ratios", words:["Write","the empirical","formula","from the","ratios"]}
+    ]
+  },
+  {
+    id:10, title:"MC: Combustion analysis", type:"mc",
+    instruction:"Select the correct answer about combustion analysis.",
+    questions:[
+      {q:"In combustion analysis, carbon is collected as:", options:["CO","CO\u2082","C (solid)","CH\u2084"], correct:1},
+      {q:"In combustion analysis, hydrogen is collected as:", options:["H\u2082","H\u2082O","HCl","H\u2082O\u2082"], correct:1},
+      {q:"Burning 1 mol of CH\u2084 produces ___ mol CO\u2082.", options:["1","2","3","4"], correct:0},
+      {q:"Burning 1 mol of CH\u2084 produces ___ mol H\u2082O.", options:["1","2","3","4"], correct:1},
+      {q:"To find mol C from CO\u2082: mol C = ", options:["mol CO\u2082","2 \u00D7 mol CO\u2082","mol CO\u2082 / 2","mol CO\u2082 / 12"], correct:0},
+      {q:"To find mol H from H\u2082O: mol H = ", options:["mol H\u2082O","2 \u00D7 mol H\u2082O","mol H\u2082O / 2","mol H\u2082O / 18"], correct:1},
+      {q:"If a compound contains C, H, and O, how do you find the mass of O?", options:["From the mass of O\u2082 used","Total mass \u2212 mass C \u2212 mass H","From the CO\u2082 produced","O cannot be determined"], correct:1},
+      {q:"44g of CO\u2082 contains ___ g of carbon.", options:["6","12","24","44"], correct:1},
+      {q:"18g of H\u2082O contains ___ g of hydrogen.", options:["1","2","9","18"], correct:1},
+      {q:"Combustion analysis works best for compounds containing:", options:["Metals only","C, H (and O)","Noble gases","Any elements"], correct:1}
+    ]
+  },
+  {
+    id:11, title:"Fill: Quick percent calculations",
+    instruction:"Calculate percent composition for these common compounds. Round to nearest whole number or 1 decimal.",
+    rows:[
+      ["1","% of C in C\u2082H\u2086 (ethane, MW=30)","80 / 80.0 / 80%"],
+      ["2","% of H in C\u2082H\u2086","20 / 20.0 / 20%"],
+      ["3","% of C in C\u2082H\u2082 (acetylene, MW=26)","92.3 / 92.3% / 92"],
+      ["4","% of O in SO\u2082 (MW=64)","50 / 50.0 / 50%"],
+      ["5","% of O in SO\u2083 (MW=80)","60 / 60.0 / 60%"],
+      ["6","% of C in C\u2086H\u2082\u2082O\u2086 (glucose, MW=180)","40 / 40.0 / 40%"],
+      ["7","% of N in NO (MW=30)","46.7 / 46.7%"],
+      ["8","% of N in NO\u2082 (MW=46)","30.4 / 30.4%"],
+      ["9","% of Cl in HCl (MW=36.5)","97.3 / 97.3%"],
+      ["10","% of Na in NaOH (MW=40)","57.5 / 57.5%"]
+    ]
+  },
+  {
+    id:12, title:"MC: Tricky empirical formula questions", type:"mc",
+    instruction:"These are designed to be challenging. Think carefully.",
+    questions:[
+      {q:"If mol ratio gives 1:1.33, multiply by ___ to get whole numbers.", options:["2","3","4","5"], correct:1},
+      {q:"If mol ratio gives 1:1.5, multiply by ___ to get whole numbers.", options:["2","3","4","5"], correct:0},
+      {q:"If mol ratio gives 1:2.5, multiply by ___ to get whole numbers.", options:["2","3","4","5"], correct:0},
+      {q:"A hydrate CuSO\u2084\u00B7xH\u2082O loses 36% of its mass when heated. x = ?", options:["3","4","5","7"], correct:2},
+      {q:"Two compounds have empirical formula CH\u2082O. Compound A has MW 30, B has MW 60. They are:", options:["The same compound","Isomers","Different compounds (formaldehyde vs acetic acid)","Cannot exist"], correct:2},
+      {q:"A compound is 72.4% Fe and 27.6% O. Empirical formula:", options:["FeO","Fe\u2082O\u2083","Fe\u2083O\u2084","FeO\u2082"], correct:1},
+      {q:"If empirical formula is found to be C\u2082.\u2085H\u2085, you should:", options:["Round to C\u2082H\u2085","Multiply by 2 to get C\u2085H\u2082\u2080","Report as is","Check your calculation for errors"], correct:3},
+      {q:"The % composition of CO and CO\u2082 are:", options:["The same","Different","Both 50% C","Cannot be compared"], correct:1},
+      {q:"A compound has MW = 180 and empirical formula CH\u2082O (EW=30). It has ___ CH\u2082O units.", options:["3","4","5","6"], correct:3},
+      {q:"In determining empirical formula, rounding 1.98 to 2 is:", options:["Never acceptable","Acceptable (close to whole number)","Only if it's carbon","Required to always round down"], correct:1}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Percent Composition & Empirical Formulas \u2014 Complete Reference</h3>' +
+'<h3>Percent Composition Formula</h3>' +
+'<p><span class="rule">% element = (number of atoms \u00D7 atomic mass / molar mass of compound) \u00D7 100</span></p>' +
+'<p>Example: % O in H\u2082O = (1 \u00D7 16 / 18) \u00D7 100 = 88.9%</p>' +
+'<p>All percentages in a compound must add up to <span class="rule">100%</span></p>' +
+'<h3>Finding Empirical Formula from % Composition</h3>' +
+'<table><tr><th>Step</th><th>Action</th><th>Example (40% C, 6.7% H, 53.3% O)</th></tr>' +
+'<tr><td>1</td><td><span class="rule">Assume 100g sample</span></td><td>40g C, 6.7g H, 53.3g O</td></tr>' +
+'<tr><td>2</td><td><span class="rule">Convert g to mol</span></td><td>40/12=3.33, 6.7/1=6.7, 53.3/16=3.33</td></tr>' +
+'<tr><td>3</td><td><span class="rule">Divide by smallest mol</span></td><td>3.33/3.33=1, 6.7/3.33=2, 3.33/3.33=1</td></tr>' +
+'<tr><td>4</td><td><span class="rule">Multiply for whole numbers</span></td><td>Ratio: 1:2:1 \u2192 CH\u2082O</td></tr></table>' +
+'<h3>Molecular Formula from Empirical</h3>' +
+'<p><span class="rule">n = molar mass / empirical formula mass</span></p>' +
+'<p><span class="rule">Molecular formula = n \u00D7 empirical formula</span></p>' +
+'<p>Example: Empirical CH\u2082O (mass=30), molar mass=180 \u2192 n=6 \u2192 C\u2086H\u2082\u2082O\u2086</p>' +
+'<h3>Combustion Analysis</h3>' +
+'<p>C\u2093H\u1D67 + O\u2082 \u2192 CO\u2082 + H\u2082O</p>' +
+'<ul>' +
+'<li><span class="rule">mol C = mol CO\u2082</span> (each CO\u2082 has 1 C)</li>' +
+'<li><span class="rule">mol H = 2 \u00D7 mol H\u2082O</span> (each H\u2082O has 2 H)</li>' +
+'<li>mass C = mol C \u00D7 12, mass H = mol H \u00D7 1</li>' +
+'<li>mass O = total sample mass \u2212 mass C \u2212 mass H</li>' +
+'</ul>' +
+'<h3>Handling Non-Whole Ratios</h3>' +
+'<table><tr><th>If ratio ends in...</th><th>Multiply all by</th><th>Example</th></tr>' +
+'<tr><td>.5</td><td>2</td><td>1:1.5 \u2192 2:3</td></tr>' +
+'<tr><td>.33 or .67</td><td>3</td><td>1:1.33 \u2192 3:4</td></tr>' +
+'<tr><td>.25 or .75</td><td>4</td><td>1:1.25 \u2192 4:5</td></tr>' +
+'<tr><td>.2 or .4 or .6 or .8</td><td>5</td><td>1:1.4 \u2192 5:7</td></tr></table>' +
+'<h3>Common Mistakes</h3>' +
+'<ul>' +
+'<li>Forgetting to assume 100g (trying to use % directly as moles)</li>' +
+'<li>Dividing by the largest mol value instead of the smallest</li>' +
+'<li>Rounding 1.33 to 1 instead of multiplying by 3</li>' +
+'<li>Confusing empirical and molecular formulas</li>' +
+'<li>In combustion analysis: forgetting that mol H = 2 \u00D7 mol H\u2082O (not 1\u00D7)</li>' +
+'</ul>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 percent composition, empirical formula, molecular formula \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

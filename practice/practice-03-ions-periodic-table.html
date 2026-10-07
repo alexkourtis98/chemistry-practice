@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Ions &amp; Periodic Table</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Ions &amp; Periodic Table</h1>
+<p class="subtitle">Deep practice &mdash; cations, anions, valence electrons, periodic table</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_03';
+const SECTIONS = [
+  {
+    id:1, title:"Cation or Anion?",
+    instruction:"Write cation or anion.",
+    rows:[
+      ["1","Na loses 1 e\u207b \u2192","cation / Na+"],
+      ["2","Cl gains 1 e\u207b \u2192","anion / Cl-"],
+      ["3","Mg loses 2 e\u207b \u2192","cation / Mg2+"],
+      ["4","O gains 2 e\u207b \u2192","anion / O2-"],
+      ["5","Al loses 3 e\u207b \u2192","cation / Al3+"],
+      ["6","N gains 3 e\u207b \u2192","anion / N3-"],
+      ["7","K loses 1 e\u207b \u2192","cation / K+"],
+      ["8","S gains 2 e\u207b \u2192","anion / S2-"],
+      ["9","F gains 1 e\u207b \u2192","anion / F-"],
+      ["10","Ca loses 2 e\u207b \u2192","cation / Ca2+"],
+      ["11","Li loses 1 e\u207b \u2192","cation / Li+"],
+      ["12","Br gains 1 e\u207b \u2192","anion / Br-"],
+      ["13","Ba loses 2 e\u207b \u2192","cation / Ba2+"],
+      ["14","P gains 3 e\u207b \u2192","anion / P3-"],
+      ["15","Sr loses 2 e\u207b \u2192","cation / Sr2+"],
+      ["16","I gains 1 e\u207b \u2192","anion / I-"],
+      ["17","Rb loses 1 e\u207b \u2192","cation / Rb+"],
+      ["18","Se gains 2 e\u207b \u2192","anion / Se2-"],
+      ["19","Cs loses 1 e\u207b \u2192","cation / Cs+"],
+      ["20","Te gains 2 e\u207b \u2192","anion / Te2-"]
+    ]
+  },
+  {
+    id:2, title:"Write the ion",
+    instruction:"Write the ion that each element forms.",
+    rows:[
+      ["1","Na (group 1)","Na+ / Na\u207a"],
+      ["2","K (group 1)","K+ / K\u207a"],
+      ["3","Mg (group 2)","Mg2+ / Mg\u00b2\u207a"],
+      ["4","Ca (group 2)","Ca2+ / Ca\u00b2\u207a"],
+      ["5","Al (group 13)","Al3+ / Al\u00b3\u207a"],
+      ["6","O (group 16)","O2- / O\u00b2\u207b"],
+      ["7","S (group 16)","S2- / S\u00b2\u207b"],
+      ["8","F (group 17)","F- / F\u207b"],
+      ["9","Cl (group 17)","Cl- / Cl\u207b"],
+      ["10","N (group 15)","N3- / N\u00b3\u207b"],
+      ["11","Li (group 1)","Li+ / Li\u207a"],
+      ["12","Be (group 2)","Be2+ / Be\u00b2\u207a"],
+      ["13","Br (group 17)","Br- / Br\u207b"],
+      ["14","I (group 17)","I- / I\u207b"],
+      ["15","Ba (group 2)","Ba2+ / Ba\u00b2\u207a"],
+      ["16","P (group 15)","P3- / P\u00b3\u207b"],
+      ["17","Se (group 16)","Se2- / Se\u00b2\u207b"],
+      ["18","Rb (group 1)","Rb+ / Rb\u207a"],
+      ["19","Sr (group 2)","Sr2+ / Sr\u00b2\u207a"],
+      ["20","Cs (group 1)","Cs+ / Cs\u207a"]
+    ]
+  },
+  {
+    id:3, title:"Valence electrons",
+    instruction:"How many valence electrons does each element have?",
+    rows:[
+      ["1","Li (group 1)","1"],
+      ["2","Be (group 2)","2"],
+      ["3","B (group 13)","3"],
+      ["4","C (group 14)","4"],
+      ["5","N (group 15)","5"],
+      ["6","O (group 16)","6"],
+      ["7","F (group 17)","7"],
+      ["8","Ne (group 18)","8"],
+      ["9","Na (group 1)","1"],
+      ["10","Mg (group 2)","2"],
+      ["11","Al (group 13)","3"],
+      ["12","Si (group 14)","4"],
+      ["13","P (group 15)","5"],
+      ["14","S (group 16)","6"],
+      ["15","Cl (group 17)","7"],
+      ["16","Ar (group 18)","8"],
+      ["17","K (group 1)","1"],
+      ["18","Ca (group 2)","2"],
+      ["19","Br (group 17)","7"],
+      ["20","I (group 17)","7"]
+    ]
+  },
+  {
+    id:4, title:"MC: Ions and periodic table", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Metals tend to:", options:["gain electrons","lose electrons","share electrons","not react"], correct:1},
+      {q:"Nonmetals tend to:", options:["lose electrons","gain electrons","not react","evaporate"], correct:1},
+      {q:"Group 1 forms ions of:", options:["+1","+2","-1","-2"], correct:0},
+      {q:"Group 17 forms ions of:", options:["+1","-2","-1","+2"], correct:2},
+      {q:"The octet rule means:", options:["6 electrons in the outer shell","8 electrons in the outer shell","8 protons","8 neutrons"], correct:1},
+      {q:"How many electrons does Ca\u00b2\u207a have? (Ca Z=20)", options:["20","22","18","2"], correct:2},
+      {q:"How many electrons does Cl\u207b have? (Cl Z=17)", options:["16","17","18","19"], correct:2},
+      {q:"Which is a noble gas?", options:["Na","Cl","Ar","Fe"], correct:2},
+      {q:"Group 2 elements form ions with charge:", options:["+1","+2","-2","+3"], correct:1},
+      {q:"Group 16 elements form ions with charge:", options:["+2","-1","-2","+6"], correct:2},
+      {q:"Which ion has the same electron configuration as Ne?", options:["Na\u207a","K\u207a","Ca\u207a","Fe\u00b2\u207a"], correct:0},
+      {q:"How many electrons does O\u00b2\u207b have?", options:["6","8","10","16"], correct:2},
+      {q:"Na\u207a and F\u207b have the same number of:", options:["protons","neutrons","electrons","nothing"], correct:2},
+      {q:"Which element does NOT easily form ions?", options:["Na","Cl","Ne","Ca"], correct:2},
+      {q:"A cation is ___ than its parent atom:", options:["larger","smaller","the same size","heavier"], correct:1},
+      {q:"An anion is ___ than its parent atom:", options:["smaller","the same size","larger","lighter"], correct:2},
+      {q:"Which transition metal commonly forms +2 and +3 ions?", options:["Na","Ca","Fe","Cl"], correct:2},
+      {q:"The charge of a polyatomic ion NH\u2084\u207a is:", options:["-1","+1","+2","0"], correct:1},
+      {q:"Which pair is isoelectronic (same electron count)?", options:["Na\u207a and Cl\u207b","Na\u207a and K\u207a","Mg\u00b2\u207a and Al\u00b3\u207a","Na and Ne"], correct:0},
+      {q:"Group 15 elements form ions with charge:", options:["+3","-3","-2","+5"], correct:1}
+    ]
+  },
+  {
+    id:5, title:"Electron count in ions",
+    instruction:"How many electrons does each ion have?",
+    rows:[
+      ["1","Na\u207a (Z=11): electrons?","10"],
+      ["2","Mg\u00b2\u207a (Z=12): electrons?","10"],
+      ["3","Al\u00b3\u207a (Z=13): electrons?","10"],
+      ["4","O\u00b2\u207b (Z=8): electrons?","10"],
+      ["5","Cl\u207b (Z=17): electrons?","18"],
+      ["6","S\u00b2\u207b (Z=16): electrons?","18"],
+      ["7","K\u207a (Z=19): electrons?","18"],
+      ["8","Ca\u00b2\u207a (Z=20): electrons?","18"],
+      ["9","F\u207b (Z=9): electrons?","10"],
+      ["10","N\u00b3\u207b (Z=7): electrons?","10"],
+      ["11","Li\u207a (Z=3): electrons?","2"],
+      ["12","Be\u00b2\u207a (Z=4): electrons?","2"],
+      ["13","Br\u207b (Z=35): electrons?","36"],
+      ["14","Sr\u00b2\u207a (Z=38): electrons?","36"],
+      ["15","Ba\u00b2\u207a (Z=56): electrons?","54"],
+      ["16","I\u207b (Z=53): electrons?","54"],
+      ["17","Fe\u00b2\u207a (Z=26): electrons?","24"],
+      ["18","Fe\u00b3\u207a (Z=26): electrons?","23"],
+      ["19","Cu\u207a (Z=29): electrons?","28"],
+      ["20","Cu\u00b2\u207a (Z=29): electrons?","27"]
+    ]
+  },
+  {
+    id:6, title:"Isoelectronic species",
+    instruction:"Which noble gas has the same electron configuration? Or how many electrons?",
+    rows:[
+      ["1","Na\u207a has the same electrons as which noble gas?","Ne / neon"],
+      ["2","Mg\u00b2\u207a has the same electrons as which noble gas?","Ne / neon"],
+      ["3","Al\u00b3\u207a has the same electrons as which noble gas?","Ne / neon"],
+      ["4","O\u00b2\u207b has the same electrons as which noble gas?","Ne / neon"],
+      ["5","F\u207b has the same electrons as which noble gas?","Ne / neon"],
+      ["6","K\u207a has the same electrons as which noble gas?","Ar / argon"],
+      ["7","Ca\u00b2\u207a has the same electrons as which noble gas?","Ar / argon"],
+      ["8","Cl\u207b has the same electrons as which noble gas?","Ar / argon"],
+      ["9","S\u00b2\u207b has the same electrons as which noble gas?","Ar / argon"],
+      ["10","Li\u207a has the same electrons as which noble gas?","He / helium"],
+      ["11","How many electrons do Na\u207a, Mg\u00b2\u207a, Al\u00b3\u207a, F\u207b, O\u00b2\u207b all have?","10"],
+      ["12","How many electrons do K\u207a, Ca\u00b2\u207a, Cl\u207b, S\u00b2\u207b all have?","18"]
+    ]
+  },
+  {
+    id:7, title:"True/False",
+    instruction:"Write true or false.",
+    rows:[
+      ["1","Metals form anions","false"],
+      ["2","Group 18 (noble gases) does not easily form ions","true"],
+      ["3","Na\u207a and Ne have the same number of electrons","true"],
+      ["4","Valence electrons = group number (for groups 1-2)","true"],
+      ["5","Group 16: valence = 16","false"],
+      ["6","A cation has fewer electrons than protons","true"],
+      ["7","An anion has more electrons than protons","true"],
+      ["8","Fe can form both Fe\u00b2\u207a and Fe\u00b3\u207a","true"],
+      ["9","Na\u207a is larger than Na atom","false"],
+      ["10","Cl\u207b is larger than Cl atom","true"],
+      ["11","Noble gases have 8 valence electrons (except He)","true"],
+      ["12","Transition metals always form +2 ions only","false"],
+      ["13","Na\u207a and F\u207b are isoelectronic","true"],
+      ["14","The octet rule applies to all elements without exception","false"],
+      ["15","Group 14 elements typically form +4 or -4 ions","false"],
+      ["16","Rb\u207a has 36 electrons","true"],
+      ["17","An atom with Z=20 that has 18 electrons has charge +2","true"],
+      ["18","Polyatomic ions contain only one element","false"]
+    ]
+  },
+  {
+    id:8, title:"MC: Transition metals and special cases", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Iron(II) has the formula:", options:["Fe\u207a","Fe\u00b2\u207a","Fe\u00b3\u207a","Fe\u2074\u207a"], correct:1},
+      {q:"Iron(III) has the formula:", options:["Fe\u207a","Fe\u00b2\u207a","Fe\u00b3\u207a","Fe\u2074\u207a"], correct:2},
+      {q:"Copper commonly forms which ions?", options:["Cu\u207a and Cu\u00b2\u207a","Cu\u00b2\u207a and Cu\u00b3\u207a","Only Cu\u207a","Only Cu\u00b2\u207a"], correct:0},
+      {q:"The Roman numeral in Iron(III) chloride tells you:", options:["The number of atoms","The charge of the iron ion","The group number","The number of chlorine atoms"], correct:1},
+      {q:"Which is a polyatomic ion?", options:["Na\u207a","Cl\u207b","OH\u207b","Mg\u00b2\u207a"], correct:2},
+      {q:"The charge of sulfate SO\u2084\u00b2\u207b is:", options:["-1","-2","+2","-4"], correct:1},
+      {q:"The charge of nitrate NO\u2083\u207b is:", options:["-2","-1","+1","-3"], correct:1},
+      {q:"Ammonium NH\u2084\u207a is a:", options:["Anion","Cation","Neutral molecule","Noble gas"], correct:1},
+      {q:"Zinc always forms which ion?", options:["Zn\u207a","Zn\u00b2\u207a","Zn\u00b3\u207a","Variable"], correct:1},
+      {q:"Silver always forms which ion?", options:["Ag\u207a","Ag\u00b2\u207a","Ag\u00b3\u207a","Variable"], correct:0}
+    ]
+  },
+  {
+    id:9, title:"Ion size vs atom size",
+    instruction:"Write larger or smaller.",
+    rows:[
+      ["1","Na\u207a compared to Na atom is ___","smaller"],
+      ["2","Cl\u207b compared to Cl atom is ___","larger"],
+      ["3","Mg\u00b2\u207a compared to Mg atom is ___","smaller"],
+      ["4","O\u00b2\u207b compared to O atom is ___","larger"],
+      ["5","Al\u00b3\u207a compared to Al atom is ___","smaller"],
+      ["6","S\u00b2\u207b compared to S atom is ___","larger"],
+      ["7","K\u207a compared to K atom is ___","smaller"],
+      ["8","Fe\u00b3\u207a compared to Fe\u00b2\u207a is ___","smaller"],
+      ["9","Cations are generally ___ than their parent atoms","smaller"],
+      ["10","Anions are generally ___ than their parent atoms","larger"]
+    ]
+  },
+  {
+    id:10, title:"Identify: element from ion info",
+    instruction:"Given the ion info, identify the element.",
+    rows:[
+      ["1","Z=11, charge +1, 10 electrons. Element?","Na / sodium"],
+      ["2","Z=17, charge -1, 18 electrons. Element?","Cl / chlorine"],
+      ["3","Z=20, charge +2, 18 electrons. Element?","Ca / calcium"],
+      ["4","Z=8, charge -2, 10 electrons. Element?","O / oxygen"],
+      ["5","Z=13, charge +3, 10 electrons. Element?","Al / aluminum / aluminium"],
+      ["6","Z=26, charge +2, 24 electrons. Element?","Fe / iron"],
+      ["7","Z=26, charge +3, 23 electrons. Element?","Fe / iron"],
+      ["8","Z=29, charge +2, 27 electrons. Element?","Cu / copper"],
+      ["9","10 electrons, +1 charge. Z=?","11"],
+      ["10","18 electrons, -1 charge. Z=?","17"]
+    ]
+  },
+  {
+    id:11, title:"Word Arrange", type:"arrange",
+    instruction:"Click the words in the correct order.",
+    sentences:[
+      {prompt:"Metals lose electrons", words:["Metals","lose","electrons"]},
+      {prompt:"Nonmetals gain electrons", words:["Nonmetals","gain","electrons"]},
+      {prompt:"Octet = 8 valence electrons", words:["Octet","=","8","valence","electrons"]},
+      {prompt:"Na loses 1 e\u207b to form Na\u207a", words:["Na","loses","1","e\u207b","to form","Na\u207a"]},
+      {prompt:"Cations are smaller than their atoms", words:["Cations","are","smaller","than their","atoms"]},
+      {prompt:"Anions are larger than their atoms", words:["Anions","are","larger","than their","atoms"]},
+      {prompt:"Na+ and F- are isoelectronic", words:["Na\u207a","and","F\u207b","are","isoelectronic"]},
+      {prompt:"Transition metals have variable charges", words:["Transition","metals","have","variable","charges"]},
+      {prompt:"Noble gases have full outer shells", words:["Noble","gases","have","full","outer shells"]},
+      {prompt:"Group number equals valence electrons", words:["Group","number","equals","valence","electrons"]}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/\u03AC/g,'\u03B1').replace(/\u03AD/g,'\u03B5').replace(/\u03AE/g,'\u03B7').replace(/\u03AF/g,'\u03B9')
+       .replace(/\u03CC/g,'\u03BF').replace(/\u03CD/g,'\u03C5').replace(/\u03CE/g,'\u03C9').replace(/\u0390/g,'\u03B9').replace(/\u03B0/g,'\u03C5');
+  s = s.replace(/\u2080/g,'0').replace(/\u2081/g,'1').replace(/\u2082/g,'2').replace(/\u2083/g,'3').replace(/\u2084/g,'4')
+       .replace(/\u2085/g,'5').replace(/\u2086/g,'6').replace(/\u2087/g,'7').replace(/\u2088/g,'8').replace(/\u2089/g,'9');
+  s = s.replace(/\u207A/g,'+').replace(/\u207B/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Ions & Periodic Table \u2014 Complete Reference</h3>' +
+'<h3>Ion Formation</h3>' +
+'<p><span class="rule">Cation (+):</span> Metal loses electrons. Na \u2192 Na\u207A + e\u207B</p>' +
+'<p><span class="rule">Anion (\u2212):</span> Nonmetal gains electrons. Cl + e\u207B \u2192 Cl\u207B</p>' +
+'<p>Memory: <span class="rule">Cat</span>ion = <span class="rule">Paw</span>sitive (+). Anion = negative (\u2212).</p>' +
+'<h3>Ion Charges by Group</h3>' +
+'<table><tr><th>Group</th><th>Valence e\u207B</th><th>Ion charge</th><th>Examples</th></tr>' +
+'<tr><td>1 (IA)</td><td>1</td><td><span class="rule">+1</span></td><td>Li\u207A, Na\u207A, K\u207A, Rb\u207A, Cs\u207A</td></tr>' +
+'<tr><td>2 (IIA)</td><td>2</td><td><span class="rule">+2</span></td><td>Be\u00B2\u207A, Mg\u00B2\u207A, Ca\u00B2\u207A, Ba\u00B2\u207A, Sr\u00B2\u207A</td></tr>' +
+'<tr><td>13 (IIIA)</td><td>3</td><td><span class="rule">+3</span></td><td>Al\u00B3\u207A</td></tr>' +
+'<tr><td>15 (VA)</td><td>5</td><td><span class="rule">\u22123</span></td><td>N\u00B3\u207B, P\u00B3\u207B</td></tr>' +
+'<tr><td>16 (VIA)</td><td>6</td><td><span class="rule">\u22122</span></td><td>O\u00B2\u207B, S\u00B2\u207B</td></tr>' +
+'<tr><td>17 (VIIA)</td><td>7</td><td><span class="rule">\u22121</span></td><td>F\u207B, Cl\u207B, Br\u207B, I\u207B</td></tr>' +
+'<tr><td>18 (VIIIA)</td><td>8</td><td><span class="rule">0</span></td><td>He, Ne, Ar (noble gases)</td></tr></table>' +
+'<h3>Common Transition Metal Charges</h3>' +
+'<table><tr><th>Metal</th><th>Common charges</th><th>Notes</th></tr>' +
+'<tr><td>Fe (Iron)</td><td>+2, +3</td><td>Variable, needs Roman numeral</td></tr>' +
+'<tr><td>Cu (Copper)</td><td>+1, +2</td><td>Variable, needs Roman numeral</td></tr>' +
+'<tr><td>Pb (Lead)</td><td>+2, +4</td><td>Variable, needs Roman numeral</td></tr>' +
+'<tr><td>Sn (Tin)</td><td>+2, +4</td><td>Variable, needs Roman numeral</td></tr>' +
+'<tr><td>Cr (Chromium)</td><td>+2, +3, +6</td><td>Variable</td></tr>' +
+'<tr><td>Mn (Manganese)</td><td>+2, +4, +7</td><td>Variable</td></tr>' +
+'<tr><td><span class="rule">Zn (Zinc)</span></td><td><span class="rule">+2 only</span></td><td>Fixed charge, no Roman numeral</td></tr>' +
+'<tr><td><span class="rule">Ag (Silver)</span></td><td><span class="rule">+1 only</span></td><td>Fixed charge, no Roman numeral</td></tr></table>' +
+'<h3>Octet Rule & Isoelectronic Species</h3>' +
+'<p><span class="rule">Octet rule:</span> Atoms gain/lose e\u207B to get 8 electrons in outer shell (like noble gases).</p>' +
+'<p><span class="rule">Isoelectronic:</span> Species with the same number of electrons.</p>' +
+'<p>Example: O\u00B2\u207B, F\u207B, Ne, Na\u207A, Mg\u00B2\u207A all have 10 electrons (isoelectronic with Ne).</p>' +
+'<h3>Ion Size vs Atom Size</h3>' +
+'<ul>' +
+'<li><span class="rule">Cations are smaller</span> than their parent atoms (lost electrons, less e\u207B repulsion)</li>' +
+'<li><span class="rule">Anions are larger</span> than their parent atoms (gained electrons, more e\u207B repulsion)</li>' +
+'<li>Na (186 pm) \u2192 Na\u207A (95 pm): smaller</li>' +
+'<li>Cl (99 pm) \u2192 Cl\u207B (181 pm): larger</li>' +
+'</ul>' +
+'<h3>Electron Configuration of Common Ions</h3>' +
+'<table><tr><th>Ion</th><th>Config</th><th>Like which noble gas?</th></tr>' +
+'<tr><td>Na\u207A</td><td>1s\u00B2 2s\u00B2 2p\u2076</td><td>Ne</td></tr>' +
+'<tr><td>Cl\u207B</td><td>1s\u00B2 2s\u00B2 2p\u2076 3s\u00B2 3p\u2076</td><td>Ar</td></tr>' +
+'<tr><td>Ca\u00B2\u207A</td><td>1s\u00B2 2s\u00B2 2p\u2076 3s\u00B2 3p\u2076</td><td>Ar</td></tr>' +
+'<tr><td>Al\u00B3\u207A</td><td>1s\u00B2 2s\u00B2 2p\u2076</td><td>Ne</td></tr></table>' +
+'<h3>Common Mistakes</h3>' +
+'<ul>' +
+'<li>Metals LOSE electrons (they do not gain them)</li>' +
+'<li>Losing an electron makes the ion POSITIVE (not negative)</li>' +
+'<li>Zn always +2, Ag always +1 (do not use Roman numerals for these)</li>' +
+'<li>Noble gases have 8 outer electrons (except He which has 2)</li>' +
+'</ul>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 cations, anions, valence electrons, periodic table \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

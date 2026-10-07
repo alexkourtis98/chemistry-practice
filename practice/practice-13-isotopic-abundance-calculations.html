@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Isotopic Abundance Calculations</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Isotopic Abundance Calculations</h1>
+<p class="subtitle">Deep practice &mdash; weighted average atomic mass from isotope data</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_13';
+const SECTIONS = [
+  {
+    id:1, title:"Convert % abundance to decimal fraction",
+    instruction:"Convert each percentage to its decimal fraction.",
+    rows:[
+      ["1","75.77% \u2192 decimal?","0.7577"],
+      ["2","24.23% \u2192 decimal?","0.2423"],
+      ["3","69.17% \u2192 decimal?","0.6917"],
+      ["4","30.83% \u2192 decimal?","0.3083"],
+      ["5","90.48% \u2192 decimal?","0.9048"],
+      ["6","9.52% \u2192 decimal?","0.0952"],
+      ["7","50.69% \u2192 decimal?","0.5069"],
+      ["8","49.31% \u2192 decimal?","0.4931"],
+      ["9","99.63% \u2192 decimal?","0.9963"],
+      ["10","0.37% \u2192 decimal?","0.0037"],
+      ["11","78.99% \u2192 decimal?","0.7899"],
+      ["12","11.01% \u2192 decimal?","0.1101"],
+      ["13","93.26% \u2192 decimal?","0.9326"],
+      ["14","6.73% \u2192 decimal?","0.0673"],
+      ["15","0.01% \u2192 decimal?","0.0001"],
+      ["16","51.84% \u2192 decimal?","0.5184"],
+      ["17","48.16% \u2192 decimal?","0.4816"],
+      ["18","60.11% \u2192 decimal?","0.6011"]
+    ]
+  },
+  {
+    id:2, title:"Two-isotope weighted average",
+    instruction:"Calculate the weighted average atomic mass from two isotopes.",
+    rows:[
+      ["1","Cl: 75.77% of 34.97u + 24.23% of 36.97u = ?","35.45 / 35.5"],
+      ["2","Cu: 69.17% of 62.93u + 30.83% of 64.93u = ?","63.55 / 63.5"],
+      ["3","Br: 50.69% of 78.92u + 49.31% of 80.92u = ?","79.90 / 79.9 / 80"],
+      ["4","Ag: 51.84% of 106.91u + 48.16% of 108.91u = ?","107.87 / 107.9"],
+      ["5","Ga: 60.11% of 68.93u + 39.89% of 70.93u = ?","69.72 / 69.7"],
+      ["6","B: 19.9% of 10.01u + 80.1% of 11.01u = ?","10.81 / 10.8"],
+      ["7","Li: 7.59% of 6.02u + 92.41% of 7.02u = ?","6.94 / 6.9"],
+      ["8","Eu: 47.81% of 150.92u + 52.19% of 152.92u = ?","151.96 / 152.0 / 152"],
+      ["9","Rb: 72.17% of 84.91u + 27.83% of 86.91u = ?","85.47 / 85.5"],
+      ["10","Tl: 29.52% of 202.97u + 70.48% of 204.97u = ?","204.38 / 204.4"],
+      ["11","In: 4.29% of 112.90u + 95.71% of 114.90u = ?","114.82 / 114.8"],
+      ["12","Ir: 37.3% of 190.96u + 62.7% of 192.96u = ?","192.22 / 192.2"],
+      ["13","Sb: 57.21% of 120.90u + 42.79% of 122.90u = ?","121.76 / 121.8"],
+      ["14","Re: 37.40% of 184.95u + 62.60% of 186.96u = ?","186.21 / 186.2"],
+      ["15","V: 0.25% of 49.95u + 99.75% of 50.94u = ?","50.94 / 50.9"]
+    ]
+  },
+  {
+    id:3, title:"Three-isotope weighted average",
+    instruction:"Calculate the weighted average atomic mass from three or more isotopes.",
+    rows:[
+      ["1","Si: 92.23% of 27.98u + 4.68% of 28.98u + 3.09% of 29.97u = ?","28.09 / 28.1"],
+      ["2","Ne: 90.48% of 19.99u + 0.27% of 20.99u + 9.25% of 21.99u = ?","20.18 / 20.2"],
+      ["3","Mg: 78.99% of 23.99u + 10.00% of 24.99u + 11.01% of 25.98u = ?","24.31 / 24.3"],
+      ["4","S: 94.93% of 31.97u + 0.76% of 32.97u + 4.29% of 33.97u + 0.02% of 35.97u = ?","32.07 / 32.1"],
+      ["5","K: 93.26% of 38.96u + 0.01% of 39.96u + 6.73% of 40.96u = ?","39.10 / 39.1"],
+      ["6","O: 99.76% of 15.99u + 0.04% of 16.99u + 0.20% of 17.99u = ?","16.00 / 16.0 / 16"],
+      ["7","Zr: 51.45% of 89.90u + 11.22% of 90.91u + 17.15% of 91.22u + 17.38% of 93.91u + 2.80% of 95.91u = ?","91.22 / 91.2"],
+      ["8","Ca: 96.94% of 39.96u + 0.65% of 41.96u + 0.14% of 42.96u + 2.09% of 43.96u + 0.19% of 45.95u = ?","40.08 / 40.1"],
+      ["9","Sn: 32.58% of 119.90u + 24.22% of 117.90u + 14.54% of 115.90u + 8.59% of 118.90u + rest at ~120u. Just the first two: 32.58% of 119.90 + 24.22% of 117.90 = ?","67.64 / 67.6"],
+      ["10","Cr: 83.79% of 51.94u + 9.50% of 52.94u + 4.35% of 49.95u + 2.36% of 53.94u = ?","52.00 / 52.0 / 52"],
+      ["11","Ba: 71.70% of 137.91u + 11.23% of 135.90u + 7.85% of 136.91u + rest minor. First three contributions: 71.70% of 137.91 + 11.23% of 135.90 + 7.85% of 136.91 = ?","125.43 / 125.4"],
+      ["12","Xe: 26.44% of 131.90u + 21.18% of 128.90u + 26.89% of 129.90u + 10.44% of 130.90u + rest minor. First four: sum?","122.38 / 122.4"]
+    ]
+  },
+  {
+    id:4, title:"Reverse: Find unknown abundance",
+    instruction:"Given the average atomic mass and isotope masses, find the unknown percentage abundance.",
+    rows:[
+      ["1","X has 2 isotopes: \u00b2\u2070X (mass 19.99u) and \u00b2\u00b2X (mass 21.99u). Avg mass = 20.18u. % of \u00b2\u2070X?","90.5 / 90.48 / 90"],
+      ["2","Element has \u2076\u2079M (68.93u) and \u2077\u00b9M (70.93u). Avg = 69.72u. % of \u2076\u2079M?","60.5 / 60.1 / 60"],
+      ["3","Y has \u00b3\u2075Y (34.97u) and \u00b3\u2077Y (36.97u). Avg = 35.45u. % of \u00b3\u2075Y?","76 / 75.77 / 76.0"],
+      ["4","Element: \u00b9\u2070A (10.01u) and \u00b9\u00b9A (11.01u). Avg = 10.81u. % of \u00b9\u00b9A?","80 / 80.1"],
+      ["5","Z has \u2076Z (6.02u) and \u2077Z (7.02u). Avg = 6.94u. % of \u2077Z?","92 / 92.41 / 92.0"],
+      ["6","Q has \u00b9\u2070\u2077Q (106.91u) and \u00b9\u2070\u2079Q (108.91u). Avg = 107.87u. % of \u00b9\u2070\u2077Q?","52 / 51.84 / 52.0"],
+      ["7","Element has two isotopes: mass 62.93u and 64.93u. Avg = 63.55u. % of lighter isotope?","69 / 69.17 / 69.0"],
+      ["8","Isotopes at 78.92u and 80.92u. Avg = 79.90u. % of heavier isotope?","49 / 49.31 / 49.0"],
+      ["9","Isotopes at 84.91u and 86.91u. Avg = 85.47u. % of 84.91u isotope?","72 / 72.17 / 72.0"],
+      ["10","Two isotopes: 120.90u and 122.90u. Avg = 121.76u. % of 120.90u?","57 / 57.21 / 57.0"],
+      ["11","Isotopes at 150.92u and 152.92u. Avg = 151.96u. % of lighter isotope?","48 / 47.81 / 48.0"],
+      ["12","Two isotopes: 202.97u and 204.97u. Avg = 204.38u. % of 204.97u isotope?","70 / 70.48 / 70.5"],
+      ["13","Isotopes at 190.96u and 192.96u. Avg = 192.22u. % of heavier isotope?","63 / 62.7 / 63.0"],
+      ["14","Element X: isotopes at 10.0u and 11.0u. Avg = 10.2u. % of 10.0u isotope?","80"],
+      ["15","Element Y: isotopes at 50.0u and 52.0u. Avg = 50.4u. % of 50.0u isotope?","80"]
+    ]
+  },
+  {
+    id:5, title:"Which isotope dominates?", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Chlorine avg mass = 35.45u. Which isotope is more abundant?", options:["\u00b3\u2075Cl","\u00b3\u2077Cl","Equal amounts","Cannot determine"], correct:0},
+      {q:"Boron avg mass = 10.81u. Isotopes: \u00b9\u2070B and \u00b9\u00b9B. More abundant?", options:["\u00b9\u2070B","\u00b9\u00b9B","Equal","Cannot tell"], correct:1},
+      {q:"Copper avg mass = 63.55u. Isotopes: \u2076\u00b3Cu and \u2076\u2075Cu. More abundant?", options:["\u2076\u00b3Cu","\u2076\u2075Cu","Equal","Neither"], correct:0},
+      {q:"Avg mass = 24.31u. Isotopes at masses 24, 25, 26. Dominant?", options:["Mass 24 isotope","Mass 25 isotope","Mass 26 isotope","Evenly split"], correct:0},
+      {q:"If avg atomic mass = 107.87u and isotopes are at 107u and 109u, what can you conclude?", options:["107u isotope slightly more abundant","109u isotope more abundant","Equal","Need more data"], correct:0},
+      {q:"An element has avg mass exactly between its two isotopes. This means:", options:["50% each isotope","Cannot have equal masses","One dominates","Element is unstable"], correct:0},
+      {q:"Lithium avg mass = 6.94u. Isotopes: \u2076Li and \u2077Li. Dominant?", options:["\u2077Li","\u2076Li","Equal","Need more info"], correct:0},
+      {q:"Neon avg mass = 20.18u. Isotopes: \u00b2\u2070Ne, \u00b2\u00b9Ne, \u00b2\u00b2Ne. Which dominates?", options:["\u00b2\u2070Ne","\u00b2\u00b9Ne","\u00b2\u00b2Ne","All equal"], correct:0},
+      {q:"Rubidium avg mass = 85.47u. Isotopes: \u2078\u2075Rb and \u2078\u2077Rb. Dominant?", options:["\u2078\u2075Rb","\u2078\u2077Rb","Equal","Cannot tell"], correct:0},
+      {q:"Thallium avg mass = 204.38u. Isotopes: \u00b2\u2070\u00b3Tl and \u00b2\u2070\u2075Tl. Dominant?", options:["\u00b2\u2070\u00b3Tl","\u00b2\u2070\u2075Tl","Equal","Both minor"], correct:1},
+      {q:"Indium avg mass = 114.82u. Isotopes: \u00b9\u00b9\u00b3In and \u00b9\u00b9\u2075In. Dominant?", options:["\u00b9\u00b9\u00b3In","\u00b9\u00b9\u2075In","Equal","Cannot determine"], correct:1},
+      {q:"Average mass = 50.5u. Two isotopes: 50u and 52u. The heavier isotope has abundance:", options:["25%","50%","75%","Cannot tell"], correct:0},
+      {q:"If the avg mass is very close to the lighter isotope's mass, what does that imply?", options:["Lighter isotope is dominant","Heavier isotope is dominant","Equal distribution","More info needed"], correct:0},
+      {q:"An element's avg mass is 100.5u, isotopes at 100u and 102u. Which statement is correct?", options:["100u isotope is ~75% abundant","102u isotope is ~75% abundant","They are 50/50","100u isotope is ~25% abundant"], correct:0},
+      {q:"Can the average atomic mass ever be OUTSIDE the range of isotope masses?", options:["Yes, if there are many isotopes","No, never","Only for radioactive elements","Only for synthetic elements"], correct:1}
+    ]
+  },
+  {
+    id:6, title:"Real elements calculation",
+    instruction:"Calculate the average atomic mass from real isotope data.",
+    rows:[
+      ["1","Carbon: 98.93% \u00b9\u00b2C (12.00u) + 1.07% \u00b9\u00b3C (13.00u). Avg mass?","12.01 / 12.0"],
+      ["2","Nitrogen: 99.63% \u00b9\u2074N (14.00u) + 0.37% \u00b9\u2075N (15.00u). Avg mass?","14.00 / 14.0 / 14"],
+      ["3","Hydrogen: 99.99% \u00b9H (1.008u) + 0.01% \u00b2H (2.014u). Avg mass?","1.008 / 1.01 / 1.0"],
+      ["4","Iron: 91.72% \u2075\u2076Fe (55.93u) + 5.85% \u2075\u2074Fe (53.94u) + 2.12% \u2075\u2077Fe (56.94u) + 0.28% \u2075\u2078Fe (57.93u). Avg?","55.85 / 55.8 / 55.9"],
+      ["5","Uranium: 99.27% \u00b2\u00b3\u2078U (238.05u) + 0.72% \u00b2\u00b3\u2075U (235.04u) + 0.01% \u00b2\u00b3\u2074U (234.04u). Avg?","238.03 / 238.0 / 238"],
+      ["6","Titanium: 73.72% \u2074\u2078Ti (47.95u) + 8.25% \u2074\u2076Ti (45.95u) + 7.44% \u2074\u2077Ti (46.95u) + 5.41% \u2074\u2079Ti (48.95u) + 5.18% \u2075\u2070Ti (49.94u). Avg?","47.87 / 47.9"],
+      ["7","Silver: 51.84% \u00b9\u2070\u2077Ag (106.91u) + 48.16% \u00b9\u2070\u2079Ag (108.91u). Avg?","107.87 / 107.9"],
+      ["8","Gallium: 60.11% \u2076\u2079Ga (68.93u) + 39.89% \u2077\u00b9Ga (70.93u). Avg?","69.72 / 69.7"],
+      ["9","Potassium: 93.26% \u00b3\u2079K (38.96u) + 0.01% \u2074\u2070K (39.96u) + 6.73% \u2074\u00b9K (40.96u). Avg?","39.10 / 39.1"],
+      ["10","Chromium: 83.79% \u2075\u00b2Cr (51.94u) + 9.50% \u2075\u00b3Cr (52.94u) + 4.35% \u2075\u2070Cr (49.95u) + 2.36% \u2075\u2074Cr (53.94u). Avg?","52.00 / 52.0 / 52"],
+      ["11","Antimony: 57.21% \u00b9\u00b2\u00b9Sb (120.90u) + 42.79% \u00b9\u00b2\u00b3Sb (122.90u). Avg?","121.76 / 121.8"],
+      ["12","Rhenium: 37.40% \u00b9\u2078\u2075Re (184.95u) + 62.60% \u00b9\u2078\u2077Re (186.96u). Avg?","186.21 / 186.2"]
+    ]
+  },
+  {
+    id:7, title:"Error analysis", type:"mc",
+    instruction:"A student made an error. Identify what went wrong.",
+    questions:[
+      {q:"Student calculated Cl avg mass as 35.97u (using 50% each). What went wrong?", options:["Used equal abundances instead of actual %","Forgot to multiply","Used wrong masses","Added instead of averaged"], correct:0},
+      {q:"Student got avg mass = 3597u for Cl. What error?", options:["Forgot to divide % by 100","Used wrong isotopes","Subtracted instead of adding","Rounded incorrectly"], correct:0},
+      {q:"Student got 71.94u for Cl avg mass. What happened?", options:["Added the two masses instead of weighting","Used wrong percentages","Forgot an isotope","Used molecular mass"], correct:0},
+      {q:"Student says B avg mass = 10.01u. Given: 19.9% of 10.01u + 80.1% of 11.01u. Error?", options:["Used only the lighter isotope mass","Forgot the heavier isotope","Switched the abundances","No error"], correct:0},
+      {q:"Student calculated: 0.7577 x 34.97 + 0.7577 x 36.97 = 54.50u. Error?", options:["Used same abundance for both isotopes","Added masses directly","Used wrong formula","Multiplied wrong numbers"], correct:0},
+      {q:"Result of 37.45u for Cl (should be 35.45). Student swapped abundances: 24.23% with 34.97u and 75.77% with 36.97u. This is:", options:["Abundance swap error","Arithmetic error","Wrong isotopes","Correct answer"], correct:0},
+      {q:"A student says the avg mass of Li must be 6.5u because it's exactly between 6 and 7. What's wrong?", options:["Equal abundances assumed, but \u2077Li is ~92%","Arithmetic error","Wrong isotopes","Nothing wrong"], correct:0},
+      {q:"Student gets a negative avg mass. The most likely error is:", options:["Subtracted instead of multiplying abundances","Used wrong formula","Wrong element","Imaginary isotope"], correct:0}
+    ]
+  },
+  {
+    id:8, title:"Calculation steps (arrange)", type:"arrange",
+    instruction:"Arrange the steps in the correct order for calculating average atomic mass.",
+    sentences:[
+      {prompt:"Steps to calculate avg atomic mass of Cl:", words:["Convert","percentages","to","decimals","then","multiply","each","mass","by","its","fraction","then","sum"]},
+      {prompt:"For Cl: first step after getting 0.7577 and 0.2423:", words:["Multiply","34.97","x","0.7577","=","26.50","then","add","36.97","x","0.2423","=","8.96"]},
+      {prompt:"To find unknown abundance x given avg mass and two isotope masses:", words:["Set","up","equation:","avg","=","x(mass1)","+"," (1-x)(mass2)","then","solve","for","x"]},
+      {prompt:"Why avg mass falls between isotope masses:", words:["Because","it","is","a","weighted","average","of","values","that","bracket","it"]},
+      {prompt:"Unit of atomic mass used in these calculations:", words:["Atomic","mass","units","abbreviated","u","or","amu"]},
+      {prompt:"When converting result to check: avg mass must be...", words:["Between","the","lightest","and","heaviest","isotope","masses"]}
+    ]
+  },
+  {
+    id:9, title:"Conceptual MC: deeper understanding", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"The periodic table shows 35.45 for Cl. This number is:", options:["Mass of the most common isotope","Average of all isotope masses weighted by abundance","Mass number","Atomic number"], correct:1},
+      {q:"If you could pick ONE Cl atom from a sample, its mass would be:", options:["35.45u exactly","Either 34.97u or 36.97u","Always 35u","Unknown"], correct:1},
+      {q:"An element has mass number 40 on the periodic table. Can you say it has 40 neutrons?", options:["No, mass number is protons + neutrons","No, 40 is the avg mass, not A of one isotope","Yes","Only if Z=0"], correct:1},
+      {q:"Why is carbon's atomic weight 12.01 and not exactly 12.00?", options:["Measurement error","The small contribution of \u00b9\u00b3C (1.07%)","Carbon has 12 protons","It was rounded"], correct:1},
+      {q:"If all chlorine in the universe suddenly became \u00b3\u2075Cl only, the atomic weight would:", options:["Stay 35.45","Become 34.97","Become 36.97","Become 35.00"], correct:1},
+      {q:"Fluorine has only ONE stable isotope (\u00b9\u2079F). Its atomic weight is:", options:["An average of many isotopes","Exactly the mass of \u00b9\u2079F","19.00 exactly","Unknown"], correct:1},
+      {q:"Two elements have the same avg atomic mass. Must they be the same element?", options:["Yes","No, different elements can coincidentally have similar avg masses","Only if they have same Z","Only if they have same isotopes"], correct:1},
+      {q:"Why do we use fractions (not %) directly in the formula?", options:["% would give answers 100x too large","It's just convention","% are inaccurate","Fractions are easier to add"], correct:0},
+      {q:"The atomic mass of Zr on the periodic table is 91.22u. This means:", options:["All Zr atoms weigh 91.22u","The most common isotope has mass 91.22u","The weighted average of all Zr isotopes is 91.22u","Zr has 91 protons"], correct:2},
+      {q:"If an element has three isotopes, you need to know ___ pieces of data to calculate avg mass:", options:["3 (masses only)","6 (3 masses + 3 abundances)","5 (3 masses + 2 abundances, since they sum to 100%)","4"], correct:2}
+    ]
+  },
+  {
+    id:10, title:"Mixed review",
+    instruction:"Fill in the blank with the correct term or value.",
+    rows:[
+      ["1","The atomic weight is always between ___ and ___ isotope masses","lightest / the lightest and heaviest / min and max"],
+      ["2","To convert 75% to a fraction for calculation, divide by ___","100"],
+      ["3","If an element has only ONE stable isotope, its atomic weight equals ___","that isotope's mass / the mass of that isotope / isotope mass"],
+      ["4","Chlorine's atomic weight (35.45) is closer to 35 than 37. This means \u00b3\u2075Cl is ___ abundant","more / more abundant"],
+      ["5","The unit for atomic mass is ___","u / amu / atomic mass unit"],
+      ["6","Avogadro's number of atoms of \u00b9\u00b2C has a mass of exactly ___ grams","12 / 12 g / 12.00"],
+      ["7","The formula for average atomic mass is: sum of (mass_i x ___)","fraction / abundance / fractional abundance"],
+      ["8","If abundances of two isotopes are x and y, then x + y = ___","1 / 100% / 1.00"],
+      ["9","The element with atomic weight closest to a whole number likely has one isotope that is ___ dominant","very / overwhelmingly / highly"],
+      ["10","Bromine's atomic weight (79.90) is almost exactly between 79 and 81. This means its two isotopes have ___ abundance","nearly equal / about equal / similar / roughly equal"],
+      ["11","Average atomic mass is a ___ average, not a simple average","weighted"],
+      ["12","On the periodic table, the number with decimal places under each element is the ___","atomic mass / atomic weight / average atomic mass"],
+      ["13","If Element X has two isotopes at 100u and 104u, and avg = 101u, the 100u isotope is ___% abundant","75"],
+      ["14","If Element Y has two isotopes at 20u and 22u, and avg = 20.8u, the 22u isotope is ___% abundant","40"],
+      ["15","For reverse problems, let x = fraction of isotope 1, then fraction of isotope 2 = ___","1-x / 1 - x"]
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Isotopic Abundance Calculations</h3><p><span class="rule">Master Formula:</span> Atomic weight = \u03A3(mass\u1D62 \u00D7 fraction\u1D62)</p><p style="margin-top:10px"><span class="rule">Step-by-step procedure:</span></p><p>1. Convert each % to a decimal fraction (divide by 100). Example: 75.77% \u2192 0.7577</p><p>2. Multiply each isotope mass \u00D7 its decimal fraction</p><p>3. Sum all the products \u2192 this is the average atomic mass</p><p style="margin-top:10px;background:#1a1a2e;padding:8px;border-left:3px solid #c85028"><span class="rule">Critical check:</span> The result must ALWAYS fall between the lightest and heaviest isotope masses. If it doesn\'t, you made an error.</p><p style="margin-top:10px"><span class="rule">Worked Example 1: Chlorine (2 isotopes)</span></p><table><tr><th>Isotope</th><th>Mass (u)</th><th>Abundance</th><th>Contribution</th></tr><tr><td>\u00b3\u2075Cl</td><td>34.97</td><td>75.77% \u2192 0.7577</td><td>34.97 \u00D7 0.7577 = 26.50</td></tr><tr><td>\u00b3\u2077Cl</td><td>36.97</td><td>24.23% \u2192 0.2423</td><td>36.97 \u00D7 0.2423 = 8.96</td></tr></table><p><span class="rule">Total:</span> 26.50 + 8.96 = <strong>35.45 u</strong> (closer to 35 \u2192 \u00b3\u2075Cl is dominant)</p><p style="margin-top:10px"><span class="rule">Worked Example 2: Silicon (3 isotopes)</span></p><table><tr><th>Isotope</th><th>Mass (u)</th><th>Abundance</th><th>Contribution</th></tr><tr><td>\u00b2\u2078Si</td><td>27.98</td><td>92.23% \u2192 0.9223</td><td>27.98 \u00D7 0.9223 = 25.80</td></tr><tr><td>\u00b2\u2079Si</td><td>28.98</td><td>4.68% \u2192 0.0468</td><td>28.98 \u00D7 0.0468 = 1.36</td></tr><tr><td>\u00b3\u2070Si</td><td>29.97</td><td>3.09% \u2192 0.0309</td><td>29.97 \u00D7 0.0309 = 0.93</td></tr></table><p><span class="rule">Total:</span> 25.80 + 1.36 + 0.93 = <strong>28.09 u</strong></p><p style="margin-top:10px"><span class="rule">Reverse Problem Strategy</span> (find unknown abundance):</p><p>Let x = fraction of isotope 1, then (1 \u2212 x) = fraction of isotope 2.</p><p>Set up: avg = x(mass\u2081) + (1\u2212x)(mass\u2082), solve for x.</p><p>Example: Avg = 10.81u, masses 10.01u and 11.01u. 10.81 = x(10.01) + (1\u2212x)(11.01) \u2192 x = 0.20, so 10.01u is 20%, 11.01u is 80%.</p><p style="margin-top:10px"><span class="rule">Real Element Data Reference</span></p><table><tr><th>Element</th><th>Isotopes</th><th>Abundances</th><th>Avg Mass</th></tr><tr><td>Cl</td><td>\u00b3\u2075Cl, \u00b3\u2077Cl</td><td>75.77%, 24.23%</td><td>35.45</td></tr><tr><td>Cu</td><td>\u2076\u00b3Cu, \u2076\u2075Cu</td><td>69.17%, 30.83%</td><td>63.55</td></tr><tr><td>B</td><td>\u00b9\u2070B, \u00b9\u00b9B</td><td>19.9%, 80.1%</td><td>10.81</td></tr><tr><td>Br</td><td>\u2077\u2079Br, \u2078\u00b9Br</td><td>50.69%, 49.31%</td><td>79.90</td></tr><tr><td>Li</td><td>\u2076Li, \u2077Li</td><td>7.59%, 92.41%</td><td>6.94</td></tr><tr><td>Si</td><td>\u00b2\u2078Si, \u00b2\u2079Si, \u00b3\u2070Si</td><td>92.23%, 4.68%, 3.09%</td><td>28.09</td></tr></table><p style="margin-top:10px"><span class="rule">Quick Check Tips:</span></p><p>\u2022 If avg mass is closer to lighter isotope \u2192 lighter isotope is more abundant</p><p>\u2022 If avg mass is almost exactly between \u2192 nearly 50/50 split (like Br)</p><p>\u2022 If element has only 1 stable isotope (e.g. F, Na, Al) \u2192 avg mass = that isotope\'s mass exactly</p>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 weighted average atomic mass from isotope data \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

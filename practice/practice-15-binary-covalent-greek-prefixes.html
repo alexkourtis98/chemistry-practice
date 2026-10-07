@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Binary Covalent Compounds</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Binary Covalent Compounds</h1>
+<p class="subtitle">Deep practice &mdash; Greek prefixes, nonmetal + nonmetal naming</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_15';
+const SECTIONS = [
+  {
+    id:1, title:"Greek prefixes: number \u2192 prefix",
+    instruction:"Write the Greek prefix for each number.",
+    rows:[
+      ["1","1 = ___","mono"],
+      ["2","2 = ___","di"],
+      ["3","3 = ___","tri"],
+      ["4","4 = ___","tetra"],
+      ["5","5 = ___","penta"],
+      ["6","6 = ___","hexa"],
+      ["7","7 = ___","hepta"],
+      ["8","8 = ___","octa"],
+      ["9","9 = ___","nona"],
+      ["10","10 = ___","deca"]
+    ]
+  },
+  {
+    id:2, title:"Prefix \u2192 number",
+    instruction:"Write the number for each Greek prefix.",
+    rows:[
+      ["1","mono = ___","1"],
+      ["2","di = ___","2"],
+      ["3","tri = ___","3"],
+      ["4","tetra = ___","4"],
+      ["5","penta = ___","5"],
+      ["6","hexa = ___","6"],
+      ["7","hepta = ___","7"],
+      ["8","octa = ___","8"],
+      ["9","nona = ___","9"],
+      ["10","deca = ___","10"]
+    ]
+  },
+  {
+    id:3, title:"Name \u2192 Formula",
+    instruction:"Write the chemical formula for each compound name.",
+    rows:[
+      ["1","Carbon dioxide","CO2 / CO\u2082"],
+      ["2","Dinitrogen pentoxide","N2O5 / N\u2082O\u2085"],
+      ["3","Phosphorus pentachloride","PCl5 / PCl\u2085"],
+      ["4","Sulfur trioxide","SO3 / SO\u2083"],
+      ["5","Carbon monoxide","CO"],
+      ["6","Dinitrogen monoxide","N2O / N\u2082O"],
+      ["7","Silicon dioxide","SiO2 / SiO\u2082"],
+      ["8","Phosphorus trichloride","PCl3 / PCl\u2083"],
+      ["9","Diphosphorus pentoxide","P2O5 / P\u2082O\u2085"],
+      ["10","Dichlorine heptoxide","Cl2O7 / Cl\u2082O\u2087"],
+      ["11","Sulfur hexafluoride","SF6 / SF\u2086"],
+      ["12","Nitrogen trifluoride","NF3 / NF\u2083"],
+      ["13","Xenon tetrafluoride","XeF4 / XeF\u2084"],
+      ["14","Iodine pentafluoride","IF5 / IF\u2085"],
+      ["15","Diboron trioxide","B2O3 / B\u2082O\u2083"],
+      ["16","Carbon tetrachloride","CCl4 / CCl\u2084"],
+      ["17","Dinitrogen trioxide","N2O3 / N\u2082O\u2083"],
+      ["18","Tetraphosphorus decoxide","P4O10 / P\u2084O\u2081\u2080"],
+      ["19","Xenon difluoride","XeF2 / XeF\u2082"],
+      ["20","Sulfur dichloride","SCl2 / SCl\u2082"]
+    ]
+  },
+  {
+    id:4, title:"Formula \u2192 Name",
+    instruction:"Write the systematic name for each formula.",
+    rows:[
+      ["1","CO\u2082","carbon dioxide"],
+      ["2","N\u2082O\u2085","dinitrogen pentoxide / dinitrogen pentaoxide"],
+      ["3","SO\u2082","sulfur dioxide"],
+      ["4","CCl\u2084","carbon tetrachloride"],
+      ["5","P\u2084O\u2081\u2080","tetraphosphorus decoxide / tetraphosphorus decaoxide"],
+      ["6","NO\u2082","nitrogen dioxide"],
+      ["7","N\u2082O\u2083","dinitrogen trioxide"],
+      ["8","SF\u2086","sulfur hexafluoride"],
+      ["9","CO","carbon monoxide"],
+      ["10","N\u2082O","dinitrogen monoxide / dinitrogen oxide"],
+      ["11","PCl\u2085","phosphorus pentachloride"],
+      ["12","IF\u2087","iodine heptafluoride"],
+      ["13","Cl\u2082O\u2087","dichlorine heptoxide"],
+      ["14","BrF\u2083","bromine trifluoride"],
+      ["15","As\u2082O\u2083","diarsenic trioxide"],
+      ["16","XeF\u2082","xenon difluoride"],
+      ["17","IF\u2085","iodine pentafluoride"],
+      ["18","NF\u2083","nitrogen trifluoride"],
+      ["19","B\u2082O\u2083","diboron trioxide"],
+      ["20","SiO\u2082","silicon dioxide"]
+    ]
+  },
+  {
+    id:5, title:"Drop mono for first element", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"CO is named:", options:["Monocarbon monoxide","Carbon monoxide","Carbon oxide","Monocarbon oxide"], correct:1},
+      {q:"NO\u2082 is named:", options:["Mononitrogen dioxide","Nitrogen dioxide","Nitrogen dioxygen","Dinitrogen oxide"], correct:1},
+      {q:"SO\u2083 is named:", options:["Monosulfur trioxide","Sulfur trioxide","Sulfur trioxygen","Trisulfur oxide"], correct:1},
+      {q:"When do we use 'mono-'?", options:["For the first element always","Only for the second element","Never","For both elements"], correct:1},
+      {q:"PCl\u2085 is named:", options:["Monophosphorus pentachloride","Phosphorus pentachloride","Penta phosphorus chloride","Phosphoride pentachlorine"], correct:1},
+      {q:"N\u2082O\u2084 is named:", options:["Nitrogen tetroxide","Dinitrogen tetroxide","Dinitrogen tetraoxide","Nitrogen quad oxide"], correct:1},
+      {q:"BrF\u2083 is named:", options:["Monobromine trifluoride","Bromine trifluoride","Tribromine fluoride","Fluorine tribromide"], correct:1},
+      {q:"Which name is INCORRECT?", options:["Carbon dioxide","Monosulfur dioxide","Nitrogen trichloride","Phosphorus pentafluoride"], correct:1},
+      {q:"SiO\u2082 is named:", options:["Monosilicon dioxide","Silicon dioxide","Disilicon oxide","Silicon dioxy"], correct:1},
+      {q:"Why don't we say 'monocarbon dioxide'?", options:["Carbon is a metal","Mono is never used","Mono is dropped for the first element","It sounds wrong"], correct:2}
+    ]
+  },
+  {
+    id:6, title:"Vowel drop rules", type:"mc",
+    instruction:"Select the correct answer about prefix vowel dropping.",
+    questions:[
+      {q:"mono + oxide = ?", options:["monooxide","monoxide","monxide","monoide"], correct:1},
+      {q:"tetra + oxide = ?", options:["tetraoxide","tetroxide","tetrxide","Both A and B are acceptable"], correct:3},
+      {q:"penta + oxide = ?", options:["pentaoxide","pentoxide","Both A and B are acceptable","pentxide"], correct:2},
+      {q:"hexa + oxide = ?", options:["hexoxide","hexaoxide","Both are acceptable","hexooxide"], correct:0},
+      {q:"di + oxide = ?", options:["diide","dioxide","doxide","Both B and C"], correct:1},
+      {q:"The vowel drop rule applies when:", options:["The prefix ends in 'a' or 'o' and the element name starts with a vowel","Always","Never for 'di'","Only for 'mono'"], correct:0},
+      {q:"hepta + oxide = ?", options:["heptoxide","heptaoxide","Both are acceptable","heptxide"], correct:0},
+      {q:"nona + oxide = ?", options:["nonoxide","nonaoxide","Both are acceptable","nonxide"], correct:0}
+    ]
+  },
+  {
+    id:7, title:"Ionic vs Covalent identification", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"NaCl is:", options:["Ionic","Covalent","Both","Neither"], correct:0},
+      {q:"CO\u2082 is:", options:["Ionic","Covalent","Both","Neither"], correct:1},
+      {q:"H\u2082O is:", options:["Ionic","Covalent","Both","Neither"], correct:1},
+      {q:"CaCl\u2082 is:", options:["Ionic","Covalent","Both","Neither"], correct:0},
+      {q:"SO\u2083 is:", options:["Ionic","Covalent","Both","Neither"], correct:1},
+      {q:"MgO is:", options:["Ionic","Covalent","Both","Neither"], correct:0},
+      {q:"How to identify: metal + nonmetal =", options:["Covalent","Ionic","Neither","Both possible"], correct:1},
+      {q:"How to identify: nonmetal + nonmetal =", options:["Ionic","Covalent","Neither","Metallic"], correct:1},
+      {q:"PCl\u2085 is:", options:["Ionic","Covalent","Both","Metallic"], correct:1},
+      {q:"K\u2082O is:", options:["Ionic","Covalent","Both","Neither"], correct:0},
+      {q:"SF\u2086 is:", options:["Ionic","Covalent","Metallic","Neither"], correct:1},
+      {q:"FeCl\u2083 is:", options:["Ionic","Covalent","Both","Neither"], correct:0},
+      {q:"N\u2082O\u2084 is:", options:["Ionic","Covalent","Both","Metallic"], correct:1},
+      {q:"Al\u2082O\u2083 is:", options:["Ionic","Covalent","Metallic","Neither"], correct:0},
+      {q:"Do we use Greek prefixes for ionic compounds?", options:["Yes, always","No, only for covalent","Sometimes","Only for metals"], correct:1}
+    ]
+  },
+  {
+    id:8, title:"Build compound names (arrange)", type:"arrange",
+    instruction:"Arrange the parts to build the correct compound name.",
+    sentences:[
+      {prompt:"Name for CO\u2082:", words:["carbon","dioxide"]},
+      {prompt:"Name for N\u2082O\u2085:", words:["dinitrogen","pentoxide"]},
+      {prompt:"Name for PCl\u2083:", words:["phosphorus","trichloride"]},
+      {prompt:"Name for SF\u2086:", words:["sulfur","hexafluoride"]},
+      {prompt:"Name for P\u2084O\u2081\u2080:", words:["tetraphosphorus","decoxide"]},
+      {prompt:"Name for Cl\u2082O\u2087:", words:["dichlorine","heptoxide"]},
+      {prompt:"Name for IF\u2085:", words:["iodine","pentafluoride"]},
+      {prompt:"Name for XeF\u2084:", words:["xenon","tetrafluoride"]},
+      {prompt:"Name for As\u2082O\u2083:", words:["diarsenic","trioxide"]},
+      {prompt:"The rule for the first element:", words:["never","use","mono","for","the","first","element"]}
+    ]
+  },
+  {
+    id:9, title:"More Formula \u2192 Name",
+    instruction:"Write the systematic name.",
+    rows:[
+      ["1","ClF\u2083","chlorine trifluoride"],
+      ["2","BrF\u2085","bromine pentafluoride"],
+      ["3","SCl\u2082","sulfur dichloride"],
+      ["4","CS\u2082","carbon disulfide"],
+      ["5","S\u2082Cl\u2082","disulfur dichloride"],
+      ["6","NO","nitrogen monoxide"],
+      ["7","N\u2082O\u2084","dinitrogen tetroxide / dinitrogen tetraoxide"],
+      ["8","P\u2082O\u2083","diphosphorus trioxide"],
+      ["9","SeF\u2086","selenium hexafluoride"],
+      ["10","OF\u2082","oxygen difluoride"],
+      ["11","Cl\u2082O","dichlorine monoxide / dichlorine oxide"],
+      ["12","ICl","iodine monochloride / iodine chloride"],
+      ["13","IBr","iodine monobromide / iodine bromide"],
+      ["14","XeF\u2086","xenon hexafluoride"],
+      ["15","TeF\u2086","tellurium hexafluoride"]
+    ]
+  },
+  {
+    id:10, title:"More Name \u2192 Formula",
+    instruction:"Write the chemical formula.",
+    rows:[
+      ["1","Chlorine trifluoride","ClF3 / ClF\u2083"],
+      ["2","Bromine pentafluoride","BrF5 / BrF\u2085"],
+      ["3","Carbon disulfide","CS2 / CS\u2082"],
+      ["4","Disulfur dichloride","S2Cl2 / S\u2082Cl\u2082"],
+      ["5","Nitrogen monoxide","NO"],
+      ["6","Dinitrogen tetroxide","N2O4 / N\u2082O\u2084"],
+      ["7","Selenium hexafluoride","SeF6 / SeF\u2086"],
+      ["8","Oxygen difluoride","OF2 / OF\u2082"],
+      ["9","Dichlorine monoxide","Cl2O / Cl\u2082O"],
+      ["10","Iodine monochloride","ICl"],
+      ["11","Xenon hexafluoride","XeF6 / XeF\u2086"],
+      ["12","Tellurium hexafluoride","TeF6 / TeF\u2086"],
+      ["13","Arsenic trifluoride","AsF3 / AsF\u2083"],
+      ["14","Diphosphorus trioxide","P2O3 / P\u2082O\u2083"],
+      ["15","Sulfur tetrafluoride","SF4 / SF\u2084"]
+    ]
+  },
+  {
+    id:11, title:"Tricky cases & common names",
+    instruction:"Fill in the correct answer.",
+    rows:[
+      ["1","N\u2082O: common name is 'laughing gas'. Systematic name?","dinitrogen monoxide / dinitrogen oxide"],
+      ["2","CO: common name is ___","carbon monoxide"],
+      ["3","Is H\u2082O named 'dihydrogen monoxide'? In practice we call it ___","water"],
+      ["4","The prefix for 4 is tetra, but before 'oxide' we keep 'tetra' \u2192 tetr___","tetroxide / tetraoxide"],
+      ["5","We drop the trailing 'a' from penta before -oxide: pent___","pentoxide / pentaoxide"],
+      ["6","Mono + oxide = ___","monoxide"],
+      ["7","NH\u2083 is commonly called ___","ammonia"],
+      ["8","CH\u2084 is commonly called ___","methane"],
+      ["9","The -ide ending on the second element means we changed the ending to ___","-ide / ide"],
+      ["10","Chlorine \u2192 chlor___ when it's the second element","-ide / chloride"],
+      ["11","Oxygen \u2192 ox___ when it's the second element","-ide / oxide"],
+      ["12","Fluorine \u2192 fluor___ when it's the second element","-ide / fluoride"],
+      ["13","Sulfur \u2192 sulf___ when it's the second element","-ide / sulfide"],
+      ["14","Nitrogen \u2192 nitr___ when it's the second element","-ide / nitride"],
+      ["15","Bromine \u2192 brom___ when it's the second element","-ide / bromide"]
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/\u03AC/g,'\u03B1').replace(/\u03AD/g,'\u03B5').replace(/\u03AE/g,'\u03B7').replace(/\u03AF/g,'\u03B9')
+       .replace(/\u03CC/g,'\u03BF').replace(/\u03CD/g,'\u03C5').replace(/\u03CE/g,'\u03C9').replace(/\u0390/g,'\u03B9').replace(/\u03B0/g,'\u03C5');
+  s = s.replace(/\u2080/g,'0').replace(/\u2081/g,'1').replace(/\u2082/g,'2').replace(/\u2083/g,'3').replace(/\u2084/g,'4')
+       .replace(/\u2085/g,'5').replace(/\u2086/g,'6').replace(/\u2087/g,'7').replace(/\u2088/g,'8').replace(/\u2089/g,'9');
+  s = s.replace(/\u207A/g,'+').replace(/\u207B/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Binary Covalent Compounds - Complete Guide</h3><p><span class="rule">WHAT ARE BINARY COVALENT COMPOUNDS?</span></p><p><strong>Binary covalent</strong> = two different <strong>nonmetals</strong> bonded together by sharing electrons.</p><p>Key identification: <strong>nonmetal + nonmetal = covalent = use Greek prefixes</strong></p><p style="margin-top:10px"><span class="rule">IONIC VS COVALENT IDENTIFICATION</span></p><table><tr><th>Check</th><th>Compound Type</th><th>Naming Method</th></tr><tr><td>Metal + Nonmetal</td><td>Ionic</td><td>No prefixes, use ion charges</td></tr><tr><td>Nonmetal + Nonmetal</td><td>Covalent</td><td>Greek prefixes</td></tr><tr><td>Metal + Polyatomic ion</td><td>Ionic</td><td>Name the polyatomic ion</td></tr><tr><td>H + Nonmetal/polyatomic (aq)</td><td>Acid</td><td>Acid naming rules</td></tr></table><p style="margin-top:10px"><span class="rule">COMPLETE GREEK PREFIX TABLE</span></p><table><tr><th>#</th><th>Prefix</th><th>Example</th></tr><tr><td>1</td><td>mono-</td><td>CO = carbon <strong>mon</strong>oxide</td></tr><tr><td>2</td><td>di-</td><td>CO\u2082 = carbon <strong>di</strong>oxide</td></tr><tr><td>3</td><td>tri-</td><td>SO\u2083 = sulfur <strong>tri</strong>oxide</td></tr><tr><td>4</td><td>tetra-</td><td>CCl\u2084 = carbon <strong>tetra</strong>chloride</td></tr><tr><td>5</td><td>penta-</td><td>PCl\u2085 = phosphorus <strong>penta</strong>chloride</td></tr><tr><td>6</td><td>hexa-</td><td>SF\u2086 = sulfur <strong>hexa</strong>fluoride</td></tr><tr><td>7</td><td>hepta-</td><td>Cl\u2082O\u2087 = dichlorine <strong>hept</strong>oxide</td></tr><tr><td>8</td><td>octa-</td><td>N\u2082O\u2088 = dinitrogen <strong>oct</strong>oxide</td></tr><tr><td>9</td><td>nona-</td><td>S\u2084N\u2089 (theoretical)</td></tr><tr><td>10</td><td>deca-</td><td>P\u2084O\u2081\u2080 = tetraphosphorus <strong>dec</strong>oxide</td></tr></table><p style="margin-top:10px"><span class="rule">THREE NAMING RULES</span></p><p><span class="rule">Rule 1: DROP \"mono-\" for the first element.</span></p><p>CO = carbon monoxide (NOT monocarbon monoxide)</p><p>NO\u2082 = nitrogen dioxide (NOT mononitrogen dioxide)</p><p><span class="rule">Rule 2: Second element always gets \"-ide\" ending.</span></p><p>oxygen \u2192 oxide, chlorine \u2192 chloride, fluorine \u2192 fluoride, sulfur \u2192 sulfide</p><p>nitrogen \u2192 nitride, bromine \u2192 bromide, iodine \u2192 iodide</p><p><span class="rule">Rule 3: VOWEL-DROP RULE</span></p><p>When a prefix ending in \"a\" or \"o\" meets an element name starting with \"a\" or \"o\", drop the trailing vowel of the prefix:</p><p>\u2022 mono + oxide = mon<strong>oxide</strong> (drop the \"o\")</p><p>\u2022 penta + oxide = pent<strong>oxide</strong> (drop the \"a\")</p><p>\u2022 hexa + oxide = hex<strong>oxide</strong> (drop the \"a\")</p><p>\u2022 hepta + oxide = hept<strong>oxide</strong> (drop the \"a\")</p><p>\u2022 di + oxide = di<strong>oxide</strong> (\"i\" + \"o\" = no drop needed)</p><p>Note: tetra + oxide can be \"tetroxide\" or \"tetraoxide\" (both accepted).</p><p style="margin-top:10px"><span class="rule">WORKED EXAMPLES</span></p><table><tr><th>Formula</th><th>Name</th><th>Logic</th></tr><tr><td>CO\u2082</td><td>carbon dioxide</td><td>1C (drop mono) + 2O (di+oxide)</td></tr><tr><td>N\u2082O\u2085</td><td>dinitrogen pentoxide</td><td>2N (di) + 5O (penta+oxide\u2192pentoxide)</td></tr><tr><td>PCl\u2085</td><td>phosphorus pentachloride</td><td>1P (drop mono) + 5Cl (penta+chloride)</td></tr><tr><td>SF\u2086</td><td>sulfur hexafluoride</td><td>1S (drop mono) + 6F (hexa+fluoride)</td></tr><tr><td>N\u2082O</td><td>dinitrogen monoxide</td><td>2N (di) + 1O (mono+oxide\u2192monoxide)</td></tr><tr><td>Cl\u2082O\u2087</td><td>dichlorine heptoxide</td><td>2Cl (di) + 7O (hepta+oxide\u2192heptoxide)</td></tr><tr><td>P\u2084O\u2081\u2080</td><td>tetraphosphorus decoxide</td><td>4P (tetra) + 10O (deca+oxide\u2192decoxide)</td></tr><tr><td>IF\u2085</td><td>iodine pentafluoride</td><td>1I (drop mono) + 5F (penta+fluoride)</td></tr><tr><td>XeF\u2084</td><td>xenon tetrafluoride</td><td>1Xe (drop mono) + 4F (tetra+fluoride)</td></tr><tr><td>CS\u2082</td><td>carbon disulfide</td><td>1C (drop mono) + 2S (di+sulfide)</td></tr></table><p style="margin-top:10px"><span class="rule">Common Names vs Systematic:</span> H\u2082O = water (not dihydrogen monoxide), NH\u2083 = ammonia, CH\u2084 = methane, N\u2082O = laughing gas</p>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 Greek prefixes, nonmetal + nonmetal naming \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

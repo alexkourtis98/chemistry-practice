@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice 53 — Solubility Equilibrium (Ksp)</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Practice 53 &mdash; Solubility Equilibrium (Ksp)</h1>
+<p class="subtitle">Deep practice &mdash; solubility product, molar solubility, common ion effect, precipitation</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_53';
+const SECTIONS = [
+  {
+    id:1, title:"Ksp Expressions",
+    instruction:"Write the Ksp expression for each compound. Use brackets and exponents (e.g. [Ag+]^2[CO3 2-]).",
+    rows:[
+      ["1","AgCl(s) \u21CC Ag\u207A(aq) + Cl\u207B(aq). Ksp = ___","[Ag+][Cl-]"],
+      ["2","BaSO\u2084(s) \u21CC Ba\u00B2\u207A(aq) + SO\u2084\u00B2\u207B(aq). Ksp = ___","[Ba2+][SO42-]"],
+      ["3","PbCl\u2082(s) \u21CC Pb\u00B2\u207A(aq) + 2Cl\u207B(aq). Ksp = ___","[Pb2+][Cl-]^2"],
+      ["4","Ca\u2083(PO\u2084)\u2082(s) \u21CC 3Ca\u00B2\u207A(aq) + 2PO\u2084\u00B3\u207B(aq). Ksp = ___","[Ca2+]^3[PO43-]^2"],
+      ["5","Ag\u2082CrO\u2084(s) \u21CC 2Ag\u207A(aq) + CrO\u2084\u00B2\u207B(aq). Ksp = ___","[Ag+]^2[CrO42-]"],
+      ["6","Fe(OH)\u2083(s) \u21CC Fe\u00B3\u207A(aq) + 3OH\u207B(aq). Ksp = ___","[Fe3+][OH-]^3"],
+      ["7","CaF\u2082(s) \u21CC Ca\u00B2\u207A(aq) + 2F\u207B(aq). Ksp = ___","[Ca2+][F-]^2"],
+      ["8","Solids and pure liquids are ___ from the Ksp expression","excluded / omitted / not included"],
+      ["9","PbSO\u2084(s) \u21CC Pb\u00B2\u207A(aq) + SO\u2084\u00B2\u207B(aq). Ksp = ___","[Pb2+][SO42-]"],
+      ["10","Mg(OH)\u2082(s) \u21CC Mg\u00B2\u207A(aq) + 2OH\u207B(aq). Ksp = ___","[Mg2+][OH-]^2"],
+      ["11","Al(OH)\u2083(s) \u21CC Al\u00B3\u207A(aq) + 3OH\u207B(aq). Ksp = ___","[Al3+][OH-]^3"],
+      ["12","Ag\u2082S(s) \u21CC 2Ag\u207A(aq) + S\u00B2\u207B(aq). Ksp = ___","[Ag+]^2[S2-]"],
+      ["13","SrCO\u2083(s) \u21CC Sr\u00B2\u207A(aq) + CO\u2083\u00B2\u207B(aq). Ksp = ___","[Sr2+][CO32-]"],
+      ["14","PbI\u2082(s) \u21CC Pb\u00B2\u207A(aq) + 2I\u207B(aq). Ksp = ___","[Pb2+][I-]^2"],
+      ["15","Cu(OH)\u2082(s) \u21CC Cu\u00B2\u207A(aq) + 2OH\u207B(aq). Ksp = ___","[Cu2+][OH-]^2"],
+      ["16","Bi\u2082S\u2083(s) \u21CC 2Bi\u00B3\u207A(aq) + 3S\u00B2\u207B(aq). Ksp = ___","[Bi3+]^2[S2-]^3"],
+      ["17","AgBr(s) \u21CC Ag\u207A(aq) + Br\u207B(aq). Ksp = ___","[Ag+][Br-]"],
+      ["18","BaCO\u2083(s) \u21CC Ba\u00B2\u207A(aq) + CO\u2083\u00B2\u207B(aq). Ksp = ___","[Ba2+][CO32-]"]
+    ]
+  },
+  {
+    id:2, title:"Molar Solubility from Ksp",
+    instruction:"Calculate molar solubility (s) from the given Ksp. Show the relationship.",
+    rows:[
+      ["1","For AgCl, Ksp = [Ag\u207A][Cl\u207B] = s\u00B2. If Ksp = 1.8 \u00D7 10\u207B\u00B9\u2070, s = ___","1.3 x 10^-5 / 1.34 x 10^-5"],
+      ["2","For BaSO\u2084, Ksp = s\u00B2. If Ksp = 1.1 \u00D7 10\u207B\u00B9\u2070, s = ___","1.0 x 10^-5 / 1.05 x 10^-5"],
+      ["3","For PbCl\u2082: Ksp = (s)(2s)\u00B2 = ___s\u00B3","4"],
+      ["4","For PbCl\u2082, Ksp = 1.7 \u00D7 10\u207B\u2075. s = \u00B3\u221A(Ksp/4) = ___","0.016 / 1.6 x 10^-2"],
+      ["5","For CaF\u2082: Ksp = (s)(2s)\u00B2 = ___s\u00B3","4"],
+      ["6","For Ag\u2082CrO\u2084: Ksp = (2s)\u00B2(s) = ___s\u00B3","4"],
+      ["7","For Ca\u2083(PO\u2084)\u2082: Ksp = (3s)\u00B3(2s)\u00B2 = ___s\u2075","108"],
+      ["8","Higher Ksp means ___ solubility (for same type of salt)","greater / higher / more"],
+      ["9","AgBr: Ksp = 5.0 \u00D7 10\u207B\u00B9\u00B3. s = ___","7.1 x 10^-7"],
+      ["10","PbI\u2082: Ksp = 8.5 \u00D7 10\u207B\u2079. Ksp = 4s\u00B3. s = ___","1.3 x 10^-3"],
+      ["11","Mg(OH)\u2082: Ksp = 5.6 \u00D7 10\u207B\u00B9\u00B2. Ksp = 4s\u00B3. s = ___","1.1 x 10^-4"],
+      ["12","Fe(OH)\u2083: Ksp = 2.8 \u00D7 10\u207B\u00B3\u2079. Ksp = 27s\u2074. s = ___","9.9 x 10^-11 / 1.0 x 10^-10"],
+      ["13","For Fe(OH)\u2083: Ksp = (s)(3s)\u00B3 = ___s\u2074","27"],
+      ["14","For Bi\u2082S\u2083: Ksp = (2s)\u00B2(3s)\u00B3 = ___s\u2075","108"],
+      ["15","SrSO\u2084: Ksp = 3.4 \u00D7 10\u207B\u2077. s = ___","5.8 x 10^-4 / 5.83 x 10^-4"]
+    ]
+  },
+  {
+    id:3, title:"Ksp from Molar Solubility",
+    instruction:"Calculate Ksp from the given molar solubility.",
+    rows:[
+      ["1","AgBr has s = 7.1 \u00D7 10\u207B\u2077 M. Ksp = s\u00B2 = ___","5.0 x 10^-13 / 5.04 x 10^-13"],
+      ["2","CaSO\u2084 has s = 4.9 \u00D7 10\u207B\u00B3 M. Ksp = s\u00B2 = ___","2.4 x 10^-5"],
+      ["3","PbI\u2082 has s = 1.3 \u00D7 10\u207B\u00B3 M. Ksp = 4s\u00B3 = ___","8.8 x 10^-9 / 8.79 x 10^-9"],
+      ["4","Mg(OH)\u2082 has s = 1.6 \u00D7 10\u207B\u2074 M. Ksp = 4s\u00B3 = ___","1.6 x 10^-11 / 1.64 x 10^-11"],
+      ["5","If 0.0015 g of BaSO\u2084 dissolves in 1.0 L, the molar solubility is ___ M (M = 233 g/mol)","6.4 x 10^-6 / 6.44 x 10^-6"],
+      ["6","From the above, Ksp of BaSO\u2084 = ___","4.1 x 10^-11 / 4.15 x 10^-11"],
+      ["7","CaF\u2082 has s = 2.1 \u00D7 10\u207B\u2074 M. [Ca\u00B2\u207A] = s = 2.1\u00D710\u207B\u2074, [F\u207B] = ___ M","4.2 x 10^-4"],
+      ["8","From Q7: Ksp = (2.1\u00D710\u207B\u2074)(4.2\u00D710\u207B\u2074)\u00B2 = ___","3.7 x 10^-11"],
+      ["9","Ag\u2082CrO\u2084 has s = 6.5 \u00D7 10\u207B\u2075 M. [Ag\u207A] = ___ M","1.3 x 10^-4"],
+      ["10","From Q9: [CrO\u2084\u00B2\u207B] = ___ M","6.5 x 10^-5"],
+      ["11","From Q9-10: Ksp = ___","1.1 x 10^-12"],
+      ["12","0.009 g of SrCO\u2083 (M=148) dissolves in 1.0 L. s = ___ M","6.1 x 10^-5 / 6.08 x 10^-5"],
+      ["13","From Q12: Ksp = ___","3.7 x 10^-9"]
+    ]
+  },
+  {
+    id:4, title:"Common Ion Effect",
+    instruction:"Calculate solubility in the presence of a common ion.",
+    rows:[
+      ["1","The common ion effect ___ the solubility of a sparingly soluble salt","decreases / reduces / lowers"],
+      ["2","AgCl in pure water: s = 1.3 \u00D7 10\u207B\u2075 M. In 0.10 M NaCl, s is ___","smaller / less / lower"],
+      ["3","AgCl (Ksp = 1.8 \u00D7 10\u207B\u00B9\u2070) in 0.10 M NaCl: Ksp = s(0.10 + s) \u2248 s(0.10). s = ___","1.8 x 10^-9"],
+      ["4","PbCl\u2082 (Ksp = 1.7 \u00D7 10\u207B\u2075) in 0.20 M KCl: Ksp = s(0.20)\u00B2. s = ___","4.25 x 10^-4 / 4.3 x 10^-4"],
+      ["5","CaF\u2082 in 0.10 M NaF: the common ion is ___","F- / fluoride"],
+      ["6","CaF\u2082 (Ksp = 3.9 \u00D7 10\u207B\u00B9\u00B9) in 0.10 M NaF: Ksp = s(0.10)\u00B2. s = ___","3.9 x 10^-9"],
+      ["7","Le Chatelier's principle explains the common ion effect: adding a product shifts equilibrium to the ___","left / reactant side"],
+      ["8","Adding AgNO\u2083 to a saturated AgCl solution will cause AgCl to ___","precipitate / come out of solution"],
+      ["9","AgBr (Ksp = 5.0\u00D710\u207B\u00B9\u00B3) in 0.050 M KBr: s = Ksp/[Br\u207B] = ___","1.0 x 10^-11"],
+      ["10","BaSO\u2084 (Ksp = 1.1\u00D710\u207B\u00B9\u2070) in 0.050 M Na\u2082SO\u2084: s = ___","2.2 x 10^-9"],
+      ["11","PbI\u2082 (Ksp = 8.5\u00D710\u207B\u2079) in 0.10 M KI: Ksp = s(0.10)\u00B2. s = ___","8.5 x 10^-7"],
+      ["12","Mg(OH)\u2082 (Ksp = 5.6\u00D710\u207B\u00B9\u00B2) in 0.01 M NaOH: Ksp = s(0.01)\u00B2. s = ___","5.6 x 10^-8"],
+      ["13","Comparing PbCl\u2082 solubility: pure water s = 0.016 M, in 0.20 M KCl s = 4.3\u00D710\u207B\u2074 M. The ratio is about ___","37 / 37x"],
+      ["14","Adding a non-common ion (like NaNO\u2083) has ___ effect on solubility (via ionic strength)","a small / slight / minor"]
+    ]
+  },
+  {
+    id:5, title:"Predicting Precipitation (Q vs Ksp)", type:"mc",
+    instruction:"Select the correct answer about predicting precipitation using Q vs Ksp.",
+    questions:[
+      {q:"If Q > Ksp, the solution is:", options:["Unsaturated","Saturated","Supersaturated, precipitation occurs","At equilibrium"], correct:2},
+      {q:"If Q < Ksp, the solution is:", options:["Unsaturated, no precipitate","Saturated","Supersaturated","At equilibrium"], correct:0},
+      {q:"If Q = Ksp, the solution is:", options:["Unsaturated","Supersaturated","Saturated, at equilibrium","Cannot determine"], correct:2},
+      {q:"Mix 50 mL of 0.002 M AgNO\u2083 + 50 mL of 0.002 M NaCl. [Ag\u207A] after mixing = ?", options:["0.002 M","0.001 M","0.004 M","0.0005 M"], correct:1},
+      {q:"From above: Q = (0.001)(0.001) = 10\u207B\u2076. Ksp(AgCl) = 1.8\u00D710\u207B\u00B9\u2070. Will AgCl precipitate?", options:["No, Q < Ksp","Yes, Q > Ksp","Cannot determine","They are equal"], correct:1},
+      {q:"To prevent precipitation, you should:", options:["Add more of the common ion","Dilute the solution","Heat the solution (if exothermic dissolution)","Both B and C can help"], correct:3},
+      {q:"Mix 100 mL of 0.01 M BaCl\u2082 + 100 mL of 0.01 M Na\u2082SO\u2084. [Ba\u00B2\u207A] = 0.005 M, [SO\u2084\u00B2\u207B] = 0.005 M. Q =", options:["2.5\u00D710\u207B\u2074","2.5\u00D710\u207B\u2075","5.0\u00D710\u207B\u2075","1.0\u00D710\u207B\u2074"], correct:1},
+      {q:"From above, Ksp(BaSO\u2084) = 1.1\u00D710\u207B\u00B9\u2070. Since Q >> Ksp:", options:["No precipitate","BaSO\u2084 precipitates","Na\u2082SO\u2084 precipitates","BaCl\u2082 precipitates"], correct:1},
+      {q:"Mix 10 mL of 1\u00D710\u207B\u2075 M AgNO\u2083 + 10 mL of 1\u00D710\u207B\u2075 M NaCl. Q = (5\u00D710\u207B\u2076)\u00B2 = 2.5\u00D710\u207B\u00B9\u00B9. Will AgCl ppt?", options:["Yes, Q > Ksp","No, Q < Ksp (1.8\u00D710\u207B\u00B9\u2070)","At equilibrium","Cannot determine"], correct:1},
+      {q:"Q is calculated the same way as Ksp but using ___ concentrations:", options:["Equilibrium","Initial (before equilibrium)","Standard","Ideal"], correct:1}
+    ]
+  },
+  {
+    id:6, title:"Selective Precipitation & pH Effects", type:"mc",
+    instruction:"Select the correct answer about selective precipitation and pH effects on solubility.",
+    questions:[
+      {q:"Selective precipitation separates ions by adding a reagent that precipitates ___ ion first:", options:["The more soluble","The less soluble","Both equally","The larger ion"], correct:1},
+      {q:"A solution has Cl\u207B and I\u207B. AgI (Ksp = 8.5\u00D710\u207B\u00B9\u2077) precipitates before AgCl (Ksp = 1.8\u00D710\u207B\u00B9\u2070) because:", options:["AgI has higher Ksp","AgI has lower Ksp (less soluble)","I\u207B is larger","Cl\u207B is more electronegative"], correct:1},
+      {q:"To separate Ba\u00B2\u207A from Ca\u00B2\u207A, add SO\u2084\u00B2\u207B. BaSO\u2084 (Ksp = 1.1\u00D710\u207B\u00B9\u2070) precipitates first because:", options:["It has higher Ksp","It has lower Ksp than CaSO\u2084","Ba\u00B2\u207A is heavier","Ca\u00B2\u207A is smaller"], correct:1},
+      {q:"In qualitative analysis, Group 1 cations precipitate as:", options:["Hydroxides","Sulfides","Chlorides (with HCl)","Carbonates"], correct:2},
+      {q:"The ion that precipitates first is the one where [reagent] needed to start precipitation is:", options:["Highest","Lowest","Equal for all","Cannot predict"], correct:1},
+      {q:"After the less soluble salt precipitates, the filtrate contains:", options:["Both ions","Only the more soluble ion","Only the precipitated ion","Pure water"], correct:1},
+      {q:"Lowering pH increases solubility of salts with ___ anions:", options:["Neutral","Basic (OH\u207B, CO\u2083\u00B2\u207B, S\u00B2\u207B, PO\u2084\u00B3\u207B)","Acidic","All anions equally"], correct:1},
+      {q:"CaCO\u2083 is more soluble in acid because H\u207A reacts with CO\u2083\u00B2\u207B to form:", options:["CaO","CO\u2082 and H\u2082O","CaCl\u2082","Ca(OH)\u2082"], correct:1},
+      {q:"Fe(OH)\u2083 dissolves in acid because:", options:["Fe\u00B3\u207A is reduced","OH\u207B is neutralized by H\u207A","The salt melts","Fe forms a complex"], correct:1},
+      {q:"AgCl dissolves in NH\u2083 because Ag\u207A forms:", options:["AgOH","Ag(NH\u2083)\u2082\u207A (a complex ion)","AgN","Ag\u2082O"], correct:1},
+      {q:"Complex ion formation ___ the solubility of the salt:", options:["Decreases","Does not change","Increases","Eliminates"], correct:2}
+    ]
+  },
+  {
+    id:7, title:"Mixed Review",
+    instruction:"Fill in the blank for these mixed Ksp problems.",
+    rows:[
+      ["1","Ksp has no ___ because it is an equilibrium constant for pure solid dissolution","units"],
+      ["2","For AB-type salts (like AgCl, BaSO\u2084), s = ___","sqrt(Ksp) / Ksp^(1/2)"],
+      ["3","For AB\u2082-type salts (like CaF\u2082, PbCl\u2082), s = \u00B3\u221A(Ksp/___)","4"],
+      ["4","Temperature increase generally ___ the Ksp (for endothermic dissolution)","increases"],
+      ["5","AgCl (Ksp = 1.8\u00D710\u207B\u00B9\u2070) vs AgBr (Ksp = 5.0\u00D710\u207B\u00B9\u00B3): which is more soluble?","AgCl"],
+      ["6","CaCO\u2083 dissolving in acid is more soluble because H\u207A reacts with ___ (removing a product)","CO32- / carbonate"],
+      ["7","pH affects Ksp of salts containing ___ or basic anions","OH- / hydroxide"],
+      ["8","Adding a complexing agent like NH\u2083 to AgCl solution ___ the solubility of AgCl","increases"],
+      ["9","AgI (Ksp = 8.5\u00D710\u207B\u00B9\u2077) vs AgBr (Ksp = 5.0\u00D710\u207B\u00B9\u00B3) vs AgCl (Ksp = 1.8\u00D710\u207B\u00B9\u2070). Most soluble = ___","AgCl"],
+      ["10","From Q9: least soluble = ___","AgI"],
+      ["11","Tooth enamel is hydroxyapatite Ca\u2085(PO\u2084)\u2083OH. Fluoride converts it to ___ which has lower Ksp","fluorapatite / Ca5(PO4)3F"],
+      ["12","Hard water contains excess ___ and ___ ions","Ca2+, Mg2+ / calcium, magnesium"],
+      ["13","Kidney stones are often made of calcium ___ (CaC\u2082O\u2084)","oxalate"],
+      ["14","The molar solubility of a salt can be determined experimentally by measuring the ___ of a saturated solution","conductivity / concentration"],
+      ["15","For salts with the same formula type (AB), you can compare solubility by directly comparing ___","Ksp"],
+      ["16","For salts with DIFFERENT formula types (AB vs AB\u2082), you must calculate ___ to compare solubility","molar solubility / s"],
+      ["17","PbCl\u2082 (Ksp = 1.7\u00D710\u207B\u2075) vs PbSO\u2084 (Ksp = 2.5\u00D710\u207B\u2078). PbCl\u2082 is ___ soluble","more"],
+      ["18","Washing with hot water dissolves more of a sparingly soluble salt if dissolution is ___","endothermic"],
+      ["19","In qualitative analysis, the systematic separation of cations uses differences in ___","Ksp / solubility"],
+      ["20","The formation constant Kf for [Ag(NH\u2083)\u2082]\u207A is very large, meaning the complex is very ___","stable"]
+    ]
+  },
+  {
+    id:8, title:"Dissolution Steps", type:"arrange",
+    instruction:"Arrange in the correct order.",
+    sentences:[
+      {prompt:"Steps to find molar solubility from Ksp:", words:["write dissolution equation,","set up ICE table,","express Ksp in terms of s,","solve for s"]},
+      {prompt:"Steps to predict precipitation:", words:["calculate Q from initial concentrations,","compare Q to Ksp,","if Q > Ksp precipitate forms"]},
+      {prompt:"Order AgX salts by decreasing solubility:", words:["AgCl (Ksp=1.8e-10)","AgBr (Ksp=5.0e-13)","AgI (Ksp=8.5e-17)"]},
+      {prompt:"Factors that increase solubility of a hydroxide salt:", words:["add acid (lower pH),","increase temperature,","add complexing agent"]},
+      {prompt:"Steps for selective precipitation:", words:["identify Ksp values,","add reagent slowly,","less soluble salt precipitates first,","filter to separate"]}
+    ]
+  },
+  {
+    id:9, title:"Ksp Conceptual & Calculation Problems", type:"mc",
+    instruction:"Select the correct answer for these solubility equilibrium questions.",
+    questions:[
+      {q:"Which has the highest molar solubility: AgCl (Ksp=1.8\u00D710\u207B\u00B9\u2070), AgBr (Ksp=5.0\u00D710\u207B\u00B9\u00B3), or AgI (Ksp=8.5\u00D710\u207B\u00B9\u2077)?", options:["AgBr","AgI","AgCl","All the same"], correct:2},
+      {q:"Adding NaCl to a saturated AgCl solution will:", options:["Increase AgCl solubility","Decrease AgCl solubility (common ion)","Have no effect","Dissolve all AgCl"], correct:1},
+      {q:"Ksp of CaF\u2082 = 3.9\u00D710\u207B\u00B9\u00B9. The Ksp expression is:", options:["[Ca\u00B2\u207A][F\u207B]","[Ca\u00B2\u207A][F\u207B]\u00B2","[Ca\u00B2\u207A]\u00B2[F\u207B]","[CaF\u2082]"], correct:1},
+      {q:"If s is the molar solubility of CaF\u2082, then Ksp = :", options:["s\u00B2","2s\u00B2","4s\u00B3","s\u00B3"], correct:2},
+      {q:"Q < Ksp means the solution is:", options:["Saturated","Supersaturated","Unsaturated","At equilibrium"], correct:2},
+      {q:"Q > Ksp means:", options:["More solid will dissolve","A precipitate will form","The solution is unsaturated","Ksp will increase"], correct:1},
+      {q:"Which salt becomes MORE soluble in acidic solution?", options:["NaCl","KNO\u2083","CaCO\u2083","AgCl"], correct:2},
+      {q:"The molar solubility of BaSO\u2084 (Ksp=1.1\u00D710\u207B\u00B9\u2070) is approximately:", options:["1.1\u00D710\u207B\u00B9\u2070 M","1.0\u00D710\u207B\u2075 M","1.1\u00D710\u207B\u2075 M","5.5\u00D710\u207B\u2076 M"], correct:1},
+      {q:"For selective precipitation of Ag\u207A and Cu\u00B2\u207A using Cl\u207B, which precipitates first?", options:["CuCl\u2082 (soluble)","AgCl (Ksp=1.8\u00D710\u207B\u00B9\u2070)","Both at the same time","Neither precipitates"], correct:1},
+      {q:"Adding NH\u2083 to AgCl(s) increases solubility by forming:", options:["Ag(OH)(s)","[Ag(NH\u2083)\u2082]\u207A complex","NH\u2084Cl","AgNH\u2083"], correct:1},
+      {q:"Which will NOT affect the Ksp value?", options:["Changing temperature","Adding a common ion","Adding a catalyst","Changing pressure (for aqueous)"], correct:1},
+      {q:"PbI\u2082 has Ksp = 9.8\u00D710\u207B\u2079. Its Ksp expression is:", options:["[Pb\u00B2\u207A][I\u207B]","[Pb\u00B2\u207A][I\u207B]\u00B2","[Pb\u00B2\u207A]\u00B2[I\u207B]","[PbI\u2082]"], correct:1},
+      {q:"Fe(OH)\u2083 has Ksp = 2.8\u00D710\u207B\u00B3\u2079. Its Ksp expression is:", options:["[Fe\u00B3\u207A][OH\u207B]\u00B3","[Fe\u00B3\u207A]\u00B3[OH\u207B]","[Fe(OH)\u2083]","[Fe\u00B3\u207A][OH\u207B]"], correct:0}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Solubility Equilibrium (Ksp)</h3><p><span class="rule">Ksp (Solubility Product):</span> The equilibrium constant for the dissolution of a sparingly soluble ionic compound in water.</p><p><span class="rule">General Form:</span> A\u2093B\u1D67(s) \u21CC xA\u207F\u207A(aq) + yB\u207F\u207B(aq)</p><p>Ksp = [A\u207F\u207A]\u02E3 \u00B7 [B\u207F\u207B]\u02B8</p><p>&bull; Pure solid is NOT included in the expression (activity = 1)</p><p>&bull; Ksp is temperature dependent (usually increases with T)</p><h3>Molar Solubility Relationships</h3><table><tr><th>Salt Type</th><th>Dissolution</th><th>Ksp = </th><th>s = </th></tr><tr><td>AB (e.g. AgCl)</td><td>AB \u21CC A\u207A + B\u207B</td><td>s\u00B2</td><td>\u221AKsp</td></tr><tr><td>AB\u2082 (e.g. CaF\u2082)</td><td>AB\u2082 \u21CC A\u00B2\u207A + 2B\u207B</td><td>4s\u00B3</td><td>\u00B3\u221A(Ksp/4)</td></tr><tr><td>A\u2082B (e.g. Ag\u2082CrO\u2084)</td><td>A\u2082B \u21CC 2A\u207A + B\u00B2\u207B</td><td>4s\u00B3</td><td>\u00B3\u221A(Ksp/4)</td></tr><tr><td>AB\u2083 (e.g. AlF\u2083)</td><td>AB\u2083 \u21CC A\u00B3\u207A + 3B\u207B</td><td>27s\u2074</td><td>\u2074\u221A(Ksp/27)</td></tr><tr><td>A\u2083B\u2082 (e.g. Ca\u2083(PO\u2084)\u2082)</td><td>A\u2083B\u2082 \u21CC 3A\u00B2\u207A + 2B\u00B3\u207B</td><td>108s\u2075</td><td>\u2075\u221A(Ksp/108)</td></tr></table><h3>Worked Example: CaF\u2082</h3><p>CaF\u2082(s) \u21CC Ca\u00B2\u207A(aq) + 2F\u207B(aq)</p><p>If s = molar solubility, then [Ca\u00B2\u207A] = s and [F\u207B] = 2s</p><p>Ksp = (s)(2s)\u00B2 = 4s\u00B3</p><p>If Ksp = 3.45 \u00D7 10\u207B\u00B9\u00B9:</p><p>s = \u00B3\u221A(3.45 \u00D7 10\u207B\u00B9\u00B9 / 4) = \u00B3\u221A(8.63 \u00D7 10\u207B\u00B9\u00B2) = 2.05 \u00D7 10\u207B\u2074 M</p><h3>Q vs Ksp (Ion Product)</h3><p><span class="rule">Q = [A\u207F\u207A]\u02E3\u2080 \u00B7 [B\u207F\u207B]\u02B8\u2080</span> (using initial/actual concentrations)</p><table><tr><th>Condition</th><th>Meaning</th><th>Result</th></tr><tr><td>Q < Ksp</td><td>Unsaturated</td><td>No precipitate, more can dissolve</td></tr><tr><td>Q = Ksp</td><td>Saturated</td><td>At equilibrium</td></tr><tr><td>Q > Ksp</td><td>Supersaturated</td><td>Precipitate forms until Q = Ksp</td></tr></table><h3>Common Ion Effect</h3><p><span class="rule">Adding a common ion</span> (one already in the Ksp expression) shifts equilibrium LEFT, <strong>decreasing</strong> solubility.</p><p>&bull; Example: CaF\u2082 in 0.10 M NaF solution. F\u207B is already present, so CaF\u2082 is LESS soluble than in pure water.</p><p>&bull; Set up: Ksp = (s)(0.10 + 2s)\u00B2 \u2248 s(0.10)\u00B2 (if 2s << 0.10)</p><h3>pH Effect on Solubility</h3><p><span class="rule">Salts with basic anions</span> (OH\u207B, CO\u2083\u00B2\u207B, PO\u2084\u00B3\u207B, S\u00B2\u207B, F\u207B) are MORE soluble in acidic solution.</p><p>&bull; Reason: H\u207A reacts with the basic anion, removing it from solution \u2192 equilibrium shifts right \u2192 more salt dissolves.</p><p>&bull; Example: CaCO\u2083 + 2H\u207A \u2192 Ca\u00B2\u207A + H\u2082O + CO\u2082 (why antacids dissolve in stomach acid)</p><p>&bull; Salts with neutral anions (Cl\u207B, Br\u207B, NO\u2083\u207B) are NOT affected by pH.</p><h3>Selective Precipitation</h3><p><span class="rule">Principle:</span> When adding a reagent to a mixture of ions, the salt with the <strong>smallest Ksp</strong> precipitates first.</p><p>&bull; Can separate ions by carefully controlling reagent addition</p><p>&bull; Calculate the concentration of reagent needed to START precipitating each ion</p><p>&bull; The ion requiring LESS reagent precipitates first</p>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 solubility product, molar solubility, common ion effect, precipitation \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

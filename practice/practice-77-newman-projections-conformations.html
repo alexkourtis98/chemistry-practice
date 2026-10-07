@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Newman Projections & Conformational Analysis</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Newman Projections & Conformational Analysis</h1>
+<p class="subtitle">Deep practice &mdash; staggered, eclipsed, gauche, anti, energy diagrams</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_77';
+const SECTIONS = [
+  {
+    id:1, title:"Fill: Conformational terminology",
+    instruction:"Write the correct conformational term or value.",
+    rows:[
+      ["1","Most stable conformation of ethane","staggered"],
+      ["2","Least stable conformation of ethane","eclipsed"],
+      ["3","Dihedral angle in staggered conformation","60 / 60\u00B0"],
+      ["4","Dihedral angle in eclipsed conformation","0 / 0\u00B0"],
+      ["5","Rotation around a C\u2013C single bond is called ___ rotation","free / conformational"],
+      ["6","Different spatial arrangements due to rotation about single bonds","conformations / conformers"],
+      ["7","A Newman projection views the molecule looking down the ___","C-C bond / carbon-carbon bond"],
+      ["8","The front carbon in a Newman projection is drawn as a ___","dot / point / circle center"],
+      ["9","The back carbon in a Newman projection is drawn as a ___","circle / large circle"],
+      ["10","The angle between adjacent bonds on front and back carbons","dihedral angle / torsion angle"],
+      ["11","When all bonds on front and back carbons are aligned (0\u00B0)","eclipsed"],
+      ["12","When bonds on front and back are perfectly offset (60\u00B0)","staggered"],
+      ["13","Conformation where two large groups are 60\u00B0 apart","gauche"],
+      ["14","Conformation where two large groups are 180\u00B0 apart","anti"],
+      ["15","Energy required to rotate from one conformation to another","rotational barrier / energy barrier"],
+      ["16","At room temperature, C\u2013C bond rotation is ___ (fast/slow)","fast"],
+      ["17","Conformations are NOT different ___ (molecules/isomers)","isomers / molecules"],
+      ["18","A 360\u00B0 rotation of ethane passes through ___ eclipsed conformations","3 / three"],
+      ["19","A 360\u00B0 rotation of ethane passes through ___ staggered conformations","3 / three"],
+      ["20","The eclipsed conformation is at an energy ___ (max/min)","maximum / max"]
+    ]
+  },
+  {
+    id:2, title:"Fill: Energy and conformations",
+    instruction:"Fill in the energy or stability relationship.",
+    rows:[
+      ["1","Eclipsed ethane has ___ energy than staggered","higher"],
+      ["2","Anti conformation has ___ energy","lowest / the lowest"],
+      ["3","The rotational barrier of ethane is approximately ___ kJ/mol","12 / 12.5"],
+      ["4","Each eclipsing H\u2013H interaction costs about ___ kJ/mol","4 / 4.0 / 4.2"],
+      ["5","Staggered is at energy ___ (minimum/maximum)","minimum / min"],
+      ["6","Eclipsed is at energy ___ (minimum/maximum)","maximum / max"],
+      ["7","Gauche butane is ___ stable than anti butane","less"],
+      ["8","The gauche interaction in butane costs about ___ kJ/mol","3.8 / 3.8 kJ/mol"],
+      ["9","Fully eclipsed butane has ___ energy of all butane conformations","highest / the highest"],
+      ["10","In butane, partially eclipsed is ___ stable than fully eclipsed","more"],
+      ["11","The energy difference between anti and gauche butane is about ___ kJ/mol","3.8 / 3.8 kJ/mol / 4"],
+      ["12","The rotational barrier of butane (anti to fully eclipsed) is about ___ kJ/mol","19 / 19 kJ/mol / 25"],
+      ["13","More substituted eclipsed interactions have ___ energy penalties","higher / larger"],
+      ["14","The strain energy in eclipsed conformations is due to ___ repulsion","electron / electron cloud"],
+      ["15","At room temperature, molecules rapidly interconvert between ___ (conformations/isomers)","conformations / conformers"]
+    ]
+  },
+  {
+    id:3, title:"MC: Newman projection reading", type:"mc",
+    instruction:"Select the correct answer about Newman projections and conformations.",
+    questions:[
+      {q:"In a Newman projection, what does the dot represent?", options:["Back carbon","Front carbon","A hydrogen atom","The bond axis"], correct:1},
+      {q:"In a Newman projection, what does the circle represent?", options:["Front carbon","Back carbon","An orbital","A methyl group"], correct:1},
+      {q:"When looking at a Newman projection, the bonds of the front carbon appear to radiate from the:", options:["Circle","Center dot","Top of the diagram","Bottom of the diagram"], correct:1},
+      {q:"A staggered conformation has a dihedral angle of:", options:["0\u00B0","30\u00B0","60\u00B0","90\u00B0"], correct:2},
+      {q:"An eclipsed conformation has a dihedral angle of:", options:["0\u00B0","60\u00B0","120\u00B0","180\u00B0"], correct:0},
+      {q:"What type of strain is present in eclipsed ethane?", options:["Steric strain only","Torsional strain","Angle strain","Ring strain"], correct:1},
+      {q:"Which conformation of butane has both torsional and steric strain?", options:["Anti","Gauche","Partially eclipsed","Fully eclipsed"], correct:3},
+      {q:"In the gauche conformation of butane, the methyl groups are separated by:", options:["0\u00B0","60\u00B0","120\u00B0","180\u00B0"], correct:1},
+      {q:"How many different staggered conformations does butane have?", options:["1","2","3","4"], correct:2},
+      {q:"Torsional strain results from:", options:["Bond angle compression","Eclipsing of bonds on adjacent atoms","Non-bonded atom repulsion","Ring puckering"], correct:1},
+      {q:"In which conformation are substituents as far apart as possible?", options:["Eclipsed","Gauche","Anti","Fully eclipsed"], correct:2},
+      {q:"The eclipsing interaction between two methyl groups is ___ than between two hydrogens:", options:["Weaker","The same","Stronger","Not comparable"], correct:2},
+      {q:"A partially eclipsed conformation of butane has the methyl groups at what dihedral angle?", options:["0\u00B0","60\u00B0","120\u00B0","180\u00B0"], correct:2},
+      {q:"How many eclipsed conformations does ethane pass through in a 360\u00B0 rotation?", options:["1","2","3","6"], correct:2},
+      {q:"Which is true about conformational isomers?", options:["They are different compounds","They can be separated at room temperature","They interconvert rapidly at room temperature","They have different molecular formulas"], correct:2},
+      {q:"What is the relationship between staggered and eclipsed ethane?", options:["Constitutional isomers","Stereoisomers","Conformational isomers","Structural isomers"], correct:2},
+      {q:"Which factor does NOT contribute to the rotational barrier?", options:["Hyperconjugation","Electrostatic repulsion","Nuclear repulsion","Ionic bonding"], correct:3},
+      {q:"In a sawhorse projection, the front carbon is drawn:", options:["On the left and lower","On the right and lower","In the center","At the top"], correct:0},
+      {q:"The rotational barrier in ethane is approximately:", options:["3 kJ/mol","12 kJ/mol","25 kJ/mol","50 kJ/mol"], correct:1},
+      {q:"Steric strain is caused by:", options:["Eclipsing of bonds","Atoms being forced too close together","Bond angle distortion","Electron delocalization"], correct:1}
+    ]
+  },
+  {
+    id:4, title:"Fill: Butane conformations",
+    instruction:"Fill in the correct value or term for butane conformations.",
+    rows:[
+      ["1","Anti butane: dihedral angle between methyl groups = ___","180 / 180\u00B0"],
+      ["2","Gauche butane: dihedral angle between methyl groups = ___","60 / 60\u00B0"],
+      ["3","Fully eclipsed butane: dihedral angle between methyl groups = ___","0 / 0\u00B0"],
+      ["4","Partially eclipsed butane: dihedral angle between methyl groups = ___","120 / 120\u00B0"],
+      ["5","Most stable butane conformation","anti"],
+      ["6","Least stable butane conformation","fully eclipsed / totally eclipsed"],
+      ["7","Gauche interaction involves methyl groups ___ apart","60\u00B0 / 60 degrees"],
+      ["8","Number of distinct staggered conformations for butane","3 / three"],
+      ["9","Number of distinct eclipsed conformations for butane","3 / three"],
+      ["10","In anti butane, the two methyl groups are on ___ sides","opposite"],
+      ["11","The gauche conformation of butane has ___ strain","steric"],
+      ["12","Fully eclipsed butane has both ___ and ___ strain","torsional, steric / torsional and steric / steric and torsional"],
+      ["13","How many gauche conformations does butane have?","2 / two"],
+      ["14","How many anti conformations does butane have?","1 / one"],
+      ["15","The anti conformation is a global energy ___","minimum / min"],
+      ["16","The gauche conformation is a local energy ___","minimum / min"],
+      ["17","Fully eclipsed conformation is a global energy ___","maximum / max"],
+      ["18","Partially eclipsed conformation is a local energy ___","maximum / max"],
+      ["19","In gauche butane, methyl groups have a ___ interaction","gauche / steric"],
+      ["20","Rotating from anti to gauche requires ___ energy input","3.8 kJ/mol / 3.8 / energy"]
+    ]
+  },
+  {
+    id:5, title:"MC: Energy diagrams", type:"mc",
+    instruction:"Select the correct answer about conformational energy diagrams.",
+    questions:[
+      {q:"On an energy diagram for ethane rotation, minima correspond to:", options:["Eclipsed conformations","Staggered conformations","Gauche conformations","Random conformations"], correct:1},
+      {q:"On an energy diagram for ethane rotation, maxima correspond to:", options:["Anti conformations","Staggered conformations","Eclipsed conformations","Gauche conformations"], correct:2},
+      {q:"The energy diagram for ethane has how many identical peaks per 360\u00B0?", options:["1","2","3","6"], correct:2},
+      {q:"The energy diagram for butane has how many peaks per 360\u00B0?", options:["1","2","3","4"], correct:2},
+      {q:"Which peak in the butane energy diagram is the tallest?", options:["Partially eclipsed","Gauche","Fully eclipsed (0\u00B0)","Anti"], correct:2},
+      {q:"The lowest point on the butane energy diagram corresponds to:", options:["Gauche","Anti","Partially eclipsed","Fully eclipsed"], correct:1},
+      {q:"In the butane energy diagram, the gauche conformation appears as:", options:["A maximum","A minimum","A plateau","Not shown"], correct:1},
+      {q:"Comparing ethane and butane energy diagrams, butane's diagram is:", options:["Identical to ethane's","Simpler than ethane's","More complex with unequal peaks","A flat line"], correct:2},
+      {q:"The x-axis of a conformational energy diagram represents:", options:["Temperature","Dihedral angle","Bond length","Molecular weight"], correct:1},
+      {q:"The y-axis of a conformational energy diagram represents:", options:["Dihedral angle","Temperature","Potential energy","Kinetic energy"], correct:2},
+      {q:"The energy difference between anti and fully eclipsed butane is approximately:", options:["4 kJ/mol","12 kJ/mol","19 kJ/mol","50 kJ/mol"], correct:2},
+      {q:"At which dihedral angle is butane at its global minimum?", options:["0\u00B0","60\u00B0","120\u00B0","180\u00B0"], correct:3},
+      {q:"At which dihedral angle is butane at its global maximum?", options:["0\u00B0","60\u00B0","120\u00B0","180\u00B0"], correct:0},
+      {q:"The partially eclipsed conformation of butane is at a dihedral angle of:", options:["0\u00B0","60\u00B0","120\u00B0","180\u00B0"], correct:2},
+      {q:"Which molecule has the lower rotational barrier?", options:["Ethane","Butane","They are the same","Cannot be determined"], correct:0}
+    ]
+  },
+  {
+    id:6, title:"Fill: Types of strain",
+    instruction:"Identify the type of strain described.",
+    rows:[
+      ["1","Strain from overlapping electron clouds in eclipsed bonds","torsional / torsional strain"],
+      ["2","Strain from large groups forced too close together","steric / steric strain"],
+      ["3","Strain from bond angles deviating from ideal","angle strain / angle"],
+      ["4","Strain present in eclipsed ethane","torsional / torsional strain"],
+      ["5","Strain present in gauche butane","steric / steric strain"],
+      ["6","Strain present in fully eclipsed butane (two types)","torsional and steric / steric and torsional"],
+      ["7","Strain caused by eclipsing H\u2013H interactions","torsional / torsional strain"],
+      ["8","Strain caused by eclipsing CH\u2083\u2013CH\u2083 interactions","steric / steric strain / torsional and steric"],
+      ["9","Type of strain relieved by staggering bonds","torsional / torsional strain"],
+      ["10","Type of strain relieved by adopting anti over gauche","steric / steric strain"],
+      ["11","Strain in cyclopropane from 60\u00B0 bond angles","angle strain / angle / ring strain"],
+      ["12","General term for all destabilizing non-bonded interactions","steric strain / van der Waals strain"],
+      ["13","Eclipsed propane has more strain than eclipsed ethane due to additional ___ strain","steric"],
+      ["14","The anti conformation minimizes both ___ and ___ strain","torsional, steric / steric, torsional / torsional and steric"],
+      ["15","Ring strain is a combination of ___ and ___ strain","angle, torsional / torsional, angle / angle and torsional"]
+    ]
+  },
+  {
+    id:7, title:"MC: Stability ranking", type:"mc",
+    instruction:"Select the correct stability ranking or comparison.",
+    questions:[
+      {q:"Rank butane conformations from most to least stable:", options:["Anti > gauche > partially eclipsed > fully eclipsed","Gauche > anti > partially eclipsed > fully eclipsed","Anti > partially eclipsed > gauche > fully eclipsed","Fully eclipsed > anti > gauche > partially eclipsed"], correct:0},
+      {q:"Which ethane conformation is more stable?", options:["Eclipsed","Staggered","They are equal","It depends on temperature"], correct:1},
+      {q:"Between gauche and anti butane, which is more stable?", options:["Gauche","Anti","They are equal","It depends on substituents"], correct:1},
+      {q:"Which has greater strain: eclipsed ethane or fully eclipsed butane?", options:["Eclipsed ethane","Fully eclipsed butane","They are equal","Cannot compare"], correct:1},
+      {q:"In 2-methylbutane, the most stable conformation about C2\u2013C3 has the largest groups:", options:["Eclipsed","Gauche (60\u00B0)","Anti (180\u00B0)","At 120\u00B0"], correct:2},
+      {q:"Which increases strain more: an H/H eclipsing interaction or a CH\u2083/H eclipsing interaction?", options:["H/H","CH\u2083/H","They are equal","Neither causes strain"], correct:1},
+      {q:"Rank eclipsing interactions from least to most strain: H/H, CH\u2083/H, CH\u2083/CH\u2083", options:["CH\u2083/CH\u2083 < CH\u2083/H < H/H","H/H < CH\u2083/H < CH\u2083/CH\u2083","CH\u2083/H < H/H < CH\u2083/CH\u2083","All are equal"], correct:1},
+      {q:"A molecule spends most of its time in which conformation?", options:["The highest energy conformation","The lowest energy conformation","All conformations equally","Eclipsed conformations"], correct:1},
+      {q:"At room temperature, what percentage of butane molecules are in the anti conformation?", options:["About 100%","About 70%","About 50%","About 30%"], correct:1},
+      {q:"Which statement about propane eclipsed conformations is correct?", options:["All three eclipsed conformations are identical","Two are identical, one is different","All three are different","Propane has no eclipsed conformations"], correct:0}
+    ]
+  },
+  {
+    id:8, title:"Fill: Dihedral angles",
+    instruction:"Give the dihedral angle for each conformation.",
+    rows:[
+      ["1","Anti conformation dihedral angle","180 / 180\u00B0"],
+      ["2","Gauche conformation dihedral angle","60 / 60\u00B0"],
+      ["3","Eclipsed (ethane) dihedral angle","0 / 0\u00B0"],
+      ["4","Fully eclipsed butane dihedral angle","0 / 0\u00B0"],
+      ["5","Partially eclipsed butane dihedral angle","120 / 120\u00B0"],
+      ["6","First staggered minimum after 0\u00B0 in butane","60 / 60\u00B0"],
+      ["7","Second eclipsed maximum after 0\u00B0 in butane","120 / 120\u00B0"],
+      ["8","The anti conformation occurs at ___ degrees rotation from fully eclipsed","180 / 180\u00B0"],
+      ["9","In a 360\u00B0 rotation, eclipsed conformations occur at 0\u00B0, 120\u00B0, and ___","240 / 240\u00B0"],
+      ["10","In a 360\u00B0 rotation, staggered conformations occur at 60\u00B0, 180\u00B0, and ___","300 / 300\u00B0"]
+    ]
+  },
+  {
+    id:9, title:"Word Arrange: Build conformation rules", type:"arrange",
+    instruction:"Click the words in the correct order.",
+    sentences:[
+      {prompt:"The anti conformation of butane has the lowest energy because the methyl groups are 180 degrees apart", words:["The anti","conformation","of butane","has the","lowest energy","because","the methyl groups","are","180 degrees","apart"]},
+      {prompt:"Torsional strain results from eclipsing interactions between bonds on adjacent carbons", words:["Torsional strain","results from","eclipsing interactions","between bonds","on adjacent","carbons"]},
+      {prompt:"Steric strain occurs when atoms are forced too close together", words:["Steric strain","occurs when","atoms are","forced","too close","together"]},
+      {prompt:"Molecules rotate freely around single bonds at room temperature", words:["Molecules","rotate freely","around","single bonds","at room","temperature"]},
+      {prompt:"The gauche conformation has higher energy than anti due to steric strain", words:["The gauche","conformation","has higher energy","than anti","due to","steric strain"]}
+    ]
+  },
+  {
+    id:10, title:"MC: Newman projection drawing", type:"mc",
+    instruction:"Identify which groups are on the front or back carbon in a Newman projection.",
+    questions:[
+      {q:"In a Newman projection of ethane, how many bonds radiate from the center dot?", options:["2","3","4","6"], correct:1},
+      {q:"In a Newman projection of ethane, bonds from the back carbon appear to radiate from the:", options:["Center dot","Edge of the circle","Top only","Bottom only"], correct:1},
+      {q:"In a staggered Newman projection, the back carbon's bonds are positioned:", options:["Directly behind the front carbon's bonds","Between the front carbon's bonds","At 90\u00B0 to the front carbon's bonds","Randomly"], correct:1},
+      {q:"In an eclipsed Newman projection, the back carbon's bonds are:", options:["Between the front carbon's bonds","Directly behind the front carbon's bonds","At 45\u00B0 to the front carbon's bonds","Not visible"], correct:1},
+      {q:"For butane in the anti Newman projection, the methyl on the front carbon is at 12 o'clock. Where is the back methyl?", options:["12 o'clock","6 o'clock","3 o'clock","9 o'clock"], correct:1},
+      {q:"For gauche butane, if the front methyl is at 12 o'clock, the back methyl could be at:", options:["12 o'clock","6 o'clock","2 o'clock","4 o'clock"], correct:2},
+      {q:"How many bonds total are shown in a Newman projection of ethane?", options:["2","4","6","8"], correct:2},
+      {q:"In an eclipsed Newman projection, you can typically see ___ of the back carbon's bonds:", options:["All 3 clearly","None","Only parts peeking out behind front bonds","Only 1"], correct:2},
+      {q:"When drawing a Newman projection, you look:", options:["From above the molecule","From the side","Directly down the C\u2013C bond axis","At a 45\u00B0 angle"], correct:2},
+      {q:"In the anti conformation of butane, the H atoms on the front carbon are at approximately:", options:["4 and 8 o'clock","2 and 10 o'clock","3 and 9 o'clock","6 and 12 o'clock"], correct:0}
+    ]
+  },
+  {
+    id:11, title:"Fill: Energy values",
+    instruction:"Give the approximate energy value.",
+    rows:[
+      ["1","Rotational barrier of ethane (kJ/mol)","12 / 12.5"],
+      ["2","Energy of one H/H eclipsing interaction (kJ/mol)","4 / 4.0 / 4.2"],
+      ["3","Energy of one CH\u2083/H eclipsing interaction (kJ/mol)","6 / 6.0"],
+      ["4","Energy cost of one CH\u2083/CH\u2083 eclipsing interaction (kJ/mol)","11 / 11.0"],
+      ["5","Energy difference: anti vs gauche butane (kJ/mol)","3.8 / 4 / 3.8 kJ/mol"],
+      ["6","Rotational barrier of butane, anti to fully eclipsed (kJ/mol)","19 / 25"],
+      ["7","Energy of one gauche interaction in butane (kJ/mol)","3.8 / 4"],
+      ["8","Total strain in eclipsed ethane = ___ \u00D7 H/H interaction","3 / three"],
+      ["9","Total strain in fully eclipsed butane is about ___ kJ/mol","19 / 25"],
+      ["10","The rotational barrier of propane is about ___ kJ/mol","14 / 14.2"]
+    ]
+  },
+  {
+    id:12, title:"MC: Tricky conformations", type:"mc",
+    instruction:"Think carefully about these conformational analysis problems.",
+    questions:[
+      {q:"Cyclopentane adopts an envelope conformation to relieve:", options:["Torsional strain only","Angle strain only","Both angle and torsional strain","Steric strain only"], correct:0},
+      {q:"For 2,3-dimethylbutane, the anti conformation places the two methyl groups on each carbon:", options:["Both anti to each other","Both gauche to each other","One anti, one gauche","It depends on which methyls you choose"], correct:3},
+      {q:"What happens to the rotational barrier when larger substituents replace H?", options:["It decreases","It stays the same","It increases","It becomes zero"], correct:2},
+      {q:"In a Newman projection of propane (C1\u2013C2 bond), the back carbon has:", options:["3 H atoms","2 H atoms and 1 CH\u2083","1 H atom and 2 CH\u2083","3 CH\u2083 groups"], correct:1},
+      {q:"The eclipsed conformation of propane has higher strain than ethane because:", options:["Propane has more electrons","There is an additional CH\u2083/H eclipsing interaction","Propane has longer bonds","Propane is heavier"], correct:1},
+      {q:"For 1-bromoethane, the most stable conformation has Br:", options:["Eclipsed with the methyl","Anti to a hydrogen","Staggered with respect to all groups","Gauche to the methyl"], correct:2},
+      {q:"If a molecule has two equally large substituents gauche to each other, increasing temperature will:", options:["Favor the anti conformation more","Have no effect","Increase the population of the gauche conformation","Freeze rotation"], correct:2},
+      {q:"In the Newman projection of 2-methylpropane (isobutane) along C2\u2013C1, the front carbon (C2) has:", options:["3 H atoms","1 H and 2 CH\u2083","2 H and 1 CH\u2083","3 CH\u2083 groups"], correct:1},
+      {q:"The term 'conformer' specifically refers to:", options:["A constitutional isomer","A stereoisomer","A specific conformation of a molecule","An enantiomer"], correct:2},
+      {q:"syn-Pentane interaction is a destabilizing interaction between groups separated by:", options:["3 bonds","4 bonds","5 bonds","6 bonds"], correct:1}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Newman Projections & Conformational Analysis \u2014 Complete Reference</h3>' +
+'<h3>Newman Projections</h3>' +
+'<p>A <span class="rule">Newman projection</span> is a way to visualize conformations by looking directly down a C\u2013C bond axis.</p>' +
+'<table><tr><th>Element</th><th>Representation</th></tr>' +
+'<tr><td>Front carbon</td><td><span class="rule">Dot (center point)</span> with 3 bonds radiating out</td></tr>' +
+'<tr><td>Back carbon</td><td><span class="rule">Circle</span> with 3 bonds radiating from its edge</td></tr></table>' +
+'<h3>Conformations of Ethane</h3>' +
+'<table><tr><th>Conformation</th><th>Dihedral Angle</th><th>Energy</th><th>Strain</th></tr>' +
+'<tr><td><span class="rule">Staggered</span></td><td>60\u00B0</td><td>Minimum</td><td>None</td></tr>' +
+'<tr><td><span class="rule">Eclipsed</span></td><td>0\u00B0</td><td>Maximum</td><td>Torsional (12 kJ/mol)</td></tr></table>' +
+'<p><span class="rule">Torsional strain:</span> Repulsion between electron clouds of bonds that are eclipsed (aligned). Each H/H eclipsing interaction \u2248 4 kJ/mol.</p>' +
+'<h3>Conformations of Butane (C2\u2013C3 bond)</h3>' +
+'<table><tr><th>Conformation</th><th>Dihedral \u03B8</th><th>Relative Energy</th><th>Type</th></tr>' +
+'<tr><td><span class="rule">Anti</span></td><td>180\u00B0</td><td>0 (most stable)</td><td>Global minimum</td></tr>' +
+'<tr><td><span class="rule">Gauche</span></td><td>60\u00B0</td><td>+3.8 kJ/mol</td><td>Local minimum</td></tr>' +
+'<tr><td>Partially eclipsed</td><td>120\u00B0</td><td>+16 kJ/mol</td><td>Local maximum</td></tr>' +
+'<tr><td><span class="rule">Fully eclipsed</span></td><td>0\u00B0</td><td>+19 kJ/mol</td><td>Global maximum</td></tr></table>' +
+'<h3>Types of Strain</h3>' +
+'<ul>' +
+'<li><span class="rule">Torsional strain:</span> From eclipsing of bonds on adjacent carbons</li>' +
+'<li><span class="rule">Steric strain:</span> From large groups forced too close together (non-bonded repulsion)</li>' +
+'<li><span class="rule">Angle strain:</span> From bond angles deviating from ideal (e.g., in small rings)</li>' +
+'</ul>' +
+'<h3>Energy Diagram</h3>' +
+'<p>The energy diagram for rotation about a C\u2013C bond plots <span class="rule">potential energy vs. dihedral angle</span> (0\u00B0 to 360\u00B0).</p>' +
+'<ul>' +
+'<li>Ethane: 3 identical peaks (eclipsed) and 3 identical valleys (staggered)</li>' +
+'<li>Butane: 3 unequal peaks and 3 unequal valleys; global min at anti (180\u00B0), global max at fully eclipsed (0\u00B0)</li>' +
+'</ul>' +
+'<h3>Key Relationships</h3>' +
+'<ul>' +
+'<li>Anti \u2192 methyl groups 180\u00B0 apart (most stable)</li>' +
+'<li>Gauche \u2192 methyl groups 60\u00B0 apart (steric strain)</li>' +
+'<li>At room temperature, rotation is fast and molecules interconvert between all conformations</li>' +
+'<li>The most stable conformation is the most populated</li>' +
+'<li>About 70% of butane molecules are in the anti conformation at room temperature</li>' +
+'</ul>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 staggered, eclipsed, gauche, anti, energy diagrams \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

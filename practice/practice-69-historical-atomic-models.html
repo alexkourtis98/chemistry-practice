@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Historical Atomic Models</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Historical Atomic Models</h1>
+<p class="subtitle">Deep practice &mdash; Dalton, Thomson, Rutherford, Bohr, conservation laws</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_69';
+const SECTIONS = [
+  {
+    id:1, title:"Match Scientist to Discovery",
+    instruction:"Write the scientist's name (Dalton, Thomson, Rutherford, Bohr, Chadwick, Democritus, Schrodinger/Heisenberg).",
+    rows:[
+      ["1","Proposed that matter is made of indivisible atoms (atomos)","Democritus"],
+      ["2","Solid sphere model; atoms are indestructible and indivisible","Dalton"],
+      ["3","Discovered the electron","Thomson"],
+      ["4","Plum pudding model","Thomson"],
+      ["5","Gold foil experiment; discovered the nucleus","Rutherford"],
+      ["6","Nuclear model with mostly empty space","Rutherford"],
+      ["7","Electrons orbit in fixed energy levels","Bohr"],
+      ["8","Explained hydrogen emission spectrum","Bohr"],
+      ["9","Discovered the neutron in 1932","Chadwick"],
+      ["10","Electron cloud / quantum mechanical model","Schrodinger / Heisenberg"],
+      ["11","Proposed that all elements are made of atoms","Dalton"],
+      ["12","Atoms of the same element are identical (later revised for isotopes)","Dalton"],
+      ["13","Proposed electrons embedded in positive sphere","Thomson"],
+      ["14","Used cathode ray tube experiment","Thomson"],
+      ["15","Showed the atom is mostly empty space","Rutherford"],
+      ["16","Predicted that electrons can only have specific energies","Bohr"],
+      ["17","Bombarded beryllium with alpha particles to find neutrons","Chadwick"],
+      ["18","Proposed probability-based electron positions (orbitals)","Schrodinger / Heisenberg"],
+      ["19","Proposed law of multiple proportions","Dalton"],
+      ["20","First to use the word 'atomos' (uncuttable)","Democritus"]
+    ]
+  },
+  {
+    id:2, title:"Match Experiment to Result",
+    instruction:"Write the key result or the scientist associated with each experiment.",
+    rows:[
+      ["1","Cathode ray experiment \u2192 discovered ___","electrons / electron / Thomson"],
+      ["2","Gold foil experiment \u2192 discovered ___","nucleus / Rutherford"],
+      ["3","In the gold foil experiment, most alpha particles ___","passed through / went straight through"],
+      ["4","In the gold foil experiment, a few particles bounced back because of ___","the nucleus / dense positive core"],
+      ["5","Cathode rays were deflected by electric/magnetic fields, proving they are ___","charged particles / negatively charged"],
+      ["6","The charge-to-mass ratio of the electron was measured by ___","Thomson"],
+      ["7","The oil drop experiment measured the electron's charge. Performed by ___","Millikan"],
+      ["8","Alpha particles are ___","helium nuclei / He-4 nuclei / positively charged"],
+      ["9","The gold foil was used because gold can be made extremely ___","thin"],
+      ["10","Bohr's model explained the ___ spectrum of hydrogen","emission / line"],
+      ["11","Rutherford concluded the nucleus is ___ and ___","small and dense / tiny and massive"],
+      ["12","Thomson's experiment used a ___ to produce cathode rays","cathode ray tube / vacuum tube"],
+      ["13","The quantum model replaced fixed orbits with ___","orbitals / electron clouds / probability regions"],
+      ["14","Chadwick's experiment involved bombarding ___ with alpha particles","beryllium / Be"],
+      ["15","The neutral particle Chadwick discovered was the ___","neutron"]
+    ]
+  },
+  {
+    id:3, title:"MC: Atomic Models Timeline", type:"mc",
+    instruction:"Select the correct answer about the history of atomic models.",
+    questions:[
+      {q:"Place in chronological order: Thomson, Dalton, Rutherford, Democritus", options:["Dalton, Democritus, Thomson, Rutherford","Democritus, Dalton, Thomson, Rutherford","Thomson, Dalton, Democritus, Rutherford","Rutherford, Thomson, Dalton, Democritus"], correct:1},
+      {q:"Dalton's atomic theory was published around:", options:["400 BC","1803","1897","1911"], correct:1},
+      {q:"Thomson discovered the electron in:", options:["1803","1869","1897","1911"], correct:2},
+      {q:"Rutherford's gold foil experiment was performed in:", options:["1897","1903","1911","1932"], correct:2},
+      {q:"Bohr's model was proposed in:", options:["1897","1911","1913","1926"], correct:2},
+      {q:"The quantum mechanical model was developed around:", options:["1911","1913","1926","1950"], correct:2},
+      {q:"Which model came first?", options:["Plum pudding","Nuclear model","Bohr model","Quantum model"], correct:0},
+      {q:"Dalton's model depicted the atom as:", options:["A plum pudding","A solar system","A solid indivisible sphere","An electron cloud"], correct:2},
+      {q:"Thomson's model is also called:", options:["Billiard ball model","Plum pudding model","Planetary model","Cloud model"], correct:1},
+      {q:"Rutherford's model is often compared to:", options:["A watermelon","A solar system","A billiard ball","A cloud"], correct:1},
+      {q:"Which model first included the nucleus?", options:["Dalton's","Thomson's","Rutherford's","Bohr's"], correct:2},
+      {q:"Which model first introduced quantized energy levels?", options:["Dalton's","Thomson's","Rutherford's","Bohr's"], correct:3},
+      {q:"Which model treats electrons as probability clouds?", options:["Thomson's","Rutherford's","Bohr's","Quantum mechanical"], correct:3},
+      {q:"Democritus lived in:", options:["Ancient Greece (~400 BC)","Medieval Europe (~1200 AD)","18th century England","19th century France"], correct:0},
+      {q:"Why was Democritus' idea not accepted for centuries?", options:["It was wrong","He had no experimental evidence","He was not a scientist","Atoms were too small to see"], correct:1},
+      {q:"Which scientist's work directly disproved Thomson's model?", options:["Dalton","Rutherford","Bohr","Chadwick"], correct:1},
+      {q:"Bohr's model worked well for ___ but failed for heavier elements:", options:["Helium","Hydrogen","Carbon","Iron"], correct:1},
+      {q:"The quantum model was developed by:", options:["Rutherford and Bohr","Schrodinger and Heisenberg","Thomson and Dalton","Chadwick and Millikan"], correct:1},
+      {q:"Which is the current accepted model of the atom?", options:["Bohr model","Rutherford model","Thomson model","Quantum mechanical model"], correct:3},
+      {q:"What did all models after Dalton have in common?", options:["All included a nucleus","All included electrons","All used quantum mechanics","All were proposed by British scientists"], correct:1}
+    ]
+  },
+  {
+    id:4, title:"Laws of Matter",
+    instruction:"Name the law described, or the scientist who proposed it.",
+    rows:[
+      ["1","Mass is neither created nor destroyed in a chemical reaction","conservation of mass / Lavoisier"],
+      ["2","Elements combine in fixed whole-number ratios by mass","definite proportions / Proust / law of definite proportions"],
+      ["3","When two elements form more than one compound, the ratios of masses are small whole numbers","multiple proportions / Dalton / law of multiple proportions"],
+      ["4","Antoine Lavoisier is associated with which law?","conservation of mass"],
+      ["5","Joseph Proust is associated with which law?","definite proportions / law of definite proportions"],
+      ["6","John Dalton is associated with which law?","multiple proportions / law of multiple proportions"],
+      ["7","Water always contains 11.1% hydrogen and 88.9% oxygen by mass. This illustrates ___","definite proportions / law of definite proportions"],
+      ["8","If 10 g of A reacts with 20 g of B, the products have a total mass of ___ g","30"],
+      ["9","CO has a C:O mass ratio of 3:4. CO\u2082 has 3:8. The O ratios (4:8 = 1:2) illustrate ___","multiple proportions / law of multiple proportions"],
+      ["10","The 'father of modern chemistry' who established conservation of mass","Lavoisier"],
+      ["11","In 2H\u2082 + O\u2082 \u2192 2H\u2082O, total mass of reactants ___ total mass of products","equals / ="],
+      ["12","NaCl always contains 39.3% Na and 60.7% Cl. This is the law of ___","definite proportions / definite composition"],
+      ["13","H\u2082O always has a 2:1 ratio of H to O atoms. This law was stated by ___","Proust"],
+      ["14","Burning wood in a closed container: the total mass before and after is ___","the same / equal / unchanged"],
+      ["15","Dalton used the law of ___ as evidence that atoms exist","multiple proportions"]
+    ]
+  },
+  {
+    id:5, title:"MC: Gold Foil Experiment Details", type:"mc",
+    instruction:"Select the correct answer about Rutherford's gold foil experiment.",
+    questions:[
+      {q:"What type of particles were fired at the gold foil?", options:["Electrons","Protons","Alpha particles","Neutrons"], correct:2},
+      {q:"Alpha particles have a charge of:", options:["+1","+2","-1","0"], correct:1},
+      {q:"Most alpha particles:", options:["Bounced straight back","Were absorbed","Passed straight through","Were deflected at large angles"], correct:2},
+      {q:"Why did most particles pass through?", options:["Gold is transparent","The atom is mostly empty space","Alpha particles are very small","The foil was too thin"], correct:1},
+      {q:"About 1 in 8,000 alpha particles:", options:["Passed through","Were slightly deflected","Bounced back at large angles","Were absorbed"], correct:2},
+      {q:"Particles bounced back because they hit:", options:["Electrons","The dense positive nucleus","Neutrons","Gold atoms"], correct:1},
+      {q:"Some particles were slightly deflected because:", options:["They passed close to the nucleus","They hit electrons","They were slowed by air","The foil was wrinkled"], correct:0},
+      {q:"Before this experiment, the accepted model was:", options:["Dalton's solid sphere","Thomson's plum pudding","Bohr's planetary model","The quantum model"], correct:1},
+      {q:"This experiment proved the atom has:", options:["No internal structure","A uniform positive charge","A small, dense, positive center","Electrons in the nucleus"], correct:2},
+      {q:"If Thomson's model were correct, alpha particles would:", options:["All bounce back","All pass through with minimal deflection","Be absorbed","Create new elements"], correct:1},
+      {q:"The nucleus is approximately ___ times smaller than the atom:", options:["10","100","1,000","100,000"], correct:3},
+      {q:"Rutherford's experiment was performed using ___ foil:", options:["Aluminum","Copper","Gold","Silver"], correct:2},
+      {q:"Gold was chosen because it:", options:["Is cheap","Can be hammered very thin","Is radioactive","Repels alpha particles"], correct:1},
+      {q:"The detector used in the experiment was a:", options:["Geiger counter","Zinc sulfide screen","Photographic plate","Cloud chamber"], correct:1},
+      {q:"Rutherford compared the bouncing particles to:", options:["Bouncing a ball off a wall","Firing a shell at tissue paper and having it bounce back","Throwing sand at a screen","Dropping a stone in water"], correct:1}
+    ]
+  },
+  {
+    id:6, title:"Model Features",
+    instruction:"Name the scientist/model described by each feature.",
+    rows:[
+      ["1","Plum pudding model","Thomson"],
+      ["2","Electrons in fixed orbits/energy levels","Bohr"],
+      ["3","Electron cloud / probability orbitals","quantum / modern / Schrodinger"],
+      ["4","Solid indivisible sphere","Dalton"],
+      ["5","Small dense nucleus with orbiting electrons","Rutherford"],
+      ["6","Positive charge spread evenly, electrons embedded","Thomson"],
+      ["7","Electrons jump between levels, emitting photons","Bohr"],
+      ["8","Uncertainty principle applies to electron position","quantum / modern / Heisenberg"],
+      ["9","Atoms are indestructible (later disproved)","Dalton"],
+      ["10","First model to include empty space in the atom","Rutherford"],
+      ["11","Could not explain why electrons don't spiral into the nucleus","Rutherford"],
+      ["12","Only works perfectly for hydrogen","Bohr"],
+      ["13","Uses wave equations to describe electron behavior","quantum / modern / Schrodinger"],
+      ["14","Atoms of different elements have different masses","Dalton"],
+      ["15","Electrons exist in s, p, d, f subshells","quantum / modern"]
+    ]
+  },
+  {
+    id:7, title:"MC: Comparing Models", type:"mc",
+    instruction:"Select the correct answer comparing different atomic models.",
+    questions:[
+      {q:"What did Dalton get wrong?", options:["Atoms exist","Atoms of same element are identical (isotopes disprove this)","Elements combine to form compounds","Atoms rearrange in reactions"], correct:1},
+      {q:"What did Thomson get right?", options:["The nucleus exists","Atoms contain negative charges (electrons)","Atoms are indivisible","Electrons orbit in shells"], correct:1},
+      {q:"What did Thomson get wrong?", options:["Electrons exist","Atoms have positive charge","The distribution of positive charge (not uniform)","Atoms are electrically neutral overall"], correct:2},
+      {q:"What problem did Rutherford's model have?", options:["No nucleus","No electrons","Could not explain why orbiting electrons don't lose energy and crash","Too many particles"], correct:2},
+      {q:"How did Bohr fix Rutherford's problem?", options:["Removed electrons","Added neutrons","Proposed electrons have fixed energy levels (quantized orbits)","Made the nucleus bigger"], correct:2},
+      {q:"The quantum model improved on Bohr by:", options:["Removing the nucleus","Describing electrons as probability clouds, not fixed orbits","Adding more orbits","Making atoms larger"], correct:1},
+      {q:"Which model first correctly predicted atomic line spectra?", options:["Dalton's","Thomson's","Bohr's","Rutherford's"], correct:2},
+      {q:"In Bohr's model, when an electron drops to a lower level it:", options:["Gains mass","Emits a photon","Absorbs a neutron","Splits into quarks"], correct:1},
+      {q:"Which two models both include a central nucleus?", options:["Dalton and Thomson","Thomson and Rutherford","Rutherford and Bohr","Dalton and Bohr"], correct:2},
+      {q:"The main limitation of Bohr's model is:", options:["It has no nucleus","It only accurately predicts hydrogen's spectrum","It doesn't include electrons","It was proposed too early"], correct:1}
+    ]
+  },
+  {
+    id:8, title:"Key Dates and Scientists",
+    instruction:"Write the scientist or year associated with each event.",
+    rows:[
+      ["1","1897: Discovery of the ___","electron / Thomson"],
+      ["2","1803: ___ proposed modern atomic theory","Dalton"],
+      ["3","1911: ___ discovered the nucleus","Rutherford"],
+      ["4","1913: ___ proposed the planetary model with energy levels","Bohr"],
+      ["5","1932: ___ discovered the neutron","Chadwick"],
+      ["6","~1926: The ___ model was developed","quantum / quantum mechanical"],
+      ["7","~400 BC: ___ proposed the idea of 'atomos'","Democritus"],
+      ["8","1909: ___ measured the charge of the electron (oil drop)","Millikan"],
+      ["9","Year Thomson discovered the electron","1897"],
+      ["10","Year Rutherford performed the gold foil experiment","1911"]
+    ]
+  },
+  {
+    id:9, title:"Arrange: Build Historical Statements", type:"arrange",
+    instruction:"Click the words in the correct order.",
+    sentences:[
+      {prompt:"Rutherford discovered the nucleus using the gold foil experiment", words:["Rutherford","discovered","the nucleus","using","the gold foil","experiment"]},
+      {prompt:"Thomson discovered electrons using cathode ray tubes", words:["Thomson","discovered","electrons","using","cathode ray","tubes"]},
+      {prompt:"Bohr proposed that electrons orbit in fixed energy levels", words:["Bohr","proposed that","electrons","orbit in","fixed energy","levels"]},
+      {prompt:"Dalton said atoms are indivisible and indestructible", words:["Dalton","said","atoms are","indivisible","and","indestructible"]},
+      {prompt:"The quantum model uses probability to describe electron position", words:["The quantum model","uses","probability","to describe","electron","position"]}
+    ]
+  },
+  {
+    id:10, title:"MC: Laws of Chemistry", type:"mc",
+    instruction:"Select the correct answer about the fundamental laws of chemistry.",
+    questions:[
+      {q:"If 12 g of carbon reacts with 32 g of oxygen, how many grams of CO\u2082 are formed?", options:["12 g","32 g","44 g","20 g"], correct:2},
+      {q:"The law of conservation of mass was established by:", options:["Dalton","Proust","Lavoisier","Thomson"], correct:2},
+      {q:"Water is always 11.1% H and 88.9% O by mass. This is the law of:", options:["Conservation of mass","Definite proportions","Multiple proportions","Conservation of energy"], correct:1},
+      {q:"CO has C:O ratio 3:4. CO\u2082 has C:O ratio 3:8. The ratio of oxygen masses (4:8 = 1:2) demonstrates:", options:["Conservation of mass","Definite proportions","Multiple proportions","Avogadro's law"], correct:2},
+      {q:"In a closed system, a candle burning will:", options:["Lose mass","Gain mass","Have the same total mass","Create energy from nothing"], correct:2},
+      {q:"The law of definite proportions means:", options:["Any ratio of elements can form a compound","A compound always has the same percent composition","Mass changes during reactions","Elements can be created"], correct:1},
+      {q:"The law of multiple proportions applies when:", options:["One compound is formed from two elements","Two different compounds are formed from the same elements","Mass is not conserved","Elements have variable atomic mass"], correct:1},
+      {q:"H\u2082O and H\u2082O\u2082 illustrate the law of:", options:["Conservation of mass","Definite proportions","Multiple proportions","Conservation of energy"], correct:2},
+      {q:"Lavoisier's key contribution was:", options:["Discovering elements","Careful mass measurements in chemical reactions","Inventing the microscope","Splitting the atom"], correct:1},
+      {q:"If you burn 5 g of magnesium in oxygen and get 8.3 g of MgO, how much oxygen reacted?", options:["3.3 g","5 g","8.3 g","13.3 g"], correct:0}
+    ]
+  },
+  {
+    id:11, title:"Contributions Timeline",
+    instruction:"Complete the timeline by filling in the scientist or contribution.",
+    rows:[
+      ["1","~400 BC: Democritus proposes ___","atoms / atomos / indivisible particles"],
+      ["2","1661: Robert Boyle defines ___","elements / chemical elements"],
+      ["3","1789: Lavoisier publishes the law of ___","conservation of mass"],
+      ["4","1799: Proust publishes the law of ___","definite proportions"],
+      ["5","1803: Dalton publishes the law of ___","multiple proportions / atomic theory"],
+      ["6","1869: Mendeleev creates the ___","periodic table"],
+      ["7","1897: Thomson discovers ___","electrons / the electron"],
+      ["8","1909: Millikan measures ___","electron charge / charge of the electron"],
+      ["9","1911: Rutherford discovers ___","the nucleus / nucleus"],
+      ["10","1913: Bohr proposes ___","energy levels / quantized orbits / planetary model"]
+    ]
+  },
+  {
+    id:12, title:"MC: Tricky History Questions", type:"mc",
+    instruction:"These are designed to be tricky. Think carefully.",
+    questions:[
+      {q:"Democritus was a philosopher, not a scientist, because:", options:["He was Greek","He had no experimental evidence for his claims","He was wrong","He lived too long ago"], correct:1},
+      {q:"Dalton's model is sometimes called the 'billiard ball' model because:", options:["He liked billiards","Atoms were depicted as solid, featureless spheres","Billiard balls are made of atoms","The math is similar to billiards"], correct:1},
+      {q:"Thomson knew electrons were negative because:", options:["He could see them","They were deflected toward the positive plate in electric fields","Dalton told him","Neutrons are positive"], correct:1},
+      {q:"If Thomson's plum pudding model were correct, in Rutherford's experiment:", options:["No particles would pass through","All particles would pass through with small deflections","All particles would bounce back","The foil would melt"], correct:1},
+      {q:"Rutherford was surprised by his results because:", options:["Everything passed through","Some particles bounced back, which was unexpected","The gold foil melted","He discovered electrons"], correct:1},
+      {q:"Bohr's model is sometimes called the 'planetary model' because:", options:["It involves planets","Electrons orbit the nucleus like planets orbit the sun","It was developed at a planetarium","The math uses planetary equations"], correct:1},
+      {q:"The quantum model says we can never know both the position and momentum of an electron exactly. This is:", options:["The Bohr principle","The Rutherford rule","The Heisenberg uncertainty principle","The Thomson theorem"], correct:2},
+      {q:"Which statement about Dalton's theory has been modified?", options:["Atoms exist","Atoms of same element have same properties (isotopes exist)","Atoms combine to form compounds","Atoms rearrange in chemical reactions"], correct:1},
+      {q:"Chadwick's discovery of the neutron in 1932 was important because:", options:["It explained isotopes","It completed the picture of the atom's nucleus","It explained nuclear stability","All of the above"], correct:3},
+      {q:"The reason we still teach older atomic models is:", options:["They are still correct","Each model built on previous ones and shows how science progresses","Teachers are required to","The quantum model is too complicated to use"], correct:1}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/\u03ac/g,'\u03b1').replace(/\u03ad/g,'\u03b5').replace(/\u03ae/g,'\u03b7').replace(/\u03af/g,'\u03b9')
+       .replace(/\u03cc/g,'\u03bf').replace(/\u03cd/g,'\u03c5').replace(/\u03ce/g,'\u03c9').replace(/\u0390/g,'\u03b9').replace(/\u03b0/g,'\u03c5');
+  s = s.replace(/\u2080/g,'0').replace(/\u2081/g,'1').replace(/\u2082/g,'2').replace(/\u2083/g,'3').replace(/\u2084/g,'4')
+       .replace(/\u2085/g,'5').replace(/\u2086/g,'6').replace(/\u2087/g,'7').replace(/\u2088/g,'8').replace(/\u2089/g,'9');
+  s = s.replace(/\u207a/g,'+').replace(/\u207b/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Timeline of Atomic Theory</h3>' +
+'<table><tr><th>Year</th><th>Scientist</th><th>Model/Discovery</th><th>Key Idea</th></tr>' +
+'<tr><td>~400 BC</td><td><span class="rule">Democritus</span></td><td>Atomos concept</td><td>Matter is made of tiny, indivisible particles called "atomos"</td></tr>' +
+'<tr><td>1803</td><td><span class="rule">Dalton</span></td><td>Solid sphere model</td><td>Atoms are indivisible, indestructible solid spheres. Same element = identical atoms. Different elements = different atoms.</td></tr>' +
+'<tr><td>1897</td><td><span class="rule">Thomson</span></td><td>Plum pudding model</td><td>Discovered electrons via cathode ray tube. Atom = positive sphere with embedded negative electrons.</td></tr>' +
+'<tr><td>1909</td><td><span class="rule">Millikan</span></td><td>Oil drop experiment</td><td>Measured the charge of a single electron (1.6 \u00D7 10\u207B\u00B9\u2079 C).</td></tr>' +
+'<tr><td>1911</td><td><span class="rule">Rutherford</span></td><td>Nuclear model</td><td>Gold foil experiment: atom is mostly empty space with a tiny, dense, positive nucleus. Electrons orbit outside.</td></tr>' +
+'<tr><td>1913</td><td><span class="rule">Bohr</span></td><td>Planetary model</td><td>Electrons orbit in fixed energy levels (quantized). Explained hydrogen emission spectrum.</td></tr>' +
+'<tr><td>1926</td><td><span class="rule">Schr\u00F6dinger/Heisenberg</span></td><td>Quantum mechanical model</td><td>Electrons exist in probability clouds (orbitals), not fixed orbits. Current accepted model.</td></tr>' +
+'<tr><td>1932</td><td><span class="rule">Chadwick</span></td><td>Neutron discovery</td><td>Found the neutral particle in the nucleus by bombarding beryllium with alpha particles.</td></tr></table>' +
+'<h3>Key Experiments</h3>' +
+'<p><span class="rule">Cathode Ray Tube (Thomson, 1897):</span> A beam of particles (cathode rays) was produced in a vacuum tube. The rays were deflected by electric and magnetic fields toward the positive plate, proving they are negatively charged particles (electrons). Thomson measured their charge-to-mass ratio.</p>' +
+'<p><span class="rule">Gold Foil Experiment (Rutherford, 1911):</span> Alpha particles (\u03B1, He\u00B2\u207A) were fired at thin gold foil. Most passed straight through (atom is mostly empty space). Some deflected slightly (passing near the nucleus). Very few (~1 in 8000) bounced straight back (hitting the dense positive nucleus). This disproved Thomson\'s plum pudding model.</p>' +
+'<h3>Laws of Chemistry</h3>' +
+'<p><span class="rule">Law of Conservation of Mass (Lavoisier, 1789):</span> In a chemical reaction, mass is neither created nor destroyed. Total mass of reactants = total mass of products.</p>' +
+'<p><span class="rule">Law of Definite Proportions (Proust, 1799):</span> A chemical compound always contains the same elements in the same proportions by mass, regardless of source or how it was prepared. Example: Water is always 11.1% H and 88.9% O by mass.</p>' +
+'<p><span class="rule">Law of Multiple Proportions (Dalton, 1803):</span> When two elements form more than one compound, the ratios of the masses of the second element that combine with a fixed mass of the first element are small whole numbers. Example: In CO and CO\u2082, the ratio of oxygen masses combining with the same mass of carbon is 1:2.</p>' +
+'<h3>What Each Model Got Right and Wrong</h3>' +
+'<ul>' +
+'<li><span class="rule">Dalton:</span> Right: atoms exist, combine in ratios. Wrong: atoms are not indivisible, not all same-element atoms are identical (isotopes).</li>' +
+'<li><span class="rule">Thomson:</span> Right: atoms contain electrons (negative charges). Wrong: positive charge is not uniformly distributed (it is concentrated in a nucleus).</li>' +
+'<li><span class="rule">Rutherford:</span> Right: nucleus exists, atom is mostly empty space. Wrong: could not explain electron stability (classical physics predicts orbiting electrons should radiate energy and spiral in).</li>' +
+'<li><span class="rule">Bohr:</span> Right: electrons have quantized energy levels. Wrong: electrons do not travel in fixed circular orbits; only works for hydrogen.</li>' +
+'<li><span class="rule">Quantum:</span> Current model. Electrons described by probability distributions (orbitals). Heisenberg uncertainty principle: cannot know both position and momentum of an electron exactly.</li>' +
+'</ul>';
+
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 Dalton, Thomson, Rutherford, Bohr, conservation laws \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

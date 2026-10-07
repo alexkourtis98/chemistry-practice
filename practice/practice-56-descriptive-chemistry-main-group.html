@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice 56 — Descriptive Chemistry: Main Group Elements</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Practice 56 &mdash; Descriptive Chemistry: Main Group Elements</h1>
+<p class="subtitle">Deep practice &mdash; Group 1-2 metals, Group 13-18, trends, common compounds</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_56';
+const SECTIONS = [
+  {
+    id:1, title:"Alkali Metals (Group 1)",
+    instruction:"Fill in the blank for each question about Group 1 elements.",
+    rows:[
+      ["1","Alkali metals have ___ valence electron(s)","1"],
+      ["2","The typical ion charge of Group 1 metals is ___","+1 / 1+"],
+      ["3","Alkali metals are ___ (hard/soft) and can be cut with a knife","soft"],
+      ["4","2Na + 2H\u2082O \u2192 2___ + H\u2082","NaOH"],
+      ["5","Lithium produces a ___ colored flame","red / crimson"],
+      ["6","Sodium produces a ___ colored flame","yellow"],
+      ["7","Potassium produces a ___ colored flame","violet / purple / lilac"],
+      ["8","Reactivity ___ (increases/decreases) going down Group 1","increases"],
+      ["9","4Li + O\u2082 \u2192 2___ (lithium forms this oxide)","Li2O / lithium oxide"],
+      ["10","2Na + O\u2082 \u2192 ___ (sodium forms this peroxide)","Na2O2 / sodium peroxide"],
+      ["11","K + O\u2082 \u2192 ___ (potassium forms this superoxide)","KO2 / potassium superoxide"],
+      ["12","Alkali metals are stored in ___ to prevent reaction with air","oil / mineral oil / kerosene"],
+      ["13","Cesium is the ___ (most/least) reactive alkali metal","most"],
+      ["14","2K + 2H\u2082O \u2192 2KOH + ___ (gas produced)","H2 / hydrogen"],
+      ["15","The reaction of K with water is ___ (more/less) violent than Na with water","more"],
+      ["16","NaCl is commonly known as ___","table salt / salt / sodium chloride"],
+      ["17","2Na + Cl\u2082 \u2192 ___","2NaCl"],
+      ["18","Alkali metal hydroxides are ___ (strong/weak) bases","strong"]
+    ]
+  },
+  {
+    id:2, title:"Alkaline Earth Metals (Group 2)",
+    instruction:"Fill in the blank for each question about Group 2 elements.",
+    rows:[
+      ["1","Alkaline earth metals have ___ valence electron(s)","2"],
+      ["2","The typical ion charge of Group 2 metals is ___","+2 / 2+"],
+      ["3","CaCO\u2083 is the chemical formula for ___","calcium carbonate / limestone"],
+      ["4","MgO is called ___","magnesium oxide"],
+      ["5","Ca(OH)\u2082 is commonly known as ___ lime","slaked"],
+      ["6","BaSO\u2084 is used in medical imaging as a ___ agent","contrast"],
+      ["7","Mg burns in air with a bright ___ flame","white"],
+      ["8","Group 2 metals are ___ (more/less) reactive than Group 1","less"],
+      ["9","Be(OH)\u2082 is ___ (amphoteric/basic/acidic)","amphoteric"],
+      ["10","Mg(OH)\u2082 is used as an antacid and is called ___ of magnesia","milk"],
+      ["11","Ca(OH)\u2082 solubility in water is ___ (high/low/moderate)","low / moderate"],
+      ["12","Ba(OH)\u2082 is ___ (soluble/insoluble) in water","soluble"],
+      ["13","Going down Group 2, hydroxide solubility ___ (increases/decreases)","increases"],
+      ["14","CaO is commonly known as ___ lime","quick / quicklime"],
+      ["15","CaSO\u2084 \u00B7 2H\u2082O is the chemical formula for ___","gypsum"],
+      ["16","MgCO\u2083 is the formula for ___","magnesium carbonate / magnesite"],
+      ["17","Calcium produces a ___ colored flame","orange-red / orange / brick-red"],
+      ["18","Barium produces a ___ colored flame","green / pale green"]
+    ]
+  },
+  {
+    id:3, title:"Groups 13-14 (Boron and Carbon Groups)",
+    instruction:"Fill in the blank for each question about Group 13 and 14 elements.",
+    rows:[
+      ["1","Boron is a ___ (metal/metalloid/nonmetal)","metalloid"],
+      ["2","Aluminum is the most abundant ___ in Earth's crust","metal"],
+      ["3","Al forms a protective layer of ___ on its surface","Al2O3 / aluminum oxide / alumina"],
+      ["4","Carbon exists in allotropes including diamond, graphite, and ___","fullerene / buckminsterfullerene / C60"],
+      ["5","Silicon is classified as a ___","metalloid / semiconductor"],
+      ["6","Silicon is the basis of ___ chips in electronics","computer / semiconductor / microchip"],
+      ["7","Al(OH)\u2083 is ___ (amphoteric/basic/acidic)","amphoteric"],
+      ["8","Al reacts with both acids AND bases because it is ___","amphoteric"],
+      ["9","The process for extracting aluminum from bauxite ore is the ___ process","Hall-Heroult / Hall-Heroult"],
+      ["10","Bauxite is the primary ___ of aluminum","ore"],
+      ["11","In diamond, each carbon is bonded to ___ other carbons","4 / four"],
+      ["12","In graphite, each carbon is bonded to ___ other carbons in a plane","3 / three"],
+      ["13","Graphite conducts electricity because of delocalized ___ electrons","pi / p"],
+      ["14","Diamond is the ___ (hardest/softest) natural substance","hardest"],
+      ["15","Silicon dioxide (SiO\u2082) is commonly known as ___","quartz / sand / silica"],
+      ["16","Germanium is a ___ (metal/metalloid/nonmetal)","metalloid / semiconductor"],
+      ["17","Tin has two allotropes: white tin and ___ tin","gray / grey"],
+      ["18","Lead (Pb) is toxic and was historically used in ___ and gasoline","paint / pipes"]
+    ]
+  },
+  {
+    id:4, title:"Groups 15-16 (Nitrogen and Oxygen Groups)",
+    instruction:"Fill in the blank for each question about Group 15 and 16 elements.",
+    rows:[
+      ["1","N\u2082 has a ___ bond (single/double/triple)","triple"],
+      ["2","N\u2082 makes up about ___% of Earth's atmosphere","78"],
+      ["3","Oxygen exists as O\u2082 and as ___ (O\u2083)","ozone"],
+      ["4","Sulfur commonly exists as ___ (molecular formula of its ring)","S8"],
+      ["5","Phosphorus has two common allotropes: white and ___","red"],
+      ["6","H\u2082SO\u2084 is the chemical formula for ___ acid","sulfuric"],
+      ["7","The Haber process converts N\u2082 + 3H\u2082 \u2192 ___","2NH3 / ammonia"],
+      ["8","The Haber process is used industrially to make ___","ammonia / NH3 / fertilizer"],
+      ["9","NH\u2083 is called ___","ammonia"],
+      ["10","HNO\u2083 is called ___ acid","nitric"],
+      ["11","NO\u2082 is a ___ (colorless/brown) gas that contributes to smog","brown / reddish-brown"],
+      ["12","O\u2083 (ozone) in the stratosphere protects from ___ radiation","UV / ultraviolet"],
+      ["13","SO\u2082 is produced by burning ___ -containing fuels","sulfur"],
+      ["14","SO\u2082 + H\u2082O \u2192 ___ (acid rain component)","H2SO3 / sulfurous acid"],
+      ["15","The Contact process produces ___ (industrial chemical)","H2SO4 / sulfuric acid"],
+      ["16","H\u2082S has the smell of ___","rotten eggs"],
+      ["17","White phosphorus is ___ (dangerous/safe) and glows in the dark","dangerous / toxic / pyrophoric"],
+      ["18","Arsenic is a ___ (metal/metalloid/nonmetal)","metalloid"]
+    ]
+  },
+  {
+    id:5, title:"Halogens (Group 17)", type:"mc",
+    instruction:"Select the correct answer about the halogens.",
+    questions:[
+      {q:"Which halogen is the most reactive?", options:["Cl\u2082","Br\u2082","F\u2082","I\u2082"], correct:2},
+      {q:"What color is fluorine gas?", options:["Green","Brown","Purple","Pale yellow"], correct:3},
+      {q:"What color is chlorine gas?", options:["Pale yellow","Yellow-green","Brown","Colorless"], correct:1},
+      {q:"What color is bromine liquid?", options:["Pale yellow","Green","Reddish-brown","Purple"], correct:2},
+      {q:"What color is iodine vapor?", options:["Pale yellow","Green","Brown","Violet/purple"], correct:3},
+      {q:"Halogens have ___ valence electrons:", options:["5","6","7","8"], correct:2},
+      {q:"The typical ion charge of halogens is:", options:["+1","-1","+2","-2"], correct:1},
+      {q:"Which halogen is the most electronegative element?", options:["Chlorine","Bromine","Iodine","Fluorine"], correct:3},
+      {q:"At room temperature, fluorine and chlorine are:", options:["Liquids","Solids","Gases","Metals"], correct:2},
+      {q:"At room temperature, bromine is a:", options:["Gas","Solid","Liquid","Plasma"], correct:2},
+      {q:"At room temperature, iodine is a:", options:["Gas","Solid","Liquid","Plasma"], correct:1},
+      {q:"F\u2082 can displace Cl\u2082 from NaCl solution because F\u2082 is:", options:["Larger","Less electronegative","More reactive","Less reactive"], correct:2},
+      {q:"Cl\u2082 + 2NaBr \u2192 2NaCl + Br\u2082 is a ___ reaction:", options:["Decomposition","Single displacement","Double displacement","Synthesis"], correct:1},
+      {q:"Can Br\u2082 displace Cl\u2082 from NaCl?", options:["Yes, always","No, Br is less reactive","Yes, if heated","Only with catalyst"], correct:1},
+      {q:"HF is a ___ acid (strong/weak):", options:["Strong","Weak","Neither","Both"], correct:1},
+      {q:"HCl, HBr, and HI are all ___ acids:", options:["Weak","Strong","Organic","Neutral"], correct:1}
+    ]
+  },
+  {
+    id:6, title:"Noble Gases (Group 18)", type:"mc",
+    instruction:"Select the correct answer about the noble gases.",
+    questions:[
+      {q:"Noble gases have a ___ outer electron shell:", options:["Half-full","Empty","Full","Single electron"], correct:2},
+      {q:"Which noble gas compound was first synthesized?", options:["HeF\u2082","XeF\u2082","ArF\u2082","KrF\u2082"], correct:1},
+      {q:"Helium is used in balloons because it is:", options:["Cheap","Less dense than air and non-flammable","The lightest element","Colorful"], correct:1},
+      {q:"Neon is commonly used in:", options:["Welding","Light-up signs","Balloons","Breathing mixtures"], correct:1},
+      {q:"Argon is used as a shielding gas in:", options:["Neon signs","Balloons","Welding","Photography"], correct:2},
+      {q:"Noble gases are sometimes called:", options:["Active gases","Inert gases","Toxic gases","Reactive gases"], correct:1},
+      {q:"Which noble gas is used with oxygen for deep-sea diving?", options:["Neon","Argon","Helium","Xenon"], correct:2},
+      {q:"XeF\u2082 has ___ lone pairs on xenon:", options:["1","2","3","4"], correct:2},
+      {q:"XeF\u2084 has the molecular geometry:", options:["Tetrahedral","Square planar","See-saw","Trigonal bipyramidal"], correct:1},
+      {q:"Radon (Rn) is ___ and can accumulate in basements:", options:["Non-toxic","Radioactive","Fluorescent","Magnetic"], correct:1}
+    ]
+  },
+  {
+    id:7, title:"Industrial Processes", type:"mc",
+    instruction:"Select the correct answer about industrial chemistry of main group elements.",
+    questions:[
+      {q:"The Haber process produces:", options:["Sulfuric acid","Ammonia","Chlorine","Sodium hydroxide"], correct:1},
+      {q:"The Contact process produces:", options:["Ammonia","Nitric acid","Sulfuric acid","Hydrochloric acid"], correct:2},
+      {q:"The Hall-Heroult process is used to produce:", options:["Iron","Copper","Aluminum","Sodium"], correct:2},
+      {q:"The Haber process conditions include high ___ and an iron catalyst:", options:["Vacuum","Pressure","Acidity","Light"], correct:1},
+      {q:"The chlor-alkali process electrolyzes brine to produce Cl\u2082, H\u2082, and:", options:["HCl","NaOH","Na\u2082CO\u2083","NaHCO\u2083"], correct:1},
+      {q:"The Ostwald process converts ammonia to:", options:["N\u2082","NH\u2084NO\u2083","HNO\u2083","N\u2082O"], correct:2},
+      {q:"Smelting is used to extract metals from their:", options:["Solutions","Ores","Alloys","Salts"], correct:1},
+      {q:"The Thermite reaction uses ___ to reduce Fe\u2082O\u2083:", options:["Carbon","Hydrogen","Aluminum","Magnesium"], correct:2},
+      {q:"The Frasch process extracts ___ from underground deposits:", options:["Gold","Iron","Sulfur","Phosphorus"], correct:2},
+      {q:"Electrolysis of molten NaCl produces Na metal and:", options:["O\u2082","H\u2082","Cl\u2082","F\u2082"], correct:2}
+    ]
+  },
+  {
+    id:8, title:"Oxide Types and Reactions",
+    instruction:"Fill in the blank about oxide chemistry.",
+    rows:[
+      ["1","Na\u2082O is a ___ (acidic/basic) oxide","basic"],
+      ["2","SO\u2083 is a ___ (acidic/basic) oxide","acidic"],
+      ["3","Al\u2082O\u2083 is an ___ oxide (can react with acids AND bases)","amphoteric"],
+      ["4","CO\u2082 + H\u2082O \u2192 ___ (carbonic acid)","H2CO3"],
+      ["5","Na\u2082O + H\u2082O \u2192 ___","2NaOH"],
+      ["6","CaO + H\u2082O \u2192 ___","Ca(OH)2 / calcium hydroxide"],
+      ["7","SO\u2083 + H\u2082O \u2192 ___","H2SO4 / sulfuric acid"],
+      ["8","Metal oxides are generally ___ (acidic/basic)","basic"],
+      ["9","Non-metal oxides are generally ___ (acidic/basic)","acidic"],
+      ["10","P\u2084O\u2081\u2080 + 6H\u2082O \u2192 4___","H3PO4 / phosphoric acid"]
+    ]
+  },
+  {
+    id:9, title:"Reactivity Trends Word Arrange", type:"arrange",
+    instruction:"Arrange groups or elements in order of reactivity (most reactive first) or as instructed.",
+    sentences:[
+      {prompt:"Alkali metals in order of increasing reactivity:", words:["Li","Na","K","Rb","Cs"]},
+      {prompt:"Halogens in order of decreasing reactivity:", words:["F","Cl","Br","I"]},
+      {prompt:"Group 2 hydroxide solubility, increasing:", words:["Be(OH)2","Mg(OH)2","Ca(OH)2","Sr(OH)2","Ba(OH)2"]},
+      {prompt:"Noble gases by increasing atomic number:", words:["He","Ne","Ar","Kr","Xe","Rn"]},
+      {prompt:"Carbon allotropes from softest to hardest:", words:["graphite","fullerene","diamond"]},
+      {prompt:"The Haber process equation:", words:["N2","+","3H2","->","2NH3"]},
+      {prompt:"Steps of the Contact process:", words:["S","burns","to","SO2,","then","SO2","oxidized","to","SO3,","then","SO3","+","H2O","=","H2SO4"]},
+      {prompt:"Halogen states at room temperature:", words:["F2(gas),","Cl2(gas),","Br2(liquid),","I2(solid)"]}
+    ]
+  },
+  {
+    id:10, title:"Mixed Review",
+    instruction:"Fill in the blank with the correct element, group, or property.",
+    rows:[
+      ["1","The most reactive metal family is Group ___","1 / 1A / alkali metals"],
+      ["2","The most reactive nonmetal family is Group ___","17 / 7A / halogens"],
+      ["3","Going down a group, atomic radius ___ (increases/decreases)","increases"],
+      ["4","Going across a period (left to right), ionization energy generally ___","increases"],
+      ["5","The element with atomic number 12 is ___","Mg / magnesium"],
+      ["6","Group 18 elements are unreactive because they have ___ valence electrons","8 / full / complete"],
+      ["7","Copper produces a ___ colored flame","blue-green / green / blue"],
+      ["8","Strontium produces a ___ colored flame","red / crimson"],
+      ["9","Going down Group 1, melting point ___ (increases/decreases)","decreases"],
+      ["10","Going down Group 17, boiling point ___ (increases/decreases)","increases"],
+      ["11","The density of alkali metals ___ (increases/decreases) going down the group","increases"],
+      ["12","Li, Na, and K are ___ (more/less) dense than water","less"],
+      ["13","Francium is the ___ (most/least) stable alkali metal due to radioactivity","least"],
+      ["14","NaHCO\u2083 is commonly known as ___","baking soda / sodium bicarbonate"],
+      ["15","Na\u2082CO\u2083 is commonly known as ___ soda","washing / soda ash"],
+      ["16","The most abundant element in the universe is ___","hydrogen / H"],
+      ["17","The most abundant element in Earth's crust (by mass) is ___","oxygen / O"],
+      ["18","Going across a period, electronegativity generally ___","increases"]
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Main Group Elements Reference</h3>' +
+'<p><span class="rule">Group 1 - Alkali Metals (Li, Na, K, Rb, Cs, Fr):</span></p>' +
+'<p>1 valence e\u207B, ion charge +1. Soft metals, can be cut with a knife. Very reactive, stored in oil/kerosene. React violently with water: 2M + 2H\u2082O \u2192 2MOH + H\u2082\u2191 (reactivity increases down group: Cs > Rb > K > Na > Li). Form strong bases (MOH). Oxides differ: Li\u2192Li\u2082O (oxide), Na\u2192Na\u2082O\u2082 (peroxide), K\u2192KO\u2082 (superoxide). Density increases down group; Li, Na, K float on water. Melting point decreases down group.</p>' +
+'<p><span class="rule">Flame Colors:</span> Li = red/crimson, Na = yellow, K = violet/lilac, Rb = red-violet, Cs = blue</p>' +
+'<p><span class="rule">Group 2 - Alkaline Earth Metals (Be, Mg, Ca, Sr, Ba, Ra):</span></p>' +
+'<p>2 valence e\u207B, ion charge +2. Harder, denser, higher MP than Group 1. Less reactive than Group 1. Be(OH)\u2082 is amphoteric. Mg burns with brilliant white flame. Hydroxide solubility increases down group: Be(OH)\u2082 < Mg(OH)\u2082 < Ca(OH)\u2082 < Sr(OH)\u2082 < Ba(OH)\u2082. Key compounds: CaCO\u2083 (limestone), Ca(OH)\u2082 (slaked lime), CaO (quicklime), MgO (refractory), BaSO\u2084 (contrast agent), CaSO\u2084\u00B72H\u2082O (gypsum), Mg(OH)\u2082 (milk of magnesia). Flame: Ca=orange-red, Sr=crimson, Ba=pale green.</p>' +
+'<p><span class="rule">Group 13 - Boron Group:</span></p>' +
+'<p>B is a metalloid (hard, high MP, semiconductor). Al is the most abundant metal in Earth\u2019s crust. Al is amphoteric: reacts with BOTH acids (Al + HCl \u2192 AlCl\u2083 + H\u2082) AND bases (Al + NaOH + H\u2082O \u2192 NaAlO\u2082 + H\u2082). Al forms a protective Al\u2082O\u2083 oxide layer (passivation). Al(OH)\u2083 is also amphoteric. Extracted from bauxite ore via the Hall-H\u00E9roult process (electrolysis of Al\u2082O\u2083 in molten cryolite).</p>' +
+'<p><span class="rule">Group 14 - Carbon Group:</span></p>' +
+'<p>C exists as allotropes: diamond (sp\u00B3, hardest natural substance, 4 bonds per C), graphite (sp\u00B2, 3 bonds per C in layers, conducts electricity via delocalized \u03C0 electrons, soft/lubricant), fullerene (C\u2086\u2080, soccer-ball shape), graphene (single graphite layer). Si is a metalloid/semiconductor, basis of computer chips. SiO\u2082 = quartz/sand/silica. Ge = semiconductor. Sn has white/gray allotropes. Pb is toxic (paint, gasoline historically).</p>' +
+'<p><span class="rule">Group 15 - Nitrogen Group:</span></p>' +
+'<p>N\u2082 has a triple bond (N\u2261N, very strong \u2192 inert at room temp). N\u2082 = 78% of atmosphere. P has allotropes: white P (toxic, pyrophoric, glows in dark) and red P (stable, used in matches). NH\u2083 = ammonia, HNO\u2083 = nitric acid, NO\u2082 = brown smog gas. As is a metalloid.</p>' +
+'<p><span class="rule">Group 16 - Oxygen/Chalcogen Group:</span></p>' +
+'<p>O exists as O\u2082 (life-sustaining) and O\u2083 (ozone, stratospheric UV shield). S exists as S\u2088 rings in rhombic (stable, yellow) and monoclinic (needle-like) allotropes. H\u2082S = rotten eggs smell. SO\u2082 = acidic gas from burning S-fuels, SO\u2082 + H\u2082O \u2192 H\u2082SO\u2083 (acid rain). H\u2082SO\u2084 = sulfuric acid (most produced industrial chemical).</p>' +
+'<p><span class="rule">Group 17 - Halogens (F, Cl, Br, I, At):</span></p>' +
+'<p>7 valence e\u207B, ion charge -1. Most reactive nonmetals. Reactivity DECREASES down group (F > Cl > Br > I). Colors/states at RT: F\u2082 = pale yellow gas, Cl\u2082 = yellow-green gas, Br\u2082 = reddish-brown LIQUID (only nonmetal liquid at RT), I\u2082 = violet/purple SOLID (sublimes to purple vapor). F = most electronegative element. HF is weak acid (all other HX are strong). Displacement: more reactive halogen displaces less reactive from salt (F\u2082 + 2NaCl \u2192 2NaF + Cl\u2082, but not reverse).</p>' +
+'<p><span class="rule">Group 18 - Noble Gases (He, Ne, Ar, Kr, Xe, Rn):</span></p>' +
+'<p>Full outer electron shell (8 e\u207B, except He = 2). Very stable, mostly inert. Exceptions: XeF\u2082 (3 lone pairs on Xe, linear), XeF\u2084 (2 lone pairs on Xe, square planar), XeF\u2086. Uses: He = balloons/diving gas (light + non-flammable), Ne = neon signs, Ar = welding shielding gas, Xe = camera flashes. Rn is radioactive, accumulates in basements.</p>' +
+'<p><span class="rule">Industrial Processes:</span></p>' +
+'<table><tr><th>Process</th><th>Reaction</th><th>Product</th><th>Conditions</th></tr>' +
+'<tr><td>Haber</td><td>N\u2082 + 3H\u2082 \u2192 2NH\u2083</td><td>Ammonia</td><td>High P, 450\u00B0C, Fe catalyst</td></tr>' +
+'<tr><td>Contact</td><td>2SO\u2082 + O\u2082 \u2192 2SO\u2083, then SO\u2083 + H\u2082O \u2192 H\u2082SO\u2084</td><td>Sulfuric acid</td><td>V\u2082O\u2085 catalyst</td></tr>' +
+'<tr><td>Hall-H\u00E9roult</td><td>Al\u2082O\u2083 electrolysis in cryolite</td><td>Aluminum</td><td>~960\u00B0C, C anodes</td></tr>' +
+'<tr><td>Ostwald</td><td>4NH\u2083 + 5O\u2082 \u2192 4NO + 6H\u2082O</td><td>Nitric acid</td><td>Pt-Rh catalyst</td></tr>' +
+'<tr><td>Chlor-alkali</td><td>2NaCl + 2H\u2082O \u2192 Cl\u2082 + H\u2082 + 2NaOH</td><td>Cl\u2082, NaOH</td><td>Electrolysis of brine</td></tr>' +
+'<tr><td>Frasch</td><td>Superheated water melts underground S</td><td>Sulfur</td><td>Hot water + compressed air</td></tr></table>' +
+'<p><span class="rule">Metallurgy:</span> Roasting (heating ore in air to convert sulfide \u2192 oxide), Smelting (reducing ore with C/CO at high temp to get metal), Refining (purifying crude metal, e.g., electrolytic refining of Cu). Thermite: 2Al + Fe\u2082O\u2083 \u2192 Al\u2082O\u2083 + 2Fe (extremely exothermic).</p>' +
+'<p><span class="rule">Oxide Types:</span> Metal oxides = basic (Na\u2082O + H\u2082O \u2192 2NaOH). Nonmetal oxides = acidic (SO\u2083 + H\u2082O \u2192 H\u2082SO\u2084). Amphoteric oxides: Al\u2082O\u2083, BeO, ZnO (react with both acids and bases).</p>' +
+'<p><span class="rule">Reactivity Trends:</span> Metals: reactivity increases DOWN a group (weaker hold on valence e\u207B). Nonmetals: reactivity increases UP a group (higher electronegativity). Across a period L\u2192R: ionization energy increases, electronegativity increases, atomic radius decreases.</p>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 Group 1-2 metals, Group 13-18, trends, common compounds \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

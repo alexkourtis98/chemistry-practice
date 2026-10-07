@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice 30 — Redox Reactions & Oxidation Numbers</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Practice 30 &mdash; Redox Reactions &amp; Oxidation Numbers</h1>
+<p class="subtitle">Deep practice &mdash; oxidation numbers, redox identification, half-reactions</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_30';
+const SECTIONS = [
+  {
+    id:1, title:"Oxidation Number Rules",
+    instruction:"Fill in the blank for each oxidation number rule.",
+    rows:[
+      ["1","Oxidation number of any element in its elemental form is ___","0"],
+      ["2","Oxidation number of O in most compounds is ___","-2"],
+      ["3","Oxidation number of H in most compounds is ___","+1"],
+      ["4","Sum of oxidation numbers in a neutral compound = ___","0"],
+      ["5","Sum of oxidation numbers in a polyatomic ion = ___","charge of the ion / the charge / ion charge"],
+      ["6","Alkali metals (Group 1) always have oxidation number ___","+1"],
+      ["7","Alkaline earth metals (Group 2) always have oxidation number ___","+2"],
+      ["8","Fluorine always has oxidation number ___","-1"],
+      ["9","Oxidation number of O in peroxides (H\u2082O\u2082) is ___","-1"],
+      ["10","Oxidation number of H in metal hydrides (NaH) is ___","-1"],
+      ["11","Oxidation number of a monatomic ion equals its ___","charge"],
+      ["12","Na\u207A has oxidation number ___","+1"],
+      ["13","Cl\u207B has oxidation number ___","-1"],
+      ["14","Fe\u00B2\u207A has oxidation number ___","+2"],
+      ["15","Halogens in compounds (except F) are usually ___","-1"],
+      ["16","Oxidation number of O in OF\u2082 is ___","+2"]
+    ]
+  },
+  {
+    id:2, title:"Assign Oxidation Numbers",
+    instruction:"Determine the oxidation number of the specified element in each compound.",
+    rows:[
+      ["1","Mn in KMnO\u2084?","+7"],
+      ["2","Cr in K\u2082Cr\u2082O\u2087?","+6"],
+      ["3","S in H\u2082SO\u2084?","+6"],
+      ["4","N in HNO\u2083?","+5"],
+      ["5","C in CO\u2082?","+4"],
+      ["6","Fe in Fe\u2082O\u2083?","+3"],
+      ["7","Cl in HClO?","+1"],
+      ["8","S in Na\u2082S?","-2"],
+      ["9","N in NH\u2083?","-3"],
+      ["10","P in H\u2083PO\u2084?","+5"],
+      ["11","Cl in NaClO\u2083?","+5"],
+      ["12","Cr in Cr\u2082O\u2083?","+3"],
+      ["13","S in SO\u2083\u00B2\u207B?","+4"],
+      ["14","N in NO\u2082?","+4"],
+      ["15","Mn in MnO\u2082?","+4"],
+      ["16","C in CH\u2084?","-4"],
+      ["17","Cl in Cl\u2082?","0"],
+      ["18","Fe in Fe?","0"],
+      ["19","S in H\u2082S?","-2"],
+      ["20","N in N\u2082O\u2085?","+5"]
+    ]
+  },
+  {
+    id:3, title:"Identify Oxidation & Reduction",
+    instruction:"Fill in the blank about oxidation and reduction concepts.",
+    rows:[
+      ["1","Oxidation is ___ of electrons","loss"],
+      ["2","Reduction is ___ of electrons","gain"],
+      ["3","Mnemonic: OIL RIG stands for ___","Oxidation Is Loss, Reduction Is Gain / oxidation is loss reduction is gain"],
+      ["4","The substance oxidized is the ___ agent","reducing"],
+      ["5","The substance reduced is the ___ agent","oxidizing"],
+      ["6","In 2Na + Cl\u2082 \u2192 2NaCl, Na is ___","oxidized"],
+      ["7","In 2Na + Cl\u2082 \u2192 2NaCl, Cl is ___","reduced"],
+      ["8","If oxidation number increases, the element is ___","oxidized"],
+      ["9","If oxidation number decreases, the element is ___","reduced"],
+      ["10","The oxidizing agent is itself ___ in the reaction","reduced"],
+      ["11","The reducing agent is itself ___ in the reaction","oxidized"],
+      ["12","In Mg + O\u2082 \u2192 MgO, Mg goes from 0 to +2, so Mg is ___","oxidized"],
+      ["13","In Mg + O\u2082 \u2192 MgO, O goes from 0 to -2, so O is ___","reduced"],
+      ["14","LEO the lion says GER: LEO stands for ___","Loss of Electrons is Oxidation / lose electrons oxidation"],
+      ["15","Oxidation and reduction always occur ___ (together/separately)","together / simultaneously"]
+    ]
+  },
+  {
+    id:4, title:"Oxidizing & Reducing Agents",
+    instruction:"Identify the oxidizing agent, reducing agent, or what is oxidized/reduced.",
+    rows:[
+      ["1","In Zn + Cu\u00B2\u207A \u2192 Zn\u00B2\u207A + Cu, the reducing agent is ___","Zn"],
+      ["2","In Zn + Cu\u00B2\u207A \u2192 Zn\u00B2\u207A + Cu, the oxidizing agent is ___","Cu2+ / Cu\u00B2\u207A"],
+      ["3","In 2Fe + 3Cl\u2082 \u2192 2FeCl\u2083, what is oxidized?","Fe"],
+      ["4","In 2Fe + 3Cl\u2082 \u2192 2FeCl\u2083, what is the oxidizing agent?","Cl2 / Cl\u2082"],
+      ["5","In CuO + H\u2082 \u2192 Cu + H\u2082O, what is reduced?","Cu / CuO"],
+      ["6","In CuO + H\u2082 \u2192 Cu + H\u2082O, the reducing agent is ___","H2 / H\u2082"],
+      ["7","In 2Al + 3CuSO\u2084 \u2192 Al\u2082(SO\u2084)\u2083 + 3Cu, the reducing agent is ___","Al"],
+      ["8","In 2Al + 3CuSO\u2084 \u2192 Al\u2082(SO\u2084)\u2083 + 3Cu, the oxidizing agent is ___","Cu2+ / CuSO4 / Cu\u00B2\u207A"],
+      ["9","In C + O\u2082 \u2192 CO\u2082, what is oxidized?","C / carbon"],
+      ["10","In C + O\u2082 \u2192 CO\u2082, what is the oxidizing agent?","O2 / O\u2082 / oxygen"],
+      ["11","In Sn\u00B2\u207A + 2Fe\u00B3\u207A \u2192 Sn\u2074\u207A + 2Fe\u00B2\u207A, Sn\u00B2\u207A is the ___ agent","reducing"],
+      ["12","In Sn\u00B2\u207A + 2Fe\u00B3\u207A \u2192 Sn\u2074\u207A + 2Fe\u00B2\u207A, Fe\u00B3\u207A is the ___ agent","oxidizing"],
+      ["13","Metals that easily lose electrons are good ___ agents","reducing"],
+      ["14","Halogens that easily gain electrons are good ___ agents","oxidizing"],
+      ["15","F\u2082 is the strongest ___ agent among halogens","oxidizing"]
+    ]
+  },
+  {
+    id:5, title:"Identify Redox Reactions", type:"mc",
+    instruction:"Determine whether each reaction is a redox reaction or not.",
+    questions:[
+      {q:"Zn + CuSO\u2084 \u2192 ZnSO\u2084 + Cu", options:["Redox","Not redox"], correct:0},
+      {q:"NaOH + HCl \u2192 NaCl + H\u2082O", options:["Redox","Not redox"], correct:1},
+      {q:"2Mg + O\u2082 \u2192 2MgO", options:["Redox","Not redox"], correct:0},
+      {q:"AgNO\u2083 + NaCl \u2192 AgCl + NaNO\u2083", options:["Redox","Not redox"], correct:1},
+      {q:"Fe\u2082O\u2083 + 3CO \u2192 2Fe + 3CO\u2082", options:["Redox","Not redox"], correct:0},
+      {q:"BaCl\u2082 + Na\u2082SO\u2084 \u2192 BaSO\u2084 + 2NaCl", options:["Redox","Not redox"], correct:1},
+      {q:"2H\u2082O\u2082 \u2192 2H\u2082O + O\u2082", options:["Redox","Not redox"], correct:0},
+      {q:"CH\u2084 + 2O\u2082 \u2192 CO\u2082 + 2H\u2082O", options:["Redox","Not redox"], correct:0},
+      {q:"Ca(OH)\u2082 + 2HCl \u2192 CaCl\u2082 + 2H\u2082O", options:["Redox","Not redox"], correct:1},
+      {q:"2Na + 2H\u2082O \u2192 2NaOH + H\u2082", options:["Redox","Not redox"], correct:0},
+      {q:"CuSO\u2084 + BaCl\u2082 \u2192 BaSO\u2084 + CuCl\u2082", options:["Redox","Not redox"], correct:1},
+      {q:"2KClO\u2083 \u2192 2KCl + 3O\u2082", options:["Redox","Not redox"], correct:0},
+      {q:"Pb(NO\u2083)\u2082 + 2KI \u2192 PbI\u2082 + 2KNO\u2083", options:["Redox","Not redox"], correct:1},
+      {q:"4Fe + 3O\u2082 \u2192 2Fe\u2082O\u2083", options:["Redox","Not redox"], correct:0},
+      {q:"Photosynthesis: 6CO\u2082 + 6H\u2082O \u2192 C\u2086H\u2081\u2082O\u2086 + 6O\u2082", options:["Redox","Not redox"], correct:0}
+    ]
+  },
+  {
+    id:6, title:"Balancing Redox (Half-Reaction Method)",
+    instruction:"Fill in the number of electrons transferred in each half-reaction.",
+    rows:[
+      ["1","Zn \u2192 Zn\u00B2\u207A + ___ e\u207B","2"],
+      ["2","Cu\u00B2\u207A + ___ e\u207B \u2192 Cu","2"],
+      ["3","Fe \u2192 Fe\u00B3\u207A + ___ e\u207B","3"],
+      ["4","MnO\u2084\u207B + 8H\u207A + ___ e\u207B \u2192 Mn\u00B2\u207A + 4H\u2082O","5"],
+      ["5","Al \u2192 Al\u00B3\u207A + ___ e\u207B","3"],
+      ["6","Ag\u207A + ___ e\u207B \u2192 Ag","1"],
+      ["7","Na \u2192 Na\u207A + ___ e\u207B","1"],
+      ["8","Ca \u2192 Ca\u00B2\u207A + ___ e\u207B","2"],
+      ["9","Cr\u2082O\u2087\u00B2\u207B + 14H\u207A + ___ e\u207B \u2192 2Cr\u00B3\u207A + 7H\u2082O","6"],
+      ["10","Sn\u00B2\u207A \u2192 Sn\u2074\u207A + ___ e\u207B","2"],
+      ["11","Cl\u2082 + ___ e\u207B \u2192 2Cl\u207B","2"],
+      ["12","Fe\u00B2\u207A \u2192 Fe\u00B3\u207A + ___ e\u207B","1"],
+      ["13","O\u2082 + 4H\u207A + ___ e\u207B \u2192 2H\u2082O","4"],
+      ["14","Mg \u2192 Mg\u00B2\u207A + ___ e\u207B","2"],
+      ["15","2H\u207A + ___ e\u207B \u2192 H\u2082","2"]
+    ]
+  },
+  {
+    id:7, title:"Activity Series & Predictions", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"In the activity series, K is ___ than Cu:", options:["Less reactive","More reactive","Equally reactive","Not comparable"], correct:1},
+      {q:"Will Zn replace Cu from CuSO\u2084 solution?", options:["Yes, Zn is more reactive","No, Cu is more reactive","Only at high temperature","Only in acid"], correct:0},
+      {q:"Will Cu replace Zn from ZnSO\u2084 solution?", options:["Yes","No, Cu is less reactive than Zn","Only in acid","Only with a catalyst"], correct:1},
+      {q:"Will Fe react with HCl to produce H\u2082?", options:["Yes, Fe is above H in activity series","No, Fe is below H","Only concentrated HCl","Never"], correct:0},
+      {q:"Will Au react with HCl?", options:["Yes","No, Au is below H in activity series","Only with heat","Only aqua regia"], correct:1},
+      {q:"Which metal can displace silver from AgNO\u2083 solution?", options:["Au","Pt","Cu","None of these"], correct:2},
+      {q:"The most reactive metal in the activity series is:", options:["Au","Fe","K","Cu"], correct:2},
+      {q:"The least reactive metal is:", options:["K","Zn","Fe","Au"], correct:3},
+      {q:"Will Mg replace Fe from FeCl\u2082?", options:["Yes","No","Only in acid","Only at high temperature"], correct:0},
+      {q:"Will Ag replace Cu from CuSO\u2084?", options:["Yes","No, Ag is less reactive than Cu","Only in acid","Only with a catalyst"], correct:1}
+    ]
+  },
+  {
+    id:8, title:"Redox Balancing Steps", type:"arrange",
+    instruction:"Arrange the words to form the correct statement.",
+    sentences:[
+      {prompt:"Step 1 of half-reaction method:", words:["Split","into","oxidation","and","reduction","half-reactions"]},
+      {prompt:"Step 2:", words:["Balance","atoms","other","than","O","and","H"]},
+      {prompt:"Step 3 (acidic solution):", words:["Balance","O","with","H\u2082O","and","H","with","H\u207A"]},
+      {prompt:"Step 4:", words:["Balance","charge","with","electrons"]},
+      {prompt:"Step 5:", words:["Multiply","to","equalize","electrons","then","add"]},
+      {prompt:"OIL RIG mnemonic:", words:["Oxidation","Is","Loss","Reduction","Is","Gain"]},
+      {prompt:"Oxidizing agent gets:", words:["reduced","(gains","electrons)"]},
+      {prompt:"Reducing agent gets:", words:["oxidized","(loses","electrons)"]}
+    ]
+  },
+  {
+    id:9, title:"Mixed Review", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"In a redox reaction, the total electrons lost must equal the total electrons:", options:["Destroyed","Gained","Created","Absorbed by solvent"], correct:1},
+      {q:"What is the oxidation number of Cr in CrO\u2084\u00B2\u207B?", options:["+4","+6","+8","-2"], correct:1},
+      {q:"Combustion reactions are always:", options:["Acid-base","Precipitation","Redox","Decomposition only"], correct:2},
+      {q:"Which metal is most easily oxidized?", options:["Au","Cu","Zn","K"], correct:3},
+      {q:"In electrochemistry, oxidation occurs at the:", options:["Cathode","Anode","Salt bridge","Electrolyte"], correct:1},
+      {q:"O in H\u2082O\u2082 has an oxidation number of:", options:["-2","-1","0","+1"], correct:1},
+      {q:"Which is a common oxidizing agent?", options:["Na","Zn","KMnO\u2084","Al"], correct:2},
+      {q:"H in NaH has oxidation number:", options:["+1","-1","0","+2"], correct:1},
+      {q:"Reduction occurs at the ___ in an electrochemical cell:", options:["Anode","Cathode","Salt bridge","Wire"], correct:1},
+      {q:"Rusting of iron is an example of:", options:["Acid-base reaction","Precipitation","Oxidation (corrosion)","Decomposition"], correct:2},
+      {q:"In a galvanic cell, the anode is the ___ electrode:", options:["Positive","Negative","Neutral","It varies"], correct:1},
+      {q:"A disproportionation reaction is when the same element is both ___ and ___:", options:["Heated and cooled","Oxidized and reduced","Dissolved and precipitated","Acid and base"], correct:1},
+      {q:"In 2H\u2082O\u2082 \u2192 2H\u2082O + O\u2082, O is:", options:["Only oxidized","Only reduced","Both oxidized and reduced (disproportionation)","Neither"], correct:2},
+      {q:"Electroplating uses ___ to deposit metal:", options:["Redox reaction / electrolysis","Acid-base reaction","Precipitation","Filtration"], correct:0},
+      {q:"Batteries convert ___ energy to electrical energy:", options:["Thermal","Nuclear","Chemical","Solar"], correct:2}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Redox Reactions - Complete Reference</h3><p><span class="rule">Key Definitions:</span></p><p><strong>Oxidation</strong> = Loss of electrons (OIL). Oxidation number increases.</p><p><strong>Reduction</strong> = Gain of electrons (RIG). Oxidation number decreases.</p><p><strong>Oxidizing agent</strong> = the substance that gets reduced (it oxidizes something else). It gains electrons.</p><p><strong>Reducing agent</strong> = the substance that gets oxidized (it reduces something else). It loses electrons.</p><p>Mnemonic: <strong>OIL RIG</strong> (Oxidation Is Loss, Reduction Is Gain) or <strong>LEO GER</strong> (Lose Electrons Oxidation, Gain Electrons Reduction).</p><p><span class="rule">Complete Oxidation Number Rules:</span></p><table><tr><th>#</th><th>Rule</th><th>Oxidation Number</th></tr><tr><td>1</td><td>Free (uncombined) element</td><td>0 (e.g., Na, O\u2082, P\u2084, S\u2088)</td></tr><tr><td>2</td><td>Monatomic ion</td><td>= ion charge (e.g., Na\u207A = +1, Cl\u207B = -1)</td></tr><tr><td>3</td><td>Fluorine (always)</td><td>-1 (most electronegative element)</td></tr><tr><td>4</td><td>Oxygen (most compounds)</td><td>-2 (except: peroxides = -1, OF\u2082 = +2)</td></tr><tr><td>5</td><td>Hydrogen (most compounds)</td><td>+1 (except: metal hydrides NaH, CaH\u2082 = -1)</td></tr><tr><td>6</td><td>Group 1 metals (Li, Na, K...)</td><td>+1 (always in compounds)</td></tr><tr><td>7</td><td>Group 2 metals (Mg, Ca...)</td><td>+2 (always in compounds)</td></tr><tr><td>8</td><td>Halogens (Cl, Br, I)</td><td>-1 (unless bonded to O or more electronegative halogen)</td></tr><tr><td>9</td><td>Sum in neutral compound</td><td>= 0</td></tr><tr><td>10</td><td>Sum in polyatomic ion</td><td>= charge of the ion</td></tr></table><p><span class="rule">Half-Reaction Method (Acidic Solution):</span></p><p><strong>Step 1:</strong> Split into two half-reactions (oxidation and reduction).</p><p><strong>Step 2:</strong> Balance all atoms EXCEPT O and H.</p><p><strong>Step 3:</strong> Balance O by adding H\u2082O to the side that needs O.</p><p><strong>Step 4:</strong> Balance H by adding H\u207A to the side that needs H.</p><p><strong>Step 5:</strong> Balance charge by adding electrons (e\u207B) to the more positive side.</p><p><strong>Step 6:</strong> Multiply half-reactions to equalize electrons transferred.</p><p><strong>Step 7:</strong> Add half-reactions, cancel species that appear on both sides.</p><p><span class="rule">Half-Reaction Method (Basic Solution):</span></p><p>Follow acidic method first, then add OH\u207B to BOTH sides to neutralize H\u207A. H\u207A + OH\u207B becomes H\u2082O. Simplify by canceling H\u2082O on both sides.</p><p><span class="rule">Activity Series (most to least reactive):</span></p><table><tr><th>Very Active</th><th>Active</th><th>Less Active</th><th>Least Active</th></tr><tr><td>K, Na, Li, Ca, Mg</td><td>Al, Zn, Fe, Ni, Sn</td><td>Pb, <strong>H\u2082</strong>, Cu</td><td>Ag, Pt, Au</td></tr></table><p>A metal can only displace metals BELOW it. Metals above H\u2082 dissolve in acids.</p><p><span class="rule">Common Oxidizing Agents:</span></p><table><tr><th>Agent</th><th>Gets Reduced To</th></tr><tr><td>KMnO\u2084 (acidic)</td><td>Mn\u00B2\u207A (colorless)</td></tr><tr><td>K\u2082Cr\u2082O\u2087 (acidic)</td><td>Cr\u00B3\u207A (green)</td></tr><tr><td>HNO\u2083 (concentrated)</td><td>NO\u2082 (brown gas)</td></tr><tr><td>H\u2082O\u2082</td><td>H\u2082O</td></tr><tr><td>Halogens (F\u2082, Cl\u2082, Br\u2082)</td><td>Halide ions (F\u207B, Cl\u207B, Br\u207B)</td></tr></table><p><span class="rule">Common Reducing Agents:</span></p><p>Active metals (Na, Mg, Zn, Fe, Al), H\u2082, C, CO, metals in low oxidation states (Fe\u00B2\u207A, Sn\u00B2\u207A)</p><p><span class="rule">Quick Check:</span> In any balanced redox equation, total electrons lost = total electrons gained.</p>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 oxidation numbers, redox identification, half-reactions \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

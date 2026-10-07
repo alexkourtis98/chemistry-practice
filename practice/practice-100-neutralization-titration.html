@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Acid-Base Neutralization & Titration</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Acid-Base Neutralization & Titration</h1>
+<p class="subtitle">Deep practice &mdash; neutralization reactions, titration calculations, indicators, titration curves</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_100';
+
+const SECTIONS = [
+  {
+    id:1, title:"Fill: Write neutralization products",
+    instruction:"Write the products of each neutralization reaction (salt + water). Use chemical formulas.",
+    rows:[
+      ["1","HCl + NaOH \u2192 ___ + H\u2082O","NaCl"],
+      ["2","HNO\u2083 + KOH \u2192 ___ + H\u2082O","KNO3 / KNO\u2083"],
+      ["3","HBr + NaOH \u2192 ___ + H\u2082O","NaBr"],
+      ["4","HCl + KOH \u2192 ___ + H\u2082O","KCl"],
+      ["5","HI + LiOH \u2192 ___ + H\u2082O","LiI"],
+      ["6","HClO\u2084 + NaOH \u2192 ___ + H\u2082O","NaClO4 / NaClO\u2084"],
+      ["7","CH\u2083COOH + NaOH \u2192 ___ + H\u2082O","CH3COONa / NaCH3COO / sodium acetate"],
+      ["8","HF + KOH \u2192 ___ + H\u2082O","KF"],
+      ["9","H\u2082SO\u2084 + 2NaOH \u2192 ___ + 2H\u2082O","Na2SO4 / Na\u2082SO\u2084"],
+      ["10","H\u2082SO\u2084 + 2KOH \u2192 ___ + 2H\u2082O","K2SO4 / K\u2082SO\u2084"],
+      ["11","H\u2083PO\u2084 + 3NaOH \u2192 ___ + 3H\u2082O","Na3PO4 / Na\u2083PO\u2084"],
+      ["12","2HCl + Ca(OH)\u2082 \u2192 ___ + 2H\u2082O","CaCl2 / CaCl\u2082"],
+      ["13","2HNO\u2083 + Ba(OH)\u2082 \u2192 ___ + 2H\u2082O","Ba(NO3)2 / Ba(NO\u2083)\u2082"],
+      ["14","2HCl + Ba(OH)\u2082 \u2192 ___ + 2H\u2082O","BaCl2 / BaCl\u2082"]
+    ]
+  },
+  {
+    id:2, title:"Fill: Balance neutralization equations",
+    instruction:"Provide the missing coefficient to balance each equation. Write just the number.",
+    rows:[
+      ["1","___HCl + NaOH \u2192 NaCl + H\u2082O","1"],
+      ["2","H\u2082SO\u2084 + ___NaOH \u2192 Na\u2082SO\u2084 + 2H\u2082O","2"],
+      ["3","H\u2083PO\u2084 + ___KOH \u2192 K\u2083PO\u2084 + 3H\u2082O","3"],
+      ["4","___HNO\u2083 + Ca(OH)\u2082 \u2192 Ca(NO\u2083)\u2082 + 2H\u2082O","2"],
+      ["5","___HCl + Al(OH)\u2083 \u2192 AlCl\u2083 + 3H\u2082O","3"],
+      ["6","H\u2082CO\u2083 + ___NaOH \u2192 Na\u2082CO\u2083 + 2H\u2082O","2"],
+      ["7","___HBr + Mg(OH)\u2082 \u2192 MgBr\u2082 + 2H\u2082O","2"],
+      ["8","___HCl + Fe(OH)\u2083 \u2192 FeCl\u2083 + ___H\u2082O (coefficient for HCl)","3"],
+      ["9","H\u2082SO\u2084 + Ba(OH)\u2082 \u2192 BaSO\u2084 + ___H\u2082O","2"],
+      ["10","___HNO\u2083 + Mg(OH)\u2082 \u2192 Mg(NO\u2083)\u2082 + 2H\u2082O","2"],
+      ["11","H\u2082SO\u2084 + ___KOH \u2192 K\u2082SO\u2084 + 2H\u2082O","2"],
+      ["12","___CH\u2083COOH + Ca(OH)\u2082 \u2192 Ca(CH\u2083COO)\u2082 + 2H\u2082O","2"]
+    ]
+  },
+  {
+    id:3, title:"Fill: Net ionic equations",
+    instruction:"Write the net ionic equation for each neutralization. Use (aq) and (l) states.",
+    rows:[
+      ["1","The net ionic equation for any strong acid + strong base neutralization is:","H+(aq) + OH-(aq) -> H2O(l) / H+ + OH- -> H2O"],
+      ["2","In a net ionic equation, ___ ions are removed","spectator"],
+      ["3","For HCl(aq) + NaOH(aq), the spectator ions are ___ and ___","Na+ and Cl- / Na+, Cl- / Cl- and Na+"],
+      ["4","For HNO\u2083(aq) + KOH(aq), the spectator ions are ___ and ___","K+ and NO3- / K+, NO3- / NO3- and K+"],
+      ["5","For H\u2082SO\u2084(aq) + 2NaOH(aq), the net ionic is:","H+(aq) + OH-(aq) -> H2O(l) / H+ + OH- -> H2O / 2H+ + 2OH- -> 2H2O"],
+      ["6","Weak acid + strong base has a different net ionic because the weak acid is not ___","fully dissociated / fully ionized / completely dissociated"],
+      ["7","Net ionic for CH\u2083COOH + NaOH: CH\u2083COOH(aq) + OH\u207B(aq) \u2192 ___ + H\u2082O(l)","CH3COO-(aq) / CH3COO- / acetate"],
+      ["8","Net ionic for HF + NaOH: HF(aq) + OH\u207B(aq) \u2192 ___ + H\u2082O(l)","F-(aq) / F-"],
+      ["9","Net ionic for NH\u2083 + HCl: NH\u2083(aq) + H\u207A(aq) \u2192 ___","NH4+(aq) / NH4+"],
+      ["10","Water in net ionic equations is written as H\u2082O(___)","l / liquid"]
+    ]
+  },
+  {
+    id:4, title:"Fill: Moles in neutralization (stoichiometry)",
+    instruction:"Calculate moles used or produced in neutralization reactions.",
+    rows:[
+      ["1","0.05 mol HCl + NaOH. Moles of NaOH needed = ___","0.05 / 0.05 mol"],
+      ["2","0.10 mol H\u2082SO\u2084 + NaOH. Moles of NaOH needed = ___","0.20 / 0.2 / 0.20 mol"],
+      ["3","0.03 mol H\u2083PO\u2084 + NaOH. Moles of NaOH needed = ___","0.09 / 0.09 mol"],
+      ["4","0.04 mol HCl + Ca(OH)\u2082. Moles of Ca(OH)\u2082 needed = ___","0.02 / 0.02 mol"],
+      ["5","0.06 mol HNO\u2083 + Ba(OH)\u2082. Moles of Ba(OH)\u2082 needed = ___","0.03 / 0.03 mol"],
+      ["6","0.10 mol NaOH neutralizes ___ mol HCl","0.10 / 0.1"],
+      ["7","0.10 mol NaOH neutralizes ___ mol H\u2082SO\u2084","0.05 / 0.050"],
+      ["8","0.25 mol HCl + excess NaOH. Moles of NaCl produced = ___","0.25"],
+      ["9","0.15 mol H\u2082SO\u2084 + excess NaOH. Moles of Na\u2082SO\u2084 produced = ___","0.15"],
+      ["10","0.12 mol H\u2082SO\u2084 + excess NaOH. Moles of H\u2082O produced = ___","0.24"],
+      ["11","If 0.08 mol HCl reacts with 0.10 mol NaOH, the limiting reagent is ___","HCl"],
+      ["12","If 0.05 mol H\u2082SO\u2084 reacts with 0.08 mol NaOH, the limiting reagent is ___","NaOH"]
+    ]
+  },
+  {
+    id:5, title:"Fill: MaVa = MbVb calculations",
+    instruction:"Use MaVa = MbVb (for monoprotic acids/bases). Show the final answer with units.",
+    rows:[
+      ["1","0.10 M HCl, 25.0 mL neutralized by 0.10 M NaOH. Volume NaOH = ___ mL","25.0 / 25"],
+      ["2","0.20 M HCl, 30.0 mL neutralized by 0.10 M NaOH. Volume NaOH = ___ mL","60.0 / 60"],
+      ["3","0.15 M NaOH, 20.0 mL neutralized by 0.30 M HCl. Volume HCl = ___ mL","10.0 / 10"],
+      ["4","0.050 M HNO\u2083, 50.0 mL neutralized by 0.10 M KOH. Volume KOH = ___ mL","25.0 / 25"],
+      ["5","0.25 M HCl, 40.0 mL neutralized by 0.50 M NaOH. Volume NaOH = ___ mL","20.0 / 20"],
+      ["6","Unknown M HCl, 25.0 mL neutralized by 35.0 mL of 0.10 M NaOH. M(HCl) = ___","0.14 / 0.14 M / 0.140"],
+      ["7","0.10 M HBr, 100.0 mL. Volume of 0.25 M NaOH needed = ___ mL","40.0 / 40"],
+      ["8","0.050 M NaOH, 75.0 mL neutralized by 0.025 M HCl. Volume HCl = ___ mL","150 / 150.0"],
+      ["9","0.30 M HCl, V = ? neutralized by 45.0 mL of 0.20 M NaOH. V(HCl) = ___ mL","30.0 / 30"],
+      ["10","Unknown M NaOH, 20.0 mL neutralized by 28.0 mL of 0.15 M HCl. M(NaOH) = ___","0.21 / 0.21 M / 0.210"]
+    ]
+  },
+  {
+    id:6, title:"Fill: Find unknown molarity from titration",
+    instruction:"A titration experiment. Calculate the unknown concentration.",
+    rows:[
+      ["1","25.00 mL of HCl titrated with 0.1000 M NaOH. Endpoint at 32.50 mL NaOH. M(HCl) = ___","0.130 / 0.13 / 0.1300"],
+      ["2","20.00 mL of NaOH titrated with 0.2000 M HCl. Endpoint at 15.00 mL HCl. M(NaOH) = ___","0.150 / 0.15 / 0.1500"],
+      ["3","50.00 mL of HNO\u2083 titrated with 0.0500 M KOH. Endpoint at 42.00 mL KOH. M(HNO\u2083) = ___","0.042 / 0.0420"],
+      ["4","10.00 mL of H\u2082SO\u2084 titrated with 0.1000 M NaOH. Endpoint at 36.00 mL. M(H\u2082SO\u2084) = ___ (Note: 2 mol NaOH per mol H\u2082SO\u2084)","0.180 / 0.18 / 0.1800"],
+      ["5","30.00 mL of Ca(OH)\u2082 titrated with 0.2000 M HCl. Endpoint at 24.00 mL. M(Ca(OH)\u2082) = ___ (Note: 2 mol HCl per mol Ca(OH)\u2082)","0.080 / 0.08 / 0.0800"],
+      ["6","15.00 mL of unknown acid (monoprotic) titrated with 0.1250 M NaOH. Endpoint at 22.40 mL. M(acid) = ___","0.187 / 0.19 / 0.1867"],
+      ["7","25.00 mL of acetic acid titrated with 0.0800 M NaOH. Endpoint at 31.25 mL. M(CH\u2083COOH) = ___","0.100 / 0.10 / 0.1000"],
+      ["8","40.00 mL of NaOH titrated with 0.1500 M H\u2082SO\u2084. Endpoint at 20.00 mL. M(NaOH) = ___","0.150 / 0.15 / 0.1500"],
+      ["9","What volume of 0.200 M NaOH is needed to neutralize 35.0 mL of 0.100 M HCl? V = ___ mL","17.5"],
+      ["10","What volume of 0.100 M HCl is needed to neutralize 25.0 mL of 0.150 M NaOH? V = ___ mL","37.5"]
+    ]
+  },
+  {
+    id:7, title:"Fill: Find unknown volume needed",
+    instruction:"Calculate the volume of titrant needed to reach the equivalence point.",
+    rows:[
+      ["1","50.0 mL of 0.10 M HCl. Volume of 0.10 M NaOH to neutralize = ___ mL","50.0 / 50"],
+      ["2","25.0 mL of 0.20 M HCl. Volume of 0.10 M NaOH = ___ mL","50.0 / 50"],
+      ["3","30.0 mL of 0.15 M H\u2082SO\u2084. Volume of 0.10 M NaOH = ___ mL (diprotic)","90.0 / 90"],
+      ["4","20.0 mL of 0.25 M HNO\u2083. Volume of 0.50 M KOH = ___ mL","10.0 / 10"],
+      ["5","40.0 mL of 0.050 M H\u2083PO\u2084. Volume of 0.10 M NaOH = ___ mL (triprotic)","60.0 / 60"],
+      ["6","100.0 mL of 0.010 M HCl. Volume of 0.050 M NaOH = ___ mL","20.0 / 20"],
+      ["7","15.0 mL of 0.30 M NaOH. Volume of 0.15 M HCl = ___ mL","30.0 / 30"],
+      ["8","25.0 mL of 0.10 M Ba(OH)\u2082. Volume of 0.10 M HCl = ___ mL (Ba(OH)\u2082 gives 2 OH\u207B)","50.0 / 50"],
+      ["9","35.0 mL of 0.20 M Ca(OH)\u2082. Volume of 0.10 M HNO\u2083 = ___ mL","140.0 / 140"],
+      ["10","10.0 mL of 0.50 M H\u2082SO\u2084. Volume of 0.25 M KOH = ___ mL","40.0 / 40"]
+    ]
+  },
+  {
+    id:8, title:"MC: Diprotic/triprotic acid titration", type:"mc",
+    instruction:"Questions about polyprotic acid titrations.",
+    questions:[
+      {q:"H\u2082SO\u2084 is diprotic. To neutralize 1 mol H\u2082SO\u2084, you need ___ mol NaOH:", options:["1","2","3","0.5"], correct:1},
+      {q:"H\u2083PO\u2084 is triprotic. To neutralize 1 mol H\u2083PO\u2084, you need ___ mol NaOH:", options:["1","2","3","4"], correct:2},
+      {q:"For diprotic acid titration, the modified formula is:", options:["MaVa = MbVb","2MaVa = MbVb","MaVa = 2MbVb","Ma = Mb"], correct:1},
+      {q:"H\u2082CO\u2083 + 2NaOH \u2192 Na\u2082CO\u2083 + 2H\u2082O. How many equivalence points on the titration curve?", options:["1","2","3","0"], correct:1},
+      {q:"At the first equivalence point of H\u2082SO\u2084 titration, the species present is:", options:["H\u2082SO\u2084","HSO\u2084\u207B","SO\u2084\u00B2\u207B","NaOH"], correct:1},
+      {q:"At the second equivalence point of H\u2082SO\u2084 titration, the species present is:", options:["H\u2082SO\u2084","HSO\u2084\u207B","SO\u2084\u00B2\u207B","H\u207A"], correct:2},
+      {q:"0.10 M H\u2083PO\u2084, 20 mL. Total moles of NaOH to fully neutralize:", options:["0.002","0.004","0.006","0.008"], correct:2},
+      {q:"A diprotic acid H\u2082A has Ka1 >> Ka2. The first proton is ___ to remove than the second.", options:["Harder","Easier","Equally easy","Impossible"], correct:1},
+      {q:"Citric acid (H\u2083C\u2086H\u2085O\u2087) is triprotic. One mole requires ___ moles of NaOH:", options:["1","2","3","6"], correct:2},
+      {q:"For H\u2082SO\u2084 (strong in both dissociations), 0.05 mol gives ___ mol H\u207A:", options:["0.05","0.10","0.15","0.025"], correct:1},
+      {q:"H\u2082C\u2082O\u2084 (oxalic acid) is diprotic. 25 mL of 0.10 M H\u2082C\u2082O\u2084 needs ___ mL of 0.10 M NaOH:", options:["25","50","75","100"], correct:1},
+      {q:"In a polyprotic acid titration, each equivalence point requires a separate ___ change:", options:["Color","Volume","pH jump","Temperature"], correct:2}
+    ]
+  },
+  {
+    id:9, title:"MC: pH at equivalence point", type:"mc",
+    instruction:"Determine the pH at the equivalence point.",
+    questions:[
+      {q:"Strong acid + strong base equivalence point pH:", options:["< 7","= 7","> 7","Cannot determine"], correct:1},
+      {q:"Weak acid + strong base equivalence point pH:", options:["< 7","= 7","> 7","= pKa"], correct:2},
+      {q:"Strong acid + weak base equivalence point pH:", options:["< 7","= 7","> 7","= pKb"], correct:0},
+      {q:"HCl + NaOH equivalence point pH:", options:["< 7","= 7","> 7","Depends on volume"], correct:1},
+      {q:"CH\u2083COOH + NaOH equivalence point pH:", options:["< 7","= 7","> 7 (conjugate base CH\u2083COO\u207B is basic)","Exactly 4.74"], correct:2},
+      {q:"HCl + NH\u2083 equivalence point pH:", options:["< 7 (conjugate acid NH\u2084\u207A is acidic)","= 7","> 7","Exactly 9.25"], correct:0},
+      {q:"At equivalence, moles of acid ___ moles of base:", options:["Are greater than","Are less than","Equal","Are zero"], correct:2},
+      {q:"Why is pH > 7 for weak acid + strong base at equivalence?", options:["Excess base","The conjugate base of the weak acid hydrolyzes","The indicator is wrong","Temperature effect"], correct:1},
+      {q:"Why is pH < 7 for strong acid + weak base at equivalence?", options:["Excess acid","The conjugate acid of the weak base hydrolyzes","Volume difference","Indicator error"], correct:1},
+      {q:"Weak acid + weak base equivalence point pH depends on:", options:["Only Ka","Only Kb","Relative values of Ka and Kb","Volume only"], correct:2},
+      {q:"NH\u2083 + HF at equivalence: Ka(HF) = 6.8\u00D710\u207B\u2074, Kb(NH\u2083) = 1.8\u00D710\u207B\u2075. pH is:", options:["< 7 (Ka > Kb, acidic side)","= 7","> 7","Exactly 14"], correct:0},
+      {q:"At the half-equivalence point of a weak acid titration, pH equals:", options:["7","pKa","pKb","14 - pKa"], correct:1}
+    ]
+  },
+  {
+    id:10, title:"MC: Indicator selection", type:"mc",
+    instruction:"Choose the appropriate indicator for each titration.",
+    questions:[
+      {q:"Phenolphthalein changes color at pH:", options:["3.1 - 4.4","4.5 - 8.3","8.2 - 10.0","12.0 - 14.0"], correct:2},
+      {q:"Methyl orange changes color at pH:", options:["3.1 - 4.4","6.0 - 7.6","8.2 - 10.0","1.0 - 2.0"], correct:0},
+      {q:"Best indicator for strong acid + strong base titration (eq. point pH = 7):", options:["Methyl orange only","Phenolphthalein only","Either works (sharp pH jump covers both ranges)","Neither works"], correct:2},
+      {q:"Best indicator for weak acid + strong base (eq. point pH > 7):", options:["Methyl orange","Phenolphthalein (range 8.2-10)","Litmus","Congo red"], correct:1},
+      {q:"Best indicator for strong acid + weak base (eq. point pH < 7):", options:["Phenolphthalein","Methyl orange (range 3.1-4.4)","Bromothymol blue","Alizarin yellow"], correct:1},
+      {q:"An ideal indicator changes color at pH ___ the equivalence point:", options:["Far from","Equal to or near","Exactly at","Before"], correct:1},
+      {q:"Litmus changes color at pH:", options:["1.0 - 3.0","4.5 - 8.3","8.2 - 10.0","10.0 - 12.0"], correct:1},
+      {q:"Bromothymol blue (pH 6.0-7.6) is good for:", options:["Weak acid + strong base","Strong acid + strong base","Strong acid + weak base","Weak acid + weak base"], correct:1},
+      {q:"Phenolphthalein is colorless in ___ solution and pink in ___ solution:", options:["Basic, acidic","Acidic, basic","Neutral, acidic","Basic, neutral"], correct:1},
+      {q:"Methyl orange is red in ___ and yellow in ___ solution:", options:["Basic, acidic","Acidic, basic","Neutral, basic","Basic, neutral"], correct:0},
+      {q:"Universal indicator shows:", options:["Only one color","A range of colors across the pH scale","Only at pH 7","Color only with strong acids"], correct:1},
+      {q:"The endpoint is when the indicator ___, the equivalence point is when moles acid = moles base:", options:["Dissolves","Changes color","Evaporates","Precipitates"], correct:1}
+    ]
+  },
+  {
+    id:11, title:"MC: Titration curve interpretation", type:"mc",
+    instruction:"Analyze titration curves.",
+    questions:[
+      {q:"A strong acid-strong base titration curve has a ___ pH jump at equivalence:", options:["Gradual","Very sharp (several pH units)","No","Negative"], correct:1},
+      {q:"A weak acid-strong base curve starts at pH ___ compared to strong acid:", options:["Higher (weak acid = higher initial pH)","Lower","The same","Exactly 7"], correct:0},
+      {q:"The buffer region on a weak acid titration curve is:", options:["At the equivalence point","Before the equivalence point where pH changes slowly","After the equivalence point","At the very start"], correct:1},
+      {q:"At the half-equivalence point, [HA] = [A\u207B], so pH = pKa. This is in the ___ region:", options:["Equivalence","Buffer","Initial","Final"], correct:1},
+      {q:"After the equivalence point, adding more NaOH to a strong acid solution, the pH:", options:["Stays at 7","Rises sharply then levels off","Drops","Stays constant at 14"], correct:1},
+      {q:"The initial pH of 0.10 M HCl is:", options:["0","1","7","14"], correct:1},
+      {q:"The initial pH of 0.10 M CH\u2083COOH (Ka = 1.8 \u00D7 10\u207B\u2075) is approximately:", options:["1.0","2.9","4.7","7.0"], correct:1},
+      {q:"A titration curve with two equivalence points indicates:", options:["A monoprotic acid","A diprotic acid","Two separate acids","An error"], correct:1},
+      {q:"For weak acid + strong base, the equivalence point pH is above 7 because:", options:["Excess NaOH","The conjugate base A\u207B is formed and hydrolyzes","Temperature increase","Indicator effect"], correct:1},
+      {q:"The steepest part of the titration curve is at the:", options:["Beginning","Half-equivalence point","Equivalence point","End"], correct:2},
+      {q:"On a strong base titrated with strong acid curve, pH starts ___ and decreases:", options:["Low","At 7","High","At 0"], correct:2},
+      {q:"A back-titration is used when:", options:["The analyte is too dilute","The analyte reacts slowly or is insoluble","You want two indicators","The base is unknown"], correct:1}
+    ]
+  },
+  {
+    id:12, title:"Arrange: Build statements about titration", type:"arrange",
+    instruction:"Click the words in the correct order.",
+    sentences:[
+      {prompt:"At equivalence point moles of acid equal moles of base", words:["At","equivalence point","moles of acid","equal","moles of base"]},
+      {prompt:"Strong acid plus strong base gives pH seven at equivalence", words:["Strong acid","plus","strong base","gives","pH seven","at equivalence"]},
+      {prompt:"Phenolphthalein turns pink in basic solution", words:["Phenolphthalein","turns","pink","in","basic","solution"]},
+      {prompt:"The half equivalence point pH equals pKa for weak acids", words:["The","half equivalence point","pH","equals","pKa","for weak acids"]},
+      {prompt:"Weak acid titrated with strong base gives equivalence pH above seven", words:["Weak acid","titrated with","strong base","gives","equivalence pH","above seven"]},
+      {prompt:"MaVa equals MbVb for monoprotic neutralization", words:["MaVa","equals","MbVb","for","monoprotic","neutralization"]},
+      {prompt:"Net ionic equation is H plus OH minus gives water", words:["Net ionic equation","is","H plus","OH minus","gives","water"]},
+      {prompt:"Buffer region resists pH changes before equivalence point", words:["Buffer region","resists","pH changes","before","equivalence point"]}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Acid-Base Neutralization & Titration \u2014 Complete Reference</h3>' +
+'<h3>Neutralization Pattern</h3>' +
+'<p><span class="rule">Acid + Base \u2192 Salt + Water</span></p>' +
+'<p>Net ionic (strong-strong): H\u207A(aq) + OH\u207B(aq) \u2192 H\u2082O(l)</p>' +
+'<h3>MaVa = MbVb</h3>' +
+'<p>For monoprotic acids: <span class="rule">M\u2090V\u2090 = M\u1D47V\u1D47</span></p>' +
+'<p>For diprotic acids: 2M\u2090V\u2090 = M\u1D47V\u1D47 (or n\u2090M\u2090V\u2090 = n\u1D47M\u1D47V\u1D47)</p>' +
+'<h3>Equivalence vs Endpoint</h3>' +
+'<table><tr><th>Term</th><th>Definition</th></tr>' +
+'<tr><td><span class="rule">Equivalence point</span></td><td>Moles acid = moles base (theoretical)</td></tr>' +
+'<tr><td><span class="rule">Endpoint</span></td><td>Indicator color change (experimental)</td></tr></table>' +
+'<h3>pH at Equivalence Point</h3>' +
+'<table><tr><th>Titration Type</th><th>pH at Equivalence</th><th>Reason</th></tr>' +
+'<tr><td>Strong acid + Strong base</td><td>= 7</td><td>Neutral salt formed</td></tr>' +
+'<tr><td>Weak acid + Strong base</td><td>> 7</td><td>Conjugate base hydrolyzes</td></tr>' +
+'<tr><td>Strong acid + Weak base</td><td>< 7</td><td>Conjugate acid hydrolyzes</td></tr></table>' +
+'<h3>Common Indicators</h3>' +
+'<table><tr><th>Indicator</th><th>pH Range</th><th>Color Change</th></tr>' +
+'<tr><td>Methyl orange</td><td>3.1 \u2013 4.4</td><td>Red \u2192 Yellow</td></tr>' +
+'<tr><td>Litmus</td><td>4.5 \u2013 8.3</td><td>Red \u2192 Blue</td></tr>' +
+'<tr><td>Bromothymol blue</td><td>6.0 \u2013 7.6</td><td>Yellow \u2192 Blue</td></tr>' +
+'<tr><td>Phenolphthalein</td><td>8.2 \u2013 10.0</td><td>Colorless \u2192 Pink</td></tr></table>' +
+'<h3>Titration Curve Features</h3>' +
+'<ul>' +
+'<li>Initial region: pH determined by analyte alone</li>' +
+'<li><span class="rule">Buffer region</span>: pH changes slowly (weak acid titration)</li>' +
+'<li>Half-equivalence: pH = pKa (for weak acid titration)</li>' +
+'<li>Equivalence: sharp pH jump</li>' +
+'<li>Post-equivalence: pH determined by excess titrant</li>' +
+'</ul>';
+
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 neutralization reactions, titration calculations, indicators, titration curves \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

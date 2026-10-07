@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice 55 — Calorimetry & Heat Calculations</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Practice 55 &mdash; Calorimetry &amp; Heat Calculations</h1>
+<p class="subtitle">Deep practice &mdash; q = mc&Delta;T, coffee-cup calorimetry, bomb calorimetry, specific heat</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_55';
+const SECTIONS = [
+  {
+    id:1, title:"Specific Heat Basics",
+    instruction:"Fill in the blank for each question about specific heat and the q = mc\u0394T equation.",
+    rows:[
+      ["1","In q = mc\u0394T, q stands for ___","heat / heat energy / thermal energy"],
+      ["2","In q = mc\u0394T, m stands for ___","mass"],
+      ["3","In q = mc\u0394T, c stands for ___","specific heat / specific heat capacity"],
+      ["4","In q = mc\u0394T, \u0394T stands for ___","change in temperature / temperature change"],
+      ["5","The SI unit for heat (q) is ___","joules / J"],
+      ["6","The specific heat of water is ___ J/g\u00B7\u00B0C","4.184"],
+      ["7","Mass in q = mc\u0394T is measured in ___","grams / g"],
+      ["8","\u0394T is calculated as T(final) ___ T(initial)","minus / - / minus T(initial)"],
+      ["9","The specific heat of aluminum is ___ J/g\u00B7\u00B0C","0.897"],
+      ["10","The specific heat of copper is ___ J/g\u00B7\u00B0C","0.385"],
+      ["11","The specific heat of gold is ___ J/g\u00B7\u00B0C","0.129"],
+      ["12","The specific heat of iron is ___ J/g\u00B7\u00B0C","0.449"],
+      ["13","The specific heat of ethanol is approximately ___ J/g\u00B7\u00B0C","2.44 / 2.4"],
+      ["14","1 calorie = ___ joules","4.184"],
+      ["15","1 kilocalorie (food Calorie) = ___ joules","4184"],
+      ["16","A substance with a HIGH specific heat changes temperature ___ (slowly/quickly)","slowly"],
+      ["17","Metals generally have ___ (high/low) specific heat values","low"],
+      ["18","Water's high specific heat makes it an excellent ___ (coolant/insulator)","coolant"]
+    ]
+  },
+  {
+    id:2, title:"Temperature Change Calculations",
+    instruction:"Calculate the missing variable using q = mc\u0394T. Show your answer with units where appropriate.",
+    rows:[
+      ["1","How much heat is needed to raise 100 g of water by 25\u00B0C? (in J)","10460 / 10,460"],
+      ["2","How much heat is needed to raise 50.0 g of water by 10.0\u00B0C? (in J)","2092 / 2,092"],
+      ["3","250 g of water absorbs 20,920 J. What is \u0394T? (in \u00B0C)","20"],
+      ["4","A metal (c = 0.450 J/g\u00B7\u00B0C, m = 200 g) absorbs 4500 J. What is \u0394T? (in \u00B0C)","50"],
+      ["5","If q = 8368 J, m = 100 g, \u0394T = 20\u00B0C, what is c? (J/g\u00B7\u00B0C)","4.184"],
+      ["6","If q = 1500 J, c = 0.385 J/g\u00B7\u00B0C, \u0394T = 30\u00B0C, what is m? (in g)","129.87 / 130"],
+      ["7","500 g of iron (c = 0.449 J/g\u00B7\u00B0C) cools from 80\u00B0C to 30\u00B0C. What is |q|? (in J)","11225 / 11,225"],
+      ["8","Is q positive or negative when a substance loses heat?","negative"],
+      ["9","300 g of aluminum (c = 0.897 J/g\u00B7\u00B0C) is heated from 20\u00B0C to 80\u00B0C. q = ? (J)","16146 / 16,146"],
+      ["10","150 g of copper (c = 0.385 J/g\u00B7\u00B0C) absorbs 2310 J. \u0394T = ? (\u00B0C)","40"],
+      ["11","A 75 g piece of gold (c = 0.129 J/g\u00B7\u00B0C) cools from 95\u00B0C to 25\u00B0C. |q| = ? (J)","677.25 / 677"],
+      ["12","How much heat is needed to raise 1.00 kg of water by 1\u00B0C? (in kJ)","4.184"],
+      ["13","An unknown metal (m = 50 g) absorbs 500 J and rises by 25\u00B0C. c = ? (J/g\u00B7\u00B0C)","0.40 / 0.4"],
+      ["14","200 g of ethanol (c = 2.44 J/g\u00B7\u00B0C) absorbs 4880 J. \u0394T = ? (\u00B0C)","10"],
+      ["15","If 418.4 J raises 50 g of a liquid by 2\u00B0C, what is c? (J/g\u00B7\u00B0C)","4.184"],
+      ["16","How much heat (kJ) to warm 500 g water from 15\u00B0C to 100\u00B0C?","177.82 / 177.8 / 178"],
+      ["17","100 g of iron at 100\u00B0C is placed in 200 g water at 20\u00B0C. Does the iron lose or gain heat?","lose"],
+      ["18","If \u0394T is negative, heat was ___ (absorbed/released) by the substance","released"]
+    ]
+  },
+  {
+    id:3, title:"Coffee-Cup Calorimetry",
+    instruction:"Fill in the blank for each coffee-cup calorimetry problem.",
+    rows:[
+      ["1","In coffee-cup calorimetry, q(rxn) = ___ q(solution)","-"],
+      ["2","A coffee-cup calorimeter operates at constant ___","pressure"],
+      ["3","When NaOH dissolves in water and T rises, the process is ___ (exo/endo)","exothermic / exo"],
+      ["4","If dissolving a salt causes T to drop, q(rxn) is ___ (positive/negative)","positive"],
+      ["5","100 mL of water (\u0394T = +5.0\u00B0C) in a coffee-cup calorimeter. q(solution) = ? (J, assume d=1g/mL)","2092 / 2,092"],
+      ["6","From Q5, q(rxn) = ? (J)","-2092 / -2,092"],
+      ["7","50 mL of 1.0 M HCl + 50 mL of 1.0 M NaOH. Total mass of solution = ? g (assume d=1g/mL)","100"],
+      ["8","From Q7, if \u0394T = 6.8\u00B0C, q(solution) = ? (J, c = 4.184)","2845 / 2845.1"],
+      ["9","From Q8, q(rxn) = ? (J)","-2845 / -2845.1"],
+      ["10","From Q9, moles of HCl reacted = ___","0.05 / 0.050"],
+      ["11","From Q10, \u0394H(neutralization) = q(rxn)/mol = ? (kJ/mol)","-56.9 / -57"],
+      ["12","When NH\u2084NO\u2083 dissolves in water, the solution gets cold. \u0394H(soln) is ___ (positive/negative)","positive"],
+      ["13","When CaCl\u2082 dissolves in water, the solution gets warm. \u0394H(soln) is ___ (positive/negative)","negative"],
+      ["14","A coffee-cup calorimeter assumes the specific heat of dilute solution equals that of ___","water"],
+      ["15","A coffee-cup calorimeter measures \u0394H because it operates at constant ___","pressure"],
+      ["16","200 mL of water at 25\u00B0C absorbs heat from a dissolving salt and rises to 30\u00B0C. q(soln) = ? (J)","4184"],
+      ["17","From Q16, q(rxn) = ? (J)","-4184"]
+    ]
+  },
+  {
+    id:4, title:"Bomb Calorimetry",
+    instruction:"Fill in the blank for each bomb calorimetry problem.",
+    rows:[
+      ["1","A bomb calorimeter operates at constant ___","volume"],
+      ["2","In bomb calorimetry, q(rxn) = ___","- C(cal) * \u0394T / -C(cal)\u0394T"],
+      ["3","C(cal) is the ___ of the calorimeter","heat capacity / calorimeter constant"],
+      ["4","C(cal) has units of ___","J/\u00B0C / kJ/\u00B0C"],
+      ["5","A bomb calorimeter (C(cal) = 5.00 kJ/\u00B0C) shows \u0394T = 3.20\u00B0C. q(rxn) = ? (kJ)","-16.0 / -16"],
+      ["6","Bomb calorimetry is commonly used for ___ reactions","combustion"],
+      ["7","A bomb calorimeter (C = 10.0 kJ/\u00B0C) records \u0394T = 4.50\u00B0C. q(rxn) = ? (kJ)","-45.0 / -45"],
+      ["8","Burning 1.00 g of sugar in a bomb cal (C = 8.50 kJ/\u00B0C) gives \u0394T = 1.85\u00B0C. q(rxn) = ? (kJ)","-15.725 / -15.7"],
+      ["9","To determine C(cal), you burn a substance with a ___ \u0394H(combustion)","known"],
+      ["10","Burning 1.00 g benzoic acid (\u0394H = -26.4 kJ/g) in a bomb cal gives \u0394T = 5.28\u00B0C. C(cal) = ? (kJ/\u00B0C)","5.00 / 5.0"],
+      ["11","In a bomb calorimeter, the quantity measured directly is \u0394___ (E or H)","E"],
+      ["12","\u0394E = \u0394H when \u0394n(gas) = ___","0 / zero"],
+      ["13","A bomb cal (C = 6.00 kJ/\u00B0C) records \u0394T = 2.00\u00B0C for 0.500 g sample. q/g = ? (kJ/g)","-24.0 / -24"],
+      ["14","Bomb calorimetry measures \u0394E rather than \u0394H because the ___ does not change","volume"],
+      ["15","The \u0394H and \u0394E relationship is: \u0394H = \u0394E + ___","\u0394nRT / delta(nRT) / PV work"]
+    ]
+  },
+  {
+    id:5, title:"Enthalpy of Reaction", type:"mc",
+    instruction:"Select the correct answer about enthalpy and calorimetry data.",
+    questions:[
+      {q:"If \u0394T is positive in a calorimeter, the reaction is:", options:["Endothermic","Exothermic","Neither","Cannot determine"], correct:1},
+      {q:"For an exothermic reaction, \u0394H is:", options:["Positive","Zero","Negative","Undefined"], correct:2},
+      {q:"An endothermic reaction ___ heat from the surroundings:", options:["Absorbs","Releases","Destroys","Creates"], correct:0},
+      {q:"\u0394H(rxn) from calorimetry equals:", options:["q(rxn) / moles of substance","q(solution)","m \u00D7 c","C(cal) \u00D7 \u0394T"], correct:0},
+      {q:"When 1 mol of NaOH dissolves and releases 44.5 kJ, \u0394H(soln) is:", options:["+44.5 kJ/mol","-44.5 kJ/mol","0 kJ/mol","89 kJ/mol"], correct:1},
+      {q:"Combustion reactions are generally:", options:["Endothermic","Exothermic","Equilibrium","Neither"], correct:1},
+      {q:"Which calorimeter measures \u0394E (internal energy) directly?", options:["Coffee-cup","Bomb","Both equally","Neither"], correct:1},
+      {q:"\u0394H \u2248 \u0394E when there is little change in:", options:["Temperature","Pressure","Volume of gas","Mass"], correct:2},
+      {q:"The standard enthalpy of formation of an element in its standard state is:", options:["+1 kJ/mol","-1 kJ/mol","0 kJ/mol","Depends on the element"], correct:2},
+      {q:"An ice pack feels cold because:", options:["It creates cold","The dissolution reaction is endothermic","The dissolution reaction is exothermic","It destroys heat"], correct:1},
+      {q:"A hand warmer feels warm because:", options:["The reaction is endothermic","The reaction is exothermic","The reaction is at equilibrium","It creates energy"], correct:1},
+      {q:"The sign of q for the surroundings in an exothermic reaction is:", options:["Negative","Positive","Zero","Cannot determine"], correct:1},
+      {q:"In calorimetry, the system and surroundings have ___ signs for q:", options:["The same","Opposite","Unpredictable","Both positive"], correct:1},
+      {q:"\u0394H(neutralization) for strong acid + strong base is approximately:", options:["+57 kJ/mol","-57 kJ/mol","0 kJ/mol","-100 kJ/mol"], correct:1},
+      {q:"The enthalpy of combustion of a substance is always:", options:["Positive","Negative","Zero","Variable"], correct:1}
+    ]
+  },
+  {
+    id:6, title:"Hess's Law Calculations",
+    instruction:"Fill in the blank for each Hess's law problem.",
+    rows:[
+      ["1","Hess's law states that \u0394H depends only on the ___ and ___ states","initial / final / initial and final"],
+      ["2","When you reverse a reaction, \u0394H changes ___","sign"],
+      ["3","When you multiply a reaction by 2, \u0394H is ___ by 2","multiplied"],
+      ["4","Given: A \u2192 B, \u0394H = -100 kJ. For B \u2192 A, \u0394H = ? (kJ)","+100 / 100"],
+      ["5","Given: A \u2192 B, \u0394H = -50 kJ. For 2A \u2192 2B, \u0394H = ? (kJ)","-100"],
+      ["6","Hess's law is a consequence of enthalpy being a ___ function","state"],
+      ["7","Given: A \u2192 B, \u0394H = +30 kJ and B \u2192 C, \u0394H = -80 kJ. For A \u2192 C, \u0394H = ? (kJ)","-50"],
+      ["8","Given: 2A \u2192 B, \u0394H = -200 kJ. For A \u2192 \u00BdB, \u0394H = ? (kJ)","-100"],
+      ["9","\u0394H\u00B0(rxn) = \u03A3\u0394H\u00B0f(products) - \u03A3\u0394H\u00B0f(_____)","reactants"],
+      ["10","The standard enthalpy of formation of CO\u2082(g) is -393.5 kJ/mol. This means: C(s) + O\u2082(g) \u2192 CO\u2082(g) releases ___ kJ","393.5"],
+      ["11","If \u0394H\u00B0f[H\u2082O(l)] = -285.8 kJ/mol, forming 2 mol H\u2082O releases ___ kJ","571.6"],
+      ["12","Given: C(s) + O\u2082(g) \u2192 CO\u2082(g), \u0394H = -393.5 kJ and C(s) + \u00BdO\u2082(g) \u2192 CO(g), \u0394H = -110.5 kJ. For CO(g) + \u00BdO\u2082(g) \u2192 CO\u2082(g), \u0394H = ? (kJ)","-283.0 / -283"],
+      ["13","Standard conditions for \u0394H\u00B0 are 1 atm and ___ \u00B0C (or K)","25 / 298"],
+      ["14","A path-independent function (like enthalpy) is called a ___ function","state"],
+      ["15","Given: 3 reactions that sum to A \u2192 D, Hess's law says you ___ their \u0394H values","add / sum"]
+    ]
+  },
+  {
+    id:7, title:"Bond Energy Calculations",
+    instruction:"Fill in the blank about bond energies and enthalpy.",
+    rows:[
+      ["1","\u0394H(rxn) \u2248 \u03A3(bonds broken) - \u03A3(bonds ___)","formed"],
+      ["2","Breaking bonds ___ energy (requires/releases)","requires / absorbs"],
+      ["3","Forming bonds ___ energy (requires/releases)","releases"],
+      ["4","The bond energy of H-H is 436 kJ/mol. Breaking 1 mol of H-H bonds requires ___ kJ","436"],
+      ["5","If bonds broken = 800 kJ and bonds formed = 1000 kJ, \u0394H = ? (kJ)","-200"],
+      ["6","The reaction from Q5 is ___ (exo/endo)thermic","exothermic / exo"],
+      ["7","If bonds broken = 500 kJ and bonds formed = 300 kJ, \u0394H = ? (kJ)","+200 / 200"],
+      ["8","The reaction from Q7 is ___ (exo/endo)thermic","endothermic / endo"],
+      ["9","The O=O double bond energy is about ___ kJ/mol","498 / 495"],
+      ["10","The O-H bond energy is about ___ kJ/mol","463 / 459"],
+      ["11","Bond energy values give ___ (exact/approximate) \u0394H values","approximate"],
+      ["12","Triple bonds are ___ (stronger/weaker) than double bonds","stronger"],
+      ["13","The C=O bond in CO\u2082 is about ___ kJ/mol","799 / 803"],
+      ["14","The N\u2261N triple bond is very ___ (strong/weak), making N\u2082 unreactive","strong"],
+      ["15","For CH\u2084 + 2O\u2082 \u2192 CO\u2082 + 2H\u2082O: bonds broken = 4(C-H) + 2(O=O). How many bonds are formed?","2(C=O) + 4(O-H) / 6"]
+    ]
+  },
+  {
+    id:8, title:"Calorimetry Sign Conventions", type:"mc",
+    instruction:"Select the correct answer about signs and energy flow in calorimetry.",
+    questions:[
+      {q:"When a reaction heats the water in a calorimeter, the reaction is:", options:["Endothermic","Exothermic","At equilibrium","Cannot tell"], correct:1},
+      {q:"In an exothermic dissolution, the water temperature:", options:["Decreases","Stays the same","Increases","Fluctuates"], correct:2},
+      {q:"q(system) + q(surroundings) = :", options:["q(system)","q(surroundings)","0","Cannot determine"], correct:2},
+      {q:"If q(water) = +500 J in a coffee-cup calorimeter, q(rxn) = :", options:["+500 J","-500 J","0 J","+1000 J"], correct:1},
+      {q:"Positive \u0394H means the reaction:", options:["Releases heat","Absorbs heat","Is at equilibrium","Releases gas"], correct:1},
+      {q:"When mixing HCl and NaOH in a calorimeter, the temperature rises. The neutralization is:", options:["Endothermic","Exothermic","Thermoneutral","Cannot determine"], correct:1},
+      {q:"An ice pack contains NH\u2084NO\u2083 and water. When mixed, the pack gets cold. \u0394H(dissolution) is:", options:["Negative","Positive","Zero","Undefined"], correct:1},
+      {q:"For an exothermic process: q(system) is ___ and q(surroundings) is ___:", options:["Positive, negative","Negative, positive","Both positive","Both negative"], correct:1},
+      {q:"When steam condenses to water, the process is:", options:["Endothermic","Exothermic","Neither","Both"], correct:1},
+      {q:"Melting ice is ___ because it requires energy input:", options:["Exothermic","Endothermic","Thermoneutral","Impossible"], correct:1}
+    ]
+  },
+  {
+    id:9, title:"Specific Heat with Different Substances",
+    instruction:"Calculate heat transfer for various substances. Use the specific heat values given.",
+    rows:[
+      ["1","How much heat to warm 250 g of ethanol (c = 2.44 J/g\u00B7\u00B0C) from 20\u00B0C to 78\u00B0C? (in J)","35,380 / 35380"],
+      ["2","A 10.0 g piece of silver (c = 0.235 J/g\u00B7\u00B0C) absorbs 47 J. \u0394T = ? (\u00B0C)","20"],
+      ["3","500 g of sand (c = 0.84 J/g\u00B7\u00B0C) absorbs the same energy as 500 g of water. Which has the larger \u0394T?","sand"],
+      ["4","This explains why ___ heats up faster than water at the beach","sand"],
+      ["5","A 150 g block of lead (c = 0.128 J/g\u00B7\u00B0C) drops from 200\u00B0C to 25\u00B0C. |q| = ? (J)","3360"],
+      ["6","Equal masses of Al and Cu absorb the same q. Al (c=0.897) has a ___ (larger/smaller) \u0394T than Cu (c=0.385)","smaller"],
+      ["7","How much heat (J) does 1 kg of water release when cooled from 100\u00B0C to 0\u00B0C?","418400 / 418,400"],
+      ["8","Equal masses of water and iron start at the same T. Both absorb 1000 J. Which reaches a higher final T?","iron"]
+    ]
+  },
+  {
+    id:10, title:"Enthalpy from Formation Data",
+    instruction:"Use standard enthalpies of formation to calculate \u0394H\u00B0(rxn). \u0394H\u00B0(rxn) = \u03A3\u0394H\u00B0f(products) - \u03A3\u0394H\u00B0f(reactants).",
+    rows:[
+      ["1","Given: \u0394H\u00B0f[CO\u2082(g)] = -393.5, \u0394H\u00B0f[H\u2082O(l)] = -285.8, \u0394H\u00B0f[CH\u2084(g)] = -74.8. For CH\u2084 + 2O\u2082 \u2192 CO\u2082 + 2H\u2082O, \u0394H\u00B0 = ? (kJ)","-890.3 / -890"],
+      ["2","\u0394H\u00B0f of O\u2082(g) is used as ___ kJ/mol in the calculation above","0"],
+      ["3","Given: \u0394H\u00B0f[NO\u2082(g)] = +33.2 kJ/mol. For N\u2082 + 2O\u2082 \u2192 2NO\u2082, \u0394H\u00B0 = ? (kJ)","+66.4 / 66.4"],
+      ["4","The formation of NO\u2082 is ___ (exo/endo)thermic","endothermic / endo"],
+      ["5","If all \u0394H\u00B0f(products) are more negative than \u0394H\u00B0f(reactants), \u0394H\u00B0(rxn) is ___ (positive/negative)","negative"],
+      ["6","\u0394H\u00B0f of any element in its standard state = ___","0"]
+    ]
+  },
+  {
+    id:11, title:"Hess's Law Word Arrange", type:"arrange",
+    instruction:"Arrange the words to form correct statements about Hess's law and calorimetry.",
+    sentences:[
+      {prompt:"State the key idea of Hess's law:", words:["Enthalpy","change","depends","only","on","initial","and","final","states"]},
+      {prompt:"What happens to \u0394H when you reverse a reaction?", words:["The","sign","of","\u0394H","is","reversed"]},
+      {prompt:"Describe the coffee-cup calorimeter condition:", words:["Coffee-cup","calorimetry","operates","at","constant","pressure"]},
+      {prompt:"Describe the bomb calorimeter condition:", words:["Bomb","calorimetry","operates","at","constant","volume"]},
+      {prompt:"State the relationship between q(rxn) and q(solution):", words:["q(rxn)","equals","negative","q(solution)"]},
+      {prompt:"State the formula for \u0394H(rxn) from formation data:", words:["\u0394H(rxn)","=","\u03A3\u0394Hf(products)","minus","\u03A3\u0394Hf(reactants)"]},
+      {prompt:"Explain why enthalpy is path-independent:", words:["Enthalpy","is","a","state","function"]},
+      {prompt:"Describe bond energy and \u0394H:", words:["\u0394H","=","energy","of","bonds","broken","minus","bonds","formed"]}
+    ]
+  },
+  {
+    id:12, title:"Mixed Review",
+    instruction:"Fill in the blank with the correct answer.",
+    rows:[
+      ["1","The heat needed to raise 1 g of a substance by 1\u00B0C is its ___","specific heat / specific heat capacity"],
+      ["2","Water has a ___ (high/low) specific heat compared to metals","high"],
+      ["3","In an exothermic reaction, the surroundings get ___ (warmer/cooler)","warmer"],
+      ["4","200 g of water absorbs 16,736 J. \u0394T = ? (\u00B0C)","20"],
+      ["5","A bomb calorimeter (C = 8.00 kJ/\u00B0C) records \u0394T = 2.50\u00B0C for burning 1.00 g of food. q(rxn) = ? (kJ)","-20.0 / -20"],
+      ["6","If q(rxn) = -20.0 kJ for 0.50 mol, \u0394H = ? (kJ/mol)","-40.0 / -40"],
+      ["7","To find \u0394H for a reaction not easily measured directly, use ___","Hess's law"],
+      ["8","Coffee-cup calorimetry assumes no heat is lost to the ___","surroundings / calorimeter / environment"],
+      ["9","A calorimeter constant is determined using a substance with ___ heat of combustion","known"],
+      ["10","The food Calorie (capital C) equals ___ cal (lowercase)","1000"],
+      ["11","Dissolving NaOH in water is ___ (exo/endo)thermic","exothermic / exo"],
+      ["12","When you halve the coefficients of a reaction, \u0394H is ___ by 2","divided"],
+      ["13","Bond breaking is always ___ (exo/endo)thermic","endothermic / endo"],
+      ["14","Bond forming is always ___ (exo/endo)thermic","exothermic / exo"],
+      ["15","If \u0394H = -200 kJ for 1 mol reaction, then 3 mol would release ___ kJ","600"]
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Calorimetry & Thermochemistry</h3><h3>Fundamental Heat Equation</h3><p><span class="rule">q = mc\u0394T</span></p><p>q = heat (J), m = mass (g), c = specific heat capacity (J/g\u00B7\u00B0C), \u0394T = T\u2092\u1D62\u2099\u2090\u2097 \u2212 T\u1D62\u2099\u1D62\u209C\u1D62\u2090\u2097 (\u00B0C or K)</p><p>&bull; q > 0: substance absorbs heat (endothermic process)</p><p>&bull; q < 0: substance releases heat (exothermic process)</p><h3>Specific Heat Values</h3><table><tr><th>Substance</th><th>c (J/g\u00B7\u00B0C)</th></tr><tr><td>Water (liquid)</td><td>4.184</td></tr><tr><td>Ice</td><td>2.09</td></tr><tr><td>Steam</td><td>2.01</td></tr><tr><td>Aluminum</td><td>0.897</td></tr><tr><td>Iron</td><td>0.449</td></tr><tr><td>Copper</td><td>0.385</td></tr><tr><td>Gold</td><td>0.129</td></tr><tr><td>Lead</td><td>0.128</td></tr></table><p><span class="rule">Rule:</span> Higher specific heat = harder to change temperature. Water has one of the highest c values of any common substance.</p><h3>Coffee-Cup Calorimetry (Constant Pressure)</h3><p><span class="rule">q\u1D63\u2093\u2099 = \u2212q\u209B\u2092\u2097\u1D64\u209C\u1D62\u2092\u2099 = \u2212mc\u0394T</span></p><p>&bull; Open to atmosphere \u2192 constant pressure \u2192 measures \u0394H directly</p><p>&bull; Assume: c(solution) \u2248 c(water) = 4.184 J/g\u00B7\u00B0C, density \u2248 1.00 g/mL</p><p>&bull; Mass of solution = mass of all liquids mixed (not just water)</p><p>&bull; \u0394H\u1D63\u2093\u2099 = q\u1D63\u2093\u2099 / moles of limiting reagent (gives kJ/mol)</p><h3>Bomb Calorimetry (Constant Volume)</h3><p><span class="rule">q\u1D63\u2093\u2099 = \u2212C\u209C\u2090\u2097\u0394T</span></p><p>&bull; C\u209C\u2090\u2097 = calorimeter constant (J/\u00B0C), includes bomb + water</p><p>&bull; Can also write: q\u1D63\u2093\u2099 = \u2212(C\u209C\u2090\u2097\u0394T + m\u2098\u2090\u209C\u2091\u1D63c\u2098\u2090\u209C\u2091\u1D63\u0394T) if C\u209C\u2090\u2097 is for bomb only</p><p>&bull; Constant volume \u2192 measures \u0394E (internal energy), not \u0394H. For most reactions, \u0394E \u2248 \u0394H.</p><h3>Determining Calorimeter Constant</h3><p><span class="rule">Method:</span> Burn a substance with known \u0394H\u209C\u2092\u2098\u2097. Measure \u0394T.</p><p>C\u209C\u2090\u2097 = |q\u2096\u2099\u2092\u2098\u2099| / \u0394T = (m\u209B\u2090\u2098\u209A\u2097\u2091 \u00D7 \u0394H\u209C\u2092\u2098\u2097 / M) / \u0394T</p><p>&bull; Once C\u209C\u2090\u2097 is known, use it for unknown samples in the same calorimeter.</p><h3>Hess\u2019s Law</h3><p><span class="rule">\u0394H is a state function:</span> Total enthalpy change depends only on initial and final states, not the path.</p><p>&bull; Reverse a reaction \u2192 change sign of \u0394H</p><p>&bull; Multiply a reaction by n \u2192 multiply \u0394H by n</p><p>&bull; Add reactions \u2192 add their \u0394H values</p><h3>\u0394H from Standard Enthalpies of Formation</h3><p><span class="rule">\u0394H\u00B0\u1D63\u2093\u2099 = \u03A3n\u0394H\u00B0f(products) \u2212 \u03A3n\u0394H\u00B0f(reactants)</span></p><p>&bull; \u0394H\u00B0f of elements in their standard state = 0 (e.g. O\u2082(g), C(graphite), Fe(s))</p><p>&bull; n = stoichiometric coefficients from balanced equation</p><h3>\u0394H from Bond Energies</h3><p><span class="rule">\u0394H\u1D63\u2093\u2099 \u2248 \u03A3(bonds broken) \u2212 \u03A3(bonds formed)</span></p><p>&bull; Breaking bonds requires energy (positive, endothermic)</p><p>&bull; Forming bonds releases energy (negative, exothermic)</p><p>&bull; This is an approximation (uses average bond energies, best for gas-phase reactions)</p><p>&bull; If \u03A3broken > \u03A3formed \u2192 endothermic (\u0394H > 0)</p><p>&bull; If \u03A3broken < \u03A3formed \u2192 exothermic (\u0394H < 0)</p>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 q = mc\u0394T, coffee-cup calorimetry, bomb calorimetry, specific heat \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

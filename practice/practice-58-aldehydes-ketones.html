@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice 58 — Aldehydes & Ketones</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Practice 58 &mdash; Aldehydes &amp; Ketones</h1>
+<p class="subtitle">Deep practice &mdash; carbonyl group, naming, reactions, Tollens' test</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_58';
+const SECTIONS = [
+  {
+    id:1, title:"Carbonyl Group Basics",
+    instruction:"Fill in the blank for each question about the carbonyl group.",
+    rows:[
+      ["1","The carbonyl group consists of a C=___ double bond","O / oxygen"],
+      ["2","In an aldehyde, the carbonyl is at the ___ of the carbon chain","end / terminal position"],
+      ["3","In a ketone, the carbonyl is in the ___ of the carbon chain","middle / interior / internal"],
+      ["4","The general formula for an aldehyde is ___","RCHO / R-CHO"],
+      ["5","The general formula for a ketone is ___","RCOR' / R-CO-R' / RCO R'"],
+      ["6","The simplest aldehyde is ___ (IUPAC name)","methanal / formaldehyde"],
+      ["7","The simplest ketone is ___ (IUPAC name)","propanone / acetone"],
+      ["8","The C=O bond is ___ (polar/nonpolar)","polar"],
+      ["9","The carbon in C=O has a partial ___ charge (+ or -)","positive / +"],
+      ["10","The oxygen in C=O has a partial ___ charge (+ or -)","negative / -"],
+      ["11","The carbonyl carbon is an ___ (electrophile/nucleophile)","electrophile"],
+      ["12","The carbonyl oxygen is a ___ (electrophile/nucleophile)","nucleophile"],
+      ["13","Aldehydes have a hydrogen on the carbonyl carbon, ketones have ___ instead","alkyl groups / R groups / carbon"],
+      ["14","The hybridization of the carbonyl carbon is ___","sp2"],
+      ["15","The bond angle around the carbonyl carbon is approximately ___ degrees","120"]
+    ]
+  },
+  {
+    id:2, title:"Naming Aldehydes",
+    instruction:"Fill in the IUPAC or common name for each aldehyde.",
+    rows:[
+      ["1","The IUPAC suffix for aldehydes is ___","-al / al"],
+      ["2","HCHO is called ___ (IUPAC)","methanal"],
+      ["3","HCHO common name is ___","formaldehyde"],
+      ["4","CH\u2083CHO is called ___ (IUPAC)","ethanal"],
+      ["5","CH\u2083CHO common name is ___","acetaldehyde"],
+      ["6","CH\u2083CH\u2082CHO is called ___ (IUPAC)","propanal"],
+      ["7","CH\u2083CH\u2082CH\u2082CHO is called ___ (IUPAC)","butanal"],
+      ["8","A 37% aqueous solution of formaldehyde is called ___","formalin"],
+      ["9","C\u2086H\u2085CHO (benzaldehyde) smells like ___","almonds / bitter almonds"],
+      ["10","CH\u2083CH\u2082CH\u2082CH\u2082CHO is called ___ (IUPAC)","pentanal"],
+      ["11","CH\u2083CH(CH\u2083)CHO is called ___","2-methylpropanal"],
+      ["12","(CH\u2083)\u2082CHCH\u2082CHO is called ___","3-methylbutanal"],
+      ["13","Cinnamaldehyde gives ___ (spice) its flavor","cinnamon"],
+      ["14","The aldehyde C is always carbon number ___","1"],
+      ["15","Vanillin is the aldehyde that gives ___ its flavor","vanilla"]
+    ]
+  },
+  {
+    id:3, title:"Naming Ketones",
+    instruction:"Fill in the IUPAC or common name for each ketone.",
+    rows:[
+      ["1","The IUPAC suffix for ketones is ___","-one / one"],
+      ["2","CH\u2083COCH\u2083 is called ___ (IUPAC)","propanone / propan-2-one"],
+      ["3","CH\u2083COCH\u2083 common name is ___","acetone"],
+      ["4","CH\u2083COCH\u2082CH\u2083 is called ___ (IUPAC)","butanone / butan-2-one"],
+      ["5","CH\u2083COCH\u2082CH\u2082CH\u2083 is called ___ (IUPAC)","2-pentanone / pentan-2-one"],
+      ["6","Acetone is widely used as a ___","solvent / nail polish remover"],
+      ["7","CH\u2083CH\u2082COCH\u2082CH\u2083 is called ___ (IUPAC)","3-pentanone / pentan-3-one"],
+      ["8","Cyclohexanone is a ___ (cyclic/linear) ketone","cyclic"],
+      ["9","CH\u2083COCH(CH\u2083)\u2082 is called ___","3-methyl-2-butanone / 3-methylbutan-2-one"],
+      ["10","Acetophenone has a ___ ring attached to the carbonyl","benzene / phenyl"],
+      ["11","Ketone numbering gives the C=O the ___ (lowest/highest) possible number","lowest"]
+    ]
+  },
+  {
+    id:4, title:"Properties", type:"mc",
+    instruction:"Select the correct answer about aldehyde and ketone properties.",
+    questions:[
+      {q:"The C=O bond makes aldehydes and ketones:", options:["Nonpolar","Polar","Ionic","Metallic"], correct:1},
+      {q:"Compared to alcohols of similar MW, aldehydes/ketones have ___ boiling points:", options:["Higher","About the same","Lower","Much higher"], correct:2},
+      {q:"Why do aldehydes/ketones have lower BP than alcohols?", options:["They are larger","They cannot form H-bonds with themselves","They are nonpolar","They are gases"], correct:1},
+      {q:"Can aldehydes/ketones form hydrogen bonds with water?", options:["No, never","Yes, as H-bond acceptors","Yes, as H-bond donors","Only ketones can"], correct:1},
+      {q:"Small aldehydes/ketones (1-4 C) are ___ in water:", options:["Insoluble","Slightly soluble","Soluble","Only soluble in hot water"], correct:2},
+      {q:"The carbonyl C is electrophilic because:", options:["It has a full negative charge","O withdraws electron density from C","It has extra electrons","C is more electronegative than O"], correct:1},
+      {q:"Formaldehyde (HCHO) at room temperature is a:", options:["Liquid","Solid","Gas","Plasma"], correct:2},
+      {q:"Acetone is ___ with water (miscible/immiscible):", options:["Immiscible","Slightly miscible","Miscible","Only in hot water"], correct:2},
+      {q:"The BP of propanal vs propanone is:", options:["Propanal is much higher","About the same","Propanone is much higher","Cannot compare"], correct:1},
+      {q:"Many aldehydes have ___ odors (pleasant/unpleasant):", options:["Always unpleasant","Always pleasant","Pleasant (fruity, floral) at low concentration","No odor"], correct:2}
+    ]
+  },
+  {
+    id:5, title:"Aldehyde Reactions and Tests",
+    instruction:"Fill in the blank for each aldehyde reaction.",
+    rows:[
+      ["1","Oxidation of an aldehyde produces a ___ acid","carboxylic"],
+      ["2","CH\u2083CHO + [O] \u2192 CH\u2083COOH. The product is ___ acid","acetic / ethanoic"],
+      ["3","Tollens' test uses ___ ion (Ag\u207A) in ammonia solution","silver"],
+      ["4","A positive Tollens' test produces a ___ mirror","silver"],
+      ["5","Tollens' test is positive for ___ (aldehydes/ketones)","aldehydes"],
+      ["6","Fehling's test uses ___ (I/II) solution (Cu\u00B2\u207A)","Cu2+ / copper(II) / copper"],
+      ["7","A positive Fehling's test shows a ___ precipitate","red / brick-red / reddish"],
+      ["8","Reduction of an aldehyde (adding H\u2082) produces a ___ alcohol","primary / 1"],
+      ["9","Benedict's test is similar to ___ test (both use Cu\u00B2\u207A)","Fehling's / Fehling"],
+      ["10","Benedict's test is used to detect ___ sugars in urine","reducing"],
+      ["11","HCHO + [O] \u2192 ___ (formic acid IUPAC)","methanoic acid / HCOOH"],
+      ["12","Propanal + [O] \u2192 ___","propanoic acid"],
+      ["13","Butanal + [O] \u2192 ___","butanoic acid"],
+      ["14","In Tollens' test, Ag\u207A is ___ (oxidized/reduced) to Ag\u2070","reduced"],
+      ["15","In Tollens' test, the aldehyde is ___ (oxidized/reduced) to a carboxylate","oxidized"]
+    ]
+  },
+  {
+    id:6, title:"Reduction and Nucleophilic Addition", type:"mc",
+    instruction:"Select the correct answer about reactions of aldehydes and ketones.",
+    questions:[
+      {q:"Ketones are ___ to oxidize than aldehydes:", options:["Easier","Harder","Equally easy","Impossible"], correct:1},
+      {q:"Tollens' test with a ketone gives:", options:["Silver mirror","No reaction (negative)","Red precipitate","Gas bubbles"], correct:1},
+      {q:"Reduction of a ketone produces a:", options:["Primary alcohol","Secondary alcohol","Tertiary alcohol","Carboxylic acid"], correct:1},
+      {q:"CH\u2083COCH\u2083 + H\u2082 \u2192 ?", options:["Propan-1-ol","Propan-2-ol","Propanal","Propanoic acid"], correct:1},
+      {q:"Why are ketones harder to oxidize than aldehydes?", options:["Ketones are smaller","The carbonyl C in ketones has no H to lose","Ketones are nonpolar","Ketones are gases"], correct:1},
+      {q:"Which reagent distinguishes between an aldehyde and a ketone?", options:["Water","HCl","Tollens' reagent (Ag\u207A/NH\u2083)","NaOH"], correct:2},
+      {q:"NaBH\u2084 reduces C=O to:", options:["C-O (alcohol)","C=C","C-C","C-N"], correct:0},
+      {q:"LiAlH\u2084 is a ___ reducing agent than NaBH\u2084:", options:["Weaker","Similar","Stronger","Not a reducing agent"], correct:2},
+      {q:"Grignard reagents (RMgBr) react with aldehydes to form:", options:["Ketones","Alcohols","Ethers","Amines"], correct:1},
+      {q:"HCHO + CH\u2083MgBr, then H\u2083O\u207A gives a ___ alcohol:", options:["Primary","Secondary","Tertiary","No alcohol"], correct:0},
+      {q:"RCHO + R'MgBr, then H\u2083O\u207A gives a ___ alcohol:", options:["Primary","Secondary","Tertiary","No alcohol"], correct:1},
+      {q:"R\u2082C=O + R'MgBr, then H\u2083O\u207A gives a ___ alcohol:", options:["Primary","Secondary","Tertiary","No alcohol"], correct:2}
+    ]
+  },
+  {
+    id:7, title:"Keto-Enol Tautomerism",
+    instruction:"Fill in the blank about keto-enol tautomerism.",
+    rows:[
+      ["1","Tautomers are isomers that differ in the position of a ___ and a double bond","hydrogen / H / proton"],
+      ["2","The keto form has C=O, the enol form has C=C and ___","-OH / OH"],
+      ["3","In most cases, the ___ form is more stable and predominates","keto"],
+      ["4","Acetone exists almost entirely in the ___ form","keto"],
+      ["5","The interconversion between keto and enol forms is called ___","tautomerism / tautomerization"],
+      ["6","The alpha carbon is the carbon ___ to the carbonyl","adjacent / next / alpha"],
+      ["7","The alpha hydrogen is on the ___ carbon","alpha"],
+      ["8","Compounds without alpha hydrogens ___ (can/cannot) undergo tautomerism","cannot"]
+    ]
+  },
+  {
+    id:8, title:"Aldol Condensation Basics",
+    instruction:"Fill in the blank about the aldol reaction.",
+    rows:[
+      ["1","In the aldol reaction, one aldehyde acts as a nucleophile (via its ___) and another as an electrophile","enolate / alpha carbon"],
+      ["2","The aldol product contains both an ___ and a hydroxyl group","aldehyde / carbonyl"],
+      ["3","Aldol condensation involves aldol addition followed by ___ of water","elimination / loss / dehydration"],
+      ["4","The product of aldol condensation is an alpha,beta-___ carbonyl","unsaturated"],
+      ["5","The aldol reaction forms a new ___-___ bond","carbon-carbon / C-C"],
+      ["6","Base-catalyzed aldol uses ___ to form the enolate","NaOH / base / hydroxide"]
+    ]
+  },
+  {
+    id:9, title:"Carbonyl Reactions Word Arrange", type:"arrange",
+    instruction:"Arrange the words to form correct statements about carbonyl chemistry.",
+    sentences:[
+      {prompt:"Tollens' test positive result:", words:["aldehyde","+","Ag+","\u2192","silver","mirror","+","carboxylate"]},
+      {prompt:"Reduction of an aldehyde:", words:["aldehyde","+","NaBH4","\u2192","primary","alcohol"]},
+      {prompt:"Reduction of a ketone:", words:["ketone","+","NaBH4","\u2192","secondary","alcohol"]},
+      {prompt:"Grignard with formaldehyde:", words:["HCHO","+","RMgBr","\u2192","primary","alcohol"]},
+      {prompt:"Oxidation of an aldehyde:", words:["aldehyde","+","oxidizing","agent","\u2192","carboxylic","acid"]},
+      {prompt:"Keto-enol equilibrium:", words:["keto","form","is","more","stable","than","enol","form"]},
+      {prompt:"Nucleophilic addition mechanism:", words:["nucleophile","attacks","electrophilic","carbonyl","carbon"]},
+      {prompt:"Aldol condensation result:", words:["two","aldehydes","form","alpha,beta-unsaturated","carbonyl","+","water"]}
+    ]
+  },
+  {
+    id:10, title:"Mixed Review",
+    instruction:"Fill in the blank with the correct term.",
+    rows:[
+      ["1","R-CHO is an ___, R-CO-R' is a ___","aldehyde, ketone / aldehyde / ketone"],
+      ["2","The -al suffix indicates an ___","aldehyde"],
+      ["3","The -one suffix indicates a ___","ketone"],
+      ["4","Tollens' test: aldehyde + Ag\u207A \u2192 ___ mirror + carboxylate","silver"],
+      ["5","Oxidation: aldehyde \u2192 carboxylic acid. Reduction: aldehyde \u2192 ___ alcohol","primary / 1"],
+      ["6","Acetone (propanone) is the simplest ___","ketone"],
+      ["7","Formaldehyde is used to preserve biological specimens as ___","formalin"],
+      ["8","NaBH\u2084 and LiAlH\u2084 are both ___ agents","reducing"],
+      ["9","Grignard reagents form new ___ bonds with carbonyls","carbon-carbon / C-C"],
+      ["10","Fehling's test: aldehyde + Cu\u00B2\u207A \u2192 ___ precipitate (Cu\u2082O)","red / brick-red"],
+      ["11","Diabetes is monitored by testing for ___ (acetone) in blood/urine","ketone bodies / ketones"],
+      ["12","The carbonyl stretch in IR spectroscopy appears near ___ cm\u207B\u00B9","1700 / 1715"],
+      ["13","Benedict's reagent turns from blue to ___ with reducing sugars","red / orange / brick-red"],
+      ["14","Acetaldehyde is the first metabolite of ___ in the body","ethanol / alcohol"],
+      ["15","Formaldehyde + phenol produces ___ (a polymer used in countertops)","Bakelite / phenol-formaldehyde resin"]
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Aldehydes & Ketones Reference</h3>' +
+'<p><span class="rule">The Carbonyl Group (C=O):</span> The defining group. C=O is polar: O is more electronegative, so C is electrophilic (\u03B4+) and O is nucleophilic (\u03B4-). Carbonyl C is sp\u00B2 hybridized (120\u00B0 bond angles). This polarity makes the carbonyl C susceptible to nucleophilic addition.</p>' +
+'<table><tr><th>Property</th><th>Aldehyde (R-CHO)</th><th>Ketone (R-CO-R\u2019)</th></tr>' +
+'<tr><td><span class="rule">Position</span></td><td>Terminal carbonyl (end of chain)</td><td>Internal carbonyl (middle of chain)</td></tr>' +
+'<tr><td><span class="rule">IUPAC suffix</span></td><td>-al (C always #1)</td><td>-one (lowest # for C=O)</td></tr>' +
+'<tr><td><span class="rule">Simplest</span></td><td>Methanal (formaldehyde, HCHO)</td><td>Propanone (acetone, CH\u2083COCH\u2083)</td></tr>' +
+'<tr><td><span class="rule">Oxidation</span></td><td>\u2192 Carboxylic acid (KMnO\u2084, K\u2082Cr\u2082O\u2087)</td><td>Resistant (no H on carbonyl C to lose)</td></tr>' +
+'<tr><td><span class="rule">Reduction</span></td><td>\u2192 1\u00B0 alcohol (NaBH\u2084 or LiAlH\u2084)</td><td>\u2192 2\u00B0 alcohol (NaBH\u2084 or LiAlH\u2084)</td></tr>' +
+'<tr><td><span class="rule">Tollens\u2019 test</span></td><td>POSITIVE (silver mirror)</td><td>Negative (no reaction)</td></tr>' +
+'<tr><td><span class="rule">Benedict\u2019s/Fehling\u2019s</span></td><td>POSITIVE (brick-red Cu\u2082O ppt)</td><td>Negative</td></tr></table>' +
+'<p><span class="rule">Tollens\u2019 Test (Silver Mirror):</span> Ag\u207A ions in NH\u2083 solution. Aldehyde reduces Ag\u207A \u2192 Ag\u2070 metallic silver (deposits as mirror on glass). The aldehyde is oxidized to carboxylate ion. Ketones give NO reaction. This test DISTINGUISHES aldehydes from ketones.</p>' +
+'<p><span class="rule">Benedict\u2019s/Fehling\u2019s Test:</span> Cu\u00B2\u207A (blue solution) is reduced to Cu\u2082O (brick-red precipitate) by aldehydes. Used to detect reducing sugars (e.g., glucose in urine for diabetes). Ketones = negative.</p>' +
+'<p><span class="rule">Reduction:</span> NaBH\u2084 (mild, selective) or LiAlH\u2084 (strong, reduces almost everything). Aldehyde + H\u2082 \u2192 1\u00B0 alcohol. Ketone + H\u2082 \u2192 2\u00B0 alcohol.</p>' +
+'<p><span class="rule">Nucleophilic Addition:</span> Nucleophile attacks electrophilic carbonyl C. Grignard reagents (RMgBr) add carbon chains: HCHO + RMgBr \u2192 1\u00B0 alcohol; RCHO + R\u2019MgBr \u2192 2\u00B0 alcohol; R\u2082CO + R\u2019MgBr \u2192 3\u00B0 alcohol. Cyanohydrin formation: C=O + HCN \u2192 cyanohydrin.</p>' +
+'<p><span class="rule">Keto-Enol Tautomerism:</span> Tautomers interconvert by moving an \u03B1-hydrogen and shifting the double bond. Keto form (C=O) is usually more stable and predominates. Enol form (C=C with -OH) is minor. Requires an \u03B1-hydrogen (H on carbon next to C=O). Compounds without \u03B1-H cannot tautomerize.</p>' +
+'<p><span class="rule">Aldol Condensation:</span> Two aldehydes combine: one provides enolate (nucleophile from \u03B1-C), the other provides electrophilic C=O. Product = \u03B2-hydroxy aldehyde. With dehydration: \u03B1,\u03B2-unsaturated carbonyl. Important for forming new C-C bonds.</p>' +
+'<p><span class="rule">Physical Properties:</span> Cannot H-bond with themselves (no O-H or N-H), but CAN accept H-bonds from water \u2192 small ones (1-4 C) are water-soluble. BP order: alcohol > aldehyde/ketone > ether > alkane (same MW). Many aldehydes have pleasant smells (cinnamaldehyde = cinnamon, benzaldehyde = almonds, vanillin = vanilla).</p>' +
+'<p><span class="rule">Common Compounds:</span> Formaldehyde (HCHO, gas at RT, formalin = 37% aqueous solution, preserves specimens). Acetaldehyde (CH\u2083CHO, first metabolite of ethanol). Acetone (CH\u2083COCH\u2083, common solvent, nail polish remover, produced in diabetic ketoacidosis). Benzaldehyde (almond scent). Bakelite = phenol-formaldehyde resin.</p>' +
+'<p><span class="rule">IR Spectroscopy:</span> Carbonyl stretch appears near 1700-1715 cm\u207B\u00B9 (strong, characteristic peak).</p>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 carbonyl group, naming, reactions, Tollens\u2019 test \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

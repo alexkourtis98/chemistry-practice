@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Conjugated Systems & Diels-Alder</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Conjugated Systems & Diels-Alder</h1>
+<p class="subtitle">Deep practice &mdash; 1,2 vs 1,4 addition, Diels-Alder reaction, dienes, dienophiles</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_80';
+const SECTIONS = [
+  {
+    id:1, title:"Fill: Conjugation basics",
+    instruction:"Fill in the blank with the correct term.",
+    rows:[
+      ["1","A conjugated system has alternating ___ and ___ bonds","single, double / single and double"],
+      ["2","1,3-butadiene is a ___ diene","conjugated"],
+      ["3","1,4-pentadiene (separated double bonds) is an ___ diene","isolated"],
+      ["4","In a conjugated system, p orbitals ___ across adjacent atoms","overlap"],
+      ["5","Conjugation leads to ___ of electrons","delocalization"],
+      ["6","Conjugated dienes are more ___ than isolated dienes","stable"],
+      ["7","The simplest conjugated diene is ___","1,3-butadiene"],
+      ["8","In allenes (C=C=C), the double bonds are ___, not conjugated","cumulated"],
+      ["9","Conjugation lowers the overall ___ of the molecule","energy"],
+      ["10","UV-Vis absorption shifts to longer wavelength with more ___","conjugation"],
+      ["11","Beta-carotene appears orange because of its extensive ___","conjugation"],
+      ["12","The heat of hydrogenation of a conjugated diene is ___ than expected","lower / less"],
+      ["13","Electrons in a conjugated system are spread over ___ atoms","multiple / all / many"],
+      ["14","A compound with alternating single and double bonds throughout is called ___","conjugated / fully conjugated"],
+      ["15","Resonance structures can be drawn for ___ systems","conjugated"],
+      ["16","The pi electrons in 1,3-butadiene occupy ___ molecular orbitals","4 / four"],
+      ["17","The HOMO of 1,3-butadiene is ___","psi-2 / \u03C8\u2082"],
+      ["18","A diene with two double bonds separated by one single bond is ___","conjugated"],
+      ["19","Cumulated dienes have ___ double bonds sharing a central carbon","adjacent / consecutive"],
+      ["20","The stabilization from conjugation is called ___ energy","resonance / delocalization / stabilization"]
+    ]
+  },
+  {
+    id:2, title:"Fill: 1,2 vs 1,4 addition",
+    instruction:"Fill in the blank about electrophilic addition to conjugated dienes.",
+    rows:[
+      ["1","The kinetic product of HBr + 1,3-butadiene is the ___ product","1,2-addition / 1,2 product / 1,2"],
+      ["2","The thermodynamic product of HBr + 1,3-butadiene is the ___ product","1,4-addition / 1,4 product / 1,4"],
+      ["3","1,2-addition is favored at ___ temperature","low"],
+      ["4","1,4-addition is favored at ___ temperature","high"],
+      ["5","The kinetic product forms ___ (faster/slower)","faster"],
+      ["6","The thermodynamic product is more ___ (stable/unstable)","stable"],
+      ["7","In 1,4-addition, the double bond ends up in the ___ position","internal / 2,3 / middle"],
+      ["8","The 1,4-product has a more ___ double bond","substituted"],
+      ["9","The intermediate in electrophilic addition to a conjugated diene is an ___ carbocation","allylic"],
+      ["10","An allylic carbocation is stabilized by ___","resonance"],
+      ["11","At low temperature, kinetic control dominates because the reaction is ___","irreversible"],
+      ["12","At high temperature, thermodynamic control dominates because the reaction is ___","reversible"],
+      ["13","1,2-addition adds both groups to ___ carbons","adjacent / neighboring"],
+      ["14","1,4-addition adds groups to the ___ and ___ carbons of the diene","first, fourth / 1, 4 / C1, C4"],
+      ["15","The activation energy for the 1,2-product is ___ than for the 1,4-product","lower / less"]
+    ]
+  },
+  {
+    id:3, title:"MC: Conjugation concepts", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Which diene is more stable?", options:["1,3-butadiene (conjugated)","1,4-pentadiene (isolated)","Both equally stable","Cannot determine"], correct:0},
+      {q:"Why are conjugated dienes more stable?", options:["Stronger sigma bonds","Electron delocalization across p orbitals","More hydrogen atoms","Higher molecular weight"], correct:1},
+      {q:"What happens to UV absorption as conjugation increases?", options:["Shifts to shorter wavelength (blue shift)","Shifts to longer wavelength (red shift)","No change","Absorption disappears"], correct:1},
+      {q:"Which is a cumulated diene?", options:["1,3-butadiene","1,2-propadiene (allene)","1,4-pentadiene","Cyclopentadiene"], correct:1},
+      {q:"How many pi electrons does 1,3-butadiene have?", options:["2","4","6","8"], correct:1},
+      {q:"The heat of hydrogenation of conjugated dienes compared to isolated dienes is:", options:["Higher","Lower","The same","Unpredictable"], correct:1},
+      {q:"Which molecule is NOT conjugated?", options:["1,3-butadiene","1,3,5-hexatriene","1,4-pentadiene","Benzene"], correct:2},
+      {q:"Delocalization of pi electrons results in:", options:["Higher energy","Lower energy (stabilization)","No energy change","Bond breaking"], correct:1},
+      {q:"In 1,3-butadiene, the C2-C3 bond is:", options:["A pure single bond","Shorter than a typical single bond","A pure double bond","Longer than a typical single bond"], correct:1},
+      {q:"Which compound absorbs light at the longest wavelength?", options:["Ethene (1 double bond)","1,3-butadiene (2 conjugated)","1,3,5-hexatriene (3 conjugated)","1,3,5,7-octatetraene (4 conjugated)"], correct:3},
+      {q:"Beta-carotene is orange because:", options:["It has no double bonds","Its extensive conjugation absorbs blue/violet light","It contains metal ions","It fluoresces"], correct:1},
+      {q:"A cross-conjugated system is one where:", options:["Three pi systems share a common atom but are not all conjugated with each other","All bonds are conjugated","No conjugation exists","Only sigma bonds are present"], correct:0},
+      {q:"The bond order of C2-C3 in 1,3-butadiene is approximately:", options:["1.0","1.5","2.0","1.2"], correct:3},
+      {q:"Which best describes the pi system of 1,3-butadiene?", options:["Two isolated pi bonds","Four p orbitals overlapping continuously","Three p orbitals overlapping","Two sigma bonds"], correct:1},
+      {q:"Conjugation requires:", options:["Adjacent p orbitals that can overlap","Sp3 hybridized carbons","Triple bonds only","Metal catalysts"], correct:0},
+      {q:"An s-cis diene has the double bonds on the ___ side of the single bond:", options:["Opposite (trans)","Same (cis)","Perpendicular","Random"], correct:1},
+      {q:"An s-trans diene has the double bonds on the ___ side of the single bond:", options:["Same (cis)","Opposite (trans)","Neither","Both"], correct:1},
+      {q:"Cyclopentadiene is locked in which conformation?", options:["s-trans","s-cis","Both equally","Neither"], correct:1},
+      {q:"Which factor does NOT increase conjugation stability?", options:["More overlapping p orbitals","Longer conjugated chain","Sp3 carbons interrupting the chain","Planar geometry"], correct:2},
+      {q:"The HOMO-LUMO gap of a conjugated system ___ as conjugation increases:", options:["Increases","Decreases","Stays the same","Oscillates"], correct:1}
+    ]
+  },
+  {
+    id:4, title:"Fill: Diels-Alder reaction",
+    instruction:"Fill in the blank about the Diels-Alder reaction.",
+    rows:[
+      ["1","The Diels-Alder is a [___] cycloaddition","[4+2] / 4+2"],
+      ["2","The diene must be in ___ conformation for Diels-Alder","s-cis"],
+      ["3","The Diels-Alder reaction is ___ (concerted/stepwise)","concerted"],
+      ["4","The Diels-Alder reaction forms a ___-membered ring","6 / six"],
+      ["5","The Diels-Alder is a ___ reaction (thermal/photochemical)","thermal"],
+      ["6","The diene provides ___ pi electrons in the Diels-Alder","4 / four"],
+      ["7","The dienophile provides ___ pi electrons in the Diels-Alder","2 / two"],
+      ["8","The Diels-Alder product is a ___","cyclohexene"],
+      ["9","The stereochemistry of the Diels-Alder is ___ addition","syn / suprafacial"],
+      ["10","No ___ are formed in a concerted Diels-Alder reaction","intermediates"],
+      ["11","The Diels-Alder reaction forms ___ new sigma bonds","2 / two"],
+      ["12","The Diels-Alder reaction breaks ___ pi bonds","2 / two"],
+      ["13","The Diels-Alder reaction creates ___ new pi bond(s) in the product","1 / one"],
+      ["14","A Diels-Alder reaction is classified as a ___","pericyclic reaction / pericyclic / cycloaddition"],
+      ["15","The Diels-Alder reaction is favored by electron-___ groups on the dienophile","withdrawing"],
+      ["16","The Diels-Alder reaction is favored by electron-___ groups on the diene","donating"],
+      ["17","The reverse of the Diels-Alder reaction is called ___","retro Diels-Alder / retro-Diels-Alder"],
+      ["18","Retro Diels-Alder is favored at ___ temperatures","high"],
+      ["19","The endo product is usually the ___ product of the Diels-Alder","kinetic / major"],
+      ["20","The endo rule is also called the ___ rule","Alder / Alder endo"]
+    ]
+  },
+  {
+    id:5, title:"MC: Diels-Alder requirements", type:"mc",
+    instruction:"Select the correct answer about Diels-Alder reaction conditions.",
+    questions:[
+      {q:"What conformation must the diene adopt for Diels-Alder?", options:["s-trans","s-cis","Anti","Gauche"], correct:1},
+      {q:"Why can't an s-trans diene undergo Diels-Alder?", options:["It's too stable","The ends are too far apart to form a ring","It has no pi electrons","It reacts with itself instead"], correct:1},
+      {q:"Which is a good dienophile?", options:["Ethene with electron-donating groups","Ethene with electron-withdrawing groups","An alkane","A noble gas"], correct:1},
+      {q:"The Diels-Alder reaction requires:", options:["UV light","A catalyst always","Heat (thermal conditions)","Extreme pressure only"], correct:2},
+      {q:"Which diene CANNOT undergo Diels-Alder easily?", options:["Cyclopentadiene","1,3-butadiene","2,3-di-tert-butyl-1,3-butadiene (locked s-trans)","Isoprene"], correct:2},
+      {q:"Cyclopentadiene readily undergoes Diels-Alder because it is:", options:["Very reactive as a dienophile","Locked in s-cis conformation","An aromatic compound","A cumulated diene"], correct:1},
+      {q:"Which is NOT a common EWG on dienophiles?", options:["-CHO","-COOH","-CH\u2083 (methyl)","-CN"], correct:2},
+      {q:"The Diels-Alder mechanism involves how many arrows in the transition state?", options:["2","3","4","6"], correct:1},
+      {q:"What type of bond is formed in the product ring?", options:["Only pi bonds","Only sigma bonds","Both sigma and pi bonds","Ionic bonds"], correct:2},
+      {q:"Which statement about the Diels-Alder is FALSE?", options:["It is stereospecific (syn addition)","It forms a 6-membered ring","It requires a radical initiator","It is concerted"], correct:2},
+      {q:"The Diels-Alder works best with:", options:["Electron-rich diene + electron-poor dienophile","Electron-poor diene + electron-rich dienophile","Two electron-rich components","Two electron-poor components"], correct:0},
+      {q:"Which catalyst can accelerate the Diels-Alder reaction?", options:["Lewis acids (e.g., AlCl\u2083)","Lewis bases","Radical initiators","Strong nucleophiles"], correct:0},
+      {q:"The Diels-Alder is a ___ reaction:", options:["One-step (concerted)","Two-step","Three-step","Multi-step radical"], correct:0},
+      {q:"How many new carbon-carbon bonds form in a Diels-Alder?", options:["1","2","3","4"], correct:1},
+      {q:"In a normal electron-demand Diels-Alder, the HOMO belongs to:", options:["The dienophile","The diene","Both equally","Neither"], correct:1}
+    ]
+  },
+  {
+    id:6, title:"Fill: Identify diene and dienophile",
+    instruction:"Identify which reactant is the diene and which is the dienophile.",
+    rows:[
+      ["1","In butadiene + ethylene \u2192 cyclohexene, butadiene is the ___","diene"],
+      ["2","In butadiene + ethylene \u2192 cyclohexene, ethylene is the ___","dienophile"],
+      ["3","The component with 4 pi electrons (two conjugated double bonds) is the ___","diene"],
+      ["4","The component with 2 pi electrons (one double/triple bond) is the ___","dienophile"],
+      ["5","Maleic anhydride is commonly used as a ___","dienophile"],
+      ["6","Cyclopentadiene is commonly used as a ___","diene"],
+      ["7","Acrolein (CH\u2082=CH-CHO) acts as a ___","dienophile"],
+      ["8","Isoprene (2-methyl-1,3-butadiene) acts as a ___","diene"],
+      ["9","An alkene with -NO\u2082 group typically acts as a ___","dienophile"],
+      ["10","A compound with -OCH\u2083 groups on a 1,3-diene acts as a better ___","diene"],
+      ["11","Acrylonitrile (CH\u2082=CH-CN) is a ___","dienophile"],
+      ["12","2,3-dimethyl-1,3-butadiene is a ___","diene"],
+      ["13","Benzoquinone acts as a ___","dienophile"],
+      ["14","1,3-cyclohexadiene acts as a ___","diene"],
+      ["15","Methyl vinyl ketone (CH\u2082=CH-COCH\u2083) is a ___","dienophile"]
+    ]
+  },
+  {
+    id:7, title:"MC: Products of Diels-Alder", type:"mc",
+    instruction:"Select the correct answer about Diels-Alder products.",
+    questions:[
+      {q:"The product of 1,3-butadiene + ethylene is:", options:["Cyclohexane","Cyclohexene","Benzene","Cyclopentene"], correct:1},
+      {q:"How many double bonds remain in the Diels-Alder product?", options:["0","1","2","3"], correct:1},
+      {q:"Where is the double bond in the cyclohexene product?", options:["Between C1-C2 of the original diene portion","Between C2-C3 of the original diene portion","Between C3-C4","Random position"], correct:1},
+      {q:"If both cis substituents are on the dienophile, they will be ___ in the product:", options:["Trans to each other","Cis to each other (syn addition)","Randomly oriented","Eliminated"], correct:1},
+      {q:"The endo product has substituents pointing:", options:["Away from the larger bridge","Toward the larger bridge (under the ring)","Upward always","It doesn't matter"], correct:1},
+      {q:"The endo product is usually favored because of:", options:["Steric factors","Secondary orbital interactions","Lower molecular weight","Higher symmetry"], correct:1},
+      {q:"In a Diels-Alder with an unsymmetrical diene and dienophile, the major product follows:", options:["Markovnikov's rule","Anti-Markovnikov rule","The ortho/para rule (1,2 and 1,4 relationship)","Random orientation"], correct:2},
+      {q:"Bicyclic products form when the diene is:", options:["Acyclic","Cyclic (e.g., cyclopentadiene)","A triene","An allene"], correct:1},
+      {q:"Dicyclopentadiene is formed by:", options:["Diels-Alder of cyclopentadiene with itself","Radical polymerization","Acid-catalyzed reaction","Photochemical reaction"], correct:0},
+      {q:"The Diels-Alder product always has ___ more ring than the reactants combined:", options:["0","1","2","3"], correct:1}
+    ]
+  },
+  {
+    id:8, title:"Fill: s-cis vs s-trans",
+    instruction:"Fill in the blank about diene conformations.",
+    rows:[
+      ["1","The s-cis conformation allows ___","Diels-Alder / [4+2] reaction / Diels-Alder reaction"],
+      ["2","In s-cis, the two double bonds are on the ___ side of the C2-C3 single bond","same"],
+      ["3","In s-trans, the two double bonds are on ___ sides of the C2-C3 single bond","opposite"],
+      ["4","The s-trans conformer of 1,3-butadiene is more ___ than s-cis","stable"],
+      ["5","The s-cis conformer has ___ interactions between H atoms","steric"],
+      ["6","Rotation around the ___ bond interconverts s-cis and s-trans","C2-C3 / single / C2\u2013C3"],
+      ["7","A diene locked in s-trans conformation ___ undergo Diels-Alder","cannot / can't"],
+      ["8","Cyclopentadiene is permanently locked in ___ conformation","s-cis"],
+      ["9","The energy barrier for s-trans to s-cis rotation in butadiene is about ___ kJ/mol","12-16 / 13 / 16 / ~16"],
+      ["10","Furan can act as a diene in Diels-Alder because it can adopt ___ conformation","s-cis"]
+    ]
+  },
+  {
+    id:9, title:"Arrange: Build Diels-Alder rules", type:"arrange",
+    instruction:"Click the words in the correct order to build the rule.",
+    sentences:[
+      {prompt:"The Diels-Alder reaction requires an s-cis diene and an electron-poor dienophile", words:["The Diels-Alder","reaction requires","an s-cis diene","and","an electron-poor","dienophile"]},
+      {prompt:"The product of a Diels-Alder reaction is a cyclohexene", words:["The product","of a","Diels-Alder reaction","is","a cyclohexene"]},
+      {prompt:"Syn addition preserves the stereochemistry of substituents", words:["Syn addition","preserves","the stereochemistry","of","substituents"]},
+      {prompt:"The endo product is kinetically favored over the exo product", words:["The endo product","is","kinetically favored","over","the exo product"]},
+      {prompt:"Retro Diels-Alder occurs at high temperatures to regenerate diene and dienophile", words:["Retro Diels-Alder","occurs at","high temperatures","to regenerate","diene and","dienophile"]}
+    ]
+  },
+  {
+    id:10, title:"MC: Kinetic vs thermodynamic control", type:"mc",
+    instruction:"Select the correct answer about kinetic and thermodynamic control.",
+    questions:[
+      {q:"At low temperature, which product dominates in 1,3-butadiene + HBr?", options:["1,4-addition product","1,2-addition product","Equal mixture","No reaction occurs"], correct:1},
+      {q:"At high temperature, which product dominates in 1,3-butadiene + HBr?", options:["1,4-addition product","1,2-addition product","Equal mixture","No reaction occurs"], correct:0},
+      {q:"The kinetic product has:", options:["Lower activation energy","Lower energy (more stable)","Higher activation energy","No activation energy"], correct:0},
+      {q:"The thermodynamic product is:", options:["Formed faster","More stable (lower energy)","Always the same as kinetic","Less substituted"], correct:1},
+      {q:"Under kinetic control, the reaction is:", options:["Reversible","Irreversible","At equilibrium","Exothermic only"], correct:1},
+      {q:"Under thermodynamic control, the reaction is:", options:["Irreversible","At or near equilibrium","Only possible with catalysts","Endothermic only"], correct:1},
+      {q:"The 1,2-product is the kinetic product because:", options:["It is more stable","The carbocation reacts at the nearest carbon (lower Ea)","It has more substitution","It is aromatic"], correct:1},
+      {q:"The 1,4-product is the thermodynamic product because:", options:["It forms faster","It has a more substituted (more stable) double bond","It is less stable","It requires a catalyst"], correct:1},
+      {q:"Raising temperature shifts product distribution toward:", options:["Kinetic product","Thermodynamic product","Neither changes","Random products"], correct:1},
+      {q:"If kinetic and thermodynamic products are the same compound, then:", options:["The reaction can't proceed","Temperature has no effect on product ratio","The reaction is endothermic","This never happens"], correct:1}
+    ]
+  },
+  {
+    id:11, title:"Fill: Electron-withdrawing groups",
+    instruction:"Fill in the blank about EWGs on dienophiles.",
+    rows:[
+      ["1","A common EWG on a dienophile: -CHO (___)","-CHO / aldehyde / CHO"],
+      ["2","A common EWG on a dienophile: -COOH (___)","-COOH / carboxylic acid / COOH"],
+      ["3","A common EWG on a dienophile: -CN (___)","-CN / nitrile / cyano / CN"],
+      ["4","A common EWG on a dienophile: -NO\u2082 (___)","-NO\u2082 / nitro / NO2"],
+      ["5","A common EWG on a dienophile: -COR (___)","-COR / ketone / carbonyl"],
+      ["6","A common EWG on a dienophile: -COOR (___)","-COOR / ester / COOR"],
+      ["7","EWGs make the dienophile more reactive by lowering its ___ energy","LUMO"],
+      ["8","The better the orbital overlap between diene HOMO and dienophile LUMO, the ___ the reaction","faster"],
+      ["9","EDGs (electron-donating groups) on the diene ___ its HOMO energy","raise / increase"],
+      ["10","The combination of high diene HOMO and low dienophile LUMO gives a ___ HOMO-LUMO gap","small / smaller / narrow"]
+    ]
+  },
+  {
+    id:12, title:"MC: Tricky conjugation problems", type:"mc",
+    instruction:"These are designed to be challenging. Think carefully.",
+    questions:[
+      {q:"A cumulated diene (allene) has how many pi systems?", options:["1","2 (perpendicular to each other)","3","0"], correct:1},
+      {q:"Cross-conjugated systems are ___ reactive in Diels-Alder than fully conjugated:", options:["More","Less","Equally","Not applicable"], correct:1},
+      {q:"Retro Diels-Alder is favored by:", options:["Low temperature","High temperature","High pressure","UV light"], correct:1},
+      {q:"Which molecule can undergo retro Diels-Alder to give cyclopentadiene?", options:["Cyclohexene","Dicyclopentadiene","Benzene","Ethanol"], correct:1},
+      {q:"In an inverse electron-demand Diels-Alder:", options:["Diene is electron-poor, dienophile is electron-rich","Diene is electron-rich, dienophile is electron-poor","Both are electron-poor","Both are electron-rich"], correct:0},
+      {q:"The Woodward-Hoffmann rules classify Diels-Alder as:", options:["Thermally forbidden","Thermally allowed (4n+2 = 6 electrons)","Photochemically allowed only","Neither allowed nor forbidden"], correct:1},
+      {q:"How many pi electrons participate in the Diels-Alder transition state?", options:["2","4","6","8"], correct:2},
+      {q:"A [2+2] cycloaddition is thermally:", options:["Allowed","Forbidden","Neutral","Catalyzed"], correct:1},
+      {q:"A [2+2] cycloaddition requires:", options:["Heat","UV light (photochemical)","A Lewis acid","An oxidizing agent"], correct:1},
+      {q:"Anthracene undergoes Diels-Alder at which ring?", options:["The outer ring","The center ring (9,10 positions)","All rings equally","None, it's too stable"], correct:1}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Conjugated Systems & Diels-Alder \u2014 Complete Reference</h3>' +
+'<h3>Conjugated Systems</h3>' +
+'<p>A <span class="rule">conjugated system</span> has alternating single and double bonds, allowing continuous p orbital overlap and electron delocalization.</p>' +
+'<table><tr><th>Type</th><th>Example</th><th>Description</th></tr>' +
+'<tr><td>Conjugated</td><td>1,3-butadiene</td><td>Alternating single/double bonds, p orbitals overlap</td></tr>' +
+'<tr><td>Isolated</td><td>1,4-pentadiene</td><td>Double bonds separated by 2+ single bonds, no overlap</td></tr>' +
+'<tr><td>Cumulated</td><td>Allene (1,2-propadiene)</td><td>Adjacent double bonds share a carbon, perpendicular pi systems</td></tr></table>' +
+'<p>Conjugated dienes are <span class="rule">more stable</span> than isolated dienes (lower heat of hydrogenation).</p>' +
+'<p>More conjugation = longer wavelength UV absorption (red shift). Beta-carotene is orange due to 11 conjugated double bonds.</p>' +
+'<h3>1,2 vs 1,4 Addition</h3>' +
+'<p>Electrophilic addition to conjugated dienes gives two products via an <span class="rule">allylic carbocation</span> intermediate:</p>' +
+'<table><tr><th>Product</th><th>Control</th><th>Temperature</th><th>Reason</th></tr>' +
+'<tr><td><span class="rule">1,2-addition</span> (kinetic)</td><td>Kinetic</td><td>Low T (\u22120\u00B0C)</td><td>Lower activation energy, forms faster</td></tr>' +
+'<tr><td><span class="rule">1,4-addition</span> (thermodynamic)</td><td>Thermodynamic</td><td>High T (40\u00B0C+)</td><td>More substituted double bond, more stable</td></tr></table>' +
+'<h3>Diels-Alder Reaction</h3>' +
+'<p>A <span class="rule">[4+2] cycloaddition</span>: conjugated diene (4\u03C0 e\u207B) + dienophile (2\u03C0 e\u207B) \u2192 cyclohexene (6-membered ring).</p>' +
+'<p>Key features:</p>' +
+'<ul>' +
+'<li><span class="rule">Concerted</span> \u2014 all bonds form/break simultaneously, no intermediates</li>' +
+'<li><span class="rule">Syn (suprafacial)</span> addition \u2014 stereochemistry preserved</li>' +
+'<li><span class="rule">Thermal</span> reaction (heat, not light)</li>' +
+'<li>Diene must be in <span class="rule">s-cis</span> conformation</li>' +
+'<li>Forms <span class="rule">2 new C\u2013C sigma bonds</span> and <span class="rule">1 new pi bond</span></li>' +
+'</ul>' +
+'<h3>Diene Requirements</h3>' +
+'<p>Must be conjugated and in <span class="rule">s-cis</span> conformation (both double bonds on same side of single bond).</p>' +
+'<p>Cyclopentadiene is locked s-cis \u2192 very reactive. Dienes locked s-trans cannot react.</p>' +
+'<h3>Dienophile Requirements</h3>' +
+'<p>Best dienophiles have <span class="rule">electron-withdrawing groups (EWGs)</span>: -CHO, -CN, -COOH, -COOR, -COR, -NO\u2082</p>' +
+'<p>EWGs lower the LUMO of the dienophile, improving HOMO(diene)\u2013LUMO(dienophile) overlap.</p>' +
+'<h3>Endo Rule</h3>' +
+'<p>The <span class="rule">endo product</span> (substituents pointing toward the larger bridge) is kinetically favored due to secondary orbital interactions in the transition state.</p>' +
+'<h3>Retro Diels-Alder</h3>' +
+'<p>At <span class="rule">high temperatures</span>, the Diels-Alder product fragments back into diene + dienophile.</p>' +
+'<p>Example: Dicyclopentadiene \u2192 2 cyclopentadiene (cracking at 170\u00B0C).</p>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 1,2 vs 1,4 addition, Diels-Alder reaction, dienes, dienophiles \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

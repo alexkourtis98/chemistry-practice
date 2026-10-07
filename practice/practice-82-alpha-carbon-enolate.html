@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Alpha Carbon & Enolate Chemistry</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Alpha Carbon & Enolate Chemistry</h1>
+<p class="subtitle">Deep practice &mdash; enolate formation, aldol condensation, Claisen condensation</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_82';
+const SECTIONS = [
+  {
+    id:1, title:"Fill: Alpha carbon terminology",
+    instruction:"Fill in the blank with the correct term.",
+    rows:[
+      ["1","The carbon adjacent to C=O is called the ___","alpha carbon / \u03B1-carbon / \u03B1 carbon"],
+      ["2","A hydrogen on the alpha carbon is called an ___","alpha hydrogen / \u03B1-hydrogen / \u03B1 hydrogen"],
+      ["3","The carbon two positions from C=O is called the ___","beta carbon / \u03B2-carbon / \u03B2 carbon"],
+      ["4","Alpha hydrogens are more ___ than typical C-H hydrogens","acidic"],
+      ["5","The pKa of alpha hydrogens on a ketone is approximately ___","20 / 19-20 / ~20"],
+      ["6","The pKa of alpha hydrogens on an ester is approximately ___","25 / 22-25 / ~25"],
+      ["7","Alpha hydrogens between two C=O groups (1,3-dicarbonyl) have pKa about ___","9-13 / 9 / 10 / 11 / 13"],
+      ["8","The acidity of alpha H is due to ___ stabilization of the conjugate base","resonance"],
+      ["9","Removing an alpha H produces a resonance-stabilized ___","enolate / enolate ion"],
+      ["10","The enolate has negative charge delocalized on ___ and ___","carbon, oxygen / C, O / carbon and oxygen"],
+      ["11","A compound with no alpha hydrogens ___ form an enolate","cannot / can't"],
+      ["12","Formaldehyde (HCHO) has ___ alpha hydrogens","zero / no / 0"],
+      ["13","Benzaldehyde (C\u2086H\u2085CHO) has ___ alpha hydrogens","zero / no / 0"],
+      ["14","Acetone (CH\u2083COCH\u2083) has ___ alpha hydrogens","6 / six"],
+      ["15","Acetaldehyde (CH\u2083CHO) has ___ alpha hydrogens","3 / three"],
+      ["16","The alpha carbon is ___ hybridized in the enolate","sp\u00B2"],
+      ["17","Enolate formation is an ___ reaction (acid-base type)","acid-base / proton transfer"],
+      ["18","A strong base like LDA removes the alpha H ___ (reversibly/irreversibly)","irreversibly"],
+      ["19","A weaker base like NaOH removes the alpha H ___","reversibly"],
+      ["20","The thermodynamic enolate is the more ___ enolate","substituted / stable"]
+    ]
+  },
+  {
+    id:2, title:"Fill: Enolate formation",
+    instruction:"Fill in the blank about forming enolates.",
+    rows:[
+      ["1","The base used to form an enolate completely (quantitatively) is ___","LDA / lithium diisopropylamide"],
+      ["2","LDA stands for ___","lithium diisopropylamide"],
+      ["3","LDA is a strong, ___ base","non-nucleophilic / hindered / bulky"],
+      ["4","The enolate is stabilized by ___ between C and O","resonance / delocalization"],
+      ["5","In the enolate resonance structure with charge on O, the C-O bond is a ___","double bond / C=O"],
+      ["6","In the enolate resonance structure with charge on C, the C-C bond is a ___","double bond / C=C"],
+      ["7","The kinetic enolate is formed at ___ temperature with a strong bulky base","low / -78"],
+      ["8","The thermodynamic enolate is formed at ___ temperature with equilibrating conditions","high / higher / room"],
+      ["9","The kinetic enolate has the less ___ double bond","substituted"],
+      ["10","NaH (sodium hydride) is a ___ base used for enolate formation","strong / non-nucleophilic"],
+      ["11","KOtBu (potassium tert-butoxide) is a ___ non-nucleophilic base","strong / bulky"],
+      ["12","Enolates react as ___ at carbon (C-alkylation) or oxygen (O-alkylation)","nucleophiles"],
+      ["13","C-alkylation is generally ___ (kinetic/thermodynamic) product","thermodynamic"],
+      ["14","O-alkylation gives an ___ ether product","enol / vinyl"],
+      ["15","LDA is typically used at ___ \u00B0C","-78"]
+    ]
+  },
+  {
+    id:3, title:"MC: Keto-enol tautomerism", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Keto and enol forms are:", options:["Resonance structures","Constitutional isomers (tautomers)","Enantiomers","Conformational isomers"], correct:1},
+      {q:"Which form is usually more stable?", options:["Enol","Keto","Both equally","Depends on solvent only"], correct:1},
+      {q:"Tautomerism requires:", options:["UV light","An alpha hydrogen","A catalyst always","A metal"], correct:1},
+      {q:"The enol form has a ___ group:", options:["Ketone (C=O)","Hydroxyl on C=C (vinyl alcohol)","Carboxylic acid","Amine"], correct:1},
+      {q:"Keto-enol tautomerism is catalyzed by:", options:["Only acids","Only bases","Both acids and bases","Neither"], correct:2},
+      {q:"In acid-catalyzed enolization, the first step is:", options:["Protonation of the carbonyl oxygen","Deprotonation of alpha H","Addition of water","Oxidation"], correct:0},
+      {q:"In base-catalyzed enolization, the first step is:", options:["Protonation of the carbonyl oxygen","Deprotonation of alpha H","Addition of water","Reduction"], correct:1},
+      {q:"Which compound has the highest enol content?", options:["Acetone","Acetaldehyde","2,4-pentanedione (acetylacetone)","Diethyl ether"], correct:2},
+      {q:"2,4-pentanedione has high enol content because:", options:["It has no alpha H","The enol is stabilized by intramolecular H-bonding and conjugation","It is aromatic","It has no carbonyl"], correct:1},
+      {q:"Phenol is NOT a true enol because:", options:["It has no O-H","The enol form is aromatic (more stable than keto)","It cannot tautomerize","It has no alpha carbon"], correct:1},
+      {q:"The percentage of enol in pure acetone is approximately:", options:["50%","99%","0.0001% (very small)","25%"], correct:2},
+      {q:"Keto-enol interconversion in neutral water is:", options:["Instantaneous","Very slow without catalyst","Impossible","Photochemical only"], correct:1},
+      {q:"An enol ether (vinyl ether) can/cannot tautomerize:", options:["Can easily","Cannot (no O-H to transfer)","Only in acid","Only in base"], correct:1},
+      {q:"The C=C bond in the enol form is between the alpha carbon and the:", options:["Carbonyl carbon","Beta carbon","Gamma carbon","Oxygen"], correct:0},
+      {q:"Deuterium exchange at alpha positions proves:", options:["Enolization occurs","No reaction happens","Only keto form exists","The molecule is aromatic"], correct:0},
+      {q:"Which solvent favors the enol form?", options:["Water (polar protic)","Non-polar solvents (less H-bond disruption)","Strong acid","Ionic liquids"], correct:1},
+      {q:"Beta-diketones have high enol content because the enol is stabilized by:", options:["Aromaticity","Conjugation + intramolecular hydrogen bonding","Steric strain release","Hyperconjugation only"], correct:1},
+      {q:"The rate of enolization depends on:", options:["Only temperature","Only pH","Both pH and temperature","Neither"], correct:2},
+      {q:"Iodine test for methyl ketones works because:", options:["Iodine is colored","Enolization allows halogenation at alpha position","Iodine reduces the ketone","Iodine is a base"], correct:1},
+      {q:"The enol form has how many more pi bonds than the keto form?", options:["0","1 (C=C replaces C-H and O-H)","2","The same number"], correct:1}
+    ]
+  },
+  {
+    id:4, title:"Fill: Aldol reaction",
+    instruction:"Fill in the blank about the aldol reaction.",
+    rows:[
+      ["1","Aldol = aldehyde + ___","aldehyde / ketone / aldol"],
+      ["2","The aldol product has ___ and ___ functional groups","hydroxyl, carbonyl / OH, C=O / beta-hydroxy carbonyl"],
+      ["3","The aldol product is a ___-hydroxy aldehyde or ___-hydroxy ketone","beta / \u03B2"],
+      ["4","The new C-C bond forms between the ___ carbon of one molecule and the ___ carbon of another","alpha, carbonyl / \u03B1, carbonyl"],
+      ["5","In base-catalyzed aldol, the nucleophile is the ___","enolate / enolate ion"],
+      ["6","In acid-catalyzed aldol, the nucleophile is the ___","enol"],
+      ["7","The aldol product can undergo ___ to lose water","dehydration / elimination"],
+      ["8","Dehydration of the aldol product gives an ___","alpha,beta-unsaturated carbonyl / \u03B1,\u03B2-unsaturated carbonyl / enal / enone"],
+      ["9","Aldol + dehydration together is called ___","aldol condensation"],
+      ["10","The driving force for dehydration is formation of a ___ system","conjugated"],
+      ["11","Self-aldol of acetaldehyde gives ___","3-hydroxybutanal / aldol / beta-hydroxybutanal"],
+      ["12","Self-aldol of acetone gives ___","diacetone alcohol / 4-hydroxy-4-methyl-2-pentanone"],
+      ["13","Base-catalyzed aldol uses bases like ___ or ___","NaOH, KOH / NaOH and KOH / NaOH or KOH / NaOH, NaOEt"],
+      ["14","The aldol reaction is ___ (reversible/irreversible)","reversible"],
+      ["15","Retro-aldol is the ___ of the aldol reaction","reverse / reversal"],
+      ["16","Retro-aldol breaks a ___ bond","C-C / carbon-carbon"],
+      ["17","Heating the aldol product with base promotes ___","dehydration / elimination / condensation"],
+      ["18","The name 'aldol' comes from ___","aldehyde + alcohol / ald(ehyde) + (alcoh)ol"],
+      ["19","In biological systems, aldol reactions are catalyzed by ___","aldolase / enzymes"],
+      ["20","Fructose-1,6-bisphosphate is formed by an aldol reaction in ___","glycolysis / gluconeogenesis"]
+    ]
+  },
+  {
+    id:5, title:"MC: Aldol condensation", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"A crossed aldol between two different aldehydes with alpha H gives:", options:["1 product","2 products","4 products (mixture)","No reaction"], correct:2},
+      {q:"To avoid mixtures in crossed aldol, one component should have:", options:["More alpha H","No alpha hydrogens","A methyl group","An ester group"], correct:1},
+      {q:"Which compound has no alpha H and is useful in crossed aldol?", options:["Acetone","Acetaldehyde","Benzaldehyde","Butanal"], correct:2},
+      {q:"Formaldehyde has no alpha H and acts as the ___ in crossed aldol:", options:["Nucleophile (enolate donor)","Electrophile (carbonyl acceptor)","Catalyst","Solvent"], correct:1},
+      {q:"Directed aldol using LDA ensures:", options:["Random product mixture","Only one enolate forms, controlling the product","No reaction","Polymerization"], correct:1},
+      {q:"The intramolecular aldol cyclization favors forming ___ and ___ membered rings:", options:["3 and 4","5 and 6","7 and 8","Any size equally"], correct:1},
+      {q:"In an aldol condensation, what is lost?", options:["CO\u2082","H\u2082O (water)","HCl","NH\u2083"], correct:1},
+      {q:"The Mukaiyama aldol uses:", options:["An enolate directly","A silyl enol ether with Lewis acid","Grignard reagent","Radical initiator"], correct:1},
+      {q:"The aldol product of two molecules of acetaldehyde is:", options:["Butanol","Crotonaldehyde (after dehydration)","Acetic acid","Ethanol"], correct:1},
+      {q:"Which is the condensation product of acetaldehyde aldol + dehydration?", options:["3-hydroxybutanal","2-butenal (crotonaldehyde)","Butanoic acid","1-butanol"], correct:1},
+      {q:"NaOH-catalyzed aldol of cyclohexanone gives:", options:["No reaction","2-(1-hydroxycyclohexyl)cyclohexanone","Benzene","Cyclohexanol"], correct:1},
+      {q:"The Zimmerman-Traxler model explains aldol stereochemistry via:", options:["Open chain transition state","6-membered chair-like transition state","Radical intermediate","SN2 mechanism"], correct:1},
+      {q:"E-enolates give mainly ___ aldol products:", options:["Anti (threo)","Syn (erythro)","Racemic only","No selectivity"], correct:0},
+      {q:"Z-enolates give mainly ___ aldol products:", options:["Anti","Syn","Racemic only","No selectivity"], correct:1},
+      {q:"Retro-aldol is favored by:", options:["Low temperature","High temperature / thermodynamic conditions","High pressure","UV light"], correct:1}
+    ]
+  },
+  {
+    id:6, title:"Fill: Claisen condensation",
+    instruction:"Fill in the blank about the Claisen condensation.",
+    rows:[
+      ["1","Claisen condensation of esters gives a ___","beta-keto ester / \u03B2-keto ester"],
+      ["2","Claisen condensation requires a ___ base","alkoxide / NaOEt / NaOR / sodium ethoxide"],
+      ["3","The base in Claisen must match the ___ group of the ester","alkoxy / OR / -OR"],
+      ["4","If the base doesn't match the ester OR group, ___ exchange occurs","transesterification / ester"],
+      ["5","Claisen condensation is driven forward by ___ of the product","deprotonation / enolization"],
+      ["6","The beta-keto ester product is deprotonated because its alpha H has low ___ (pKa ~11)","pKa"],
+      ["7","At least ___ alpha hydrogens on the ester are needed for Claisen","2 / two"],
+      ["8","One alpha H is lost in condensation, one in final ___","deprotonation"],
+      ["9","Crossed Claisen works when one ester has ___ alpha hydrogens","no / zero / 0"],
+      ["10","Dieckmann condensation is an ___ Claisen","intramolecular"],
+      ["11","Dieckmann condensation forms a ___ ring","5 / 6 / five / six / cyclic"],
+      ["12","The Claisen product is acidified in workup to give the ___ form","protonated / neutral / beta-keto ester"],
+      ["13","Ethyl acetate + NaOEt gives ___","ethyl acetoacetate / ethyl 3-oxobutanoate"],
+      ["14","The leaving group in Claisen condensation is ___","alkoxide / ethoxide / -OEt / -OR / RO\u207B"],
+      ["15","Claisen condensation is analogous to ___ but with esters instead of aldehydes/ketones","aldol / aldol reaction"]
+    ]
+  },
+  {
+    id:7, title:"MC: Alpha halogenation", type:"mc",
+    instruction:"Select the correct answer about halogenation at the alpha position.",
+    questions:[
+      {q:"Acid-catalyzed alpha halogenation gives:", options:["Polyhalogenation","Monohalogenation (controlled)","No halogenation","Elimination only"], correct:1},
+      {q:"Base-catalyzed alpha halogenation gives:", options:["Monohalogenation","Polyhalogenation (all alpha H replaced)","No reaction","Selective halogenation"], correct:1},
+      {q:"Why does base-catalyzed halogenation give polysubstitution?", options:["The product is less acidic at alpha","The product is MORE acidic at alpha (EWG effect of halogen)","Random process","Base is consumed"], correct:1},
+      {q:"The haloform reaction occurs with:", options:["Any ketone","Methyl ketones (RCOCH\u2083)","Only aldehydes","Only esters"], correct:1},
+      {q:"The haloform reaction produces:", options:["An alkyl halide","A carboxylate ion + haloform (CHX\u2083)","A dihalide","An alcohol"], correct:1},
+      {q:"CHCl\u2083 (chloroform) is a ___ product:", options:["Aldol","Claisen","Haloform","Grignard"], correct:2},
+      {q:"CHI\u2083 (iodoform) is a ___ precipitate used to identify methyl ketones:", options:["White","Yellow","Blue","Red"], correct:1},
+      {q:"The iodoform test is positive for:", options:["All ketones","Methyl ketones and acetaldehyde","Only aldehydes","Only alcohols"], correct:1},
+      {q:"The iodoform test is also positive for CH\u2083CH(OH)R because:", options:["It's already a ketone","Oxidation first gives a methyl ketone","It contains iodine","It's an ester"], correct:1},
+      {q:"Hell-Volhard-Zelinsky (HVZ) reaction halogenates at alpha position of:", options:["Ketones","Aldehydes","Carboxylic acids","Esters"], correct:2}
+    ]
+  },
+  {
+    id:8, title:"Fill: Crossed reactions",
+    instruction:"Fill in the blank about crossed (mixed) condensation reactions.",
+    rows:[
+      ["1","Crossed aldol works best when one component has ___","no alpha hydrogens / no \u03B1-H"],
+      ["2","Aldehydes without alpha H include benzaldehyde and ___","formaldehyde / HCHO"],
+      ["3","In crossed aldol, the component without alpha H acts as the ___","electrophile / carbonyl acceptor"],
+      ["4","In crossed aldol, the component with alpha H forms the ___","enolate / nucleophile"],
+      ["5","Crossed Claisen with an ester having no alpha H: examples include ___ and ___","ethyl formate, ethyl benzoate / diethyl carbonate, ethyl oxalate / ethyl formate and ethyl benzoate"],
+      ["6","Claisen between a ketone and an ester is called ___","mixed Claisen / crossed Claisen"],
+      ["7","The ketone alpha H is more acidic than the ester alpha H because pKa is ___","lower"],
+      ["8","An ester reacting with a ketone enolate gives a ___","1,3-diketone / beta-diketone / \u03B2-diketone"],
+      ["9","To control regioselectivity in crossed reactions, use ___ to form specific enolate","LDA"],
+      ["10","Using LDA at -78\u00B0C gives the ___ enolate selectively","kinetic / less substituted"]
+    ]
+  },
+  {
+    id:9, title:"Arrange: Build reaction sequences", type:"arrange",
+    instruction:"Click the words in the correct order to build the statement.",
+    sentences:[
+      {prompt:"The enolate is a resonance-stabilized carbanion formed by deprotonation of the alpha hydrogen", words:["The enolate","is a","resonance-stabilized","carbanion formed","by deprotonation","of the alpha hydrogen"]},
+      {prompt:"The aldol reaction forms a beta-hydroxy carbonyl compound", words:["The aldol reaction","forms","a beta-hydroxy","carbonyl","compound"]},
+      {prompt:"Claisen condensation of esters requires an alkoxide base and gives a beta-keto ester", words:["Claisen condensation","of esters requires","an alkoxide base","and gives","a beta-keto ester"]},
+      {prompt:"The haloform reaction converts methyl ketones into carboxylate and haloform", words:["The haloform reaction","converts","methyl ketones","into carboxylate","and haloform"]},
+      {prompt:"LDA is a strong non-nucleophilic base that forms enolates quantitatively", words:["LDA is","a strong","non-nucleophilic base","that forms enolates","quantitatively"]}
+    ]
+  },
+  {
+    id:10, title:"MC: Michael addition", type:"mc",
+    instruction:"Select the correct answer about Michael addition.",
+    questions:[
+      {q:"The Michael addition is a ___ addition to a conjugated carbonyl:", options:["1,2-addition (direct to C=O)","1,4-addition (conjugate addition)","1,6-addition","Radical addition"], correct:1},
+      {q:"The Michael donor is:", options:["The electrophilic alkene","A nucleophile (enolate, enamine, etc.)","A Lewis acid","A radical"], correct:1},
+      {q:"The Michael acceptor is:", options:["An enolate","An \u03B1,\u03B2-unsaturated carbonyl compound","A saturated ketone","An alcohol"], correct:1},
+      {q:"Common Michael acceptors include:", options:["Alkanes","Methyl vinyl ketone, acrylonitrile, acrylate esters","\u03B2-keto esters only","Alcohols and ethers"], correct:1},
+      {q:"The product of a Michael addition is a:", options:["1,3-dicarbonyl","1,5-dicarbonyl","1,2-diol","Epoxide"], correct:1},
+      {q:"The Robinson annulation combines:", options:["Aldol + Claisen","Michael addition + intramolecular aldol","Two Claisen reactions","Diels-Alder + aldol"], correct:1},
+      {q:"The Robinson annulation forms a:", options:["5-membered ring","6-membered ring (cyclohexenone)","4-membered ring","7-membered ring"], correct:1},
+      {q:"In Michael addition, the new C-C bond forms at the ___ position of the acceptor:", options:["Alpha (\u03B1)","Beta (\u03B2)","Gamma (\u03B3)","Carbonyl carbon"], correct:1},
+      {q:"Why is 1,4-addition preferred over 1,2- for soft nucleophiles like enolates?", options:["Kinetic control","Thermodynamic control (soft-soft interaction, more stable product)","Random preference","Steric factors only"], correct:1},
+      {q:"The Stetter reaction is a Michael addition using:", options:["A Grignard reagent","An acyl anion equivalent (from NHC catalyst)","An enamine","A Wittig reagent"], correct:1}
+    ]
+  },
+  {
+    id:11, title:"Fill: Acetoacetic ester synthesis",
+    instruction:"Fill in the blank about acetoacetic ester and malonic ester synthesis.",
+    rows:[
+      ["1","Acetoacetic ester synthesis produces substituted ___","methyl ketones / ketones"],
+      ["2","Malonic ester synthesis produces substituted ___ acids","carboxylic / acetic"],
+      ["3","Both syntheses end with hydrolysis and ___","decarboxylation"],
+      ["4","Decarboxylation requires a ___ group beta to COOH","carbonyl / C=O / keto"],
+      ["5","The intermediate in decarboxylation is a cyclic ___ transition state","6-membered / six-membered"],
+      ["6","Decarboxylation releases ___ gas","CO\u2082 / carbon dioxide"],
+      ["7","In acetoacetic ester synthesis, the starting material is ___","ethyl acetoacetate / ethyl 3-oxobutanoate"],
+      ["8","In malonic ester synthesis, the starting material is ___","diethyl malonate / malonic ester"],
+      ["9","Step 1 of both syntheses: deprotonation with ___ to form enolate","NaOEt / sodium ethoxide / base"],
+      ["10","Step 2: ___ with alkyl halide (SN2)","alkylation"]
+    ]
+  },
+  {
+    id:12, title:"MC: Tricky alpha carbon problems", type:"mc",
+    instruction:"These are designed to be challenging. Think carefully.",
+    questions:[
+      {q:"Robinson annulation = Michael + aldol. The final product is:", options:["A linear diketone","A 2-cyclohexen-1-one (cyclohexenone)","A cyclopentanone","An aromatic ring"], correct:1},
+      {q:"Malonic ester synthesis gives an acid with ___ more carbon(s) than the alkyl halide:", options:["1","2","3","0"], correct:1},
+      {q:"Acetoacetic ester synthesis gives a ketone with ___ more carbon(s) than the alkyl halide:", options:["1","2","3","0"], correct:2},
+      {q:"Which cannot undergo self-aldol?", options:["Acetaldehyde","Propanal","Benzaldehyde (no alpha H)","Butanal"], correct:2},
+      {q:"Enamines are formed from ketones and:", options:["Primary amines","Secondary amines","Tertiary amines","Ammonia"], correct:1},
+      {q:"Enamines are useful as ___ equivalents:", options:["Grignard","Enolate","Acid chloride","Alcohol"], correct:1},
+      {q:"The Stork enamine synthesis allows:", options:["Monoalkylation of ketones via enamine intermediate","Polyalkylation","Reduction","Oxidation"], correct:0},
+      {q:"In a Knoevenagel condensation, the nucleophile is:", options:["An enolate from LDA","An active methylene compound (pKa ~9-13)","A Grignard reagent","An amine"], correct:1},
+      {q:"Decarboxylation of beta-keto acids occurs readily because:", options:["The C-C bond is weak","A 6-membered cyclic transition state via enol intermediate is favorable","CO\u2082 is a gas","The acid is strong"], correct:1},
+      {q:"The Perkin reaction is a variation of aldol using:", options:["An acid anhydride as the enolate source","An ester","A ketone","An amide"], correct:0}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Alpha Carbon & Enolate Chemistry \u2014 Complete Reference</h3>' +
+'<h3>Alpha Carbon</h3>' +
+'<p>The <span class="rule">\u03B1-carbon</span> is adjacent to C=O. Its H atoms are acidic (pKa \u224820 for ketones, \u224825 for esters) because the conjugate base (enolate) is resonance-stabilized.</p>' +
+'<p>1,3-Dicarbonyl compounds have very acidic \u03B1-H (pKa \u22489\u201313) due to stabilization by two C=O groups.</p>' +
+'<h3>Enolate Ion</h3>' +
+'<p>A <span class="rule">resonance-stabilized carbanion</span> with negative charge delocalized between C and O.</p>' +
+'<p><span class="rule">LDA</span> (lithium diisopropylamide) at \u221278\u00B0C: strong, non-nucleophilic base \u2192 quantitative, irreversible enolate formation.</p>' +
+'<p>NaOH/NaOEt: weaker bases \u2192 equilibrium enolate formation.</p>' +
+'<p>Kinetic enolate (less substituted, LDA, \u221278\u00B0C) vs thermodynamic enolate (more substituted, equilibrating conditions).</p>' +
+'<h3>Keto-Enol Tautomerism</h3>' +
+'<p><span class="rule">Keto form</span> usually favored (\u226499.9%). Enol has C=C\u2013OH.</p>' +
+'<p>Acid-catalyzed: protonate O first, then lose \u03B1-H. Base-catalyzed: remove \u03B1-H first, then protonate O.</p>' +
+'<p>\u03B2-Diketones favor enol due to intramolecular H-bonding + conjugation.</p>' +
+'<h3>Aldol Reaction</h3>' +
+'<p>Enolate + carbonyl \u2192 <span class="rule">\u03B2-hydroxy carbonyl</span> (aldol product).</p>' +
+'<p>Dehydration \u2192 <span class="rule">\u03B1,\u03B2-unsaturated carbonyl</span> (aldol condensation).</p>' +
+'<p>Crossed aldol: use one component without \u03B1-H (benzaldehyde, formaldehyde) as electrophile.</p>' +
+'<p>Directed aldol: LDA forms specific enolate \u2192 controlled product.</p>' +
+'<h3>Claisen Condensation</h3>' +
+'<p>Ester + ester \u2192 <span class="rule">\u03B2-keto ester</span> (with alkoxide base matching ester OR group).</p>' +
+'<p>Driven by deprotonation of product (pKa \u224811). Requires \u22652 \u03B1-H on ester.</p>' +
+'<p>Dieckmann = intramolecular Claisen \u2192 cyclic \u03B2-keto ester.</p>' +
+'<h3>Michael Addition</h3>' +
+'<p><span class="rule">1,4-conjugate addition</span> of enolate (Michael donor) to \u03B1,\u03B2-unsaturated carbonyl (Michael acceptor).</p>' +
+'<p>Product: 1,5-dicarbonyl compound.</p>' +
+'<p>Robinson annulation = Michael + intramolecular aldol \u2192 cyclohexenone.</p>' +
+'<h3>Haloform Reaction</h3>' +
+'<p>Methyl ketone + excess X\u2082/OH\u207B \u2192 <span class="rule">carboxylate + CHX\u2083</span> (haloform).</p>' +
+'<p>Iodoform test: yellow CHI\u2083 precipitate identifies methyl ketones.</p>' +
+'<h3>Acetoacetic & Malonic Ester Synthesis</h3>' +
+'<p>Acetoacetic ester synthesis: ethyl acetoacetate \u2192 substituted methyl ketone.</p>' +
+'<p>Malonic ester synthesis: diethyl malonate \u2192 substituted acetic acid.</p>' +
+'<p>Steps: deprotonate with NaOEt \u2192 alkylate (SN2) \u2192 hydrolyze \u2192 decarboxylate (\u2212CO\u2082).</p>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 enolate formation, aldol condensation, Claisen condensation \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

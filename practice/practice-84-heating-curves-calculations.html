@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Heating Curves & Calculations</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Heating Curves & Calculations</h1>
+<p class="subtitle">Deep practice &mdash; heating/cooling curves, q=mc\u0394T, phase change calculations</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_84';
+const SECTIONS = [
+  {
+    id:1, title:"Fill: Heating curve terminology",
+    instruction:"Complete each statement about heating curves.",
+    rows:[
+      ["1","During a phase change, the temperature ___ (increases/stays constant)","stays constant / remains constant"],
+      ["2","The flat (horizontal) region at 0\u00B0C on a water heating curve represents ___","melting / fusion / melting point"],
+      ["3","The flat region at 100\u00B0C on a water heating curve represents ___","boiling / vaporization / boiling point"],
+      ["4","The formula for heat during a temperature change is q = ___","mc\u0394T / mcdeltat"],
+      ["5","The formula for heat during melting is q = ___","m\u0394Hfus / m x \u0394Hfus"],
+      ["6","The formula for heat during vaporization is q = ___","m\u0394Hvap / m x \u0394Hvap"],
+      ["7","The specific heat of liquid water is ___ J/(g\u00B7\u00B0C)","4.184 / 4.18"],
+      ["8","The specific heat of ice is ___ J/(g\u00B7\u00B0C)","2.09 / 2.1"],
+      ["9","The specific heat of steam is ___ J/(g\u00B7\u00B0C)","2.01 / 2.0"],
+      ["10","\u0394Hfus for water is ___ J/g","334 / 334.0"],
+      ["11","\u0394Hvap for water is ___ J/g","2260 / 2260.0"],
+      ["12","Melting is ___ (endothermic/exothermic)","endothermic"],
+      ["13","Freezing is ___ (endothermic/exothermic)","exothermic"],
+      ["14","Condensation is ___ (endothermic/exothermic)","exothermic"],
+      ["15","Vaporization is ___ (endothermic/exothermic)","endothermic"]
+    ]
+  },
+  {
+    id:2, title:"Fill: Identify regions on a heating curve",
+    instruction:"A heating curve for water goes from -20\u00B0C to 120\u00B0C. Identify each region.",
+    rows:[
+      ["1","Region A (-20\u00B0C to 0\u00B0C): heating ___ (phase)","ice / solid"],
+      ["2","Region B (flat at 0\u00B0C): ___ is occurring","melting / fusion"],
+      ["3","Region C (0\u00B0C to 100\u00B0C): heating ___ (phase)","water / liquid"],
+      ["4","Region D (flat at 100\u00B0C): ___ is occurring","boiling / vaporization"],
+      ["5","Region E (100\u00B0C to 120\u00B0C): heating ___ (phase)","steam / gas / vapor"],
+      ["6","In Region A, q = m \u00D7 ___ \u00D7 \u0394T (which specific heat?)","c(ice) / 2.09"],
+      ["7","In Region B, q = m \u00D7 ___","\u0394Hfus / 334"],
+      ["8","In Region C, q = m \u00D7 ___ \u00D7 \u0394T (which specific heat?)","c(water) / 4.184 / 4.18"],
+      ["9","In Region D, q = m \u00D7 ___","\u0394Hvap / 2260"],
+      ["10","In Region E, q = m \u00D7 ___ \u00D7 \u0394T (which specific heat?)","c(steam) / 2.01 / 2.0"],
+      ["11","The slope of the curve is steepest in Region ___ (A, C, or E)","A / E"],
+      ["12","The slope is least steep (most gradual) in Region ___","C"],
+      ["13","A steeper slope means ___ specific heat (higher/lower)","lower"],
+      ["14","The longest flat region is at ___ \u00B0C","100"],
+      ["15","The plateau at 100\u00B0C is longer because \u0394Hvap is ___ than \u0394Hfus","larger / greater / bigger"]
+    ]
+  },
+  {
+    id:3, title:"MC: Heating curve concepts", type:"mc",
+    instruction:"Select the correct answer about heating curves.",
+    questions:[
+      {q:"During a phase change, added heat energy goes into:", options:["Raising the temperature","Breaking intermolecular forces","Increasing kinetic energy","Compressing the substance"], correct:1},
+      {q:"Which phase change requires the most energy per gram for water?", options:["Melting (334 J/g)","Vaporization (2260 J/g)","Sublimation","Freezing"], correct:1},
+      {q:"At the melting point plateau, what phases coexist?", options:["Solid only","Liquid only","Solid and liquid","Liquid and gas"], correct:2},
+      {q:"The slope of a heating curve is inversely proportional to:", options:["Mass","Temperature","\u0394H","Specific heat capacity"], correct:3},
+      {q:"A cooling curve is:", options:["The reverse of a heating curve","Completely different","Only for gases","Only for ionic compounds"], correct:0},
+      {q:"On a cooling curve, when vapor condenses, heat is:", options:["Absorbed (endothermic)","Released (exothermic)","Neither absorbed nor released","Converted to work"], correct:1},
+      {q:"Why is \u0394Hvap much larger than \u0394Hfus for water?", options:["Water molecules are heavier in gas phase","Vaporization requires completely separating molecules","Ice has no hydrogen bonds","The gas phase is denser"], correct:1},
+      {q:"At exactly 0\u00B0C with ice and water present, adding heat will:", options:["Raise the temperature","Melt more ice at constant temperature","Freeze the water","Do nothing"], correct:1},
+      {q:"If you add heat to water at 100\u00B0C (1 atm) in an open container:", options:["Temperature rises above 100\u00B0C","Water boils at constant temperature","Water freezes","Nothing happens"], correct:1},
+      {q:"Sublimation goes directly from ___ to ___:", options:["Liquid to gas","Gas to liquid","Solid to gas","Gas to solid"], correct:2},
+      {q:"The reverse of sublimation is called:", options:["Condensation","Deposition","Freezing","Evaporation"], correct:1},
+      {q:"Steam at 100\u00B0C causes worse burns than water at 100\u00B0C because:", options:["Steam is hotter","Steam releases \u0394Hvap when it condenses on skin","Steam molecules are larger","Water has higher specific heat"], correct:1},
+      {q:"Which has more total energy: 1 g of steam at 100\u00B0C or 1 g of water at 100\u00B0C?", options:["Water at 100\u00B0C","Steam at 100\u00B0C","They are equal","Cannot determine"], correct:1},
+      {q:"The total heat to convert ice at -10\u00B0C to steam at 110\u00B0C requires ___ separate calculations:", options:["2","3","5","1"], correct:2}
+    ]
+  },
+  {
+    id:4, title:"Fill: q = mc\u0394T calculations",
+    instruction:"Calculate heat (q) for temperature changes. Show answer in J or kJ.",
+    rows:[
+      ["1","Heat 50.0 g of water from 25\u00B0C to 75\u00B0C: q = ___ J","10460 / 10,460"],
+      ["2","Heat 100.0 g of water from 20\u00B0C to 80\u00B0C: q = ___ J","25104 / 25,104 / 25100 / 25,100"],
+      ["3","Heat 200.0 g of ice from -20\u00B0C to 0\u00B0C: q = ___ J","8360 / 8,360 / 8400 / 8,400"],
+      ["4","Heat 50.0 g of steam from 100\u00B0C to 130\u00B0C: q = ___ J","3015 / 3,015 / 3000 / 3,000"],
+      ["5","Cool 75.0 g of water from 90\u00B0C to 40\u00B0C: q = ___ J","-15690 / -15,690 / -15700 / -15,700"],
+      ["6","Heat 10.0 g of ice from -15\u00B0C to 0\u00B0C: q = ___ J","313.5 / 314 / 315"],
+      ["7","Heat 25.0 g of water from 0\u00B0C to 100\u00B0C: q = ___ J","10460 / 10,460 / 10450 / 10,450"],
+      ["8","Cool 30.0 g of steam from 150\u00B0C to 100\u00B0C: q = ___ J","-3015 / -3,015 / -3000 / -3,000"],
+      ["9","Heat 500.0 g of water from 22\u00B0C to 37\u00B0C (body temp): q = ___ J","31380 / 31,380 / 31400 / 31,400"],
+      ["10","Heat 1000 g (1 kg) of water from 0\u00B0C to 100\u00B0C: q = ___ kJ","418.4 / 418 / 419"],
+      ["11","The specific heat of aluminum is 0.897 J/(g\u00B7\u00B0C). Heat 50 g Al from 25\u00B0C to 100\u00B0C: q = ___ J","3364 / 3,364 / 3360 / 3,360"],
+      ["12","The specific heat of iron is 0.449 J/(g\u00B7\u00B0C). Heat 100 g Fe from 20\u00B0C to 520\u00B0C: q = ___ J","22450 / 22,450"]
+    ]
+  },
+  {
+    id:5, title:"MC: Phase change calculations", type:"mc",
+    instruction:"Select the correct answer for each phase change problem.",
+    questions:[
+      {q:"Heat required to melt 50.0 g of ice at 0\u00B0C: q = 50.0 \u00D7 334 =", options:["16,700 J","1,670 J","167,000 J","3,340 J"], correct:0},
+      {q:"Heat required to vaporize 100.0 g of water at 100\u00B0C:", options:["22,600 J","226,000 J","2,260 J","334,000 J"], correct:1},
+      {q:"Heat released when 25.0 g of steam condenses at 100\u00B0C:", options:["+56,500 J","-56,500 J","+8,350 J","-8,350 J"], correct:1},
+      {q:"Heat released when 80.0 g of water freezes at 0\u00B0C:", options:["+26,720 J","-26,720 J","+180,800 J","-180,800 J"], correct:1},
+      {q:"Which requires more energy: melting 100 g of ice or heating 100 g of water from 0\u00B0C to 80\u00B0C?", options:["Melting the ice (33,400 J vs 33,472 J, roughly equal)","Heating the water (33,472 J)","Melting the ice is much more","They are exactly equal"], correct:0},
+      {q:"\u0394Hsub \u2248 \u0394Hfus + \u0394Hvap. For water, \u0394Hsub \u2248:", options:["334 J/g","2260 J/g","2594 J/g","1926 J/g"], correct:2},
+      {q:"To freeze 200 g of water AND cool the ice to -10\u00B0C, total |q| is:", options:["66,800 J","4,180 J","70,980 J","62,620 J"], correct:2},
+      {q:"Energy to convert 10 g ice at 0\u00B0C to water at 0\u00B0C:", options:["3,340 J","41,840 J","22,600 J","0 J"], correct:0},
+      {q:"Energy to heat 10 g water from 0\u00B0C to 100\u00B0C:", options:["3,340 J","4,184 J","41,840 J","22,600 J"], correct:2},
+      {q:"Energy to vaporize 10 g water at 100\u00B0C:", options:["3,340 J","4,184 J","22,600 J","41,840 J"], correct:2},
+      {q:"Total energy: 10 g ice at 0\u00B0C to steam at 100\u00B0C:", options:["3,340 + 41,840 + 22,600 = 67,780 J","Only 22,600 J","Only 41,840 J","3,340 + 22,600 = 25,940 J"], correct:0},
+      {q:"If q = -5000 J, the process is:", options:["Endothermic","Exothermic","At equilibrium","Cannot determine"], correct:1}
+    ]
+  },
+  {
+    id:6, title:"Fill: Multi-step heating calculations",
+    instruction:"Calculate total heat for each multi-step process (water data). Round to nearest whole number.",
+    rows:[
+      ["1","Step 1: Heat 20 g ice from -10\u00B0C to 0\u00B0C: q\u2081 = ___ J","418 / 420"],
+      ["2","Step 2: Melt 20 g ice at 0\u00B0C: q\u2082 = ___ J","6680 / 6,680"],
+      ["3","Step 3: Heat 20 g water from 0\u00B0C to 100\u00B0C: q\u2083 = ___ J","8368 / 8,368 / 8360 / 8,360"],
+      ["4","Step 4: Vaporize 20 g water at 100\u00B0C: q\u2084 = ___ J","45200 / 45,200"],
+      ["5","Step 5: Heat 20 g steam from 100\u00B0C to 120\u00B0C: q\u2085 = ___ J","804 / 800"],
+      ["6","Total heat (q\u2081+q\u2082+q\u2083+q\u2084+q\u2085) = ___ J (approximately)","61470 / 61,470 / 61460 / 61,460 / 61500 / 61,500"],
+      ["7","The step requiring the MOST energy is Step ___ (vaporization)","4"],
+      ["8","The percentage of total energy used for vaporization is approximately ___% ","74 / 73 / 74%"],
+      ["9","Heat 50 g of water from 25\u00B0C to 100\u00B0C, then vaporize: q(total) = ___ J","128660 / 128,660 / 128700 / 128,700 / 129000 / 129,000"],
+      ["10","Condense 30 g of steam at 100\u00B0C, then cool water to 25\u00B0C: q(total) = ___ J","-77214 / -77,214 / -77200 / -77,200 / -77400 / -77,400"],
+      ["11","The largest single energy term in any heating curve calculation is usually ___","\u0394Hvap / vaporization / heat of vaporization"],
+      ["12","In a cooling curve, the order of processes (starting from steam) is: cool steam, ___, cool water, ___, cool ice","condense, freeze / condensation, freezing"]
+    ]
+  },
+  {
+    id:7, title:"MC: Interpreting heating curves", type:"mc",
+    instruction:"Analyze heating curve features.",
+    questions:[
+      {q:"On a heating curve, a horizontal line indicates:", options:["Temperature is rising","A phase change is occurring","The substance is cooling","No heat is being added"], correct:1},
+      {q:"The length of a plateau on a heating curve depends on:", options:["Only temperature","The mass and \u0394H of the phase change","The color of the substance","Atmospheric pressure only"], correct:1},
+      {q:"If substance X has a shorter boiling plateau than water (same mass), X has:", options:["Higher \u0394Hvap","Lower \u0394Hvap","Same \u0394Hvap","Cannot determine"], correct:1},
+      {q:"A substance with a very steep heating curve slope in the liquid phase has:", options:["High specific heat","Low specific heat","High \u0394Hvap","Low melting point"], correct:1},
+      {q:"On a heating curve, the kinetic energy of molecules increases during:", options:["Phase changes only","Temperature-increasing regions only","Both regions","Neither region"], correct:1},
+      {q:"On a heating curve, the potential energy of molecules increases during:", options:["Temperature-increasing regions","Phase change plateaus","Both","Neither"], correct:1},
+      {q:"A substance melts at -38\u00B0C and boils at 357\u00B0C. It is most likely:", options:["Water","Mercury","Nitrogen","Sodium chloride"], correct:1},
+      {q:"If two substances have the same mass but different specific heats, the one with higher c will:", options:["Heat up faster","Heat up slower (needs more energy per degree)","Have a higher boiling point","Have a lower melting point"], correct:1},
+      {q:"Supercooling occurs when a liquid:", options:["Freezes above its melting point","Cools below its freezing point without solidifying","Boils below its boiling point","Heats without evaporating"], correct:1},
+      {q:"The heating curve for a pure substance has ___ melting/boiling points:", options:["Broad ranges","Sharp, well-defined","No defined","Variable"], correct:1},
+      {q:"An impure substance's heating curve differs from a pure substance by:", options:["Having sharper plateaus","Having depressed and broader melting/boiling plateaus","Being identical","Having higher melting points"], correct:1},
+      {q:"During the vaporization plateau of water at 1 atm:", options:["Temperature is above 100\u00B0C","Temperature stays at exactly 100\u00B0C","Temperature drops","Temperature oscillates"], correct:1}
+    ]
+  },
+  {
+    id:8, title:"Fill: Cooling curve processes",
+    instruction:"Describe the cooling curve processes (reverse of heating).",
+    rows:[
+      ["1","Cooling steam from 130\u00B0C to 100\u00B0C uses the formula q = ___","mc\u0394T / mc(steam)\u0394T"],
+      ["2","The phase change from gas to liquid is called ___","condensation"],
+      ["3","The phase change from liquid to solid is called ___","freezing / solidification"],
+      ["4","During condensation, heat is ___ (absorbed/released)","released"],
+      ["5","During freezing, heat is ___ (absorbed/released)","released"],
+      ["6","\u0394Hcondensation = ___ \u0394Hvap (positive or negative?)","negative / -\u0394Hvap / -2260 J/g"],
+      ["7","\u0394Hfreezing = ___ \u0394Hfus (positive or negative?)","-\u0394Hfus / negative / -334 J/g"],
+      ["8","On a cooling curve, temperature ___ during phase changes (rises/stays constant/drops)","stays constant"],
+      ["9","If 100 g of steam at 100\u00B0C condenses completely, |q| = ___ J","226000 / 226,000"],
+      ["10","If 100 g of water at 0\u00B0C freezes completely, |q| = ___ J","33400 / 33,400"]
+    ]
+  },
+  {
+    id:9, title:"Arrange: Heating curve concepts", type:"arrange",
+    instruction:"Click the words in the correct order.",
+    sentences:[
+      {prompt:"Temperature remains constant during a phase change", words:["Temperature","remains","constant","during","a phase change"]},
+      {prompt:"Vaporization requires more energy than melting for water", words:["Vaporization","requires","more energy","than","melting","for water"]},
+      {prompt:"Added heat breaks intermolecular forces during phase changes", words:["Added heat","breaks","intermolecular forces","during","phase changes"]},
+      {prompt:"The specific heat of liquid water is 4.184 joules per gram degree Celsius", words:["The specific heat","of liquid water","is","4.184","joules per gram","degree Celsius"]},
+      {prompt:"Steam causes worse burns because condensation releases heat", words:["Steam","causes","worse burns","because","condensation","releases","heat"]},
+      {prompt:"Kinetic energy increases only when temperature increases", words:["Kinetic energy","increases","only","when","temperature","increases"]}
+    ]
+  },
+  {
+    id:10, title:"MC: Advanced heating curve problems", type:"mc",
+    instruction:"Solve these more challenging heating curve problems.",
+    questions:[
+      {q:"Total energy to convert 100 g ice at -20\u00B0C to water at 50\u00B0C: Steps are heat ice + melt + heat water. Which is correct?", options:["4,180 + 33,400 + 20,920 = 58,500 J","20,920 + 33,400 + 4,180 = 58,500 J","4,180 + 33,400 + 20,920 = 58,500 J","All three expressions give the same result: ~58,500 J"], correct:3},
+      {q:"How much ice at 0\u00B0C can be melted by 10,000 J of heat?", options:["10.0 g","29.9 g","100 g","4.43 g"], correct:1},
+      {q:"50 g of water at 80\u00B0C is mixed with 50 g of water at 20\u00B0C. Final temp:", options:["40\u00B0C","50\u00B0C","60\u00B0C","80\u00B0C"], correct:1},
+      {q:"100 g of water at 90\u00B0C is mixed with 100 g ice at 0\u00B0C. Will all ice melt?", options:["Yes, q(water) = 37,656 J > q(melt ice) = 33,400 J","No, not enough energy","Exactly enough","Cannot determine"], correct:0},
+      {q:"Which requires more total energy: heating 1 g of water from 0\u00B0C to 100\u00B0C, or melting 1 g of ice at 0\u00B0C?", options:["Heating water (418.4 J vs 334 J)","Melting ice","They are equal","Depends on pressure"], correct:0},
+      {q:"At what point on a heating curve is the average kinetic energy of molecules highest?", options:["End of the gas heating region","At the boiling plateau","At the melting plateau","At the start"], correct:0},
+      {q:"\u0394Hfus of a substance is 150 J/g and \u0394Hvap is 800 J/g. The boiling plateau is ___ times longer than the melting plateau:", options:["0.19","2.0","5.3","150"], correct:2},
+      {q:"For an unknown substance: c(solid) = 1.5 J/(g\u00B7\u00B0C), c(liquid) = 3.0 J/(g\u00B7\u00B0C). Which phase's heating curve is steeper?", options:["Solid (lower c = steeper slope)","Liquid","They are equal","Cannot determine"], correct:0},
+      {q:"If pressure increases, the boiling point of water:", options:["Decreases","Increases","Stays the same","First increases then decreases"], correct:1},
+      {q:"At the triple point of water:", options:["Only liquid exists","Solid, liquid, and gas coexist","Only gas exists","Temperature is 100\u00B0C"], correct:1},
+      {q:"How much heat to convert 5 g of ice at -5\u00B0C to steam at 105\u00B0C?", options:["About 15,250 J","About 10,000 J","About 5,000 J","About 2,500 J"], correct:0},
+      {q:"Which segment has the greatest \u0394T per joule added (for water)?", options:["Heating ice","Heating liquid water","Heating steam","They are all equal"], correct:2}
+    ]
+  },
+  {
+    id:11, title:"Fill: Phase change names",
+    instruction:"Name each phase transition.",
+    rows:[
+      ["1","Solid \u2192 Liquid: ___","melting / fusion"],
+      ["2","Liquid \u2192 Gas: ___","vaporization / boiling / evaporation"],
+      ["3","Gas \u2192 Liquid: ___","condensation"],
+      ["4","Liquid \u2192 Solid: ___","freezing / solidification"],
+      ["5","Solid \u2192 Gas: ___","sublimation"],
+      ["6","Gas \u2192 Solid: ___","deposition"],
+      ["7","All phase changes from lower to higher energy state are ___ (endo/exo)","endothermic"],
+      ["8","All phase changes from higher to lower energy state are ___ (endo/exo)","exothermic"],
+      ["9","Endothermic phase changes: melting, vaporization, and ___","sublimation"],
+      ["10","Exothermic phase changes: freezing, condensation, and ___","deposition"],
+      ["11","The energy required for sublimation equals ___ + ___","\u0394Hfus + \u0394Hvap / heat of fusion + heat of vaporization"],
+      ["12","At the normal boiling point, vapor pressure equals ___ atm","1 / 1 atm"]
+    ]
+  },
+  {
+    id:12, title:"MC: Mixed heating curve review", type:"mc",
+    instruction:"Comprehensive review questions.",
+    questions:[
+      {q:"Which is NOT true about the flat portions of a heating curve?", options:["Temperature stays constant","Phase change is occurring","Kinetic energy is increasing","Heat is being absorbed"], correct:2},
+      {q:"The process with the largest enthalpy change for 1 mol of water is:", options:["Melting","Vaporization","Heating liquid water 1\u00B0C","Heating ice 1\u00B0C"], correct:1},
+      {q:"If c(liquid A) > c(liquid B), heating equal masses the same \u0394T:", options:["A requires less energy","A requires more energy","They require equal energy","Cannot compare"], correct:1},
+      {q:"Ethanol has \u0394Hvap = 841 J/g vs water's 2260 J/g. Ethanol evaporates:", options:["Slower than water","Faster than water (less energy needed)","At the same rate","Cannot determine"], correct:1},
+      {q:"A substance with a very high \u0394Hvap would have:", options:["A short boiling plateau","A long boiling plateau","No boiling plateau","A low boiling point"], correct:1},
+      {q:"On a cooling curve, the first plateau from the top represents:", options:["Melting","Freezing","Condensation","Sublimation"], correct:2},
+      {q:"The heat of crystallization is:", options:["Equal to \u0394Hfus","Equal to -\u0394Hfus","Equal to \u0394Hvap","Always zero"], correct:1},
+      {q:"How many degrees of freedom (variables) exist at a phase change plateau?", options:["0 (fixed T and P at 1 atm)","1","2","3"], correct:0},
+      {q:"Water's unusually high specific heat is due to:", options:["Its low molar mass","Extensive hydrogen bonding","Metallic bonding","London dispersion forces only"], correct:1},
+      {q:"Converting 1 g of water at 100\u00B0C to steam at 100\u00B0C requires ___ times more energy than raising 1 g of water by 1\u00B0C:", options:["About 100","About 334","About 540","About 2260"], correct:2},
+      {q:"Dry ice (CO\u2082) goes directly from solid to gas at 1 atm. This means at 1 atm:", options:["The liquid phase doesn't exist","The triple point pressure is above 1 atm","CO\u2082 has no liquid phase ever","The critical point is below 1 atm"], correct:1},
+      {q:"If you plot a cooling curve and the temperature drops below the freezing point before suddenly jumping up to it, this is:", options:["An error","Supercooling","Superheating","Sublimation"], correct:1}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Heating Curves & Calculations \u2014 Complete Reference</h3>' +
+'<h3>Key Formulas</h3>' +
+'<table><tr><th>When</th><th>Formula</th><th>Variables</th></tr>' +
+'<tr><td><span class="rule">Temperature changing</span></td><td>q = mc\u0394T</td><td>m=mass, c=specific heat, \u0394T=temp change</td></tr>' +
+'<tr><td><span class="rule">Melting/Freezing</span></td><td>q = m\u0394H<sub>fus</sub></td><td>m=mass, \u0394H<sub>fus</sub>=heat of fusion</td></tr>' +
+'<tr><td><span class="rule">Boiling/Condensing</span></td><td>q = m\u0394H<sub>vap</sub></td><td>m=mass, \u0394H<sub>vap</sub>=heat of vaporization</td></tr></table>' +
+'<h3>Water Data</h3>' +
+'<table><tr><th>Property</th><th>Value</th></tr>' +
+'<tr><td>c(ice)</td><td>2.09 J/(g\u00B7\u00B0C)</td></tr>' +
+'<tr><td>c(liquid water)</td><td><span class="rule">4.184 J/(g\u00B7\u00B0C)</span></td></tr>' +
+'<tr><td>c(steam)</td><td>2.01 J/(g\u00B7\u00B0C)</td></tr>' +
+'<tr><td>\u0394H<sub>fus</sub></td><td><span class="rule">334 J/g</span> (6.01 kJ/mol)</td></tr>' +
+'<tr><td>\u0394H<sub>vap</sub></td><td><span class="rule">2260 J/g</span> (40.7 kJ/mol)</td></tr>' +
+'<tr><td>mp</td><td>0\u00B0C</td></tr>' +
+'<tr><td>bp</td><td>100\u00B0C (at 1 atm)</td></tr></table>' +
+'<h3>Heating Curve Regions (ice \u2192 steam)</h3>' +
+'<ol>' +
+'<li><span class="rule">Heat ice</span>: q = mc(ice)\u0394T, temperature rises</li>' +
+'<li><span class="rule">Melt ice</span>: q = m\u0394H<sub>fus</sub>, T = 0\u00B0C constant</li>' +
+'<li><span class="rule">Heat water</span>: q = mc(water)\u0394T, temperature rises</li>' +
+'<li><span class="rule">Vaporize water</span>: q = m\u0394H<sub>vap</sub>, T = 100\u00B0C constant</li>' +
+'<li><span class="rule">Heat steam</span>: q = mc(steam)\u0394T, temperature rises</li>' +
+'</ol>' +
+'<h3>Phase Changes</h3>' +
+'<table><tr><th>Transition</th><th>Name</th><th>Endo/Exo</th></tr>' +
+'<tr><td>Solid \u2192 Liquid</td><td>Melting (fusion)</td><td>Endothermic</td></tr>' +
+'<tr><td>Liquid \u2192 Gas</td><td>Vaporization</td><td>Endothermic</td></tr>' +
+'<tr><td>Solid \u2192 Gas</td><td>Sublimation</td><td>Endothermic</td></tr>' +
+'<tr><td>Gas \u2192 Liquid</td><td>Condensation</td><td>Exothermic</td></tr>' +
+'<tr><td>Liquid \u2192 Solid</td><td>Freezing</td><td>Exothermic</td></tr>' +
+'<tr><td>Gas \u2192 Solid</td><td>Deposition</td><td>Exothermic</td></tr></table>' +
+'<h3>Key Concepts</h3>' +
+'<ul>' +
+'<li>During phase changes: T constant, heat breaks/forms intermolecular forces</li>' +
+'<li>\u0394H<sub>vap</sub> >> \u0394H<sub>fus</sub> because vaporization fully separates molecules</li>' +
+'<li>Steeper slope = lower specific heat = heats up faster</li>' +
+'<li>Longer plateau = larger \u0394H = more energy needed for phase change</li>' +
+'<li>\u0394H<sub>sub</sub> = \u0394H<sub>fus</sub> + \u0394H<sub>vap</sub> (Hess\'s Law)</li>' +
+'</ul>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 heating/cooling curves, q=mc\u0394T, phase change calculations \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

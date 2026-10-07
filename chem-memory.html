@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chem Match - Chemistry FYE12</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#fff;color:#3c3c3c;font-family:'DIN Round Pro','Nunito','Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;min-height:100vh;overflow-x:hidden}
+
+/* ---- BACK LINK ---- */
+a.back{color:#1CB0F6;text-decoration:none;font-weight:700;padding:16px 20px;display:inline-block;font-size:.95em}
+a.back:hover{text-decoration:underline}
+
+/* ---- SCREEN MANAGEMENT ---- */
+.screen{display:none}
+.screen.active{display:block}
+
+/* ============ LEVEL SELECT ============ */
+#levelSelect{max-width:640px;margin:0 auto;padding:0 20px 40px}
+#levelSelect h1{text-align:center;font-size:1.6em;color:#3c3c3c;font-weight:800;padding:0 0 4px;letter-spacing:-.5px}
+.ls-subtitle{text-align:center;color:#afafaf;font-size:.9em;margin-bottom:20px;font-weight:600}
+.level-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.level-card{
+  background:#fff;
+  border:2px solid #e5e5e5;
+  border-bottom:4px solid #e5e5e5;
+  border-radius:16px;
+  padding:20px 16px;
+  cursor:pointer;
+  transition:all .15s;
+  text-align:center;
+  position:relative;
+}
+.level-card:hover{background:#f7f7f7;border-color:#ddd;border-bottom-color:#ddd}
+.level-card:active{transform:translateY(2px);border-bottom-width:2px;margin-top:2px}
+.level-card.completed{border-color:#58CC02;border-bottom-color:#46a302}
+.level-card.completed:hover{border-color:#58CC02;border-bottom-color:#46a302;background:#f0fce4}
+.level-card h3{color:#3c3c3c;font-size:1.05em;font-weight:800;margin-bottom:2px}
+.level-card .level-info{color:#afafaf;font-size:.8em;font-weight:600}
+.level-card .level-stars{font-size:1.5em;margin-top:8px;line-height:1}
+.level-card .level-best{color:#58CC02;font-size:.78em;font-weight:700;margin-top:4px}
+.level-card.locked{opacity:.45;cursor:not-allowed}
+.level-card.locked:hover{background:#fff;border-color:#e5e5e5;border-bottom-color:#e5e5e5;transform:none}
+.lock-icon{font-size:1.6em;margin-top:8px;color:#ccc}
+
+.star-gold{color:#FFC800}
+.star-empty{color:#e5e5e5}
+
+.reset-all-btn{display:block;margin:24px auto 0;background:none;border:2px solid #e5e5e5;color:#afafaf;padding:10px 24px;border-radius:12px;cursor:pointer;font-size:.85em;font-weight:700;transition:all .15s}
+.reset-all-btn:hover{border-color:#FF4B4B;color:#FF4B4B}
+
+/* ============ GAMEPLAY ============ */
+#gameArea{max-width:700px;margin:0 auto;padding:0 16px 20px}
+
+/* Top bar */
+.top-bar{display:flex;align-items:center;gap:12px;padding:12px 0 8px}
+.top-bar .close-btn{
+  background:none;border:none;cursor:pointer;font-size:1.4em;color:#afafaf;
+  padding:4px;line-height:1;font-weight:700;transition:color .15s;
+}
+.top-bar .close-btn:hover{color:#FF4B4B}
+.progress-wrap{flex:1;height:16px;background:#e5e5e5;border-radius:10px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#58CC02,#69e30b);border-radius:10px;transition:width .3s;width:0}
+
+.game-info-bar{display:flex;justify-content:space-between;align-items:center;padding:0 2px 10px}
+.moves-label{color:#afafaf;font-size:.85em;font-weight:700}
+.mistakes-label{color:#FF4B4B;font-size:.85em;font-weight:700}
+.timer-label{font-size:.95em;font-weight:800;color:#3c3c3c}
+.pairs-label{font-size:.85em;font-weight:700;color:#58CC02}
+
+/* ============ MATCH GRID ============ */
+.match-grid{
+  display:grid;
+  gap:10px;
+  max-width:620px;
+  margin:0 auto;
+}
+.match-grid.grid-16{grid-template-columns:repeat(4,1fr)}
+.match-grid.grid-24{grid-template-columns:repeat(4,1fr)}
+
+/* ============ MATCH CARD ============ */
+.match-card{
+  background:#fff;
+  border:2px solid #e5e5e5;
+  border-bottom:4px solid #e5e5e5;
+  border-radius:14px;
+  padding:12px 8px;
+  cursor:pointer;
+  user-select:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  font-weight:700;
+  font-size:.85em;
+  line-height:1.3;
+  min-height:72px;
+  word-break:break-word;
+  transition:all .15s ease, transform .15s ease, opacity .4s ease;
+  position:relative;
+}
+.match-card:hover{
+  transform:scale(1.02);
+  box-shadow:0 4px 12px rgba(0,0,0,.08);
+  border-color:#d0d0d0;
+}
+
+/* Selected state */
+.match-card.selected{
+  border-color:#1CB0F6;
+  border-bottom-color:#1899d6;
+  background:#e8f4fd;
+  box-shadow:0 0 0 3px rgba(28,176,246,.2), 0 4px 12px rgba(28,176,246,.15);
+  animation:selectedPulse 1.5s ease infinite;
+}
+@keyframes selectedPulse{
+  0%,100%{box-shadow:0 0 0 3px rgba(28,176,246,.2), 0 4px 12px rgba(28,176,246,.15)}
+  50%{box-shadow:0 0 0 5px rgba(28,176,246,.15), 0 4px 16px rgba(28,176,246,.2)}
+}
+
+/* Correct match */
+.match-card.correct{
+  border-color:#58CC02;
+  border-bottom-color:#46a302;
+  background:#d7ffb8;
+  color:#46a302;
+  pointer-events:none;
+}
+
+/* Wrong match */
+.match-card.wrong{
+  border-color:#FF4B4B;
+  border-bottom-color:#e63e3e;
+  background:#ffdfe0;
+  color:#FF4B4B;
+  animation:wrongShake .5s ease;
+}
+
+/* Matched and disappearing */
+.match-card.matched-out{
+  transform:scale(0);
+  opacity:0;
+  pointer-events:none;
+  transition:transform .4s cubic-bezier(.4,0,.2,1), opacity .4s ease;
+}
+.match-card.matched-gone{
+  visibility:hidden;
+  min-height:0;
+  height:0;
+  padding:0;
+  margin:0;
+  border:none;
+  overflow:hidden;
+}
+
+@keyframes wrongShake{
+  0%,100%{transform:translateX(0) rotate(0)}
+  20%{transform:translateX(-4px) rotate(-2deg)}
+  40%{transform:translateX(4px) rotate(2deg)}
+  60%{transform:translateX(-3px) rotate(-1deg)}
+  80%{transform:translateX(3px) rotate(1deg)}
+}
+
+/* ============ LEVEL COMPLETE ============ */
+#levelComplete{max-width:420px;margin:40px auto;text-align:center;padding:20px}
+#levelComplete h2{font-size:1.7em;color:#3c3c3c;font-weight:800}
+.lc-stars{font-size:3em;margin:20px 0;line-height:1}
+.lc-stars .star{display:inline-block;opacity:0;transform:scale(0) rotate(-30deg);transition:all .4s cubic-bezier(.34,1.56,.64,1)}
+.lc-stars .star.reveal{opacity:1;transform:scale(1) rotate(0)}
+.lc-stat{color:#afafaf;font-size:.95em;font-weight:600;margin:4px 0}
+.lc-stat span{color:#3c3c3c;font-weight:800}
+.lc-stat,.lc-subtitle{animation:slideUp .4s ease both}
+.lc-subtitle{color:#afafaf;font-size:.9em;font-weight:600;margin-bottom:16px;animation-delay:.1s}
+.lc-stat:nth-of-type(1){animation-delay:.6s}
+.lc-stat:nth-of-type(2){animation-delay:.7s}
+.lc-stat:nth-of-type(3){animation-delay:.8s}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* ============ STATS BAR ============ */
+.stats-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px;padding:16px;background:#f7f7f7;border-radius:14px;border:2px solid #e5e5e5}
+.stat-box{text-align:center}
+.stat-box .stat-value{font-size:1.2em;font-weight:800;color:#3c3c3c}
+.stat-box .stat-label{font-size:.72em;font-weight:700;color:#afafaf;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+
+/* ============ BUTTONS ============ */
+.btn{
+  display:inline-block;
+  background:#58CC02;
+  color:#fff;
+  border:none;
+  border-bottom:4px solid #46a302;
+  padding:13px 32px;
+  border-radius:14px;
+  cursor:pointer;
+  font-size:1em;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.5px;
+  transition:all .1s;
+  margin:8px;
+}
+.btn:hover{background:#61d800}
+.btn:active{transform:translateY(2px);border-bottom-width:1px}
+.btn.secondary{
+  background:#fff;
+  color:#afafaf;
+  border:2px solid #e5e5e5;
+  border-bottom:4px solid #e5e5e5;
+}
+.btn.secondary:hover{background:#f7f7f7;color:#777}
+.btn-wrap{margin-top:24px}
+
+/* ============ CONFETTI ============ */
+#confettiCanvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:300}
+
+/* ============ RESPONSIVE ============ */
+@media(max-width:500px){
+  .match-card{min-height:60px;font-size:.75em;padding:8px 6px}
+  #levelSelect h1{font-size:1.3em}
+  .level-grid{gap:10px}
+  .level-card{padding:16px 12px}
+  .lc-stars{font-size:2.4em}
+  .match-grid{gap:7px}
+}
+@media(max-width:380px){
+  .match-card{font-size:.68em;min-height:52px;padding:6px 4px}
+}
+</style>
+</head>
+<body>
+
+<a href="index.html" class="back">&larr; Back to Exercises</a>
+
+<!-- SCREEN 1: Level Select -->
+<div id="levelSelect" class="screen active">
+  <h1>Chem Match</h1>
+  <p class="ls-subtitle">8 levels &mdash; Match pairs as fast as you can!</p>
+  <div class="level-grid" id="levelGrid"></div>
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-box"><div class="stat-value" id="statGames">0</div><div class="stat-label">Games</div></div>
+    <div class="stat-box"><div class="stat-value" id="statStars">0</div><div class="stat-label">Stars</div></div>
+    <div class="stat-box"><div class="stat-value" id="statPairs">0</div><div class="stat-label">Pairs Found</div></div>
+  </div>
+  <button class="reset-all-btn" onclick="resetAllProgress()">Reset All Progress</button>
+</div>
+
+<!-- SCREEN 2: Gameplay -->
+<div id="gameArea" class="screen">
+  <div class="top-bar">
+    <button class="close-btn" onclick="confirmQuit()" title="Quit">&times;</button>
+    <div class="progress-wrap"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+  <div class="game-info-bar">
+    <div class="moves-label" id="movesLabel">Moves: 0</div>
+    <div class="mistakes-label" id="mistakesLabel">Mistakes: 0</div>
+    <div class="pairs-label" id="pairsLabel">Remaining: 8 / 8</div>
+    <div class="timer-label" id="timerLabel">0:00</div>
+  </div>
+  <div class="match-grid" id="matchGrid"></div>
+</div>
+
+<!-- SCREEN 3: Level Complete -->
+<div id="levelComplete" class="screen">
+  <h2 id="lcTitle">Level Complete!</h2>
+  <p class="lc-subtitle" id="lcDeck"></p>
+  <div class="lc-stars" id="lcStars"></div>
+  <div class="lc-stat">Time: <span id="lcTime">0:00</span></div>
+  <div class="lc-stat">Moves: <span id="lcMoves">0</span></div>
+  <div class="lc-stat">Mistakes: <span id="lcMistakes">0</span></div>
+  <div class="btn-wrap">
+    <button class="btn" id="btnReplay" onclick="replayLevel()">PLAY AGAIN</button>
+    <br>
+    <button class="btn secondary" onclick="backToLevels()">LEVELS</button>
+  </div>
+</div>
+
+<!-- Confetti canvas -->
+<canvas id="confettiCanvas"></canvas>
+
+<script>
+// ============ SOUND SYSTEM (Web Audio API) ============
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+function playTone(freq, duration, type, gain) {
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.value = freq;
+    g.gain.value = gain || 0.15;
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.connect(g);
+    g.connect(ctx.destination);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + duration);
+  } catch(e) {}
+}
+function playSelect() {
+  playTone(500, 0.05, 'sine', 0.07);
+}
+function playCorrect() {
+  playTone(523, 0.12, 'sine', 0.12);
+  setTimeout(() => playTone(659, 0.15, 'sine', 0.12), 80);
+}
+function playWrong() {
+  playTone(150, 0.2, 'sawtooth', 0.08);
+}
+function playLevelWin() {
+  const notes = [523, 587, 659, 784, 880, 1047];
+  notes.forEach((f, i) => setTimeout(() => playTone(f, 0.2, 'sine', 0.1), i * 130));
+}
+
+// ============ CHEMISTRY FORMATTING ============
+function chemFormat(s) {
+  if (!s) return '';
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4').replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-').replace(/²/g,'2').replace(/³/g,'3');
+  s = s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  s = s.replace(/([A-Za-z\)])(\d+)/g, '$1<sub>$2</sub>');
+  s = s.replace(/(\d*)([\+\-])$/g, '<sup>$1$2</sup>');
+  return s;
+}
+
+// ============ DECKS ============
+const MEMORY_DECKS = [
+  {
+    name: "Element Symbol \u2194 Name",
+    desc: "Match element symbols to their names",
+    gridSize: [4, 4],
+    pairs: [
+      ["H", "Hydrogen"], ["He", "Helium"], ["C", "Carbon"], ["N", "Nitrogen"],
+      ["O", "Oxygen"], ["Na", "Sodium"], ["Fe", "Iron"], ["Au", "Gold"],
+      ["Ag", "Silver"], ["Cu", "Copper"], ["K", "Potassium"], ["Ca", "Calcium"]
+    ]
+  },
+  {
+    name: "Ion \u2194 Charge",
+    desc: "Match ions to their charges",
+    gridSize: [4, 4],
+    pairs: [
+      ["Na\u207a", "+1"], ["Mg\u00b2\u207a", "+2"], ["Al\u00b3\u207a", "+3"], ["Cl\u207b", "\u22121"],
+      ["O\u00b2\u207b", "\u22122"], ["N\u00b3\u207b", "\u22123"], ["Fe\u00b2\u207a", "+2 (iron II)"], ["Cu\u207a", "+1 (copper I)"],
+      ["Ba\u00b2\u207a", "+2"], ["K\u207a", "+1"], ["F\u207b", "\u22121"], ["S\u00b2\u207b", "\u22122"]
+    ]
+  },
+  {
+    name: "Polyatomic Ion \u2194 Formula",
+    desc: "Match polyatomic ion names to formulas",
+    gridSize: [4, 4],
+    pairs: [
+      ["Hydroxide", "OH\u207b"], ["Nitrate", "NO\u2083\u207b"], ["Ammonium", "NH\u2084\u207a"],
+      ["Carbonate", "CO\u2083\u00b2\u207b"], ["Sulfate", "SO\u2084\u00b2\u207b"], ["Phosphate", "PO\u2084\u00b3\u207b"],
+      ["Bicarbonate", "HCO\u2083\u207b"], ["Nitrite", "NO\u2082\u207b"],
+      ["Sulfite", "SO\u2083\u00b2\u207b"], ["Permanganate", "MnO\u2084\u207b"], ["Acetate", "CH\u2083COO\u207b"],
+      ["Cyanide", "CN\u207b"]
+    ]
+  },
+  {
+    name: "Compound Formula \u2194 Name",
+    desc: "Match compound formulas to their names",
+    gridSize: [4, 4],
+    pairs: [
+      ["NaCl", "Sodium chloride"], ["MgO", "Magnesium oxide"], ["CaCl\u2082", "Calcium chloride"],
+      ["Al\u2082O\u2083", "Aluminium oxide"], ["K\u2082S", "Potassium sulfide"], ["Na\u2082O", "Sodium oxide"],
+      ["CaF\u2082", "Calcium fluoride"], ["KBr", "Potassium bromide"],
+      ["NaOH", "Sodium hydroxide"], ["Ca(OH)\u2082", "Calcium hydroxide"],
+      ["KNO\u2083", "Potassium nitrate"], ["Na\u2082CO\u2083", "Sodium carbonate"]
+    ]
+  },
+  {
+    name: "Acid Formula \u2194 Name",
+    desc: "Match acid formulas to their names",
+    gridSize: [4, 4],
+    pairs: [
+      ["HCl", "Hydrochloric acid"], ["HBr", "Hydrobromic acid"],
+      ["H\u2082SO\u2084", "Sulfuric acid"], ["HNO\u2083", "Nitric acid"],
+      ["H\u2083PO\u2084", "Phosphoric acid"], ["H\u2082CO\u2083", "Carbonic acid"],
+      ["H\u2082SO\u2083", "Sulfurous acid"], ["HNO\u2082", "Nitrous acid"],
+      ["HF", "Hydrofluoric acid"], ["HClO\u2083", "Chloric acid"],
+      ["HClO\u2084", "Perchloric acid"], ["HC\u2082H\u2083O\u2082", "Acetic acid"]
+    ]
+  },
+  {
+    name: "Functional Group \u2194 Name",
+    desc: "Match functional groups to their names",
+    gridSize: [4, 4],
+    pairs: [
+      ["-OH", "Alcohol"], ["-COOH", "Carboxylic acid"], ["-NH\u2082", "Amine"],
+      ["-CHO", "Aldehyde"], ["C=O (mid)", "Ketone"], ["-O-", "Ether"],
+      ["-COO-", "Ester"], ["-CONH\u2082", "Amide"],
+      ["C=C", "Alkene"], ["C\u2261C", "Alkyne"], ["-SH", "Thiol"], ["Ar ring", "Aromatic"]
+    ]
+  },
+  {
+    name: "Greek Prefix \u2194 Number",
+    desc: "Match Greek prefixes to numbers",
+    gridSize: [4, 4],
+    pairs: [
+      ["mono-", "1"], ["di-", "2"], ["tri-", "3"], ["tetra-", "4"],
+      ["penta-", "5"], ["hexa-", "6"], ["hepta-", "7"], ["octa-", "8"],
+      ["nona-", "9"], ["deca-", "10"], ["hendeca-", "11"], ["dodeca-", "12"]
+    ]
+  },
+  {
+    name: "Mixed Review (Large Grid)",
+    desc: "The ultimate match challenge \u2014 12 pairs!",
+    gridSize: [4, 6],
+    pairs: [
+      ["H", "Hydrogen"], ["Na\u207a", "+1 charge"], ["OH\u207b", "Hydroxide"],
+      ["NaCl", "Sodium chloride"], ["HCl", "Hydrochloric acid"], ["-OH", "Alcohol"],
+      ["tri-", "3"], ["Fe", "Iron"], ["CO\u2083\u00b2\u207b", "Carbonate"],
+      ["H\u2082SO\u2084", "Sulfuric acid"], ["C=C", "Alkene"], ["Au", "Gold"]
+    ]
+  }
+];
+
+// ============ STATE ============
+const STORAGE_KEY = 'fye12_chem_memory';
+let progress = loadProgress();
+let currentLevel = 0;
+let gameCards = [];
+let selectedCard = null;
+let lockBoard = false;
+let moves = 0;
+let mistakes = 0;
+let matchedPairs = 0;
+let totalPairs = 0;
+let timerInterval = null;
+let elapsedSeconds = 0;
+
+function loadProgress() {
+  try {
+    const d = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if (d && d.levels) return d;
+  } catch(e) {}
+  return { levels: {}, totalGames: 0, totalPairs: 0, totalStars: 0 };
+}
+
+function saveProgress() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+  try {
+    fetch('/api/memory-progress', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(progress)
+    }).catch(() => {});
+  } catch(e) {}
+}
+
+// ============ SCREEN MANAGEMENT ============
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ============ LEVEL SELECT ============
+function renderLevelSelect() {
+  const grid = document.getElementById('levelGrid');
+  grid.innerHTML = '';
+  MEMORY_DECKS.forEach((deck, i) => {
+    const card = document.createElement('div');
+    card.className = 'level-card';
+    const lvlData = progress.levels[i];
+    const unlocked = i === 0 || progress.levels[i - 1];
+
+    if (lvlData) {
+      card.classList.add('completed');
+      const stars = lvlData.stars || 0;
+      card.innerHTML = `
+        <h3>${deck.name}</h3>
+        <div class="level-info">${deck.desc}</div>
+        <div class="level-stars">${renderStars(stars)}</div>
+        <div class="level-best">Best: ${formatTime(lvlData.bestTime)}</div>
+      `;
+      card.onclick = () => startLevel(i);
+    } else if (unlocked) {
+      card.innerHTML = `
+        <h3>${deck.name}</h3>
+        <div class="level-info">${deck.desc}</div>
+        <div class="level-stars">${renderStars(0)}</div>
+      `;
+      card.onclick = () => startLevel(i);
+    } else {
+      card.classList.add('locked');
+      card.innerHTML = `
+        <h3>${deck.name}</h3>
+        <div class="level-info">${deck.desc}</div>
+        <div class="lock-icon">&#x1f512;</div>
+      `;
+    }
+    grid.appendChild(card);
+  });
+
+  let totalStars = 0, totalGames = progress.totalGames || 0, totalPairsAll = progress.totalPairs || 0;
+  Object.values(progress.levels).forEach(l => { totalStars += (l.stars || 0); });
+  document.getElementById('statGames').textContent = totalGames;
+  document.getElementById('statStars').textContent = totalStars + ' / ' + (MEMORY_DECKS.length * 3);
+  document.getElementById('statPairs').textContent = totalPairsAll;
+}
+
+function renderStars(count) {
+  let html = '';
+  for (let i = 0; i < 3; i++) {
+    html += i < count
+      ? '<span class="star-gold">\u2605</span>'
+      : '<span class="star-empty">\u2605</span>';
+  }
+  return html;
+}
+
+function resetAllProgress() {
+  if (!confirm('Reset all Chem Match progress?')) return;
+  progress = { levels: {}, totalGames: 0, totalPairs: 0, totalStars: 0 };
+  saveProgress();
+  renderLevelSelect();
+}
+
+// ============ START LEVEL ============
+function startLevel(levelIndex) {
+  currentLevel = levelIndex;
+  const deck = MEMORY_DECKS[levelIndex];
+  const [cols, rows] = deck.gridSize;
+  totalPairs = (cols * rows) / 2;
+  matchedPairs = 0;
+  moves = 0;
+  mistakes = 0;
+  elapsedSeconds = 0;
+  selectedCard = null;
+  lockBoard = false;
+
+  // Select pairs
+  let selectedPairs;
+  if (totalPairs >= deck.pairs.length) {
+    selectedPairs = [...deck.pairs];
+  } else {
+    const shuffled = [...deck.pairs].sort(() => Math.random() - 0.5);
+    selectedPairs = shuffled.slice(0, totalPairs);
+  }
+
+  // Create card array: each pair produces two cards
+  gameCards = [];
+  selectedPairs.forEach((pair, idx) => {
+    gameCards.push({ id: idx * 2, pairId: idx, content: pair[0], matched: false });
+    gameCards.push({ id: idx * 2 + 1, pairId: idx, content: pair[1], matched: false });
+  });
+
+  // Shuffle
+  for (let i = gameCards.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [gameCards[i], gameCards[j]] = [gameCards[j], gameCards[i]];
+  }
+
+  renderGrid(cols, rows);
+  updateUI();
+  showScreen('gameArea');
+  startTimer();
+}
+
+function renderGrid(cols, rows) {
+  const grid = document.getElementById('matchGrid');
+  grid.innerHTML = '';
+  grid.className = 'match-grid';
+  const totalCards = cols * rows;
+  grid.classList.add(totalCards > 16 ? 'grid-24' : 'grid-16');
+
+  gameCards.forEach((card, index) => {
+    const el = document.createElement('div');
+    el.className = 'match-card';
+    el.dataset.index = index;
+    el.innerHTML = chemFormat(card.content);
+    el.addEventListener('click', () => handleCardClick(index, el));
+    grid.appendChild(el);
+  });
+}
+
+// ============ GAME LOGIC ============
+function handleCardClick(index, el) {
+  if (lockBoard) return;
+  const card = gameCards[index];
+  if (card.matched) return;
+
+  // Clicking the already-selected card: deselect
+  if (selectedCard && selectedCard.index === index) {
+    el.classList.remove('selected');
+    selectedCard = null;
+    playSelect();
+    return;
+  }
+
+  // First card selection
+  if (!selectedCard) {
+    selectedCard = { index, el, card };
+    el.classList.add('selected');
+    playSelect();
+    return;
+  }
+
+  // Second card clicked
+  moves++;
+  lockBoard = true;
+
+  // Check match
+  if (selectedCard.card.pairId === card.pairId) {
+    // Correct match
+    el.classList.add('correct');
+    selectedCard.el.classList.remove('selected');
+    selectedCard.el.classList.add('correct');
+    playCorrect();
+
+    const prevSelected = selectedCard;
+    matchedPairs++;
+    updateUI();
+
+    // Shrink and disappear
+    setTimeout(() => {
+      el.classList.add('matched-out');
+      prevSelected.el.classList.add('matched-out');
+
+      setTimeout(() => {
+        el.classList.add('matched-gone');
+        prevSelected.el.classList.add('matched-gone');
+        card.matched = true;
+        prevSelected.card.matched = true;
+
+        if (matchedPairs === totalPairs) {
+          setTimeout(() => completeLevel(), 300);
+        }
+      }, 400);
+    }, 500);
+
+    selectedCard = null;
+    lockBoard = false;
+  } else {
+    // Wrong match
+    mistakes++;
+    el.classList.add('wrong');
+    selectedCard.el.classList.remove('selected');
+    selectedCard.el.classList.add('wrong');
+    playWrong();
+    updateUI();
+
+    const prevSelected = selectedCard;
+    setTimeout(() => {
+      el.classList.remove('wrong');
+      prevSelected.el.classList.remove('wrong');
+      selectedCard = null;
+      lockBoard = false;
+    }, 800);
+  }
+}
+
+function updateUI() {
+  document.getElementById('movesLabel').textContent = 'Moves: ' + moves;
+  document.getElementById('mistakesLabel').textContent = 'Mistakes: ' + mistakes;
+  const remaining = totalPairs - matchedPairs;
+  document.getElementById('pairsLabel').textContent = 'Remaining: ' + remaining + ' / ' + totalPairs;
+  const pct = totalPairs > 0 ? (matchedPairs / totalPairs) * 100 : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+// ============ TIMER ============
+function startTimer() {
+  clearInterval(timerInterval);
+  elapsedSeconds = 0;
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    elapsedSeconds++;
+    updateTimerDisplay();
+  }, 1000);
+}
+
+function stopTimer() {
+  clearInterval(timerInterval);
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(elapsedSeconds / 60);
+  const s = elapsedSeconds % 60;
+  document.getElementById('timerLabel').textContent = m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+function formatTime(secs) {
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  return m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+// ============ COMPLETE LEVEL ============
+function completeLevel() {
+  stopTimer();
+  playLevelWin();
+
+  // Stars based on time + mistakes
+  // 3 stars: 0 mistakes AND time under (pairs * 3) seconds
+  // 2 stars: <=2 mistakes OR time under (pairs * 5) seconds
+  // 1 star: completed
+  let stars = 1;
+  const fastTime = totalPairs * 3;
+  const mediumTime = totalPairs * 5;
+  if (mistakes <= 2 || elapsedSeconds < mediumTime) stars = 2;
+  if (mistakes === 0 && elapsedSeconds < fastTime) stars = 3;
+
+  // Update progress
+  const prev = progress.levels[currentLevel];
+  const bestStars = prev ? Math.max(prev.stars, stars) : stars;
+  const bestTime = prev ? Math.min(prev.bestTime, elapsedSeconds) : elapsedSeconds;
+  const bestMistakes = prev ? Math.min(prev.bestMistakes || mistakes, mistakes) : mistakes;
+  const isNewBest = !prev || elapsedSeconds < prev.bestTime;
+
+  progress.levels[currentLevel] = {
+    stars: bestStars,
+    bestTime: bestTime,
+    bestMoves: prev ? Math.min(prev.bestMoves || moves, moves) : moves,
+    bestMistakes: bestMistakes
+  };
+  progress.totalGames = (progress.totalGames || 0) + 1;
+  progress.totalPairs = (progress.totalPairs || 0) + totalPairs;
+  saveProgress();
+
+  // Show complete screen
+  const deck = MEMORY_DECKS[currentLevel];
+  document.getElementById('lcDeck').textContent = deck.name;
+  document.getElementById('lcTime').textContent = formatTime(elapsedSeconds) + (isNewBest && prev ? ' (new best!)' : '');
+  document.getElementById('lcMoves').textContent = moves;
+  document.getElementById('lcMistakes').textContent = mistakes;
+
+  showScreen('levelComplete');
+
+  // Animate stars
+  const starsEl = document.getElementById('lcStars');
+  starsEl.innerHTML = '';
+  for (let i = 0; i < 3; i++) {
+    const span = document.createElement('span');
+    span.className = 'star';
+    span.textContent = '\u2605';
+    span.style.color = i < stars ? '#FFC800' : '#e5e5e5';
+    starsEl.appendChild(span);
+    setTimeout(() => span.classList.add('reveal'), 200 + i * 250);
+  }
+
+  if (stars === 3) {
+    setTimeout(() => launchConfetti(), 600);
+  }
+}
+
+function replayLevel() {
+  startLevel(currentLevel);
+}
+
+function backToLevels() {
+  stopTimer();
+  renderLevelSelect();
+  showScreen('levelSelect');
+}
+
+function confirmQuit() {
+  if (matchedPairs > 0 && matchedPairs < totalPairs) {
+    if (!confirm('Quit this game? Progress will be lost.')) return;
+  }
+  backToLevels();
+}
+
+// ============ CONFETTI ============
+function launchConfetti() {
+  const canvas = document.getElementById('confettiCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const colors = ['#58CC02', '#1CB0F6', '#FF9600', '#FFC800', '#FF4B4B', '#CE82FF'];
+  const particles = [];
+  for (let i = 0; i < 80; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height * 0.3 - canvas.height * 0.1,
+      w: Math.random() * 8 + 4,
+      h: Math.random() * 6 + 3,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      vx: (Math.random() - 0.5) * 4,
+      vy: Math.random() * 3 + 2,
+      rotation: Math.random() * 360,
+      rotSpeed: (Math.random() - 0.5) * 10,
+      opacity: 1
+    });
+  }
+
+  let frame = 0;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let alive = false;
+    particles.forEach(p => {
+      if (p.opacity <= 0) return;
+      alive = true;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation * Math.PI / 180);
+      ctx.globalAlpha = p.opacity;
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.08;
+      p.rotation += p.rotSpeed;
+      if (frame > 40) p.opacity -= 0.015;
+    });
+    frame++;
+    if (alive && frame < 200) requestAnimationFrame(draw);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  draw();
+}
+
+// ============ INIT ============
+renderLevelSelect();
+</script>
+</body>
+</html>

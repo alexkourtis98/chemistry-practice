@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Mole Concept</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the answer...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Mole Concept</h1>
+<p class="subtitle">Deep practice &mdash; mol, n=m/M, Avogadro</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_09';
+const SECTIONS = [
+  {
+    id:1, title:"Basic concepts",
+    instruction:"Fill in the basics of the mole.",
+    rows:[
+      ["1","1 mol = how many particles?","6.022 × 10²³ / 6.022 x 10^23"],
+      ["2","Avogadro's number =","6.022 × 10²³ / 6.022 x 10^23"],
+      ["3","n = ___ / M","m"],
+      ["4","m = n × ___","M"],
+      ["5","M = m / ___","n"],
+      ["6","What does the mole measure?","amount of substance"],
+      ["7","Unit of M?","g/mol"],
+      ["8","Unit of n?","mol"],
+      ["9","Who is Avogadro's number named after?","Amedeo Avogadro"],
+      ["10","Symbol for number of moles?","n"],
+      ["11","Symbol for molar mass?","M"],
+      ["12","Symbol for mass?","m"],
+      ["13","Unit of mass in chemistry?","g / grams"],
+      ["14","1 mol of atoms contains ___ atoms","6.022 × 10²³ / 6.022 x 10^23"],
+      ["15","The mole is the SI unit for ___","amount of substance"],
+      ["16","Nₐ stands for?","Avogadro's number / Avogadro constant"]
+    ]
+  },
+  {
+    id:2, title:"Calculate n = m/M",
+    instruction:"Calculate the moles (n = m / M).",
+    rows:[
+      ["1","46g Na (M=23) → n =","2 / 2 mol"],
+      ["2","6g C (M=12) → n =","0.5 / 0.5 mol"],
+      ["3","36g H₂O (M=18) → n =","2 / 2 mol"],
+      ["4","120g NaCl (M=58.5) → n =","2.05 / ≈2.05 / 2.05 mol"],
+      ["5","222g CaCl₂ (M=111) → n =","2 / 2 mol"],
+      ["6","148g Ca(OH)₂ (M=74) → n =","2 / 2 mol"],
+      ["7","98g H₂SO₄ (M=98) → n =","1 / 1 mol"],
+      ["8","44g CO₂ (M=44) → n =","1 / 1 mol"],
+      ["9","160g Fe₂O₃ (M=160) → n =","1 / 1 mol"],
+      ["10","9g H₂O (M=18) → n =","0.5 / 0.5 mol"],
+      ["11","69g Na (M=23) → n =","3 / 3 mol"],
+      ["12","24g Mg (M=24) → n =","1 / 1 mol"],
+      ["13","56g Fe (M=56) → n =","1 / 1 mol"],
+      ["14","28g N₂ (M=28) → n =","1 / 1 mol"],
+      ["15","64g O₂ (M=32) → n =","2 / 2 mol"],
+      ["16","4g H₂ (M=2) → n =","2 / 2 mol"],
+      ["17","180g glucose (M=180) → n =","1 / 1 mol"],
+      ["18","342g sucrose (M=342) → n =","1 / 1 mol"]
+    ]
+  },
+  {
+    id:3, title:"Calculate m = n × M",
+    instruction:"Calculate the mass (m = n × M).",
+    rows:[
+      ["1","3 mol NaCl (M=58.5) → m =","175.5 / 175.5 g"],
+      ["2","0.5 mol H₂SO₄ (M=98) → m =","49 / 49 g"],
+      ["3","2.5 mol Al₂O₃ (M=102) → m =","255 / 255 g"],
+      ["4","2 mol H₂O (M=18) → m =","36 / 36 g"],
+      ["5","0.25 mol CO₂ (M=44) → m =","11 / 11 g"],
+      ["6","4 mol NaCl (M=58.5) → m =","234 / 234 g"],
+      ["7","1.5 mol CaCl₂ (M=111) → m =","166.5 / 166.5 g"],
+      ["8","3 mol Ca(OH)₂ (M=74) → m =","222 / 222 g"],
+      ["9","0.1 mol Na (M=23) → m =","2.3 / 2.3 g"],
+      ["10","5 mol H₂O (M=18) → m =","90 / 90 g"],
+      ["11","0.2 mol Fe₂O₃ (M=160) → m =","32 / 32 g"],
+      ["12","10 mol H₂ (M=2) → m =","20 / 20 g"],
+      ["13","0.75 mol CO₂ (M=44) → m =","33 / 33 g"],
+      ["14","6 mol MgO (M=40) → m =","240 / 240 g"],
+      ["15","0.01 mol NaCl (M=58.5) → m =","0.585 / 0.585 g"],
+      ["16","100 mol H₂O (M=18) → m =","1800 / 1800 g"]
+    ]
+  },
+  {
+    id:4, title:"Calculate M = m/n",
+    instruction:"Calculate the molar mass (M = m / n).",
+    rows:[
+      ["1","100g / 4 mol → M =","25 / 25 g/mol"],
+      ["2","58.5g / 1 mol → M =","58.5 / 58.5 g/mol"],
+      ["3","180g / 10 mol → M =","18 / 18 g/mol"],
+      ["4","98g / 2 mol → M =","49 / 49 g/mol"],
+      ["5","160g / 1 mol → M =","160 / 160 g/mol"],
+      ["6","74g / 2 mol → M =","37 / 37 g/mol"],
+      ["7","342g / 2 mol → M =","171 / 171 g/mol"],
+      ["8","44g / 0.5 mol → M =","88 / 88 g/mol"],
+      ["9","111g / 3 mol → M =","37 / 37 g/mol"],
+      ["10","240g / 6 mol → M =","40 / 40 g/mol"],
+      ["11","56g / 1 mol → M =","56 / 56 g/mol"],
+      ["12","28g / 2 mol → M =","14 / 14 g/mol"],
+      ["13","490g / 5 mol → M =","98 / 98 g/mol"],
+      ["14","204g / 2 mol → M =","102 / 102 g/mol"]
+    ]
+  },
+  {
+    id:5, title:"MC: Mole concept", type:"mc",
+    instruction:"Choose the correct answer.",
+    questions:[
+      {q:"The formula n = m/M is used to:", options:["Calculate mass from volume","Calculate moles from mass","Calculate density","Calculate atomic number"], correct:1},
+      {q:"If n=2 mol and M=18 g/mol, then m=?", options:["9 g","18 g","36 g","72 g"], correct:2},
+      {q:"1 mol of any substance contains:", options:["6.022×10²⁰ particles","6.022×10²³ particles","6.022×10²⁶ particles","1000 particles"], correct:1},
+      {q:"The mole connects:", options:["Temperature and pressure","Formulas and grams","Volume and density","Energy and mass"], correct:1},
+      {q:"The M of an element equals:", options:["The atomic number in g/mol","The atomic mass in g/mol","The number of neutrons","The number of electrons"], correct:1},
+      {q:"If m=100g and n=2mol, then M=?", options:["200 g/mol","50 g/mol","2 g/mol","0.02 g/mol"], correct:1},
+      {q:"Which has more moles: 46g Na or 36g H₂O?", options:["46g Na","36g H₂O","Same (both 2 mol)","Cannot be calculated"], correct:2},
+      {q:"n=m/M. To find m, I rearrange as:", options:["m = M / n","m = n / M","m = n × M","m = n + M"], correct:2},
+      {q:"Which has more atoms: 1 mol Fe or 1 mol Al?", options:["1 mol Fe","1 mol Al","Same number","Depends on mass"], correct:2},
+      {q:"2 mol of CO₂ contains how many molecules?", options:["6.022×10²³","1.204×10²⁴","3.011×10²³","2"], correct:1},
+      {q:"Which is heavier: 1 mol Fe (56 g/mol) or 1 mol Al (27 g/mol)?", options:["1 mol Fe","1 mol Al","Same weight","Cannot tell"], correct:0},
+      {q:"0.5 mol of H₂O contains how many molecules?", options:["6.022×10²³","3.011×10²³","1.204×10²⁴","12.044×10²³"], correct:1},
+      {q:"If you double the mass but M stays the same, n:", options:["Halves","Stays the same","Doubles","Quadruples"], correct:2},
+      {q:"The molar mass M of O₂ is:", options:["16 g/mol","32 g/mol","8 g/mol","64 g/mol"], correct:1},
+      {q:"How many atoms in 1 mol of H₂O?", options:["6.022×10²³","1.204×10²⁴","1.807×10²⁴","3.011×10²³"], correct:2},
+      {q:"Which sample has the most particles?", options:["1 mol NaCl","2 mol H₂O","0.5 mol Fe₂O₃","1.5 mol CO₂"], correct:1}
+    ]
+  },
+  {
+    id:6, title:"Word problems",
+    instruction:"Solve the problems.",
+    rows:[
+      ["1","You have 92g Na. How many mol? (M=23)","4 / 4 mol"],
+      ["2","You need 5 mol H₂O. How many grams? (M=18)","90 / 90 g"],
+      ["3","A 2 mol sample weighs 196g. M=?","98 / 98 g/mol"],
+      ["4","H₂O has M=18 g/mol. 54g = how many mol?","3 / 3 mol"],
+      ["5","0.1 mol NaCl = how many g? (M=58.5)","5.85 / 5.85 g"],
+      ["6","500g CaCO₃ (M=100) = how many mol?","5 / 5 mol"],
+      ["7","A lab needs 0.25 mol of NaOH (M=40). Mass needed?","10 / 10 g"],
+      ["8","You weigh 342g of sugar (M=342). How many mol?","1 / 1 mol"],
+      ["9","3.5 mol of Mg (M=24). What mass?","84 / 84 g"],
+      ["10","A sample of unknown M weighs 220g and is 2 mol. M=?","110 / 110 g/mol"],
+      ["11","You dissolve 5.85g NaCl (M=58.5) in water. Moles dissolved?","0.1 / 0.1 mol"],
+      ["12","A reaction needs 4 mol Fe (M=56). Grams required?","224 / 224 g"],
+      ["13","117g NaCl (M=58.5) divided into equal portions of 0.5 mol each. How many portions?","4"],
+      ["14","You have 360g H₂O (M=18). Moles?","20 / 20 mol"]
+    ]
+  },
+  {
+    id:7, title:"True/False",
+    instruction:"Write 'true' or 'false'.",
+    rows:[
+      ["1","1 mol H₂O and 1 mol NaCl have the same number of formula units","true"],
+      ["2","1 mol H₂O weighs 18g","true"],
+      ["3","n = M / m","false"],
+      ["4","Molar mass depends on the amount","false"],
+      ["5","2 mol H₂O = 36g","true"],
+      ["6","1 mol of Fe and 1 mol of Al contain the same number of atoms","true"],
+      ["7","1 mol of Fe weighs the same as 1 mol of Al","false"],
+      ["8","If you have 0 grams, you have 0 moles","true"],
+      ["9","Avogadro's number is approximately 6.022 × 10²³","true"],
+      ["10","The unit of molar mass is mol/g","false"],
+      ["11","Doubling the mass doubles the moles (same substance)","true"],
+      ["12","1 mol H₂ = 1 mol O₂ in mass","false"],
+      ["13","n is always a whole number","false"],
+      ["14","M changes when you take more of the substance","false"]
+    ]
+  },
+  {
+    id:8, title:"Avogadro's number problems",
+    instruction:"Calculate the number of particles or moles. Use Nₐ = 6.022 × 10²³.",
+    rows:[
+      ["1","2 mol of H₂O = how many molecules?","1.204 × 10²⁴ / 1.204 x 10^24 / 12.044 × 10²³ / 12.044 x 10^23"],
+      ["2","3 mol of NaCl = how many formula units?","1.807 × 10²⁴ / 1.807 x 10^24 / 18.066 × 10²³ / 18.066 x 10^23"],
+      ["3","0.5 mol of Fe = how many atoms?","3.011 × 10²³ / 3.011 x 10^23"],
+      ["4","6.022 × 10²³ atoms of C = how many mol?","1 / 1 mol"],
+      ["5","1.204 × 10²⁴ molecules of H₂O = how many mol?","2 / 2 mol"],
+      ["6","3.011 × 10²³ atoms of Na = how many mol?","0.5 / 0.5 mol"],
+      ["7","10 mol of Al = how many atoms?","6.022 × 10²⁴ / 6.022 x 10^24 / 60.22 × 10²³ / 60.22 x 10^23"],
+      ["8","0.1 mol of CO₂ = how many molecules?","6.022 × 10²² / 6.022 x 10^22"],
+      ["9","18.066 × 10²³ atoms = how many mol?","3 / 3 mol"],
+      ["10","How many H atoms in 1 mol of H₂O?","1.204 × 10²⁴ / 1.204 x 10^24 / 2 × 6.022 × 10²³"],
+      ["11","How many O atoms in 2 mol of CO₂?","2.409 × 10²⁴ / 2.409 x 10^24 / 4 × 6.022 × 10²³"],
+      ["12","How many total atoms in 1 mol of H₂O?","1.807 × 10²⁴ / 1.807 x 10^24 / 3 × 6.022 × 10²³"]
+    ]
+  },
+  {
+    id:9, title:"Multi-step: grams → moles → particles",
+    instruction:"Convert grams to particles (or reverse). Show only the final answer.",
+    rows:[
+      ["1","36g H₂O (M=18): how many molecules?","1.204 × 10²⁴ / 1.204 x 10^24 / 12.044 × 10²³"],
+      ["2","46g Na (M=23): how many atoms?","1.204 × 10²⁴ / 1.204 x 10^24 / 12.044 × 10²³"],
+      ["3","44g CO₂ (M=44): how many molecules?","6.022 × 10²³ / 6.022 x 10^23"],
+      ["4","56g Fe (M=56): how many atoms?","6.022 × 10²³ / 6.022 x 10^23"],
+      ["5","9g H₂O (M=18): how many molecules?","3.011 × 10²³ / 3.011 x 10^23"],
+      ["6","4g H₂ (M=2): how many molecules?","1.204 × 10²⁴ / 1.204 x 10^24"],
+      ["7","6.022 × 10²³ molecules of CO₂ → how many grams? (M=44)","44 / 44 g"],
+      ["8","1.204 × 10²⁴ atoms of Na → how many grams? (M=23)","46 / 46 g"],
+      ["9","3.011 × 10²³ molecules of H₂O → how many grams? (M=18)","9 / 9 g"],
+      ["10","12g C (M=12): how many atoms?","6.022 × 10²³ / 6.022 x 10^23"]
+    ]
+  },
+  {
+    id:10, title:"MC: Conceptual depth", type:"mc",
+    instruction:"Choose the correct answer.",
+    questions:[
+      {q:"1 mol of H₂ gas contains how many atoms?", options:["6.022×10²³","1.204×10²⁴","3.011×10²³","2"], correct:1},
+      {q:"Which has more molecules: 18g H₂O or 44g CO₂?", options:["18g H₂O","44g CO₂","Same (both 1 mol)","Cannot compare"], correct:2},
+      {q:"If you have 3.011×10²³ atoms, you have:", options:["0.25 mol","0.5 mol","1 mol","2 mol"], correct:1},
+      {q:"1 mol of NaCl in water gives:", options:["1 mol particles total","2 mol ions total","6.022×10²³ NaCl molecules","0.5 mol ions"], correct:1},
+      {q:"36g of H₂O (M=18) = how many moles?", options:["0.5","1","2","18"], correct:2},
+      {q:"Which conversion is correct?", options:["grams ÷ Nₐ = moles","grams ÷ M = moles","moles ÷ M = grams","grams × M = moles"], correct:1},
+      {q:"The number of atoms in 2 mol of He equals:", options:["2","6.022×10²³","1.204×10²⁴","2 × Nₐ²"], correct:2},
+      {q:"64g of O₂ (M=32) contains:", options:["1 mol O₂","2 mol O₂","0.5 mol O₂","32 mol O₂"], correct:1}
+    ]
+  },
+  {
+    id:11, title:"Arrange: conversion steps", type:"arrange",
+    instruction:"Put the conversion steps in the correct order.",
+    sentences:[
+      {prompt:"To convert grams to particles:", words:["Divide","mass","by","M","to get","moles,","then","multiply","by","Nₐ"]},
+      {prompt:"To convert particles to grams:", words:["Divide","particles","by","Nₐ","to get","moles,","then","multiply","by","M"]},
+      {prompt:"To find moles from mass:", words:["n","=","m","÷","M"]},
+      {prompt:"To find mass from moles:", words:["m","=","n","×","M"]},
+      {prompt:"To find particles from moles:", words:["particles","=","n","×","Nₐ"]},
+      {prompt:"Steps: 36g H₂O → molecules:", words:["36","÷","18","=","2 mol","×","Nₐ","=","1.204×10²⁴"]}
+    ]
+  },
+  {
+    id:12, title:"Reverse calculations",
+    instruction:"Work backwards. Given the result, find the missing value.",
+    rows:[
+      ["1","n = 3 mol, M = 18 g/mol. What was m?","54 / 54 g"],
+      ["2","m = 117g, n = 2 mol. What is M?","58.5 / 58.5 g/mol"],
+      ["3","n = 0.5 mol, m = 14g. What is M?","28 / 28 g/mol"],
+      ["4","M = 44 g/mol, m = 220g. n = ?","5 / 5 mol"],
+      ["5","M = 40 g/mol, n = 2.5 mol. m = ?","100 / 100 g"],
+      ["6","m = 684g, M = 342 g/mol. n = ?","2 / 2 mol"],
+      ["7","n = 10 mol, m = 180g. M = ?","18 / 18 g/mol"],
+      ["8","M = 56 g/mol, m = 280g. n = ?","5 / 5 mol"],
+      ["9","n = 0.25 mol, M = 98 g/mol. m = ?","24.5 / 24.5 g"],
+      ["10","m = 240g, n = 10 mol. M = ?","24 / 24 g/mol"]
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Mole Concept \u2014 Complete Reference</h3>' +
+'<h3>The Mole Triangle</h3>' +
+'<p style="text-align:center;font-size:1.2em;margin:8px 0;padding:10px;border:1px solid #333;border-radius:6px;background:rgba(0,0,0,.2)">' +
+'<span class="rule">n = m / M</span> &nbsp; | &nbsp; <span class="rule">m = n \u00D7 M</span> &nbsp; | &nbsp; <span class="rule">M = m / n</span></p>' +
+'<table><tr><th>Symbol</th><th>Quantity</th><th>Unit</th><th>What it means</th></tr>' +
+'<tr><td><span class="rule">n</span></td><td>Amount (moles)</td><td>mol</td><td>How many "packages" of particles</td></tr>' +
+'<tr><td><span class="rule">m</span></td><td>Mass</td><td>g</td><td>What you measure on a scale</td></tr>' +
+'<tr><td><span class="rule">M</span></td><td>Molar mass</td><td>g/mol</td><td>Mass of 1 mole (from periodic table)</td></tr></table>' +
+'<h3>Avogadro\'s Number</h3>' +
+'<p><span class="rule">1 mol = 6.022 \u00D7 10\u00B2\u00B3 particles</span> (N\u2090)</p>' +
+'<p>This works for atoms, molecules, ions, formula units, or any particles.</p>' +
+'<h3>Mole Conversion Flowchart</h3>' +
+'<p style="text-align:center;font-size:.95em;padding:8px;border:1px dashed #555;border-radius:4px">' +
+'<span class="rule">grams</span> \u2194 (\u00F7 M or \u00D7 M) \u2194 <span class="rule">moles</span> \u2194 (\u00D7 N\u2090 or \u00F7 N\u2090) \u2194 <span class="rule">particles</span></p>' +
+'<ul>' +
+'<li>Grams \u2192 Moles: <span class="rule">n = m / M</span></li>' +
+'<li>Moles \u2192 Grams: <span class="rule">m = n \u00D7 M</span></li>' +
+'<li>Moles \u2192 Particles: <span class="rule">N = n \u00D7 6.022 \u00D7 10\u00B2\u00B3</span></li>' +
+'<li>Particles \u2192 Moles: <span class="rule">n = N / 6.022 \u00D7 10\u00B2\u00B3</span></li>' +
+'</ul>' +
+'<h3>Worked Examples</h3>' +
+'<p><span class="rule">Example 1:</span> How many moles in 46 g of Na? (M = 23 g/mol)</p>' +
+'<p>n = m/M = 46/23 = <span class="rule">2 mol</span></p>' +
+'<p><span class="rule">Example 2:</span> Mass of 0.5 mol H\u2082O? (M = 18 g/mol)</p>' +
+'<p>m = n \u00D7 M = 0.5 \u00D7 18 = <span class="rule">9 g</span></p>' +
+'<p><span class="rule">Example 3:</span> How many molecules in 2 mol H\u2082O?</p>' +
+'<p>N = 2 \u00D7 6.022 \u00D7 10\u00B2\u00B3 = <span class="rule">1.204 \u00D7 10\u00B2\u2074 molecules</span></p>' +
+'<h3>The 7 Diatomic Elements</h3>' +
+'<p>These elements exist as <span class="rule">pairs of atoms</span> in nature:</p>' +
+'<table><tr><th>Element</th><th>Formula</th><th>M (g/mol)</th></tr>' +
+'<tr><td>Hydrogen</td><td>H\u2082</td><td>2</td></tr>' +
+'<tr><td>Nitrogen</td><td>N\u2082</td><td>28</td></tr>' +
+'<tr><td>Oxygen</td><td>O\u2082</td><td>32</td></tr>' +
+'<tr><td>Fluorine</td><td>F\u2082</td><td>38</td></tr>' +
+'<tr><td>Chlorine</td><td>Cl\u2082</td><td>71</td></tr>' +
+'<tr><td>Bromine</td><td>Br\u2082</td><td>160</td></tr>' +
+'<tr><td>Iodine</td><td>I\u2082</td><td>254</td></tr></table>' +
+'<p>Memory: <span class="rule">HONClBrIF</span> ("Honk-le-brif")</p>' +
+'<h3>Key Molar Masses</h3>' +
+'<table><tr><th>Element</th><th>M (g/mol)</th></tr>' +
+'<tr><td>H</td><td>1</td></tr><tr><td>C</td><td>12</td></tr><tr><td>N</td><td>14</td></tr>' +
+'<tr><td>O</td><td>16</td></tr><tr><td>Na</td><td>23</td></tr><tr><td>Mg</td><td>24</td></tr>' +
+'<tr><td>Al</td><td>27</td></tr><tr><td>S</td><td>32</td></tr><tr><td>Cl</td><td>35.5</td></tr>' +
+'<tr><td>K</td><td>39</td></tr><tr><td>Ca</td><td>40</td></tr><tr><td>Fe</td><td>56</td></tr></table>' +
+'<h3>Common Mistakes</h3>' +
+'<ul>' +
+'<li>Confusing M (molar mass, g/mol) with m (mass, g)</li>' +
+'<li>Using atomic mass of H (1) for H\u2082 gas (should be 2)</li>' +
+'<li>Forgetting to convert percentage to decimal for calculations</li>' +
+'<li>1 mol of H\u2082O has 2 mol of H atoms and 1 mol of O atoms</li>' +
+'<li>Atoms vs molecules: 1 mol O\u2082 = 2 mol O atoms</li>' +
+'</ul>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 mol, n=m/M, Avogadro \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

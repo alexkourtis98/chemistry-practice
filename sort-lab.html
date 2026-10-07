@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sort Lab - Chemistry FYE12</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#fff;color:#3c3c3c;font-family:'DIN Round Pro','Nunito','Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;min-height:100vh;overflow-x:hidden}
+
+/* ---- BACK LINK ---- */
+a.back{color:#1CB0F6;text-decoration:none;font-weight:700;padding:16px 20px;display:inline-block;font-size:.95em}
+a.back:hover{text-decoration:underline}
+
+/* ---- SCREEN MANAGEMENT ---- */
+.screen{display:none}
+.screen.active{display:block}
+
+/* ============ LEVEL SELECT ============ */
+#levelSelect{max-width:640px;margin:0 auto;padding:0 20px 40px}
+#levelSelect h1{text-align:center;font-size:1.6em;color:#3c3c3c;font-weight:800;padding:0 0 4px;letter-spacing:-.5px}
+.ls-subtitle{text-align:center;color:#afafaf;font-size:.9em;margin-bottom:20px;font-weight:600}
+.level-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.level-card{
+  background:#fff;
+  border:2px solid #e5e5e5;
+  border-bottom:4px solid #e5e5e5;
+  border-radius:16px;
+  padding:20px 16px;
+  cursor:pointer;
+  transition:all .15s;
+  text-align:center;
+  position:relative;
+}
+.level-card:hover{background:#f7f7f7;border-color:#ddd;border-bottom-color:#ddd}
+.level-card:active{transform:translateY(2px);border-bottom-width:2px;margin-top:2px}
+.level-card.completed{border-color:#58CC02;border-bottom-color:#46a302}
+.level-card.completed:hover{border-color:#58CC02;border-bottom-color:#46a302;background:#f0fce4}
+.level-card h3{color:#3c3c3c;font-size:1.05em;font-weight:800;margin-bottom:2px}
+.level-card .level-info{color:#afafaf;font-size:.8em;font-weight:600}
+.level-card .level-stars{font-size:1.5em;margin-top:8px;line-height:1}
+.level-card .level-best{color:#58CC02;font-size:.78em;font-weight:700;margin-top:4px}
+.level-card.locked{opacity:.45;cursor:not-allowed}
+.level-card.locked:hover{background:#fff;border-color:#e5e5e5;border-bottom-color:#e5e5e5;transform:none}
+.lock-icon{font-size:1.6em;margin-top:8px;color:#ccc}
+.star-gold{color:#FFC800}
+.star-empty{color:#e5e5e5}
+.reset-all-btn{display:block;margin:24px auto 0;background:none;border:2px solid #e5e5e5;color:#afafaf;padding:10px 24px;border-radius:12px;cursor:pointer;font-size:.85em;font-weight:700;transition:all .15s}
+.reset-all-btn:hover{border-color:#FF4B4B;color:#FF4B4B}
+
+/* ============ MODE SELECT ============ */
+#modeSelect{max-width:420px;margin:60px auto;text-align:center;padding:20px}
+#modeSelect h2{font-size:1.5em;color:#3c3c3c;font-weight:800;margin-bottom:6px}
+.mode-desc{color:#afafaf;font-size:.9em;font-weight:600;margin-bottom:24px}
+.mode-cards{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.mode-card{
+  background:#fff;border:2px solid #e5e5e5;border-bottom:4px solid #e5e5e5;
+  border-radius:16px;padding:24px 20px;cursor:pointer;transition:all .15s;
+  text-align:center;flex:1;min-width:160px;max-width:200px;
+}
+.mode-card:hover{background:#f7f7f7;border-color:#ddd}
+.mode-card:active{transform:translateY(2px);border-bottom-width:2px}
+.mode-card .mode-icon{font-size:2em;margin-bottom:8px}
+.mode-card h3{font-size:1em;font-weight:800;color:#3c3c3c;margin-bottom:4px}
+.mode-card p{font-size:.8em;color:#afafaf;font-weight:600}
+
+/* ============ GET READY COUNTDOWN ============ */
+#getReady{position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:100;flex-direction:column;align-items:center;justify-content:center}
+#getReady.active{display:flex}
+#getReady .countdown-number{font-size:120px;font-weight:800;color:#1CB0F6;animation:countPop .4s ease}
+#getReady .countdown-label{font-size:1.1em;color:#afafaf;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-top:8px}
+@keyframes countPop{0%{transform:scale(.5);opacity:0}60%{transform:scale(1.3)}100%{transform:scale(1);opacity:1}}
+
+/* ============ GAMEPLAY ============ */
+#gameArea{max-width:700px;margin:0 auto;padding:0 16px 20px}
+
+/* Top bar */
+.top-bar{display:flex;align-items:center;gap:12px;padding:12px 0 8px}
+.top-bar .close-btn{
+  background:none;border:none;cursor:pointer;font-size:1.4em;color:#afafaf;
+  padding:4px;line-height:1;font-weight:700;transition:color .15s;
+}
+.top-bar .close-btn:hover{color:#FF4B4B}
+.progress-wrap{flex:1;height:16px;background:#e5e5e5;border-radius:10px;overflow:hidden;position:relative}
+.progress-fill{height:100%;background:linear-gradient(90deg,#58CC02,#69e30b);border-radius:10px;transition:width .3s;width:0;position:relative}
+.progress-fill.pulse{animation:progPulse .3s ease}
+@keyframes progPulse{0%{transform:scaleY(1)}50%{transform:scaleY(1.3)}100%{transform:scaleY(1)}}
+.top-bar .timer{font-size:1.1em;font-weight:800;color:#3c3c3c;min-width:40px;text-align:right}
+.top-bar .timer.warning{animation:timerPulse .5s infinite alternate}
+.top-bar .timer.danger{color:#FF4B4B;animation:timerPulse .5s infinite alternate}
+.top-bar .timer.hidden{display:none}
+@keyframes timerPulse{from{transform:scale(1)}to{transform:scale(1.15)}}
+
+/* Game info bar */
+.game-info-bar{display:flex;justify-content:space-between;align-items:center;padding:0 2px 10px}
+.items-left{color:#afafaf;font-size:.85em;font-weight:700}
+.streak-display{font-size:.9em;font-weight:800;color:#FF9600;min-height:22px}
+.streak-display.glowing{animation:streakGlow .8s infinite alternate,streakBounce .4s ease;color:#58CC02}
+@keyframes streakGlow{from{text-shadow:0 0 4px rgba(88,204,2,.3)}to{text-shadow:0 0 12px rgba(88,204,2,.6)}}
+@keyframes streakBounce{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1)}}
+
+/* Hint button (practice mode) */
+.hint-btn{
+  background:none;border:2px solid #1CB0F6;color:#1CB0F6;padding:6px 16px;border-radius:10px;
+  cursor:pointer;font-size:.82em;font-weight:700;transition:all .15s;margin-left:8px;
+}
+.hint-btn:hover{background:#ddf4ff}
+.hint-btn.hidden{display:none}
+
+/* ============ CARD ITEMS ============ */
+#cardPool{
+  display:flex;flex-wrap:wrap;gap:10px;justify-content:center;
+  padding:10px 0 20px;min-height:60px;
+}
+.sort-card{
+  background:#fff;
+  border:2px solid #e5e5e5;
+  border-bottom:4px solid #e5e5e5;
+  border-radius:12px;
+  padding:12px 16px;
+  cursor:grab;
+  transition:all .12s;
+  text-align:center;
+  font-size:.92em;
+  font-weight:700;
+  user-select:none;
+  color:#3c3c3c;
+  position:relative;
+  touch-action:none;
+}
+.sort-card:hover{background:#f7f7f7}
+.sort-card.selected{
+  border-color:#1CB0F6;border-bottom-color:#1899d6;
+  background:#ddf4ff;color:#1CB0F6;
+  box-shadow:0 0 0 3px rgba(28,176,246,.2);
+}
+.sort-card.dragging{
+  opacity:.85;z-index:50;position:fixed;pointer-events:none;
+  box-shadow:0 8px 24px rgba(0,0,0,.15);transform:scale(1.05) rotate(2deg);
+}
+.sort-card.correct-anim{
+  border-color:#58CC02;border-bottom-color:#46a302;background:#d7ffb8;color:#58CC02;
+  animation:correctSlide .4s cubic-bezier(.34,1.56,.64,1);
+}
+.sort-card.wrong-anim{
+  border-color:#FF4B4B;border-bottom-color:#e63e3e;background:#ffdfe0;color:#FF4B4B;
+  animation:wrongShake .5s ease;
+}
+.sort-card.hint-glow{
+  border-color:#1CB0F6;background:#ddf4ff;
+  animation:hintPulse 1s ease-in-out 2;
+}
+@keyframes correctSlide{
+  0%{transform:scale(1);opacity:1}
+  50%{transform:scale(.8);opacity:.6}
+  100%{transform:scale(0);opacity:0}
+}
+@keyframes wrongShake{
+  0%,100%{transform:translateX(0) rotate(0);background:#ffdfe0}
+  10%{background:#ffb8ba}
+  20%{transform:translateX(-6px) rotate(-3deg)}
+  40%{transform:translateX(6px) rotate(3deg)}
+  60%{transform:translateX(-4px) rotate(-1.5deg)}
+  80%{transform:translateX(4px) rotate(1.5deg)}
+}
+@keyframes hintPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(28,176,246,.3)}
+  50%{box-shadow:0 0 0 8px rgba(28,176,246,.15)}
+}
+
+/* ============ BUCKETS (Beakers) ============ */
+#bucketZone{
+  display:flex;gap:10px;justify-content:center;flex-wrap:wrap;
+  padding:10px 0;
+}
+.bucket{
+  flex:1;min-width:120px;max-width:200px;min-height:140px;
+  border:3px dashed #e5e5e5;
+  border-radius:0 0 16px 16px;
+  padding:10px 8px 14px;
+  text-align:center;
+  position:relative;
+  transition:all .15s;
+  display:flex;flex-direction:column;align-items:center;
+  background:linear-gradient(180deg,rgba(240,240,240,.3) 0%,rgba(220,220,220,.15) 100%);
+}
+.bucket::before{
+  content:'';display:block;width:calc(100% + 20px);height:8px;
+  background:linear-gradient(180deg,#ddd 0%,#ccc 100%);
+  border-radius:4px 4px 0 0;position:absolute;top:-8px;left:-10px;
+}
+.bucket.highlight{
+  border-color:#1CB0F6;background:rgba(28,176,246,.06);
+  box-shadow:0 0 0 3px rgba(28,176,246,.15);
+}
+.bucket.wrong-highlight{
+  border-color:#FF4B4B;background:rgba(255,75,75,.06);
+  animation:bucketWrong .4s ease;
+}
+@keyframes bucketWrong{
+  0%,100%{background:rgba(255,75,75,.06)}
+  50%{background:rgba(255,75,75,.15)}
+}
+.bucket-label{
+  font-size:.82em;font-weight:800;color:#3c3c3c;
+  text-transform:uppercase;letter-spacing:.5px;
+  margin-bottom:8px;padding:4px 10px;
+  background:#f0f0f0;border-radius:8px;
+  white-space:nowrap;
+}
+.bucket-count{
+  font-size:.72em;font-weight:700;color:#afafaf;margin-top:auto;padding-top:6px;
+}
+.bucket-items{
+  display:flex;flex-wrap:wrap;gap:4px;justify-content:center;
+  min-height:20px;width:100%;
+}
+.bucket-item{
+  font-size:.72em;font-weight:700;color:#58CC02;
+  background:rgba(88,204,2,.08);border:1px solid rgba(88,204,2,.2);
+  padding:3px 8px;border-radius:6px;
+}
+
+/* Review pile */
+#reviewPile{
+  max-width:700px;margin:10px auto;padding:0 16px;
+}
+.review-header{
+  font-size:.82em;font-weight:700;color:#FF4B4B;margin-bottom:6px;display:none;
+}
+.review-header.show{display:block}
+#reviewCards{
+  display:flex;flex-wrap:wrap;gap:8px;justify-content:center;
+}
+.review-card{
+  background:#fff;border:2px solid #FF4B4B;border-bottom:3px solid #e63e3e;
+  border-radius:10px;padding:8px 12px;font-size:.82em;font-weight:700;
+  color:#FF4B4B;cursor:grab;touch-action:none;user-select:none;
+  transition:all .12s;
+}
+.review-card:hover{background:#fff5f5}
+.review-card.selected{
+  background:#ffdfe0;box-shadow:0 0 0 3px rgba(255,75,75,.2);
+}
+.review-card.dragging{
+  opacity:.85;z-index:50;position:fixed;pointer-events:none;
+  box-shadow:0 8px 24px rgba(0,0,0,.15);transform:scale(1.05);
+}
+
+/* Floating XP popup */
+.xp-float{
+  position:fixed;font-size:.85em;font-weight:800;color:#FF9600;
+  pointer-events:none;z-index:200;animation:xpFloat .7s ease forwards;
+}
+@keyframes xpFloat{
+  0%{opacity:1;transform:translateY(0) scale(1)}
+  60%{opacity:1;transform:translateY(-30px) scale(1.1)}
+  100%{opacity:0;transform:translateY(-50px) scale(.9)}
+}
+
+/* ============ LEVEL COMPLETE ============ */
+#levelComplete{max-width:420px;margin:40px auto;text-align:center;padding:20px}
+#levelComplete h2{font-size:1.7em;color:#3c3c3c;font-weight:800}
+.lc-stars{font-size:3em;margin:20px 0;line-height:1}
+.lc-stars .star{display:inline-block;opacity:0;transform:scale(0) rotate(-30deg);transition:all .4s cubic-bezier(.34,1.56,.64,1)}
+.lc-stars .star.reveal{opacity:1;transform:scale(1) rotate(0)}
+.lc-xp{font-size:1.8em;font-weight:800;color:#FF9600;margin:8px 0}
+.lc-stat{color:#afafaf;font-size:.95em;font-weight:600;margin:4px 0}
+.lc-stat span{color:#3c3c3c;font-weight:800}
+.lc-xp,.lc-stat{animation:slideUp .4s ease both}
+.lc-xp{animation-delay:.6s}
+.lc-stat:nth-of-type(1){animation-delay:.8s}
+.lc-stat:nth-of-type(2){animation-delay:.9s}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* ============ STATS BAR ============ */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px;padding:16px;background:#f7f7f7;border-radius:14px;border:2px solid #e5e5e5}
+.stat-box{text-align:center}
+.stat-box .stat-value{font-size:1.2em;font-weight:800;color:#3c3c3c}
+.stat-box .stat-label{font-size:.72em;font-weight:700;color:#afafaf;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+
+/* ============ BUTTONS ============ */
+.btn{
+  display:inline-block;background:#58CC02;color:#fff;border:none;
+  border-bottom:4px solid #46a302;padding:13px 32px;border-radius:14px;
+  cursor:pointer;font-size:1em;font-weight:800;text-transform:uppercase;
+  letter-spacing:.5px;transition:all .1s;margin:8px;
+}
+.btn:hover{background:#61d800}
+.btn:active{transform:translateY(2px);border-bottom-width:1px}
+.btn.secondary{
+  background:#fff;color:#afafaf;border:2px solid #e5e5e5;border-bottom:4px solid #e5e5e5;
+}
+.btn.secondary:hover{background:#f7f7f7;color:#777}
+.btn-wrap{margin-top:24px}
+
+/* ============ CONFETTI ============ */
+#confettiCanvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:300}
+
+/* ============ RESPONSIVE ============ */
+@media(max-width:600px){
+  .bucket{min-width:90px;min-height:110px;padding:8px 4px 10px}
+  .bucket-label{font-size:.72em;padding:3px 7px}
+  .sort-card{padding:10px 12px;font-size:.85em}
+  .review-card{padding:6px 10px;font-size:.78em}
+  .top-bar .timer{font-size:1em}
+  #levelSelect h1{font-size:1.3em}
+  .level-grid{gap:10px}
+  .level-card{padding:16px 12px}
+  #getReady .countdown-number{font-size:80px}
+  .lc-stars{font-size:2.4em}
+  .mode-card{padding:18px 14px}
+  #bucketZone{gap:6px}
+}
+@media(max-width:400px){
+  .bucket{min-width:70px;max-width:none;flex:1 1 calc(50% - 6px)}
+}
+</style>
+</head>
+<body>
+
+<a href="index.html" class="back">&larr; Back to Exercises</a>
+
+<!-- SCREEN 1: Level Select -->
+<div id="levelSelect" class="screen active">
+  <h1>Sort Lab</h1>
+  <p class="ls-subtitle">10 levels — Drag items into the right beakers!</p>
+  <div class="level-grid" id="levelGrid"></div>
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-box"><div class="stat-value" id="statXP">0</div><div class="stat-label">Total XP</div></div>
+    <div class="stat-box"><div class="stat-value" id="statGames">0</div><div class="stat-label">Games</div></div>
+    <div class="stat-box"><div class="stat-value" id="statStreak">0</div><div class="stat-label">Best Streak</div></div>
+    <div class="stat-box"><div class="stat-value" id="statSorted">0</div><div class="stat-label">Sorted</div></div>
+  </div>
+  <button class="reset-all-btn" onclick="resetAllProgress()">Reset All Progress</button>
+</div>
+
+<!-- SCREEN 2: Mode Select -->
+<div id="modeSelect" class="screen">
+  <h2 id="modeTitle">Bond Types</h2>
+  <p class="mode-desc" id="modeDesc">Choose your mode</p>
+  <div class="mode-cards">
+    <div class="mode-card" onclick="startGame('practice')">
+      <div class="mode-icon">&#x1F9EA;</div>
+      <h3>Practice</h3>
+      <p>No timer, hints available</p>
+    </div>
+    <div class="mode-card" onclick="startGame('timed')">
+      <div class="mode-icon">&#x23F1;</div>
+      <h3>Timed</h3>
+      <p>Beat the clock!</p>
+    </div>
+  </div>
+  <div class="btn-wrap">
+    <button class="btn secondary" onclick="backToLevels()">BACK</button>
+  </div>
+</div>
+
+<!-- SCREEN 3: Get Ready Countdown -->
+<div id="getReady" class="screen">
+  <div class="countdown-number" id="countdownNum">3</div>
+  <div class="countdown-label">Get Ready</div>
+</div>
+
+<!-- SCREEN 4: Gameplay -->
+<div id="gameArea" class="screen">
+  <div class="top-bar">
+    <button class="close-btn" onclick="confirmQuit()" title="Quit">&times;</button>
+    <div class="progress-wrap"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="timer" id="timer">90</div>
+  </div>
+  <div class="game-info-bar">
+    <div>
+      <span class="items-left" id="itemsLeft">18 items left</span>
+      <button class="hint-btn hidden" id="hintBtn" onclick="showHint()">HINT</button>
+    </div>
+    <div class="streak-display" id="streakDisplay"></div>
+  </div>
+  <div id="cardPool"></div>
+  <div id="bucketZone"></div>
+  <div id="reviewPile">
+    <div class="review-header" id="reviewHeader">Review pile — try again!</div>
+    <div id="reviewCards"></div>
+  </div>
+</div>
+
+<!-- SCREEN 5: Level Complete -->
+<div id="levelComplete" class="screen">
+  <h2>Level Complete!</h2>
+  <div class="lc-stars" id="lcStars"></div>
+  <div class="lc-xp" id="lcXP">+0 XP</div>
+  <div class="lc-stat">Items sorted: <span id="lcSorted">0</span></div>
+  <div class="lc-stat">Wrong placements: <span id="lcWrong">0</span></div>
+  <div class="btn-wrap">
+    <button class="btn" onclick="backToLevels()">CONTINUE</button>
+  </div>
+</div>
+
+<!-- Confetti canvas -->
+<canvas id="confettiCanvas"></canvas>
+
+<script>
+// ============ SOUND SYSTEM (Web Audio API) ============
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+function playTone(freq, duration, type, gain) {
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.value = freq;
+    g.gain.value = gain || 0.15;
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.connect(g);
+    g.connect(ctx.destination);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + duration);
+  } catch(e) {}
+}
+function playCorrect() {
+  playTone(523, 0.12, 'sine', 0.12);
+  setTimeout(() => playTone(659, 0.15, 'sine', 0.12), 80);
+}
+function playWrong() {
+  playTone(150, 0.2, 'sawtooth', 0.08);
+}
+function playStreak() {
+  playTone(523, 0.1, 'sine', 0.1);
+  setTimeout(() => playTone(659, 0.1, 'sine', 0.1), 70);
+  setTimeout(() => playTone(784, 0.18, 'sine', 0.12), 140);
+}
+function playTick() {
+  playTone(800, 0.05, 'sine', 0.08);
+}
+function playLevelWin() {
+  const notes = [523, 587, 659, 784, 880, 1047];
+  notes.forEach((f, i) => setTimeout(() => playTone(f, 0.2, 'sine', 0.1), i * 130));
+}
+function playTimeWarn() {
+  playTone(600, 0.04, 'triangle', 0.06);
+}
+function playDrop() {
+  playTone(392, 0.08, 'sine', 0.1);
+  setTimeout(() => playTone(523, 0.1, 'sine', 0.1), 60);
+}
+
+// ============ CHEMISTRY FORMATTING ============
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+function chemFormat(s) {
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-').replace(/²/g,'2').replace(/³/g,'3');
+  s = s.replace(/([A-Za-z\)])(\d+)/g, '$1<sub>$2</sub>');
+  s = s.replace(/(\d*)([\+\-])$/g, '<sup>$1$2</sup>');
+  return s;
+}
+
+// ============ LEVEL DATA ============
+const SORT_LEVELS = [
+  {
+    name: "Bond Types",
+    desc: "Sort into Ionic, Covalent, or Metallic",
+    buckets: ["Ionic", "Covalent", "Metallic"],
+    items: [
+      {text:"NaCl", bucket:"Ionic"}, {text:"H₂O", bucket:"Covalent"}, {text:"Cu wire", bucket:"Metallic"},
+      {text:"MgO", bucket:"Ionic"}, {text:"CO₂", bucket:"Covalent"}, {text:"Fe metal", bucket:"Metallic"},
+      {text:"CaCl₂", bucket:"Ionic"}, {text:"CH₄", bucket:"Covalent"}, {text:"Al foil", bucket:"Metallic"},
+      {text:"KBr", bucket:"Ionic"}, {text:"NH₃", bucket:"Covalent"}, {text:"Gold bar", bucket:"Metallic"},
+      {text:"Na₂O", bucket:"Ionic"}, {text:"HCl (g)", bucket:"Covalent"}, {text:"Bronze", bucket:"Metallic"},
+      {text:"LiF", bucket:"Ionic"}, {text:"O₂", bucket:"Covalent"}, {text:"Steel", bucket:"Metallic"}
+    ]
+  },
+  {
+    name: "Element, Compound, or Mixture",
+    desc: "Classify each substance",
+    buckets: ["Element", "Compound", "Mixture"],
+    items: [
+      {text:"O₂", bucket:"Element"}, {text:"H₂O", bucket:"Compound"}, {text:"Air", bucket:"Mixture"},
+      {text:"Fe", bucket:"Element"}, {text:"NaCl", bucket:"Compound"}, {text:"Salt water", bucket:"Mixture"},
+      {text:"Au", bucket:"Element"}, {text:"CO₂", bucket:"Compound"}, {text:"Trail mix", bucket:"Mixture"},
+      {text:"N₂", bucket:"Element"}, {text:"C₆H₁₂O₆", bucket:"Compound"}, {text:"Milk", bucket:"Mixture"},
+      {text:"Ag", bucket:"Element"}, {text:"H₂SO₄", bucket:"Compound"}, {text:"Brass", bucket:"Mixture"},
+      {text:"He", bucket:"Element"}, {text:"CaCO₃", bucket:"Compound"}, {text:"Blood", bucket:"Mixture"}
+    ]
+  },
+  {
+    name: "Physical or Chemical Change",
+    desc: "Is it a physical or chemical change?",
+    buckets: ["Physical Change", "Chemical Change"],
+    items: [
+      {text:"Ice melting", bucket:"Physical Change"}, {text:"Rusting iron", bucket:"Chemical Change"},
+      {text:"Boiling water", bucket:"Physical Change"}, {text:"Burning wood", bucket:"Chemical Change"},
+      {text:"Cutting paper", bucket:"Physical Change"}, {text:"Cooking egg", bucket:"Chemical Change"},
+      {text:"Dissolving sugar", bucket:"Physical Change"}, {text:"Tarnishing silver", bucket:"Chemical Change"},
+      {text:"Breaking glass", bucket:"Physical Change"}, {text:"Digesting food", bucket:"Chemical Change"},
+      {text:"Freezing juice", bucket:"Physical Change"}, {text:"Baking bread", bucket:"Chemical Change"},
+      {text:"Mixing sand & salt", bucket:"Physical Change"}, {text:"Fireworks exploding", bucket:"Chemical Change"},
+      {text:"Sublimation of CO₂", bucket:"Physical Change"}, {text:"Photosynthesis", bucket:"Chemical Change"}
+    ]
+  },
+  {
+    name: "Acid, Base, or Neutral Salt",
+    desc: "Classify each substance",
+    buckets: ["Acid", "Base", "Neutral Salt"],
+    items: [
+      {text:"HCl", bucket:"Acid"}, {text:"NaOH", bucket:"Base"}, {text:"NaCl", bucket:"Neutral Salt"},
+      {text:"H₂SO₄", bucket:"Acid"}, {text:"KOH", bucket:"Base"}, {text:"KNO₃", bucket:"Neutral Salt"},
+      {text:"HNO₃", bucket:"Acid"}, {text:"Ca(OH)₂", bucket:"Base"}, {text:"Na₂SO₄", bucket:"Neutral Salt"},
+      {text:"CH₃COOH", bucket:"Acid"}, {text:"NH₃ (aq)", bucket:"Base"}, {text:"KCl", bucket:"Neutral Salt"},
+      {text:"HF", bucket:"Acid"}, {text:"Ba(OH)₂", bucket:"Base"}, {text:"CaCl₂", bucket:"Neutral Salt"},
+      {text:"H₃PO₄", bucket:"Acid"}, {text:"LiOH", bucket:"Base"}, {text:"MgSO₄", bucket:"Neutral Salt"}
+    ]
+  },
+  {
+    name: "Reaction Types",
+    desc: "What type of reaction?",
+    buckets: ["Synthesis", "Decomposition", "Single Replacement", "Double Replacement"],
+    items: [
+      {text:"2Na + Cl₂ → 2NaCl", bucket:"Synthesis"}, {text:"2H₂O → 2H₂ + O₂", bucket:"Decomposition"},
+      {text:"Zn + CuSO₄ → ZnSO₄ + Cu", bucket:"Single Replacement"}, {text:"AgNO₃ + NaCl → AgCl + NaNO₃", bucket:"Double Replacement"},
+      {text:"N₂ + 3H₂ → 2NH₃", bucket:"Synthesis"}, {text:"CaCO₃ → CaO + CO₂", bucket:"Decomposition"},
+      {text:"Fe + CuCl₂ → FeCl₂ + Cu", bucket:"Single Replacement"}, {text:"BaCl₂ + Na₂SO₄ → BaSO₄ + 2NaCl", bucket:"Double Replacement"},
+      {text:"2Mg + O₂ → 2MgO", bucket:"Synthesis"}, {text:"2KClO₃ → 2KCl + 3O₂", bucket:"Decomposition"},
+      {text:"Mg + 2HCl → MgCl₂ + H₂", bucket:"Single Replacement"}, {text:"Pb(NO₃)₂ + 2KI → PbI₂ + 2KNO₃", bucket:"Double Replacement"}
+    ]
+  },
+  {
+    name: "Strong vs Weak Acids & Bases",
+    desc: "Strong or weak?",
+    buckets: ["Strong Acid", "Weak Acid", "Strong Base", "Weak Base"],
+    items: [
+      {text:"HCl", bucket:"Strong Acid"}, {text:"CH₃COOH", bucket:"Weak Acid"},
+      {text:"NaOH", bucket:"Strong Base"}, {text:"NH₃", bucket:"Weak Base"},
+      {text:"HBr", bucket:"Strong Acid"}, {text:"HF", bucket:"Weak Acid"},
+      {text:"KOH", bucket:"Strong Base"}, {text:"C₅H₅N (pyridine)", bucket:"Weak Base"},
+      {text:"HI", bucket:"Strong Acid"}, {text:"H₂CO₃", bucket:"Weak Acid"},
+      {text:"Ca(OH)₂", bucket:"Strong Base"}, {text:"N₂H₄ (hydrazine)", bucket:"Weak Base"},
+      {text:"HNO₃", bucket:"Strong Acid"}, {text:"HNO₂", bucket:"Weak Acid"},
+      {text:"Ba(OH)₂", bucket:"Strong Base"}, {text:"CH₃NH₂", bucket:"Weak Base"},
+      {text:"H₂SO₄", bucket:"Strong Acid"}, {text:"H₃PO₄", bucket:"Weak Acid"},
+      {text:"LiOH", bucket:"Strong Base"}, {text:"Al(OH)₃", bucket:"Weak Base"},
+      {text:"HClO₄", bucket:"Strong Acid"}, {text:"HCOOH", bucket:"Weak Acid"}
+    ]
+  },
+  {
+    name: "Paramagnetic or Diamagnetic",
+    desc: "Does it have unpaired electrons?",
+    buckets: ["Paramagnetic", "Diamagnetic"],
+    items: [
+      {text:"O₂", bucket:"Paramagnetic"}, {text:"N₂", bucket:"Diamagnetic"},
+      {text:"Fe", bucket:"Paramagnetic"}, {text:"Zn", bucket:"Diamagnetic"},
+      {text:"Cu", bucket:"Paramagnetic"}, {text:"Ca", bucket:"Diamagnetic"},
+      {text:"Na", bucket:"Paramagnetic"}, {text:"Mg", bucket:"Diamagnetic"},
+      {text:"Cr", bucket:"Paramagnetic"}, {text:"Ne", bucket:"Diamagnetic"},
+      {text:"Mn", bucket:"Paramagnetic"}, {text:"Ar", bucket:"Diamagnetic"},
+      {text:"Co", bucket:"Paramagnetic"}, {text:"Be", bucket:"Diamagnetic"},
+      {text:"Ni", bucket:"Paramagnetic"}, {text:"He", bucket:"Diamagnetic"}
+    ]
+  },
+  {
+    name: "IMF Types",
+    desc: "What's the strongest IMF?",
+    buckets: ["London Dispersion", "Dipole-Dipole", "Hydrogen Bonding"],
+    items: [
+      {text:"CH₄", bucket:"London Dispersion"}, {text:"HCl", bucket:"Dipole-Dipole"}, {text:"H₂O", bucket:"Hydrogen Bonding"},
+      {text:"He", bucket:"London Dispersion"}, {text:"SO₂", bucket:"Dipole-Dipole"}, {text:"NH₃", bucket:"Hydrogen Bonding"},
+      {text:"Br₂", bucket:"London Dispersion"}, {text:"CHCl₃", bucket:"Dipole-Dipole"}, {text:"HF", bucket:"Hydrogen Bonding"},
+      {text:"I₂", bucket:"London Dispersion"}, {text:"PCl₃", bucket:"Dipole-Dipole"}, {text:"CH₃OH", bucket:"Hydrogen Bonding"},
+      {text:"Ne", bucket:"London Dispersion"}, {text:"NO", bucket:"Dipole-Dipole"}, {text:"C₂H₅OH", bucket:"Hydrogen Bonding"},
+      {text:"N₂", bucket:"London Dispersion"}, {text:"ICl", bucket:"Dipole-Dipole"}, {text:"HCOOH", bucket:"Hydrogen Bonding"}
+    ]
+  },
+  {
+    name: "Functional Groups",
+    desc: "Which class does this compound belong to?",
+    buckets: ["Alcohol", "Aldehyde", "Ketone", "Carboxylic Acid"],
+    items: [
+      {text:"CH₃OH", bucket:"Alcohol"}, {text:"HCHO", bucket:"Aldehyde"},
+      {text:"CH₃COCH₃", bucket:"Ketone"}, {text:"CH₃COOH", bucket:"Carboxylic Acid"},
+      {text:"C₂H₅OH", bucket:"Alcohol"}, {text:"CH₃CHO", bucket:"Aldehyde"},
+      {text:"C₃H₆O (propanone)", bucket:"Ketone"}, {text:"HCOOH", bucket:"Carboxylic Acid"},
+      {text:"Phenol (ArOH)", bucket:"Alcohol"}, {text:"Benzaldehyde", bucket:"Aldehyde"},
+      {text:"Cyclohexanone", bucket:"Ketone"}, {text:"Benzoic acid", bucket:"Carboxylic Acid"},
+      {text:"1-propanol", bucket:"Alcohol"}, {text:"Propanal", bucket:"Aldehyde"},
+      {text:"2-butanone", bucket:"Ketone"}, {text:"Propanoic acid", bucket:"Carboxylic Acid"}
+    ]
+  },
+  {
+    name: "Mixed Challenge",
+    desc: "All topics combined!",
+    buckets: ["Ionic", "Covalent", "Acid", "Base"],
+    items: [
+      {text:"NaCl", bucket:"Ionic"}, {text:"CH₄", bucket:"Covalent"},
+      {text:"HCl", bucket:"Acid"}, {text:"NaOH", bucket:"Base"},
+      {text:"MgO", bucket:"Ionic"}, {text:"CO₂", bucket:"Covalent"},
+      {text:"H₂SO₄", bucket:"Acid"}, {text:"KOH", bucket:"Base"},
+      {text:"CaCl₂", bucket:"Ionic"}, {text:"H₂O", bucket:"Covalent"},
+      {text:"HNO₃", bucket:"Acid"}, {text:"Ca(OH)₂", bucket:"Base"},
+      {text:"K₂O", bucket:"Ionic"}, {text:"NH₃", bucket:"Covalent"},
+      {text:"HF", bucket:"Acid"}, {text:"Ba(OH)₂", bucket:"Base"}
+    ]
+  }
+];
+
+const STORAGE_KEY = 'fye12_sort_lab';
+const TIME_LIMIT = 90; // seconds for timed mode
+
+// ============ STATE ============
+let currentLevel = 0;
+let gameMode = 'practice'; // 'practice' or 'timed'
+let timerInterval = null;
+let timeLeft = 0;
+let gameStartTime = 0;
+
+// Game state
+let activeItems = [];    // items still in the card pool
+let reviewItems = [];    // items that were wrong, in the review pile
+let sortedCount = 0;
+let wrongCount = 0;
+let totalItems = 0;
+let streak = 0;
+let bestStreak = 0;
+let gameXP = 0;
+
+// Drag state
+let dragCard = null;
+let dragOffsetX = 0;
+let dragOffsetY = 0;
+let selectedCard = null; // for tap-to-select mobile fallback
+
+// ============ PROGRESS / localStorage + server ============
+const DEFAULT_STATS = {totalXP:0,totalGames:0,totalSorted:0,totalWrong:0,bestStreak:0};
+
+function getProgress() {
+  try {
+    const d = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    if (!d.levels) d.levels = {};
+    if (!d.stats) d.stats = {...DEFAULT_STATS};
+    return d;
+  } catch(e) { return { levels: {}, stats: {...DEFAULT_STATS} }; }
+}
+
+function saveProgress(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  fetch('/api/sortlab-progress', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(data)
+  }).catch(() => {});
+}
+
+function saveLevelResult(level, stars, xp) {
+  const prog = getProgress();
+  const prev = prog.levels[level];
+  if (!prev || prev.stars < stars) {
+    prog.levels[level] = { stars, xp };
+  }
+  const s = prog.stats;
+  s.totalGames++;
+  s.totalXP += xp;
+  s.totalSorted += sortedCount;
+  s.totalWrong += wrongCount;
+  if (bestStreak > s.bestStreak) s.bestStreak = bestStreak;
+  saveProgress(prog);
+}
+
+async function loadProgressFromServer() {
+  try {
+    const res = await fetch('/api/sortlab-progress');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data && data.levels && Object.keys(data.levels).length > 0) {
+      if (!data.stats) data.stats = {...DEFAULT_STATS};
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+  } catch(e) {}
+}
+
+function resetAllProgress() {
+  if (!confirm('Reset all Sort Lab progress?')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  fetch('/api/sortlab-progress', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({})
+  }).catch(() => {});
+  renderLevels();
+}
+
+function renderStats() {
+  const prog = getProgress();
+  const s = prog.stats || DEFAULT_STATS;
+  document.getElementById('statXP').textContent = s.totalXP;
+  document.getElementById('statGames').textContent = s.totalGames;
+  document.getElementById('statStreak').textContent = s.bestStreak;
+  document.getElementById('statSorted').textContent = s.totalSorted;
+}
+
+// ============ SCREEN MANAGEMENT ============
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ============ LEVEL SELECT ============
+function renderLevels() {
+  showScreen('levelSelect');
+  const grid = document.getElementById('levelGrid');
+  const prog = getProgress();
+  grid.innerHTML = '';
+  SORT_LEVELS.forEach((level, i) => {
+    const data = prog.levels[i];
+    const unlocked = i === 0 || prog.levels[i - 1];
+    const card = document.createElement('div');
+    card.className = 'level-card' + (data && data.stars >= 3 ? ' completed' : '') + (!unlocked ? ' locked' : '');
+
+    let starsHTML;
+    if (!unlocked) {
+      starsHTML = '<div class="lock-icon">&#x1F512;</div>';
+    } else if (data && data.stars > 0) {
+      starsHTML = '<div class="level-stars">'
+        + '<span class="star-gold">&#9733;</span>'.repeat(data.stars)
+        + '<span class="star-empty">&#9733;</span>'.repeat(3 - data.stars)
+        + '</div>';
+    } else {
+      starsHTML = '<div class="level-stars">'
+        + '<span class="star-empty">&#9733;</span>'.repeat(3)
+        + '</div>';
+    }
+
+    card.innerHTML = `
+      <h3>Level ${i + 1}</h3>
+      <div class="level-info">${level.name}</div>
+      <div class="level-info">${level.desc}</div>
+      ${starsHTML}
+      ${data ? '<div class="level-best">' + data.xp + ' XP</div>' : ''}
+    `;
+    if (unlocked) card.onclick = () => selectMode(i);
+    grid.appendChild(card);
+  });
+  renderStats();
+}
+
+// ============ MODE SELECT ============
+function selectMode(level) {
+  currentLevel = level;
+  const lv = SORT_LEVELS[level];
+  document.getElementById('modeTitle').textContent = lv.name;
+  document.getElementById('modeDesc').textContent = lv.desc;
+  showScreen('modeSelect');
+}
+
+function startGame(mode) {
+  gameMode = mode;
+  showCountdown(() => {
+    showScreen('gameArea');
+    initGame();
+  });
+}
+
+// ============ GET READY COUNTDOWN ============
+function showCountdown(callback) {
+  showScreen('getReady');
+  const numEl = document.getElementById('countdownNum');
+  let count = 3;
+  numEl.textContent = count;
+  numEl.style.animation = 'none';
+  void numEl.offsetWidth;
+  numEl.style.animation = 'countPop .4s ease';
+  playTick();
+
+  const iv = setInterval(() => {
+    count--;
+    if (count <= 0) {
+      clearInterval(iv);
+      callback();
+      return;
+    }
+    numEl.textContent = count;
+    numEl.style.animation = 'none';
+    void numEl.offsetWidth;
+    numEl.style.animation = 'countPop .4s ease';
+    playTick();
+  }, 600);
+}
+
+// ============ INIT GAME ============
+function initGame() {
+  const lv = SORT_LEVELS[currentLevel];
+  activeItems = shuffle([...lv.items]);
+  reviewItems = [];
+  sortedCount = 0;
+  wrongCount = 0;
+  totalItems = lv.items.length;
+  streak = 0;
+  bestStreak = 0;
+  gameXP = 0;
+  selectedCard = null;
+  dragCard = null;
+  gameStartTime = Date.now();
+
+  // Timer
+  const timerEl = document.getElementById('timer');
+  if (gameMode === 'timed') {
+    timeLeft = TIME_LIMIT;
+    timerEl.textContent = timeLeft;
+    timerEl.className = 'timer';
+    timerEl.classList.remove('hidden');
+    clearInterval(timerInterval);
+    timerInterval = setInterval(tick, 1000);
+  } else {
+    timerEl.classList.add('hidden');
+    clearInterval(timerInterval);
+  }
+
+  // Hint button
+  const hintBtn = document.getElementById('hintBtn');
+  if (gameMode === 'practice') {
+    hintBtn.classList.remove('hidden');
+  } else {
+    hintBtn.classList.add('hidden');
+  }
+
+  // Progress
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('streakDisplay').textContent = '';
+  document.getElementById('streakDisplay').classList.remove('glowing');
+
+  // Render
+  renderBuckets();
+  renderCards();
+  updateItemsLeft();
+}
+
+// ============ TIMER ============
+function tick() {
+  timeLeft--;
+  const timerEl = document.getElementById('timer');
+  timerEl.textContent = timeLeft;
+  if (timeLeft <= 5) {
+    timerEl.className = 'timer danger';
+    playTimeWarn();
+  } else if (timeLeft <= 10) {
+    timerEl.className = 'timer warning';
+  }
+  if (timeLeft <= 0) {
+    clearInterval(timerInterval);
+    endGame();
+  }
+}
+
+// ============ RENDER BUCKETS ============
+function renderBuckets() {
+  const zone = document.getElementById('bucketZone');
+  const lv = SORT_LEVELS[currentLevel];
+  zone.innerHTML = '';
+  lv.buckets.forEach(name => {
+    const bucket = document.createElement('div');
+    bucket.className = 'bucket';
+    bucket.dataset.bucket = name;
+    bucket.innerHTML = `
+      <div class="bucket-label">${escHtml(name)}</div>
+      <div class="bucket-items" data-bucket="${escHtml(name)}"></div>
+      <div class="bucket-count">0</div>
+    `;
+    // Tap-to-place: clicking a bucket when a card is selected
+    bucket.addEventListener('click', (e) => {
+      if (selectedCard && !dragCard) {
+        placeInBucket(selectedCard, name);
+      }
+    });
+    zone.appendChild(bucket);
+  });
+}
+
+// ============ RENDER CARDS ============
+function renderCards() {
+  const pool = document.getElementById('cardPool');
+  pool.innerHTML = '';
+  activeItems.forEach((item, i) => {
+    const card = createCard(item, i, 'sort-card');
+    pool.appendChild(card);
+  });
+
+  // Render review pile
+  const reviewDiv = document.getElementById('reviewCards');
+  reviewDiv.innerHTML = '';
+  const reviewHeader = document.getElementById('reviewHeader');
+  if (reviewItems.length > 0) {
+    reviewHeader.classList.add('show');
+    reviewItems.forEach((item, i) => {
+      const card = createCard(item, i, 'review-card');
+      reviewDiv.appendChild(card);
+    });
+  } else {
+    reviewHeader.classList.remove('show');
+  }
+}
+
+function createCard(item, index, className) {
+  const card = document.createElement('div');
+  card.className = className;
+  card.innerHTML = chemFormat(escHtml(item.text));
+  card.dataset.text = item.text;
+  card.dataset.bucket = item.bucket;
+  card.dataset.index = index;
+  card.dataset.source = className === 'review-card' ? 'review' : 'pool';
+
+  // Pointer events for drag
+  card.addEventListener('pointerdown', onPointerDown);
+
+  // Tap-to-select fallback
+  card.addEventListener('click', (e) => {
+    if (card._wasDragged) {
+      card._wasDragged = false;
+      return;
+    }
+    handleCardTap(card);
+  });
+
+  return card;
+}
+
+// ============ DRAG SYSTEM (Pointer Events) ============
+function onPointerDown(e) {
+  const card = e.currentTarget;
+  if (card.classList.contains('correct-anim') || card.classList.contains('wrong-anim')) return;
+
+  card._startX = e.clientX;
+  card._startY = e.clientY;
+  card._wasDragged = false;
+
+  const onMove = (ev) => {
+    const dx = Math.abs(ev.clientX - card._startX);
+    const dy = Math.abs(ev.clientY - card._startY);
+    if (dx > 5 || dy > 5) {
+      if (!dragCard) {
+        startDrag(card, ev);
+      }
+      moveDrag(ev);
+    }
+  };
+
+  const onUp = (ev) => {
+    document.removeEventListener('pointermove', onMove);
+    document.removeEventListener('pointerup', onUp);
+    if (dragCard) {
+      card._wasDragged = true;
+      endDrag(ev);
+    }
+  };
+
+  document.addEventListener('pointermove', onMove);
+  document.addEventListener('pointerup', onUp);
+}
+
+function startDrag(card, e) {
+  // Deselect any selected card
+  deselectCard();
+
+  const rect = card.getBoundingClientRect();
+  dragCard = card;
+  dragOffsetX = e.clientX - rect.left;
+  dragOffsetY = e.clientY - rect.top;
+
+  // Store original dimensions
+  card._origWidth = rect.width;
+  card._origHeight = rect.height;
+
+  // Create placeholder
+  const placeholder = document.createElement('div');
+  placeholder.style.width = rect.width + 'px';
+  placeholder.style.height = rect.height + 'px';
+  placeholder.style.visibility = 'hidden';
+  placeholder.className = 'drag-placeholder';
+  card.parentNode.insertBefore(placeholder, card);
+  card._placeholder = placeholder;
+
+  card.classList.add('dragging');
+  card.style.width = rect.width + 'px';
+  card.style.left = (e.clientX - dragOffsetX) + 'px';
+  card.style.top = (e.clientY - dragOffsetY) + 'px';
+  document.body.appendChild(card);
+}
+
+function moveDrag(e) {
+  if (!dragCard) return;
+  dragCard.style.left = (e.clientX - dragOffsetX) + 'px';
+  dragCard.style.top = (e.clientY - dragOffsetY) + 'px';
+
+  // Highlight bucket under cursor
+  const buckets = document.querySelectorAll('.bucket');
+  buckets.forEach(b => b.classList.remove('highlight'));
+  const bucket = getBucketAtPoint(e.clientX, e.clientY);
+  if (bucket) bucket.classList.add('highlight');
+}
+
+function endDrag(e) {
+  if (!dragCard) return;
+  const card = dragCard;
+  dragCard = null;
+
+  // Remove highlight from all buckets
+  document.querySelectorAll('.bucket').forEach(b => b.classList.remove('highlight'));
+
+  // Check if dropped on a bucket
+  const bucket = getBucketAtPoint(e.clientX, e.clientY);
+
+  // Remove dragging styles
+  card.classList.remove('dragging');
+  card.style.position = '';
+  card.style.left = '';
+  card.style.top = '';
+  card.style.width = '';
+  card.style.zIndex = '';
+
+  // Remove placeholder and restore card to its source
+  if (card._placeholder) {
+    card._placeholder.parentNode.insertBefore(card, card._placeholder);
+    card._placeholder.remove();
+    card._placeholder = null;
+  }
+
+  if (bucket) {
+    const bucketName = bucket.dataset.bucket;
+    placeInBucket(card, bucketName);
+  }
+}
+
+function getBucketAtPoint(x, y) {
+  const buckets = document.querySelectorAll('.bucket');
+  for (const b of buckets) {
+    const rect = b.getBoundingClientRect();
+    if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+      return b;
+    }
+  }
+  return null;
+}
+
+// ============ TAP-TO-SELECT (MOBILE FALLBACK) ============
+function handleCardTap(card) {
+  if (selectedCard === card) {
+    deselectCard();
+    return;
+  }
+  deselectCard();
+  selectedCard = card;
+  card.classList.add('selected');
+}
+
+function deselectCard() {
+  if (selectedCard) {
+    selectedCard.classList.remove('selected');
+    selectedCard = null;
+  }
+}
+
+// ============ PLACE IN BUCKET ============
+function placeInBucket(card, bucketName) {
+  const correctBucket = card.dataset.bucket;
+  const itemText = card.dataset.text;
+  const source = card.dataset.source;
+
+  deselectCard();
+
+  if (bucketName === correctBucket) {
+    // CORRECT
+    handleCorrectSort(card, bucketName, source);
+  } else {
+    // WRONG
+    handleWrongSort(card, bucketName, source);
+  }
+}
+
+function handleCorrectSort(card, bucketName, source) {
+  sortedCount++;
+  streak++;
+  if (streak > bestStreak) bestStreak = streak;
+
+  // XP
+  let xp = 10;
+  if (streak > 2) xp += (streak - 2) * 3;
+  if (gameMode === 'timed' && timeLeft > TIME_LIMIT * 0.5) xp += 5;
+  gameXP += xp;
+
+  if (streak >= 3) playStreak();
+  else playCorrect();
+
+  // Show floating XP
+  showFloatingXP(card, '+' + xp + ' XP');
+
+  // Animate card into bucket
+  card.classList.add('correct-anim');
+
+  // Add to bucket visuals
+  const bucketItems = document.querySelector(`.bucket-items[data-bucket="${escHtml(bucketName)}"]`);
+  if (bucketItems) {
+    const chip = document.createElement('span');
+    chip.className = 'bucket-item';
+    chip.innerHTML = chemFormat(escHtml(card.dataset.text));
+    bucketItems.appendChild(chip);
+  }
+  // Update bucket count
+  updateBucketCount(bucketName);
+
+  // Remove from source array
+  const itemText = card.dataset.text;
+  if (source === 'review') {
+    reviewItems = reviewItems.filter(it => it.text !== itemText);
+  } else {
+    activeItems = activeItems.filter(it => it.text !== itemText);
+  }
+
+  // Remove card after animation
+  setTimeout(() => {
+    card.remove();
+    updateItemsLeft();
+    updateProgressBar();
+    updateStreakDisplay();
+    checkGameComplete();
+  }, 400);
+}
+
+function handleWrongSort(card, bucketName, source) {
+  wrongCount++;
+  streak = 0;
+  playWrong();
+
+  // Animate bounce-back
+  card.classList.add('wrong-anim');
+
+  // Flash bucket red
+  const bucket = document.querySelector(`.bucket[data-bucket="${bucketName}"]`);
+  if (bucket) {
+    bucket.classList.add('wrong-highlight');
+    setTimeout(() => bucket.classList.remove('wrong-highlight'), 400);
+  }
+
+  // Move to review pile if from pool
+  if (source === 'pool') {
+    const itemText = card.dataset.text;
+    const item = activeItems.find(it => it.text === itemText);
+    if (item) {
+      activeItems = activeItems.filter(it => it.text !== itemText);
+      reviewItems.push(item);
+    }
+  }
+
+  setTimeout(() => {
+    card.classList.remove('wrong-anim');
+    renderCards();
+    updateItemsLeft();
+    updateStreakDisplay();
+  }, 500);
+}
+
+// ============ HELPERS ============
+function updateBucketCount(bucketName) {
+  const bucket = document.querySelector(`.bucket[data-bucket="${bucketName}"]`);
+  if (!bucket) return;
+  const items = bucket.querySelector('.bucket-items');
+  const countEl = bucket.querySelector('.bucket-count');
+  if (items && countEl) {
+    countEl.textContent = items.children.length;
+  }
+}
+
+function updateItemsLeft() {
+  const remaining = activeItems.length + reviewItems.length;
+  document.getElementById('itemsLeft').textContent = remaining + ' item' + (remaining !== 1 ? 's' : '') + ' left';
+}
+
+function updateProgressBar() {
+  const pf = document.getElementById('progressFill');
+  pf.style.width = (sortedCount / totalItems * 100) + '%';
+  pf.classList.remove('pulse');
+  void pf.offsetWidth;
+  pf.classList.add('pulse');
+}
+
+function updateStreakDisplay() {
+  const sd = document.getElementById('streakDisplay');
+  if (streak >= 3) {
+    sd.textContent = streak + ' streak!';
+    sd.classList.add('glowing');
+  } else if (streak >= 2) {
+    sd.textContent = streak + ' in a row';
+    sd.classList.remove('glowing');
+  } else {
+    sd.textContent = '';
+    sd.classList.remove('glowing');
+  }
+}
+
+function showFloatingXP(el, text) {
+  const rect = el.getBoundingClientRect();
+  const floater = document.createElement('div');
+  floater.className = 'xp-float';
+  floater.textContent = text;
+  floater.style.left = (rect.left + rect.width / 2 - 20) + 'px';
+  floater.style.top = (rect.top - 5) + 'px';
+  document.body.appendChild(floater);
+  setTimeout(() => floater.remove(), 750);
+}
+
+// ============ HINT (Practice mode) ============
+function showHint() {
+  // Find first card in pool or review and highlight its correct bucket
+  let hintItem = null;
+  let hintCard = null;
+
+  const poolCards = document.querySelectorAll('#cardPool .sort-card');
+  if (poolCards.length > 0) {
+    hintCard = poolCards[0];
+    hintItem = activeItems.find(it => it.text === hintCard.dataset.text);
+  }
+  if (!hintItem) {
+    const reviewCards = document.querySelectorAll('#reviewCards .review-card');
+    if (reviewCards.length > 0) {
+      hintCard = reviewCards[0];
+      hintItem = reviewItems.find(it => it.text === hintCard.dataset.text);
+    }
+  }
+
+  if (!hintItem || !hintCard) return;
+
+  // Glow the card
+  hintCard.classList.add('hint-glow');
+  setTimeout(() => hintCard.classList.remove('hint-glow'), 2000);
+
+  // Highlight the correct bucket
+  const bucket = document.querySelector(`.bucket[data-bucket="${hintItem.bucket}"]`);
+  if (bucket) {
+    bucket.classList.add('highlight');
+    setTimeout(() => bucket.classList.remove('highlight'), 2000);
+  }
+
+  // Hint costs XP
+  gameXP = Math.max(0, gameXP - 5);
+}
+
+// ============ CHECK GAME COMPLETE ============
+function checkGameComplete() {
+  if (activeItems.length === 0 && reviewItems.length === 0) {
+    clearInterval(timerInterval);
+    // Time bonus for timed mode
+    if (gameMode === 'timed' && timeLeft > 0) {
+      gameXP += timeLeft * 2;
+    }
+    setTimeout(endGame, 300);
+  }
+}
+
+// ============ END GAME ============
+function endGame() {
+  clearInterval(timerInterval);
+
+  // Stars: 1=complete, 2=under 3 wrong, 3=zero wrong
+  let stars = 0;
+  if (sortedCount === totalItems) {
+    if (wrongCount === 0) stars = 3;
+    else if (wrongCount < 3) stars = 2;
+    else stars = 1;
+  } else {
+    // Didn't finish (timer ran out) but sorted some
+    if (sortedCount > 0) stars = 1;
+  }
+
+  saveLevelResult(currentLevel, stars, gameXP);
+  playLevelWin();
+
+  showScreen('levelComplete');
+  document.getElementById('lcXP').textContent = '+' + gameXP + ' XP';
+  document.getElementById('lcSorted').textContent = sortedCount + ' / ' + totalItems;
+  document.getElementById('lcWrong').textContent = wrongCount;
+
+  // Animated stars
+  const starsEl = document.getElementById('lcStars');
+  starsEl.innerHTML = '';
+  for (let i = 0; i < 3; i++) {
+    const span = document.createElement('span');
+    span.className = 'star';
+    span.innerHTML = '&#9733;';
+    span.style.color = i < stars ? '#FFC800' : '#e5e5e5';
+    starsEl.appendChild(span);
+    setTimeout(() => span.classList.add('reveal'), 300 + i * 300);
+  }
+
+  if (stars >= 2) {
+    setTimeout(launchConfetti, 200);
+  }
+}
+
+// ============ NAVIGATION ============
+function confirmQuit() {
+  if (confirm('Quit this level? Progress for this session will be lost.')) {
+    clearInterval(timerInterval);
+    backToLevels();
+  }
+}
+
+function backToLevels() {
+  clearInterval(timerInterval);
+  renderLevels();
+}
+
+// ============ CONFETTI ============
+function launchConfetti() {
+  const canvas = document.getElementById('confettiCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const colors = ['#58CC02','#1CB0F6','#FF9600','#FFC800','#FF4B4B','#CE82FF'];
+  const pieces = [];
+
+  for (let i = 0; i < 70; i++) {
+    pieces.push({
+      x: Math.random() * canvas.width,
+      y: -10 - Math.random() * 200,
+      w: 6 + Math.random() * 6,
+      h: 10 + Math.random() * 8,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      vy: 2 + Math.random() * 3,
+      vx: (Math.random() - 0.5) * 2,
+      rot: Math.random() * 360,
+      vr: (Math.random() - 0.5) * 8,
+      opacity: 1
+    });
+  }
+
+  let frame = 0;
+  const maxFrames = 180;
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    frame++;
+
+    if (frame > maxFrames * 0.6) {
+      pieces.forEach(p => p.opacity = Math.max(0, p.opacity - 0.02));
+    }
+
+    let alive = false;
+    pieces.forEach(p => {
+      if (p.opacity <= 0) return;
+      alive = true;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.05;
+      p.rot += p.vr;
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot * Math.PI / 180);
+      ctx.globalAlpha = p.opacity;
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    });
+
+    if (alive && frame < maxFrames) {
+      requestAnimationFrame(draw);
+    } else {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+
+  requestAnimationFrame(draw);
+}
+
+// ============ UTILS ============
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ============ INIT ============
+(async function init() {
+  await loadProgressFromServer();
+  renderLevels();
+})();
+</script>
+</body>
+</html>

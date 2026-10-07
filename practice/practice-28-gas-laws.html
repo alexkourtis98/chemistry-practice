@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice 28 — Gas Laws</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Practice 28 &mdash; Gas Laws</h1>
+<p class="subtitle">Deep practice &mdash; Boyle, Charles, Gay-Lussac, ideal gas law, Dalton</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_28';
+const SECTIONS = [
+  {
+    id:1, title:"Boyle's Law (P-V)",
+    instruction:"Fill in the blank. Press Enter to check.",
+    rows:[
+      ["1","Boyle's Law: P\u2081V\u2081 = ___","P2V2 / P\u2082V\u2082"],
+      ["2","At constant T, P and V are ___ proportional","inversely"],
+      ["3","P\u2081=2 atm, V\u2081=4 L, P\u2082=4 atm. V\u2082 = ?","2 / 2 L"],
+      ["4","P\u2081=1 atm, V\u2081=10 L, V\u2082=5 L. P\u2082 = ?","2 / 2 atm"],
+      ["5","If pressure doubles, volume ___","halves / is halved"],
+      ["6","P\u2081=3 atm, V\u2081=6 L, P\u2082=1 atm. V\u2082 = ?","18 / 18 L"],
+      ["7","P\u2081=760 mmHg, V\u2081=2 L, V\u2082=4 L. P\u2082 = ?","380 / 380 mmHg"],
+      ["8","Boyle's Law applies at constant ___","temperature / T"],
+      ["9","P\u2081=5 atm, V\u2081=3 L, V\u2082=15 L. P\u2082 = ?","1 / 1 atm"],
+      ["10","P\u2081=0.5 atm, V\u2081=8 L, P\u2082=2 atm. V\u2082 = ?","2 / 2 L"],
+      ["11","P\u2081=1 atm, V\u2081=22.4 L, P\u2082=2 atm. V\u2082 = ?","11.2 / 11.2 L"],
+      ["12","If volume triples at constant T, pressure becomes ___ of original","one-third / 1/3"],
+      ["13","P\u2081=4 atm, V\u2081=2 L, V\u2082=0.5 L. P\u2082 = ?","16 / 16 atm"],
+      ["14","P\u2081=101.3 kPa, V\u2081=5 L, P\u2082=202.6 kPa. V\u2082 = ?","2.5 / 2.5 L"],
+      ["15","A syringe with 60 mL gas at 1 atm is compressed to 20 mL. P\u2082 = ?","3 / 3 atm"],
+      ["16","Boyle's Law: constant T and constant ___","n / moles / amount"]
+    ]
+  },
+  {
+    id:2, title:"Charles's Law (V-T)",
+    instruction:"Fill in the blank. Press Enter to check.",
+    rows:[
+      ["1","Charles's Law: V\u2081/T\u2081 = ___","V2/T2 / V\u2082/T\u2082"],
+      ["2","V and T are ___ proportional (at constant P)","directly"],
+      ["3","V\u2081=2 L, T\u2081=300 K, T\u2082=600 K. V\u2082 = ?","4 / 4 L"],
+      ["4","Temperature MUST be in ___","Kelvin / K"],
+      ["5","Convert 27\u00B0C to K","300"],
+      ["6","V\u2081=5 L, T\u2081=250 K, V\u2082=10 L. T\u2082 = ?","500 / 500 K"],
+      ["7","If temperature doubles (in K), volume ___","doubles"],
+      ["8","0\u00B0C = ___ K","273 / 273.15"],
+      ["9","Convert 100\u00B0C to K","373 / 373.15"],
+      ["10","Convert -73\u00B0C to K","200"],
+      ["11","V\u2081=4 L, T\u2081=200 K, T\u2082=400 K. V\u2082 = ?","8 / 8 L"],
+      ["12","V\u2081=10 L at 300 K, cooled to 150 K. V\u2082 = ?","5 / 5 L"],
+      ["13","V\u2081=6 L at 27\u00B0C (300 K). V\u2082 at 127\u00B0C (400 K) = ?","8 / 8 L"],
+      ["14","V\u2081=3 L at 0\u00B0C (273 K), heated to 546 K. V\u2082 = ?","6 / 6 L"],
+      ["15","If V\u2081=1 L at T\u2081, and V\u2082=3 L, then T\u2082 = ___ \u00D7 T\u2081","3"],
+      ["16","Absolute zero is ___ K","0"],
+      ["17","Absolute zero in \u00B0C is approximately ___","-273 / -273.15"]
+    ]
+  },
+  {
+    id:3, title:"Gay-Lussac's Law (P-T)",
+    instruction:"Fill in the blank. Press Enter to check.",
+    rows:[
+      ["1","Gay-Lussac's Law: P\u2081/T\u2081 = ___","P2/T2 / P\u2082/T\u2082"],
+      ["2","Gay-Lussac's Law: at constant volume, P and T are ___ proportional","directly"],
+      ["3","P\u2081=1 atm, T\u2081=300 K, T\u2082=600 K. P\u2082 = ?","2 / 2 atm"],
+      ["4","P\u2081=4 atm, T\u2081=200 K, P\u2082=2 atm. T\u2082 = ?","100 / 100 K"],
+      ["5","P\u2081=2 atm at 27\u00B0C (300 K). P\u2082 at 127\u00B0C (400 K) = ?","2.67 / 2.7 / 8/3"],
+      ["6","P\u2081=3 atm, T\u2081=150 K, T\u2082=450 K. P\u2082 = ?","9 / 9 atm"],
+      ["7","A tire at 2.5 atm, 20\u00B0C (293 K). Heated to 50\u00B0C (323 K). P\u2082 = ? (round to 1 dec)","2.8 / 2.76"],
+      ["8","If temperature triples (K), pressure ___","triples"],
+      ["9","P\u2081=760 mmHg at 273 K. Heated to 546 K. P\u2082 = ?","1520 / 1520 mmHg"],
+      ["10","Gay-Lussac's Law: constant ___ and constant n","volume / V"]
+    ]
+  },
+  {
+    id:4, title:"Combined Gas Law",
+    instruction:"Fill in the blank. Press Enter to check.",
+    rows:[
+      ["1","Combined gas law: P\u2081V\u2081/T\u2081 = ___","P2V2/T2 / P\u2082V\u2082/T\u2082"],
+      ["2","P\u2081=2 atm, V\u2081=3 L, T\u2081=300 K, P\u2082=1 atm, T\u2082=450 K. V\u2082 = ?","9 / 9 L"],
+      ["3","V\u2081=10 L, T\u2081=300 K, P\u2081=1 atm, V\u2082=5 L, T\u2082=150 K. P\u2082 = ?","1 / 1 atm"],
+      ["4","The combined gas law combines Boyle's, Charles's, and ___ laws","Gay-Lussac's / Gay-Lussac"],
+      ["5","P\u2081=1 atm, V\u2081=4 L, T\u2081=200 K, P\u2082=2 atm, T\u2082=400 K. V\u2082 = ?","4 / 4 L"],
+      ["6","P\u2081=3 atm, V\u2081=2 L, T\u2081=300 K, V\u2082=3 L, T\u2082=450 K. P\u2082 = ?","3 / 3 atm"],
+      ["7","P\u2081=1 atm, V\u2081=22.4 L, T\u2081=273 K, P\u2082=2 atm, T\u2082=546 K. V\u2082 = ?","22.4 / 22.4 L"],
+      ["8","If P doubles, V halves, and T stays the same, the gas law is ___","Boyle's / Boyle"],
+      ["9","P\u2081=0.5 atm, V\u2081=10 L, T\u2081=250 K, P\u2082=1 atm, V\u2082=?, T\u2082=500 K. V\u2082 = ?","10 / 10 L"],
+      ["10","When n is also changing, use the ___ gas law","ideal / PV=nRT"]
+    ]
+  },
+  {
+    id:5, title:"Ideal Gas Law (PV=nRT)",
+    instruction:"Fill in the blank. Press Enter to check.",
+    rows:[
+      ["1","PV = ___","nRT"],
+      ["2","R = 0.0821 L\u00B7atm/(mol\u00B7K) when P is in ___","atm"],
+      ["3","n=1 mol, T=273 K, P=1 atm. V = ?","22.4 / 22.4 L"],
+      ["4","At STP, 1 mol of gas occupies ___ L","22.4"],
+      ["5","P=2 atm, V=5 L, T=300 K. n = ? (round to 2 decimal places)","0.41"],
+      ["6","STP means ___ K and 1 atm","273 / 273.15"],
+      ["7","n=0.5 mol, T=300 K, P=1 atm. V = ? (round to 1 decimal)","12.3 / 12.3 L"],
+      ["8","How many moles in 44.8 L at STP?","2"],
+      ["9","n=2 mol, T=273 K, P=1 atm. V = ?","44.8 / 44.8 L"],
+      ["10","P=1 atm, V=5.6 L, T=273 K. n = ?","0.25"],
+      ["11","n=0.1 mol, T=300 K, P=2 atm. V = ? (round to 2 dec)","1.23"],
+      ["12","What is the molar mass of a gas if 3.2 g occupies 2.24 L at STP?","32"],
+      ["13","What is the density (g/L) of O\u2082 (MW=32) at STP?","1.43"],
+      ["14","R = 8.314 when P is in ___ and V in L","kPa / kilopascals"],
+      ["15","n=3 mol, T=546 K, P=2 atm. V = ? (round to 1 dec)","67.2 / 67.3"],
+      ["16","How many moles in 11.2 L of gas at STP?","0.5"],
+      ["17","What volume does 0.25 mol occupy at STP?","5.6 / 5.6 L"],
+      ["18","Density of a gas at STP = molar mass / ___","22.4"]
+    ]
+  },
+  {
+    id:6, title:"Dalton's Law & Graham's Law",
+    instruction:"Fill in the blank. Press Enter to check.",
+    rows:[
+      ["1","P(total) = P\u2081 + P\u2082 + ___ (general form)","P3 / P\u2083 / ... / P3..."],
+      ["2","P(O\u2082)=0.2 atm, P(N\u2082)=0.8 atm. P(total) = ?","1 / 1 atm"],
+      ["3","P(total)=760 mmHg, P(N\u2082)=600 mmHg. P(O\u2082) = ?","160 / 160 mmHg"],
+      ["4","Mole fraction = moles of component / total ___","moles"],
+      ["5","P(partial) = mole fraction \u00D7 ___","P(total) / total pressure / Ptotal"],
+      ["6","A gas mixture: 2 mol O\u2082 + 3 mol N\u2082. Mole fraction of O\u2082 = ?","0.4 / 2/5"],
+      ["7","P(total) = 1 atm, mole fraction O\u2082 = 0.21. P(O\u2082) = ?","0.21 / 0.21 atm"],
+      ["8","3 mol He + 1 mol Ne + 1 mol Ar. Mole fraction of He = ?","0.6 / 3/5"],
+      ["9","Gas collected over water: P(total) = P(gas) + P(_____)","water vapor / H2O / water"],
+      ["10","P(total)=755 mmHg, P(H\u2082O)=25 mmHg. P(gas) = ?","730 / 730 mmHg"],
+      ["11","Graham's Law: lighter gases diffuse ___ than heavier gases","faster"],
+      ["12","Rate\u2081/Rate\u2082 = \u221A(M\u2082/___)", "M1 / M\u2081"],
+      ["13","Which diffuses faster: H\u2082 (MW=2) or O\u2082 (MW=32)?","H2 / H\u2082"],
+      ["14","H\u2082 diffuses ___ times faster than O\u2082 (\u221A(32/2))","4"],
+      ["15","Graham's Law applies to both diffusion and ___","effusion"]
+    ]
+  },
+  {
+    id:7, title:"Gas Law Identification", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"A balloon shrinks when taken outside on a cold day. Which law?", options:["Boyle's Law","Charles's Law","Gay-Lussac's Law","Dalton's Law"], correct:1},
+      {q:"Tire pressure increases on a hot day (volume nearly constant). Which law?", options:["Boyle's Law","Charles's Law","Gay-Lussac's Law","Ideal Gas Law"], correct:2},
+      {q:"Compressing a syringe (constant T). Which law?", options:["Boyle's Law","Charles's Law","Gay-Lussac's Law","Avogadro's Law"], correct:0},
+      {q:"Doubling the amount of gas at constant T and P doubles the volume. Which law?", options:["Boyle's Law","Charles's Law","Dalton's Law","Avogadro's Law"], correct:3},
+      {q:"A sealed can of gas explodes when heated. Which law best explains?", options:["Boyle's Law","Charles's Law","Gay-Lussac's Law","Dalton's Law"], correct:2},
+      {q:"A weather balloon expands as it rises (pressure decreases, T constant). Which law?", options:["Boyle's Law","Charles's Law","Gay-Lussac's Law","Ideal Gas Law"], correct:0},
+      {q:"Scuba divers must exhale while ascending because:", options:["Charles's Law: gas cools","Boyle's Law: lower pressure = gas expands","Dalton's Law: partial pressures change","Gay-Lussac's Law: temperature rises"], correct:1},
+      {q:"The total pressure in a gas mixture equals the sum of partial pressures. Which law?", options:["Boyle's Law","Combined Gas Law","Dalton's Law","Avogadro's Law"], correct:2},
+      {q:"A helium balloon floats higher than an air balloon of the same size. Related to:", options:["Boyle's Law","Dalton's Law","Graham's Law (lighter gas)","Gay-Lussac's Law"], correct:2},
+      {q:"A pressure cooker increases boiling point. The sealed container uses:", options:["Boyle's Law","Charles's Law","Gay-Lussac's Law","Combined Gas Law"], correct:2},
+      {q:"Blowing air into a flat tire increases volume at roughly constant T:", options:["Boyle's Law","Charles's Law","Avogadro's Law","Dalton's Law"], correct:2},
+      {q:"Heating a piston that can expand freely (constant P):", options:["Boyle's Law","Charles's Law","Gay-Lussac's Law","Dalton's Law"], correct:1},
+      {q:"At high altitude, a sealed chip bag puffs up because:", options:["More chips","Boyle's Law: lower external pressure","Charles's Law: colder temperature","Dalton's Law"], correct:1},
+      {q:"Equal volumes of gases at same T and P have equal number of moles:", options:["Boyle's Law","Charles's Law","Dalton's Law","Avogadro's Law"], correct:3},
+      {q:"Deep sea divers experience nitrogen narcosis due to:", options:["Boyle's Law","Dalton's Law: increased partial pressure of N\u2082","Charles's Law","Gay-Lussac's Law"], correct:1}
+    ]
+  },
+  {
+    id:8, title:"Match Gas Law to Equation", type:"arrange",
+    instruction:"Arrange the words to form the correct equation or statement.",
+    sentences:[
+      {prompt:"Boyle's Law equation:", words:["P\u2081","V\u2081","=","P\u2082","V\u2082"]},
+      {prompt:"Charles's Law equation:", words:["V\u2081","/","T\u2081","=","V\u2082","/","T\u2082"]},
+      {prompt:"Gay-Lussac's Law equation:", words:["P\u2081","/","T\u2081","=","P\u2082","/","T\u2082"]},
+      {prompt:"Ideal Gas Law:", words:["P","V","=","n","R","T"]},
+      {prompt:"Dalton's Law:", words:["P(total)","=","P\u2081","+","P\u2082","+","P\u2083"]},
+      {prompt:"Combined Gas Law:", words:["P\u2081V\u2081","/","T\u2081","=","P\u2082V\u2082","/","T\u2082"]},
+      {prompt:"Molar volume at STP:", words:["1","mol","=","22.4","L","at","STP"]},
+      {prompt:"Convert Celsius to Kelvin:", words:["K","=","\u00B0C","+","273"]}
+    ]
+  },
+  {
+    id:9, title:"Mixed Calculations", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"A gas at 2 atm and 4 L is compressed to 1 L at constant T. New pressure?", options:["0.5 atm","2 atm","4 atm","8 atm"], correct:3},
+      {q:"A gas occupies 3 L at 300 K. At what temperature will it occupy 6 L (constant P)?", options:["150 K","300 K","600 K","900 K"], correct:2},
+      {q:"At STP, how many liters does 0.5 mol of an ideal gas occupy?", options:["5.6 L","11.2 L","22.4 L","44.8 L"], correct:1},
+      {q:"If P(total) = 2 atm and mole fraction of gas A is 0.25, P(A) = ?", options:["0.25 atm","0.5 atm","1 atm","2 atm"], correct:1},
+      {q:"Using PV=nRT, what is n if P=1atm, V=11.2L, T=273K?", options:["0.25 mol","0.5 mol","1.0 mol","2.0 mol"], correct:1},
+      {q:"A gas at 1 atm and 273 K is heated to 546 K at constant V. New pressure?", options:["0.5 atm","1 atm","2 atm","4 atm"], correct:2},
+      {q:"5.6 L of gas at STP. How many moles?", options:["0.125","0.25","0.5","1.0"], correct:1},
+      {q:"2 mol gas at 2 atm, 300 K. Volume = ? (use R=0.0821)", options:["12.3 L","24.6 L","49.3 L","6.15 L"], correct:1},
+      {q:"Molar mass of a gas: 4.4 g occupies 2.24 L at STP. MW = ?", options:["22","32","44","88"], correct:2},
+      {q:"A gas at 4 atm, 6 L, 300 K is changed to 2 atm, 600 K. V\u2082 = ?", options:["6 L","12 L","24 L","3 L"], correct:2},
+      {q:"Gas collected over water at 25\u00B0C: P(total)=760 mmHg, P(H\u2082O)=24 mmHg. P(gas) = ?", options:["784 mmHg","760 mmHg","736 mmHg","24 mmHg"], correct:2},
+      {q:"Which gas effuses fastest?", options:["O\u2082 (32 g/mol)","N\u2082 (28 g/mol)","He (4 g/mol)","CO\u2082 (44 g/mol)"], correct:2},
+      {q:"An ideal gas has no ___ forces between molecules:", options:["Gravitational","Intermolecular","Nuclear","Magnetic"], correct:1},
+      {q:"Real gases deviate from ideal behavior at:", options:["Low P, high T","High P, low T","All conditions","Standard conditions only"], correct:1},
+      {q:"1 atm = ___ mmHg:", options:["273","760","101.3","1000"], correct:1}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Gas Laws - Complete Reference</h3><p><span class="rule">Boyle\'s Law (P-V):</span> P\u2081V\u2081 = P\u2082V\u2082</p><p>At constant T and n, pressure and volume are <strong>inversely proportional</strong>. If P doubles, V halves.</p><p><span class="rule">Charles\'s Law (V-T):</span> V\u2081/T\u2081 = V\u2082/T\u2082</p><p>At constant P and n, volume and temperature are <strong>directly proportional</strong>. T MUST be in Kelvin! If T doubles, V doubles.</p><p><span class="rule">Gay-Lussac\'s Law (P-T):</span> P\u2081/T\u2081 = P\u2082/T\u2082</p><p>At constant V and n, pressure and temperature are <strong>directly proportional</strong>. T must be in Kelvin.</p><p><span class="rule">Combined Gas Law:</span> P\u2081V\u2081/T\u2081 = P\u2082V\u2082/T\u2082</p><p>Combines Boyle\'s, Charles\'s, and Gay-Lussac\'s. Use when two or more variables change. Constant n.</p><p><span class="rule">Ideal Gas Law:</span> PV = nRT</p><p>Use when n changes or for single-state calculations.</p><table><tr><th>R Value</th><th>P Unit</th><th>V Unit</th><th>Full Units</th></tr><tr><td>0.0821</td><td>atm</td><td>L</td><td>L\u00B7atm/(mol\u00B7K)</td></tr><tr><td>8.314</td><td>kPa or Pa</td><td>L or m\u00B3</td><td>J/(mol\u00B7K) = L\u00B7kPa/(mol\u00B7K)</td></tr><tr><td>62.36</td><td>mmHg</td><td>L</td><td>L\u00B7mmHg/(mol\u00B7K)</td></tr></table><p><span class="rule">Avogadro\'s Law:</span> V\u2081/n\u2081 = V\u2082/n\u2082 (at constant T, P). Equal volumes of gases at same T and P contain equal moles.</p><p><span class="rule">Dalton\'s Law of Partial Pressures:</span></p><p>P(total) = P\u2081 + P\u2082 + P\u2083 + ...</p><p>P(partial) = mole fraction \u00D7 P(total)</p><p>Mole fraction (\u03C7) = moles of component / total moles</p><p>Gas collected over water: P(gas) = P(total) \u2212 P(water vapor)</p><p><span class="rule">Graham\'s Law of Effusion/Diffusion:</span></p><p>rate\u2081/rate\u2082 = \u221A(M\u2082/M\u2081)</p><p>Lighter gases diffuse and effuse faster. H\u2082 is the fastest common gas.</p><h3>Standard Conditions</h3><table><tr><th>STP</th><th>Value</th></tr><tr><td>Temperature</td><td>0\u00B0C = 273.15 K</td></tr><tr><td>Pressure</td><td>1 atm = 760 mmHg = 101.325 kPa</td></tr><tr><td>Molar Volume</td><td>22.4 L/mol</td></tr></table><h3>Unit Conversions</h3><p>K = \u00B0C + 273.15 (always use Kelvin in gas laws!)</p><p>1 atm = 760 mmHg = 760 torr = 101.325 kPa = 101325 Pa</p><h3>Useful Derived Formulas</h3><p>Density of gas at STP: d = MW / 22.4 (g/L)</p><p>Molar mass from PV=nRT: MW = dRT/P or MW = mRT/(PV)</p><p>At STP: n = V(L) / 22.4</p><p><span class="rule">Real vs Ideal:</span> Real gases deviate from ideal behavior at high pressure and low temperature (intermolecular forces become significant). Ideal gas model assumes: (1) no intermolecular forces, (2) negligible particle volume.</p>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 Boyle, Charles, Gay-Lussac, ideal gas law, Dalton \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

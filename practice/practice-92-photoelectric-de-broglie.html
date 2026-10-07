@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Photoelectric Effect & de Broglie</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Photoelectric Effect & de Broglie</h1>
+<p class="subtitle">Deep practice &mdash; photoelectric effect, work function, de Broglie wavelength, uncertainty principle</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_92';
+const SECTIONS = [
+  {
+    id:1, title:"Fill: Photoelectric effect fundamentals",
+    instruction:"Complete each statement about the photoelectric effect.",
+    rows:[
+      ["1","The photoelectric effect is the ejection of ___ from a metal surface by light","electrons / photoelectrons"],
+      ["2","Einstein explained the photoelectric effect using the concept of light ___","quanta / photons / packets"],
+      ["3","The energy of a photon is E = ___","h\u03BD / hf / h\u00D7\u03BD"],
+      ["4","Planck's constant h = ___ \u00D7 10\u207B\u00B3\u2074 J\u00B7s","6.626 / 6.63"],
+      ["5","The work function (\u03C6) is the ___ energy needed to eject an electron","minimum / threshold"],
+      ["6","The equation for maximum kinetic energy of ejected electrons: KE_max = ___","h\u03BD \u2212 \u03C6 / hf \u2212 \u03C6 / h\u03BD - \u03C6"],
+      ["7","The threshold frequency (\u03BD\u2080) is the ___ frequency needed for electron ejection","minimum / lowest"],
+      ["8","At the threshold frequency, KE_max = ___","0 / zero"],
+      ["9","Below the threshold frequency, ___ electrons are ejected regardless of intensity","no / zero"],
+      ["10","Increasing light intensity increases the ___ of ejected electrons, not their energy","number / amount / quantity"],
+      ["11","Increasing light frequency increases the ___ of ejected electrons","kinetic energy / KE / energy"],
+      ["12","The work function relates to threshold frequency by \u03C6 = ___","h\u03BD\u2080 / hf\u2080 / h\u00D7\u03BD\u2080"],
+      ["13","Einstein received the Nobel Prize in 1921 for his work on the ___ effect","photoelectric"],
+      ["14","The photoelectric effect proved that light has ___ properties","particle / corpuscular"],
+      ["15","The unit of work function is typically ___ (SI unit) or eV","joules / J"]
+    ]
+  },
+  {
+    id:2, title:"Fill: Photoelectric calculations",
+    instruction:"Calculate the requested values. Use h = 6.626 \u00D7 10\u207B\u00B3\u2074 J\u00B7s.",
+    rows:[
+      ["1","A photon has \u03BD = 7.0 \u00D7 10\u00B9\u2074 Hz. E = h\u03BD = ___ \u00D7 10\u207B\u00B9\u2079 J","4.64 / 4.6"],
+      ["2","\u03C6 = 3.0 \u00D7 10\u207B\u00B9\u2079 J, \u03BD = 7.0 \u00D7 10\u00B9\u2074 Hz. KE_max = ___ \u00D7 10\u207B\u00B9\u2079 J","1.64 / 1.6"],
+      ["3","\u03C6 = 4.0 eV for a metal. Threshold frequency \u03BD\u2080 = \u03C6/h = ___ \u00D7 10\u00B9\u2074 Hz","9.67 / 9.7"],
+      ["4","1 eV = ___ \u00D7 10\u207B\u00B9\u2079 J","1.602 / 1.60"],
+      ["5","\u03C6 = 2.3 eV = ___ \u00D7 10\u207B\u00B9\u2079 J","3.68 / 3.7"],
+      ["6","Photon \u03BB = 400 nm. Frequency \u03BD = c/\u03BB = ___ \u00D7 10\u00B9\u2074 Hz","7.50 / 7.5"],
+      ["7","Photon \u03BB = 400 nm. Energy = h\u03BD = ___ \u00D7 10\u207B\u00B9\u2079 J","4.97 / 5.0"],
+      ["8","Photon \u03BB = 400 nm, \u03C6 = 2.0 eV (3.2\u00D710\u207B\u00B9\u2079 J). KE_max = ___ \u00D7 10\u207B\u00B9\u2079 J","1.77 / 1.8"],
+      ["9","Sodium has \u03C6 = 2.28 eV. Threshold wavelength = hc/\u03C6 = ___ nm","544 / 545"],
+      ["10","Light of \u03BB = 600 nm hits sodium (\u03C6 = 2.28 eV). Will electrons be ejected? (yes/no)","no"],
+      ["11","Light of \u03BB = 300 nm hits sodium (\u03C6 = 2.28 eV). KE_max = ___ eV","1.86 / 1.9"],
+      ["12","Cesium has \u03C6 = 2.1 eV. Threshold wavelength = ___ nm","591 / 590"],
+      ["13","The stopping voltage V_s relates to KE_max by eV_s = ___","KE_max / h\u03BD \u2212 \u03C6"],
+      ["14","If KE_max = 1.6 eV, the stopping voltage = ___ V","1.6"],
+      ["15","A photon of \u03BB = 200 nm has energy ___ eV","6.21 / 6.2"]
+    ]
+  },
+  {
+    id:3, title:"MC: Photoelectric effect concepts", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Increasing light intensity on a metal surface (above threshold):", options:["Increases KE of electrons","Increases number of electrons ejected","Decreases work function","Changes threshold frequency"], correct:1},
+      {q:"Increasing light frequency (above threshold):", options:["Increases number of electrons","Increases KE_max of electrons","Decreases the work function","Has no effect"], correct:1},
+      {q:"Below the threshold frequency:", options:["Electrons are ejected slowly","Electrons are ejected with low KE","No electrons are ejected at all","Many electrons are ejected"], correct:2},
+      {q:"The photoelectric effect could NOT be explained by:", options:["Quantum theory","Classical wave theory of light","Einstein's photon model","Planck's quantum hypothesis"], correct:1},
+      {q:"Classical wave theory predicted that any frequency should eject electrons given enough:", options:["Time","Intensity","Area","None, classical theory was correct"], correct:1},
+      {q:"The work function is a property of:", options:["The photon","The metal surface","The electron","The light source"], correct:1},
+      {q:"Which metal has the lowest work function?", options:["Platinum (\u03C6 = 6.4 eV)","Gold (\u03C6 = 5.1 eV)","Sodium (\u03C6 = 2.3 eV)","Cesium (\u03C6 = 2.1 eV)"], correct:3},
+      {q:"A metal with lower work function requires ___ threshold frequency:", options:["Higher","Lower","The same","Cannot determine"], correct:1},
+      {q:"If a photon has exactly the threshold energy (\u03C6), the ejected electron has:", options:["Maximum KE","Zero KE","Negative KE","Infinite KE"], correct:1},
+      {q:"The graph of KE_max vs frequency is a straight line with slope:", options:["c (speed of light)","h (Planck's constant)","e (electron charge)","\u03C6 (work function)"], correct:1},
+      {q:"The x-intercept of the KE_max vs \u03BD graph gives:", options:["The work function directly","The threshold frequency \u03BD\u2080","Planck's constant","The speed of light"], correct:1},
+      {q:"The y-intercept of the KE_max vs \u03BD graph gives:", options:["+\u03C6","\u2212\u03C6","h","0"], correct:1},
+      {q:"Photoelectric effect demonstrates that light is:", options:["Only a wave","Only a particle","Both wave and particle (wave-particle duality)","Neither wave nor particle"], correct:2},
+      {q:"Millikan's experiment confirmed Einstein's photoelectric equation and measured:", options:["Speed of light","Planck's constant","Electron mass","Avogadro's number"], correct:1},
+      {q:"The photoelectric effect is instantaneous because:", options:["Waves travel fast","Each photon transfers energy to one electron in a single event","Electrons are very light","The metal is thin"], correct:1}
+    ]
+  },
+  {
+    id:4, title:"Fill: de Broglie wavelength",
+    instruction:"Complete each statement about de Broglie's hypothesis.",
+    rows:[
+      ["1","de Broglie proposed that all matter has ___ properties","wave / wavelike"],
+      ["2","The de Broglie wavelength equation is \u03BB = ___","h/mv / h/(mv) / h/p"],
+      ["3","h is ___ constant","Planck's / Planck"],
+      ["4","m is the ___ of the particle","mass"],
+      ["5","v is the ___ of the particle","velocity / speed"],
+      ["6","p = mv is the ___ of the particle","momentum"],
+      ["7","Larger mass means ___ (shorter/longer) de Broglie wavelength","shorter / smaller"],
+      ["8","Faster speed means ___ (shorter/longer) de Broglie wavelength","shorter / smaller"],
+      ["9","An electron (m = 9.109 \u00D7 10\u207B\u00B3\u00B9 kg) moving at 1.0 \u00D7 10\u2076 m/s has \u03BB = ___ \u00D7 10\u207B\u00B9\u2070 m","7.27 / 7.3"],
+      ["10","A baseball (m = 0.145 kg) at 40 m/s has \u03BB = ___ \u00D7 10\u207B\u00B3\u2074 m","1.14 / 1.1"],
+      ["11","The baseball's wavelength is ___ (detectable/undetectable)","undetectable / negligible / undetectably small"],
+      ["12","de Broglie wavelength is significant only for ___ particles","subatomic / very small / microscopic"],
+      ["13","de Broglie received the Nobel Prize in ___","1929"],
+      ["14","Davisson and Germer confirmed de Broglie's hypothesis by observing electron ___","diffraction"],
+      ["15","The de Broglie wavelength of a particle ___ as kinetic energy increases","decreases / gets shorter"]
+    ]
+  },
+  {
+    id:5, title:"MC: de Broglie and wave-particle duality", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Which particle has the longest de Broglie wavelength (same speed)?", options:["Proton","Neutron","Electron","Alpha particle"], correct:2},
+      {q:"Two electrons: one at 1\u00D710\u2076 m/s, another at 2\u00D710\u2076 m/s. Which has shorter \u03BB?", options:["The slower one","The faster one","Same wavelength","Cannot determine"], correct:1},
+      {q:"de Broglie's hypothesis extended wave-particle duality from ___ to matter:", options:["Sound","Light/photons","Gravity","Magnetism"], correct:1},
+      {q:"Electron diffraction patterns prove electrons have:", options:["Only particle nature","Only wave nature","Wave nature (confirming de Broglie)","No definite nature"], correct:2},
+      {q:"The electron microscope works because electrons have:", options:["Large mass","Very short de Broglie wavelengths","Positive charge","No wavelength"], correct:1},
+      {q:"A proton and electron have the same KE. Which has the longer \u03BB?", options:["Proton (larger mass)","Electron (smaller mass)","Same \u03BB","Cannot determine"], correct:1},
+      {q:"If an electron is accelerated through a potential V, its KE = eV and \u03BB =", options:["h/\u221A(2meV)","h\u00D7m\u00D7v","mc\u00B2","hc/E"], correct:0},
+      {q:"Which experiment confirmed de Broglie's hypothesis?", options:["Photoelectric effect","Millikan oil drop","Davisson-Germer electron diffraction","Rutherford gold foil"], correct:2},
+      {q:"A neutron used in crystallography has \u03BB comparable to:", options:["Radio waves","Visible light","X-ray wavelengths","Gamma rays"], correct:2},
+      {q:"The de Broglie wavelength of a photon (E = hc/\u03BB) gives \u03BB = h/p where p =", options:["mc","E/c","hc","mv"], correct:1},
+      {q:"Wave-particle duality means:", options:["Particles are waves","Waves are particles","All matter and radiation exhibit both wave and particle properties","Only electrons are waves"], correct:2},
+      {q:"Which of these does NOT exhibit measurable wave behavior?", options:["Electron","Neutron","Proton","Tennis ball"], correct:3},
+      {q:"Thermal neutrons (T ~ 300 K) have de Broglie wavelength of about:", options:["0.18 nm","1.8 nm","18 nm","180 nm"], correct:0},
+      {q:"If velocity doubles, de Broglie wavelength:", options:["Doubles","Halves","Quadruples","Stays the same"], correct:1},
+      {q:"The momentum of a photon with wavelength \u03BB is:", options:["mc","h/\u03BB","h\u03BB","m\u03BB"], correct:1}
+    ]
+  },
+  {
+    id:6, title:"Fill: Heisenberg uncertainty principle",
+    instruction:"Complete each statement about the uncertainty principle.",
+    rows:[
+      ["1","The Heisenberg uncertainty principle states: \u0394x \u00D7 \u0394p \u2265 ___","h/(4\u03C0) / h/4\u03C0 / \u0127/2"],
+      ["2","\u0394x represents the uncertainty in ___","position"],
+      ["3","\u0394p represents the uncertainty in ___","momentum"],
+      ["4","The more precisely we know position, the ___ precisely we can know momentum","less"],
+      ["5","The more precisely we know momentum, the ___ precisely we can know position","less"],
+      ["6","This is NOT a limitation of instruments but a fundamental property of ___","nature / quantum mechanics / quantum physics"],
+      ["7","For macroscopic objects, the uncertainty is ___ (significant/negligible)","negligible / insignificant"],
+      ["8","The uncertainty principle is significant for ___ particles","subatomic / microscopic / small"],
+      ["9","The energy-time uncertainty relation is \u0394E \u00D7 \u0394t \u2265 ___","h/(4\u03C0) / h/4\u03C0 / \u0127/2"],
+      ["10","If \u0394x = 1.0 \u00D7 10\u207B\u00B9\u2070 m, minimum \u0394p = h/(4\u03C0\u0394x) = ___ \u00D7 10\u207B\u00B2\u2075 kg\u00B7m/s","5.27 / 5.3"],
+      ["11","The uncertainty principle implies electrons do NOT have definite ___ in atoms","orbits / paths / trajectories"],
+      ["12","Instead of orbits, we use ___ to describe electron location probability","orbitals / probability distributions / wave functions"],
+      ["13","Heisenberg published the uncertainty principle in ___","1927"],
+      ["14","The reduced Planck constant \u0127 = h/(2\u03C0) = ___ \u00D7 10\u207B\u00B3\u2074 J\u00B7s","1.055 / 1.05"],
+      ["15","The uncertainty principle is a consequence of the ___ nature of matter","wave / quantum"]
+    ]
+  },
+  {
+    id:7, title:"MC: Heisenberg and quantum concepts", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"The uncertainty principle applies to:", options:["Only photons","Only electrons","All particles","Only macroscopic objects"], correct:2},
+      {q:"If we know an electron's position exactly (\u0394x = 0), its momentum uncertainty is:", options:["Also zero","Infinite","Very small","Equal to h"], correct:1},
+      {q:"The uncertainty principle is important because it shows:", options:["Classical mechanics is always correct","Quantum mechanics allows exact simultaneous measurement of x and p","There is a fundamental limit to what we can simultaneously know","Instruments need improvement"], correct:2},
+      {q:"Which pair of properties CANNOT be simultaneously measured with arbitrary precision?", options:["Mass and charge","Position and momentum","Color and shape","Temperature and pressure"], correct:1},
+      {q:"The uncertainty principle directly led to the concept of:", options:["Fixed electron orbits","Electron probability clouds/orbitals","Proton orbits","Neutron shells"], correct:1},
+      {q:"For a 0.01 kg marble with \u0394v = 0.01 m/s, the minimum \u0394x is:", options:["~5 \u00D7 10\u207B\u00B3\u00B2 m (unmeasurably small)","~1 m","~1 nm","~1 cm"], correct:0},
+      {q:"Which statement about the uncertainty principle is FALSE?", options:["It applies to all matter","It is a fundamental law of nature","It only applies because our instruments are imperfect","It limits simultaneous knowledge of conjugate variables"], correct:2},
+      {q:"The complementary (conjugate) variables in the uncertainty principle are:", options:["Mass and energy","Position and momentum (or energy and time)","Charge and spin","Temperature and entropy"], correct:1},
+      {q:"Bohr's model failed because it assumed electrons have definite:", options:["Charge","Mass","Orbits (violating uncertainty principle)","Spin"], correct:2},
+      {q:"The wave function \u03C8 contains information about:", options:["Only position","Only momentum","Both position and momentum probabilities","The electron's color"], correct:2},
+      {q:"|\u03C8|\u00B2 gives the ___ of finding an electron at a given location:", options:["Certainty","Probability density","Exact position","Speed"], correct:1},
+      {q:"The uncertainty principle makes which measurement impossible?", options:["Measuring an electron's energy","Measuring an electron's exact path through space","Measuring an electron's charge","Measuring an electron's spin"], correct:1},
+      {q:"Which scientist formulated the uncertainty principle?", options:["Bohr","de Broglie","Heisenberg","Schrodinger"], correct:2},
+      {q:"Zero-point energy exists because confining a particle to smaller \u0394x:", options:["Decreases its energy","Has no effect","Increases minimum KE (larger \u0394p)","Stops the particle"], correct:2},
+      {q:"An electron in a 1s orbital has:", options:["A definite circular orbit","A probability distribution peaking at the nucleus","A spherical probability cloud","A figure-eight shape"], correct:2}
+    ]
+  },
+  {
+    id:8, title:"Fill: Bohr model and its limitations",
+    instruction:"Complete each statement about the Bohr model.",
+    rows:[
+      ["1","Bohr proposed that electrons orbit the nucleus in fixed circular ___","orbits / paths"],
+      ["2","In the Bohr model, only certain ___ orbits are allowed","quantized / discrete / specific"],
+      ["3","The energy of the nth orbit: E_n = ___ /n\u00B2 (for hydrogen)","\u221213.6 eV / -13.6 eV"],
+      ["4","The ground state of hydrogen corresponds to n = ___","1"],
+      ["5","The Bohr model works well for ___ but fails for multi-electron atoms","hydrogen / H / the hydrogen atom"],
+      ["6","Bohr's model cannot explain the ___ spectra of multi-electron atoms","emission / line / absorption"],
+      ["7","Bohr's model violates the ___ uncertainty principle","Heisenberg / Heisenberg's"],
+      ["8","Bohr assumed electrons have definite orbits, but quantum mechanics uses ___","orbitals / probability clouds / wave functions"],
+      ["9","The Bohr radius (a\u2080) for hydrogen ground state is ___ \u00C5 (or 0.0529 nm)","0.529"],
+      ["10","The quantum mechanical model replaced Bohr's model using the ___ equation","Schrodinger / Schrodinger's"],
+      ["11","In the quantum model, electron position is described by a ___ function","wave / probability"],
+      ["12","The quantum numbers (n, l, m_l, m_s) describe the ___ of an electron","state / quantum state"],
+      ["13","Bohr's model correctly predicted the ___ spectrum of hydrogen","emission / line / absorption"],
+      ["14","The Rydberg formula for hydrogen spectral lines: 1/\u03BB = R_H(1/n\u00B9\u00B2 \u2212 1/n\u00B2\u00B2), where R_H = ___ \u00D7 10\u2077 m\u207B\u00B9","1.097 / 1.10"],
+      ["15","The main limitation of Bohr's model is that it treats electrons as ___ rather than waves","particles"]
+    ]
+  },
+  {
+    id:9, title:"Arrange: Historical development of atomic theory", type:"arrange",
+    instruction:"Click the words in the correct order.",
+    sentences:[
+      {prompt:"Planck proposed that energy is quantized in discrete packets called quanta", words:["Planck","proposed that","energy is quantized","in discrete packets","called quanta"]},
+      {prompt:"Einstein explained the photoelectric effect using photons in 1905", words:["Einstein","explained","the photoelectric effect","using photons","in 1905"]},
+      {prompt:"Bohr proposed quantized electron orbits for the hydrogen atom in 1913", words:["Bohr","proposed","quantized electron orbits","for the hydrogen atom","in 1913"]},
+      {prompt:"de Broglie proposed that all matter has wave properties in 1924", words:["de Broglie","proposed that","all matter","has wave properties","in 1924"]},
+      {prompt:"Heisenberg formulated the uncertainty principle in 1927", words:["Heisenberg","formulated","the uncertainty principle","in 1927"]},
+      {prompt:"Schrodinger developed the wave equation for quantum mechanics in 1926", words:["Schrodinger","developed","the wave equation","for quantum mechanics","in 1926"]},
+      {prompt:"Davisson and Germer confirmed electron diffraction experimentally", words:["Davisson and Germer","confirmed","electron diffraction","experimentally"]},
+      {prompt:"The maximum kinetic energy of photoelectrons equals photon energy minus work function", words:["The maximum","kinetic energy","of photoelectrons","equals","photon energy","minus","work function"]}
+    ]
+  },
+  {
+    id:10, title:"MC: Comparing Bohr and quantum models", type:"mc",
+    instruction:"Select the correct answer comparing atomic models.",
+    questions:[
+      {q:"Bohr model: electrons are in ___; quantum model: electrons are in ___:", options:["Orbits; orbitals","Orbitals; orbits","Shells; orbits","Clouds; circles"], correct:0},
+      {q:"Which model can explain the spectrum of helium?", options:["Bohr model","Quantum mechanical model","Both equally well","Neither"], correct:1},
+      {q:"The Bohr model treats the electron as:", options:["A wave","A particle in a circular orbit","A probability cloud","A standing wave"], correct:1},
+      {q:"The quantum model treats the electron as:", options:["A particle in a fixed orbit","A wave described by \u03C8","A classical point particle","A stationary object"], correct:1},
+      {q:"Electron spin was NOT predicted by Bohr's model but was discovered by:", options:["Bohr himself","Goudsmit and Uhlenbeck","Einstein","Planck"], correct:1},
+      {q:"The Stern-Gerlach experiment demonstrated:", options:["Electron orbits","Electron spin quantization","Photoelectric effect","Wave-particle duality"], correct:1},
+      {q:"Which quantum number has NO analog in Bohr's model?", options:["n (principal)","l (angular momentum)","m_l (magnetic)","m_s (spin)"], correct:3},
+      {q:"Bohr's model correctly predicted hydrogen's spectrum because:", options:["It was complete","Hydrogen has only one electron (no e-e repulsion)","It used wave functions","It included spin"], correct:1},
+      {q:"The probability of finding an electron at the nucleus in a 1s orbital is:", options:["Zero","Maximum (highest |\u03C8|\u00B2)","50%","100%"], correct:1},
+      {q:"The most probable distance from the nucleus for a 1s electron is:", options:["0 (at nucleus)","0.529 \u00C5 (Bohr radius)","1.058 \u00C5","Infinity"], correct:1}
+    ]
+  },
+  {
+    id:11, title:"Fill: de Broglie wavelength calculations",
+    instruction:"Calculate the de Broglie wavelength. Use h = 6.626 \u00D7 10\u207B\u00B3\u2074 J\u00B7s.",
+    rows:[
+      ["1","Electron (m = 9.109\u00D710\u207B\u00B3\u00B9 kg) at v = 2.0\u00D710\u2076 m/s. \u03BB = ___ \u00D7 10\u207B\u00B9\u2070 m","3.64 / 3.6"],
+      ["2","Proton (m = 1.673\u00D710\u207B\u00B2\u2077 kg) at v = 1.0\u00D710\u2074 m/s. \u03BB = ___ \u00D7 10\u207B\u00B9\u00B9 m","3.96 / 4.0"],
+      ["3","Neutron (m = 1.675\u00D710\u207B\u00B2\u2077 kg) at v = 3.0\u00D710\u00B3 m/s. \u03BB = ___ \u00D7 10\u207B\u00B9\u2070 m","1.32 / 1.3"],
+      ["4","Alpha particle (m = 6.64\u00D710\u207B\u00B2\u2077 kg) at v = 1.0\u00D710\u2077 m/s. \u03BB = ___ \u00D7 10\u207B\u00B9\u2074 m","9.98 / 10.0 / 1.0"],
+      ["5","Electron accelerated through 100 V has KE = ___ \u00D7 10\u207B\u00B9\u2077 J","1.602 / 1.60"],
+      ["6","That electron's velocity v = \u221A(2KE/m) = ___ \u00D7 10\u2076 m/s","5.93 / 5.9"],
+      ["7","That electron's \u03BB = ___ \u00D7 10\u207B\u00B9\u2070 m","1.23 / 1.2"],
+      ["8","A 70 kg person walking at 1.5 m/s. \u03BB = ___ \u00D7 10\u207B\u00B3\u2076 m","6.31 / 6.3"],
+      ["9","This wavelength is ___ (observable/unobservable)","unobservable / undetectable"],
+      ["10","An electron with \u03BB = 0.1 nm has momentum p = h/\u03BB = ___ \u00D7 10\u207B\u00B2\u2074 kg\u00B7m/s","6.63 / 6.6"],
+      ["11","That electron's velocity = p/m = ___ \u00D7 10\u2076 m/s","7.28 / 7.3"],
+      ["12","A photon with \u03BB = 500 nm has momentum p = h/\u03BB = ___ \u00D7 10\u207B\u00B2\u2077 kg\u00B7m/s","1.33 / 1.3"],
+      ["13","Doubling an electron's speed ___ (halves/doubles) its de Broglie wavelength","halves"],
+      ["14","An electron with 4\u00D7 the KE has ___ \u00D7 the de Broglie wavelength","1/2 / 0.5 / half"],
+      ["15","For the same \u03BB, a proton must travel ___ (faster/slower) than an electron","slower"]
+    ]
+  },
+  {
+    id:12, title:"MC: Advanced photoelectric and quantum concepts", type:"mc",
+    instruction:"Think carefully about these challenging questions.",
+    questions:[
+      {q:"UV light (\u03BB = 250 nm) hits a metal with \u03C6 = 4.0 eV. KE_max of ejected electrons:", options:["0.97 eV","1.97 eV","2.97 eV","No electrons ejected"], correct:0},
+      {q:"Two metals: A (\u03C6 = 2.0 eV) and B (\u03C6 = 4.0 eV). Same light hits both. Electrons from A have:", options:["Lower KE","Higher KE","Same KE","No electrons from either"], correct:1},
+      {q:"A photon and electron have the same wavelength. Which has more energy?", options:["The photon","The electron","They have equal energy","Cannot determine"], correct:0},
+      {q:"If an electron is confined to a region of ~0.1 nm (atom size), minimum \u0394p \u2248:", options:["5.3 \u00D7 10\u207B\u00B2\u2075 kg\u00B7m/s","5.3 \u00D7 10\u207B\u00B2\u2074 kg\u00B7m/s","5.3 \u00D7 10\u207B\u00B3\u2074 kg\u00B7m/s","Zero"], correct:0},
+      {q:"This minimum \u0394p gives a minimum KE of about:", options:["0.038 eV","0.38 eV","3.8 eV","38 eV"], correct:2},
+      {q:"The photoelectric effect is used in:", options:["Nuclear reactors","Solar cells and photomultiplier tubes","MRI machines","X-ray diffraction"], correct:1},
+      {q:"Compton scattering showed that photons have:", options:["Mass","Momentum","Charge","Spin"], correct:1},
+      {q:"The Compton wavelength shift depends on:", options:["Light intensity","Scattering angle","Metal work function","Temperature"], correct:1},
+      {q:"In the double-slit experiment with electrons, individual electrons:", options:["Always go through one slit","Create an interference pattern over many trials","Never reach the screen","Create two bright lines"], correct:1},
+      {q:"The Bohr model's quantization condition is equivalent to:", options:["Electrons being particles","Electron orbits fitting whole number de Broglie wavelengths","Random electron motion","Classical mechanics"], correct:1},
+      {q:"An electron in the n=2 orbit of hydrogen has a circumference equal to:", options:["1 de Broglie wavelength","2 de Broglie wavelengths","3 de Broglie wavelengths","4 de Broglie wavelengths"], correct:1},
+      {q:"The photoelectric threshold for potassium (\u03C6 = 2.3 eV) corresponds to what color?", options:["UV (below 400 nm)","Violet (~430 nm)","Green (~540 nm)","Red (~650 nm)"], correct:2},
+      {q:"Tunneling (particles passing through barriers) is a consequence of:", options:["Classical mechanics","Wave nature of particles","Gravitational effects","Electromagnetic force"], correct:1},
+      {q:"The energy-time uncertainty relation implies that:", options:["Energy is not conserved","Short-lived states have uncertain energies","Time is imaginary","Energy and time are the same"], correct:1},
+      {q:"Which observation could NOT be explained without quantum theory?", options:["Planetary motion","Blackbody radiation spectrum","Projectile motion","Gas pressure"], correct:1}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Photoelectric Effect & de Broglie \u2014 Complete Reference</h3>' +
+'<h3>Photoelectric Effect</h3>' +
+'<p><span class="rule">KE_max = h\u03BD \u2212 \u03C6</span></p>' +
+'<p>h = 6.626 \u00D7 10\u207B\u00B3\u2074 J\u00B7s, c = 3.00 \u00D7 10\u2078 m/s</p>' +
+'<p>\u03C6 = work function (minimum energy to eject electron)</p>' +
+'<p>Threshold frequency: \u03BD\u2080 = \u03C6/h</p>' +
+'<p>Threshold wavelength: \u03BB\u2080 = hc/\u03C6</p>' +
+'<table><tr><th>Metal</th><th>\u03C6 (eV)</th><th>\u03BD\u2080 (\u00D710\u00B9\u2074 Hz)</th><th>\u03BB\u2080 (nm)</th></tr>' +
+'<tr><td>Cs</td><td>2.1</td><td>5.1</td><td>591</td></tr>' +
+'<tr><td>Na</td><td>2.28</td><td>5.5</td><td>544</td></tr>' +
+'<tr><td>K</td><td>2.3</td><td>5.6</td><td>539</td></tr>' +
+'<tr><td>Cu</td><td>4.7</td><td>11.4</td><td>264</td></tr>' +
+'<tr><td>Pt</td><td>6.4</td><td>15.5</td><td>194</td></tr></table>' +
+'<h3>Key Observations</h3>' +
+'<ul>' +
+'<li>Below threshold: NO electrons, regardless of intensity</li>' +
+'<li>Above threshold: more intensity = more electrons (not faster)</li>' +
+'<li>Higher frequency = higher KE_max</li>' +
+'<li>Effect is instantaneous (no delay)</li>' +
+'<li>1 eV = 1.602 \u00D7 10\u207B\u00B9\u2079 J</li>' +
+'</ul>' +
+'<h3>de Broglie Wavelength</h3>' +
+'<p><span class="rule">\u03BB = h/mv = h/p</span></p>' +
+'<p>All matter has wave properties; significant only for subatomic particles.</p>' +
+'<p>Confirmed by Davisson-Germer electron diffraction experiment (1927).</p>' +
+'<h3>Heisenberg Uncertainty Principle</h3>' +
+'<p><span class="rule">\u0394x \u00D7 \u0394p \u2265 h/(4\u03C0)</span></p>' +
+'<p>\u0394E \u00D7 \u0394t \u2265 h/(4\u03C0)</p>' +
+'<p>Fundamental limit, not instrumental limitation.</p>' +
+'<p>Implies electrons exist in probability clouds (orbitals), not fixed orbits.</p>' +
+'<h3>Bohr vs Quantum Model</h3>' +
+'<table><tr><th>Feature</th><th>Bohr</th><th>Quantum</th></tr>' +
+'<tr><td>Electron path</td><td>Fixed circular orbits</td><td>Probability clouds (orbitals)</td></tr>' +
+'<tr><td>Works for</td><td>H only</td><td>All atoms</td></tr>' +
+'<tr><td>Position</td><td>Known exactly</td><td>Probability distribution</td></tr>' +
+'<tr><td>Equation</td><td>E_n = -13.6/n\u00B2 eV</td><td>Schrodinger equation</td></tr></table>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 photoelectric effect, work function, de Broglie wavelength, uncertainty principle \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

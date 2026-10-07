@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Salt Hydrolysis & Acidic/Basic Salts</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Salt Hydrolysis & Acidic/Basic Salts</h1>
+<p class="subtitle">Deep practice &mdash; acidic, basic, and neutral salts, hydrolysis reactions</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_75';
+const SECTIONS = [
+  {
+    id:1, title:"Fill: Classify salt solutions",
+    instruction:"Write acidic, basic, or neutral for the aqueous solution of each salt.",
+    rows:[
+      ["1","NaCl solution is ___","neutral"],
+      ["2","CH\u2083COONa (sodium acetate) solution is ___","basic"],
+      ["3","NH\u2084Cl solution is ___","acidic"],
+      ["4","KNO\u2083 solution is ___","neutral"],
+      ["5","Na\u2082CO\u2083 solution is ___","basic"],
+      ["6","NH\u2084NO\u2083 solution is ___","acidic"],
+      ["7","NaF solution is ___","basic"],
+      ["8","KCl solution is ___","neutral"],
+      ["9","FeCl\u2083 solution is ___","acidic"],
+      ["10","NaHCO\u2083 solution is ___","basic"],
+      ["11","AlCl\u2083 solution is ___","acidic"],
+      ["12","K\u2082SO\u2084 solution is ___","neutral"],
+      ["13","NH\u2084F solution is ___","acidic"],
+      ["14","NaCN solution is ___","basic"],
+      ["15","Ba(NO\u2083)\u2082 solution is ___","neutral"],
+      ["16","CuSO\u2084 solution is ___","acidic"],
+      ["17","Na\u2082S solution is ___","basic"],
+      ["18","KBr solution is ___","neutral"],
+      ["19","CH\u2083COONH\u2084 solution is ___","neutral / slightly acidic"],
+      ["20","Na\u2083PO\u2084 solution is ___","basic"]
+    ]
+  },
+  {
+    id:2, title:"Fill: Parent acid and base",
+    instruction:"Identify the parent acid and base that form each salt.",
+    rows:[
+      ["1","NaCl comes from ___ acid + ___ base","HCl + NaOH / strong acid + strong base / HCl, NaOH"],
+      ["2","CH\u2083COONa comes from ___ acid + ___ base","CH3COOH + NaOH / weak acid + strong base / CH\u2083COOH, NaOH"],
+      ["3","NH\u2084Cl comes from ___ acid + ___ base","HCl + NH3 / strong acid + weak base / HCl, NH\u2083"],
+      ["4","KNO\u2083 comes from ___ acid + ___ base","HNO3 + KOH / strong acid + strong base / HNO\u2083, KOH"],
+      ["5","Na\u2082CO\u2083 comes from ___ acid + ___ base","H2CO3 + NaOH / weak acid + strong base / H\u2082CO\u2083, NaOH"],
+      ["6","NH\u2084NO\u2083 comes from ___ acid + ___ base","HNO3 + NH3 / strong acid + weak base / HNO\u2083, NH\u2083"],
+      ["7","NaF comes from ___ acid + ___ base","HF + NaOH / weak acid + strong base / HF, NaOH"],
+      ["8","KCl comes from ___ acid + ___ base","HCl + KOH / strong acid + strong base / HCl, KOH"],
+      ["9","FeCl\u2083 comes from ___ acid + ___ base","HCl + Fe(OH)3 / strong acid + weak base / HCl, Fe(OH)\u2083"],
+      ["10","NaCN comes from ___ acid + ___ base","HCN + NaOH / weak acid + strong base / HCN, NaOH"],
+      ["11","AlCl\u2083 comes from ___ acid + ___ base","HCl + Al(OH)3 / strong acid + weak base / HCl, Al(OH)\u2083"],
+      ["12","NaHCO\u2083 comes from ___ acid + ___ base","H2CO3 + NaOH / weak acid + strong base / H\u2082CO\u2083, NaOH"],
+      ["13","CuSO\u2084 comes from ___ acid + ___ base","H2SO4 + Cu(OH)2 / strong acid + weak base / H\u2082SO\u2084, Cu(OH)\u2082"],
+      ["14","Na\u2082S comes from ___ acid + ___ base","H2S + NaOH / weak acid + strong base / H\u2082S, NaOH"],
+      ["15","Ba(NO\u2083)\u2082 comes from ___ acid + ___ base","HNO3 + Ba(OH)2 / strong acid + strong base / HNO\u2083, Ba(OH)\u2082"],
+      ["16","CH\u2083COONH\u2084 comes from ___ acid + ___ base","CH3COOH + NH3 / weak acid + weak base / CH\u2083COOH, NH\u2083"],
+      ["17","K\u2082SO\u2084 comes from ___ acid + ___ base","H2SO4 + KOH / strong acid + strong base / H\u2082SO\u2084, KOH"],
+      ["18","Na\u2083PO\u2084 comes from ___ acid + ___ base","H3PO4 + NaOH / weak acid + strong base / H\u2083PO\u2084, NaOH"],
+      ["19","NH\u2084F comes from ___ acid + ___ base","HF + NH3 / weak acid + weak base / HF, NH\u2083"],
+      ["20","CaCl\u2082 comes from ___ acid + ___ base","HCl + Ca(OH)2 / strong acid + strong base / HCl, Ca(OH)\u2082"]
+    ]
+  },
+  {
+    id:3, title:"MC: Salt hydrolysis concepts", type:"mc",
+    instruction:"Select the correct answer about salt hydrolysis.",
+    questions:[
+      {q:"A salt from a strong acid + strong base produces a solution that is:", options:["Acidic","Basic","Neutral","Cannot determine"], correct:2},
+      {q:"A salt from a weak acid + strong base produces a solution that is:", options:["Acidic","Basic","Neutral","Depends on concentration"], correct:1},
+      {q:"A salt from a strong acid + weak base produces a solution that is:", options:["Acidic","Basic","Neutral","Depends on temperature"], correct:0},
+      {q:"A salt from a weak acid + weak base produces a solution that:", options:["Is always neutral","Depends on the relative Ka and Kb","Is always acidic","Is always basic"], correct:1},
+      {q:"Why is NaCl solution neutral?", options:["Na\u207A and Cl\u207B both hydrolyze","Neither Na\u207A nor Cl\u207B hydrolyze significantly","Na\u207A is acidic, Cl\u207B is basic, they cancel","NaCl doesn't dissolve"], correct:1},
+      {q:"Why is CH\u2083COONa solution basic?", options:["Na\u207A hydrolyzes","CH\u2083COO\u207B hydrolyzes, producing OH\u207B","Neither ion hydrolyzes","Both ions hydrolyze equally"], correct:1},
+      {q:"The hydrolysis of CH\u2083COO\u207B produces:", options:["CH\u2083COOH + OH\u207B","CH\u2083COOH + H\u207A","CH\u2084 + CO\u2082","No reaction"], correct:0},
+      {q:"The hydrolysis of NH\u2084\u207A produces:", options:["NH\u2083 + H\u207A","NH\u2083 + OH\u207B","N\u2082 + H\u2082","No reaction"], correct:0},
+      {q:"Which ion does NOT hydrolyze?", options:["CH\u2083COO\u207B","NH\u2084\u207A","Na\u207A","F\u207B"], correct:2},
+      {q:"Hydrolysis means reaction with:", options:["Acid","Base","Water","Salt"], correct:2},
+      {q:"Fe\u00B3\u207A in water acts as a(n):", options:["Base (produces OH\u207B)","Acid (produces H\u207A)","Neutral species","Oxidizing agent only"], correct:1},
+      {q:"Small, highly charged cations (like Al\u00B3\u207A, Fe\u00B3\u207A) tend to make solutions:", options:["Basic","Neutral","Acidic","Cannot predict"], correct:2},
+      {q:"The conjugate base of a strong acid is:", options:["A strong base","A weak base (doesn't hydrolyze)","A strong acid","Neutral only"], correct:1},
+      {q:"The conjugate acid of a strong base is:", options:["A strong acid","A weak acid (doesn't hydrolyze)","A strong base","Always hydrolyzes"], correct:1},
+      {q:"Which produces the most basic solution?", options:["NaCl","NaNO\u2083","Na\u2082CO\u2083","NaClO\u2084"], correct:2},
+      {q:"Percent hydrolysis increases when:", options:["Concentration increases","Concentration decreases","Temperature stays constant","pH decreases"], correct:1},
+      {q:"Which salt solution has pH > 7?", options:["NH\u2084Cl","KNO\u2083","KF","AlCl\u2083"], correct:2},
+      {q:"Which salt solution has pH < 7?", options:["NaF","Na\u2082CO\u2083","NH\u2084Br","KCl"], correct:2},
+      {q:"For CH\u2083COONH\u2084: Ka(CH\u2083COOH) = 1.8\u00D710\u207B\u2075, Kb(NH\u2083) = 1.8\u00D710\u207B\u2075. Solution is:", options:["Acidic","Basic","Neutral (Ka = Kb)","Cannot determine"], correct:2},
+      {q:"Anions from weak acids (F\u207B, CN\u207B, CO\u2083\u00B2\u207B) are:", options:["Neutral in water","Acidic in water","Basic in water","Don't dissolve"], correct:2}
+    ]
+  },
+  {
+    id:4, title:"Fill: pH prediction",
+    instruction:"Write whether the pH is greater than 7, less than 7, or equal to 7.",
+    rows:[
+      ["1","pH of NH\u2084NO\u2083 solution is ___ 7","less than / < / below"],
+      ["2","pH of NaCl solution is ___ 7","equal to / = / 7"],
+      ["3","pH of Na\u2082CO\u2083 solution is ___ 7","greater than / > / above"],
+      ["4","pH of KBr solution is ___ 7","equal to / = / 7"],
+      ["5","pH of NaF solution is ___ 7","greater than / > / above"],
+      ["6","pH of FeCl\u2083 solution is ___ 7","less than / < / below"],
+      ["7","pH of CH\u2083COONa solution is ___ 7","greater than / > / above"],
+      ["8","pH of AlCl\u2083 solution is ___ 7","less than / < / below"],
+      ["9","pH of Ba(NO\u2083)\u2082 solution is ___ 7","equal to / = / 7"],
+      ["10","pH of NaCN solution is ___ 7","greater than / > / above"],
+      ["11","pH of NH\u2084Cl solution is ___ 7","less than / < / below"],
+      ["12","pH of K\u2082SO\u2084 solution is ___ 7","equal to / = / 7"],
+      ["13","pH of CuSO\u2084 solution is ___ 7","less than / < / below"],
+      ["14","pH of Na\u2083PO\u2084 solution is ___ 7","greater than / > / above"],
+      ["15","pH of Na\u2082S solution is ___ 7","greater than / > / above"]
+    ]
+  },
+  {
+    id:5, title:"MC: Hydrolysis reactions", type:"mc",
+    instruction:"Identify or evaluate hydrolysis reactions.",
+    questions:[
+      {q:"CH\u2083COO\u207B + H\u2082O \u21CC ___:", options:["CH\u2083COOH + OH\u207B","CH\u2083COOH + H\u207A","CH\u2084 + CO\u2082 + OH\u207B","No reaction occurs"], correct:0},
+      {q:"NH\u2084\u207A + H\u2082O \u21CC ___:", options:["NH\u2083 + H\u2083O\u207A","NH\u2083 + OH\u207B","N\u2082 + H\u2082 + H\u207A","NH\u2084OH"], correct:0},
+      {q:"F\u207B + H\u2082O \u21CC ___:", options:["HF + OH\u207B","HF + H\u207A","F\u2082 + OH\u207B","No reaction"], correct:0},
+      {q:"CN\u207B + H\u2082O \u21CC ___:", options:["HCN + OH\u207B","HCN + H\u207A","C + N + OH\u207B","No reaction"], correct:0},
+      {q:"Cl\u207B + H\u2082O \u2192 ___:", options:["HCl + OH\u207B","No significant reaction","Cl\u2082 + OH\u207B","ClOH + H\u207A"], correct:1},
+      {q:"Na\u207A + H\u2082O \u2192 ___:", options:["NaOH + H\u207A","No significant reaction","Na + OH\u207B","NaH + OH\u207B"], correct:1},
+      {q:"Al\u00B3\u207A + 6H\u2082O \u21CC ___:", options:["Al(H\u2082O)\u2086\u00B3\u207A, then Al(H\u2082O)\u2085(OH)\u00B2\u207A + H\u207A","Al(OH)\u2083 + 3H\u207A","AlH\u2083 + 3OH\u207B","No reaction"], correct:0},
+      {q:"CO\u2083\u00B2\u207B + H\u2082O \u21CC ___:", options:["H\u2082CO\u2083","HCO\u2083\u207B + OH\u207B","CO\u2082 + 2OH\u207B","No reaction"], correct:1},
+      {q:"S\u00B2\u207B + H\u2082O \u21CC ___:", options:["H\u2082S + 2OH\u207B","HS\u207B + OH\u207B","H\u2082S + H\u207A","No reaction"], correct:1},
+      {q:"PO\u2084\u00B3\u207B + H\u2082O \u21CC ___:", options:["HPO\u2084\u00B2\u207B + OH\u207B","H\u2083PO\u2084","H\u2082PO\u2084\u207B + 2OH\u207B","No reaction"], correct:0},
+      {q:"Which ion undergoes hydrolysis to produce H\u207A?", options:["Na\u207A","K\u207A","NH\u2084\u207A","Cl\u207B"], correct:2},
+      {q:"Which ion undergoes hydrolysis to produce OH\u207B?", options:["NO\u2083\u207B","Br\u207B","CH\u2083COO\u207B","Na\u207A"], correct:2},
+      {q:"The Kb for the hydrolysis of CH\u2083COO\u207B is related to Ka of CH\u2083COOH by:", options:["Kb = Ka","Kb = Kw / Ka","Kb = Ka / Kw","Kb = Ka \u00D7 Kw"], correct:1},
+      {q:"For NH\u2084\u207A hydrolysis, Ka = Kw / Kb(NH\u2083). If Kb = 1.8\u00D710\u207B\u2075:", options:["Ka = 5.6\u00D710\u207B\u00B9\u2070","Ka = 1.8\u00D710\u207B\u2075","Ka = 1\u00D710\u207B\u00B9\u2074","Ka = 1\u00D710\u207B\u2077"], correct:0},
+      {q:"HCO\u2083\u207B can act as both acid and base. This makes it:", options:["Amphoteric / amphiprotic","Strong acid","Strong base","Neutral"], correct:0}
+    ]
+  },
+  {
+    id:6, title:"Fill: Strong/weak identification",
+    instruction:"Classify each as strong or weak acid/base.",
+    rows:[
+      ["1","HCl is a ___ acid","strong"],
+      ["2","CH\u2083COOH is a ___ acid","weak"],
+      ["3","NaOH is a ___ base","strong"],
+      ["4","NH\u2083 is a ___ base","weak"],
+      ["5","HNO\u2083 is a ___ acid","strong"],
+      ["6","H\u2082SO\u2084 is a ___ acid","strong"],
+      ["7","HF is a ___ acid","weak"],
+      ["8","KOH is a ___ base","strong"],
+      ["9","HCN is a ___ acid","weak"],
+      ["10","Ba(OH)\u2082 is a ___ base","strong"],
+      ["11","H\u2082CO\u2083 is a ___ acid","weak"],
+      ["12","HClO\u2084 is a ___ acid","strong"],
+      ["13","Fe(OH)\u2083 is a ___ base","weak"],
+      ["14","Al(OH)\u2083 is a ___ base","weak"],
+      ["15","HBr is a ___ acid","strong"]
+    ]
+  },
+  {
+    id:7, title:"MC: Buffer vs salt", type:"mc",
+    instruction:"Distinguish buffer solutions from simple salt solutions.",
+    questions:[
+      {q:"A buffer solution contains:", options:["A strong acid + strong base","A weak acid + its conjugate base (or weak base + its conjugate acid)","Any salt dissolved in water","Pure water"], correct:1},
+      {q:"CH\u2083COOH + CH\u2083COONa is a:", options:["Salt solution","Buffer solution","Strong acid solution","Pure base"], correct:1},
+      {q:"NaCl dissolved in water is:", options:["A buffer","A salt solution (not a buffer)","An acid","A base"], correct:1},
+      {q:"NH\u2083 + NH\u2084Cl is a:", options:["Salt solution only","Buffer solution","Strong base","Neutral solution"], correct:1},
+      {q:"Which is NOT a buffer?", options:["HF + NaF","CH\u2083COOH + CH\u2083COONa","HCl + NaCl","NH\u2083 + NH\u2084Cl"], correct:2},
+      {q:"A buffer resists changes in:", options:["Temperature","Volume","pH","Concentration"], correct:2},
+      {q:"Adding NaOH to a CH\u2083COOH/CH\u2083COONa buffer:", options:["pH rises dramatically","pH rises slightly","pH drops","No change"], correct:1},
+      {q:"The Henderson-Hasselbalch equation is pH = ___:", options:["pKa + log([A\u207B]/[HA])","pKb + log([B]/[BH\u207A])","14 \u2212 pOH","\u2212log[H\u207A]"], correct:0},
+      {q:"A buffer has maximum capacity when:", options:["pH = 0","pH = pKa","pH = 14","[HA] >> [A\u207B]"], correct:1},
+      {q:"NaCH\u2083COO dissolved alone (without acetic acid) acts as:", options:["A buffer","A basic salt solution (not truly a buffer)","An acid","Neutral"], correct:1}
+    ]
+  },
+  {
+    id:8, title:"Fill: Products of neutralization",
+    instruction:"Complete the neutralization reaction: acid + base \u2192 salt + water.",
+    rows:[
+      ["1","HCl + NaOH \u2192 ___ + H\u2082O","NaCl"],
+      ["2","HNO\u2083 + KOH \u2192 ___ + H\u2082O","KNO3 / KNO\u2083"],
+      ["3","CH\u2083COOH + NaOH \u2192 ___ + H\u2082O","CH3COONa / NaCH3COO / CH\u2083COONa"],
+      ["4","HCl + NH\u2083 \u2192 ___","NH4Cl / NH\u2084Cl"],
+      ["5","H\u2082SO\u2084 + 2NaOH \u2192 ___ + 2H\u2082O","Na2SO4 / Na\u2082SO\u2084"],
+      ["6","HF + KOH \u2192 ___ + H\u2082O","KF"],
+      ["7","H\u2082CO\u2083 + 2NaOH \u2192 ___ + 2H\u2082O","Na2CO3 / Na\u2082CO\u2083"],
+      ["8","HCl + Ca(OH)\u2082 \u2192 ___ + 2H\u2082O","CaCl2 / CaCl\u2082"],
+      ["9","HCN + NaOH \u2192 ___ + H\u2082O","NaCN"],
+      ["10","H\u2083PO\u2084 + 3NaOH \u2192 ___ + 3H\u2082O","Na3PO4 / Na\u2083PO\u2084"]
+    ]
+  },
+  {
+    id:9, title:"Arrange: Build hydrolysis rules", type:"arrange",
+    instruction:"Click the words in the correct order.",
+    sentences:[
+      {prompt:"Strong acid plus strong base gives neutral salt", words:["Strong acid","plus","strong base","gives","neutral","salt"]},
+      {prompt:"Weak acid plus strong base gives basic salt", words:["Weak acid","plus","strong base","gives","basic","salt"]},
+      {prompt:"Strong acid plus weak base gives acidic salt", words:["Strong acid","plus","weak base","gives","acidic","salt"]},
+      {prompt:"Conjugate base of weak acid hydrolyzes to produce hydroxide", words:["Conjugate base","of weak acid","hydrolyzes","to produce","hydroxide"]},
+      {prompt:"Salt hydrolysis is the reaction of ions with water", words:["Salt","hydrolysis","is the","reaction","of ions","with water"]}
+    ]
+  },
+  {
+    id:10, title:"MC: Ka and Kb in salt solutions", type:"mc",
+    instruction:"Compare Ka and Kb to predict salt solution pH.",
+    questions:[
+      {q:"For NH\u2084F: Ka(HF) = 6.8\u00D710\u207B\u2074, Kb(NH\u2083) = 1.8\u00D710\u207B\u2075. Since Ka > Kb, solution is:", options:["Basic","Acidic","Neutral","Cannot determine"], correct:1},
+      {q:"For NH\u2084CN: Ka(HCN) = 6.2\u00D710\u207B\u00B9\u2070, Kb(NH\u2083) = 1.8\u00D710\u207B\u2075. Since Kb > Ka, solution is:", options:["Basic","Acidic","Neutral","Cannot determine"], correct:0},
+      {q:"For CH\u2083COONH\u2084: Ka = Kb = 1.8\u00D710\u207B\u2075. Solution is:", options:["Acidic","Basic","Neutral","Strongly acidic"], correct:2},
+      {q:"When Ka of conjugate acid > Kb of conjugate base:", options:["Solution is basic","Solution is acidic","Solution is neutral","Need more data"], correct:1},
+      {q:"When Kb of conjugate base > Ka of conjugate acid:", options:["Solution is basic","Solution is acidic","Solution is neutral","Depends on T"], correct:0},
+      {q:"For a salt of weak acid + weak base, pH depends on:", options:["Only Ka","Only Kb","Comparison of Ka and Kb","Neither Ka nor Kb"], correct:2},
+      {q:"The Kh (hydrolysis constant) for CH\u2083COO\u207B equals:", options:["Kw / Ka(CH\u2083COOH)","Ka(CH\u2083COOH) / Kw","Kw \u00D7 Ka","Ka + Kb"], correct:0},
+      {q:"If Ka(HA) = 1\u00D710\u207B\u00B3, the Kb for A\u207B hydrolysis is:", options:["1\u00D710\u207B\u00B9\u00B9","1\u00D710\u207B\u00B3","1\u00D710\u207B\u2077","1\u00D710\u207B\u00B9\u2074"], correct:0},
+      {q:"Stronger parent acid means its conjugate base:", options:["Hydrolyzes more","Hydrolyzes less","Doesn't dissolve","Is always basic"], correct:1},
+      {q:"A salt with a very small Ka parent acid (very weak acid) produces a ___ basic solution:", options:["Weakly","Strongly","Not","Neutral"], correct:1}
+    ]
+  },
+  {
+    id:11, title:"Fill: Common salt classifications",
+    instruction:"Classify each salt as acidic, basic, or neutral.",
+    rows:[
+      ["1","NaClO\u2084 (from HClO\u2084 + NaOH)","neutral"],
+      ["2","LiF (from HF + LiOH)","basic"],
+      ["3","NH\u2084Br (from HBr + NH\u2083)","acidic"],
+      ["4","SrCl\u2082 (from HCl + Sr(OH)\u2082)","neutral"],
+      ["5","KCH\u2083COO (from CH\u2083COOH + KOH)","basic"],
+      ["6","Zn(NO\u2083)\u2082 (from HNO\u2083 + Zn(OH)\u2082)","acidic"],
+      ["7","RbNO\u2083 (from HNO\u2083 + RbOH)","neutral"],
+      ["8","NaNO\u2082 (from HNO\u2082 + NaOH)","basic"],
+      ["9","CrCl\u2083 (from HCl + Cr(OH)\u2083)","acidic"],
+      ["10","K\u2082S (from H\u2082S + KOH)","basic"]
+    ]
+  },
+  {
+    id:12, title:"MC: Tricky salt problems", type:"mc",
+    instruction:"Think carefully about these challenging questions.",
+    questions:[
+      {q:"NaHCO\u2083 can act as acid or base. In water, it is:", options:["Acidic (Ka\u2082 > Kb)","Basic (Kb > Ka\u2082)","Perfectly neutral","Strongly acidic"], correct:1},
+      {q:"Na\u2082CO\u2083 vs NaHCO\u2083: which is more basic?", options:["Na\u2082CO\u2083 (CO\u2083\u00B2\u207B is a stronger base than HCO\u2083\u207B)","NaHCO\u2083","They are equally basic","Neither is basic"], correct:0},
+      {q:"NaHSO\u2084 in water is:", options:["Neutral","Basic","Acidic (HSO\u2084\u207B is a strong acid)","Depends on concentration"], correct:2},
+      {q:"KAl(SO\u2084)\u2082 (alum) in water is:", options:["Neutral","Basic","Acidic (Al\u00B3\u207A hydrolyzes)","Depends on temperature"], correct:2},
+      {q:"NH\u2084HCO\u2083 in water: NH\u2084\u207A is acidic, HCO\u2083\u207B is basic. The solution is:", options:["Acidic","Basic (Kb of HCO\u2083\u207B > Ka of NH\u2084\u207A)","Exactly neutral","Cannot determine without Ka/Kb values"], correct:3},
+      {q:"FePO\u2084: Fe\u00B3\u207A is acidic, PO\u2084\u00B3\u207B is basic. Without Ka/Kb values:", options:["Clearly acidic","Clearly basic","Need Ka and Kb to determine","Always neutral"], correct:2},
+      {q:"Sodium bisulfite (NaHSO\u2083) in water:", options:["Neutral","Acidic (HSO\u2083\u207B acts as acid)","Basic","Amphoteric, but slightly acidic"], correct:3},
+      {q:"Why is Al\u00B3\u207A acidic in water but Na\u207A is not?", options:["Al\u00B3\u207A is smaller and more highly charged, polarizing water","Na\u207A is heavier","Al is a nonmetal","Na\u207A forms stronger bonds with water"], correct:0},
+      {q:"Pb(CH\u2083COO)\u2082 solution is:", options:["Basic only","Acidic only","Could be acidic or basic (Pb\u00B2\u207A acidic, CH\u2083COO\u207B basic)","Always neutral"], correct:2},
+      {q:"The degree of hydrolysis increases with:", options:["Increasing concentration","Decreasing concentration (dilution)","Adding more salt","Lower temperature only"], correct:1}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Salt Hydrolysis & Acidic/Basic Salts \u2014 Complete Reference</h3>' +
+'<h3>Salt Formation</h3>' +
+'<p><span class="rule">Acid + Base \u2192 Salt + Water</span> (neutralization)</p>' +
+'<h3>Classification Rules</h3>' +
+'<table><tr><th>Parent Acid</th><th>Parent Base</th><th>Solution pH</th><th>Example</th></tr>' +
+'<tr><td>Strong</td><td>Strong</td><td><span class="rule">Neutral (pH = 7)</span></td><td>NaCl, KNO\u2083</td></tr>' +
+'<tr><td>Strong</td><td>Weak</td><td><span class="rule">Acidic (pH < 7)</span></td><td>NH\u2084Cl, FeCl\u2083</td></tr>' +
+'<tr><td>Weak</td><td>Strong</td><td><span class="rule">Basic (pH > 7)</span></td><td>CH\u2083COONa, NaF</td></tr>' +
+'<tr><td>Weak</td><td>Weak</td><td><span class="rule">Compare Ka vs Kb</span></td><td>CH\u2083COONH\u2084</td></tr></table>' +
+'<h3>Hydrolysis Definition</h3>' +
+'<p><span class="rule">Hydrolysis</span> = reaction of salt ions with water to produce H\u207A or OH\u207B</p>' +
+'<p>Only ions from <span class="rule">weak</span> acids or bases hydrolyze significantly.</p>' +
+'<p>Ions from strong acids/bases (Na\u207A, K\u207A, Cl\u207B, NO\u2083\u207B) do NOT hydrolyze.</p>' +
+'<h3>Key Hydrolysis Reactions</h3>' +
+'<p><span class="rule">Anion hydrolysis</span> (from weak acid): A\u207B + H\u2082O \u21CC HA + OH\u207B (basic)</p>' +
+'<p><span class="rule">Cation hydrolysis</span> (from weak base): BH\u207A + H\u2082O \u21CC B + H\u2083O\u207A (acidic)</p>' +
+'<p><span class="rule">Metal ion hydrolysis</span>: M\u00B3\u207A(H\u2082O)\u2086 \u21CC M(OH)(H\u2082O)\u2085\u00B2\u207A + H\u207A (acidic)</p>' +
+'<h3>Common Examples</h3>' +
+'<table><tr><th>Salt</th><th>Parent Acid</th><th>Parent Base</th><th>Solution</th></tr>' +
+'<tr><td>NaCl</td><td>HCl (strong)</td><td>NaOH (strong)</td><td>Neutral</td></tr>' +
+'<tr><td>CH\u2083COONa</td><td>CH\u2083COOH (weak)</td><td>NaOH (strong)</td><td>Basic</td></tr>' +
+'<tr><td>NH\u2084Cl</td><td>HCl (strong)</td><td>NH\u2083 (weak)</td><td>Acidic</td></tr>' +
+'<tr><td>Na\u2082CO\u2083</td><td>H\u2082CO\u2083 (weak)</td><td>NaOH (strong)</td><td>Basic</td></tr>' +
+'<tr><td>FeCl\u2083</td><td>HCl (strong)</td><td>Fe(OH)\u2083 (weak)</td><td>Acidic</td></tr></table>' +
+'<h3>Weak Acid + Weak Base Salts</h3>' +
+'<p>Compare Ka of conjugate acid with Kb of conjugate base:</p>' +
+'<ul>' +
+'<li>Ka > Kb \u2192 acidic</li>' +
+'<li>Ka < Kb \u2192 basic</li>' +
+'<li>Ka = Kb \u2192 neutral</li>' +
+'</ul>' +
+'<h3>Key Relationships</h3>' +
+'<p><span class="rule">Ka \u00D7 Kb = Kw = 1.0 \u00D7 10\u207B\u00B9\u2074</span> (at 25\u00B0C)</p>' +
+'<p>Kb(hydrolysis of A\u207B) = Kw / Ka(HA)</p>' +
+'<p>Ka(hydrolysis of BH\u207A) = Kw / Kb(B)</p>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 acidic, basic, and neutral salts, hydrolysis reactions \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice 40 — Intermolecular Forces</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Practice 40 &mdash; Intermolecular Forces</h1>
+<p class="subtitle">Deep practice &mdash; IMFs, hydrogen bonding, physical properties</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_40';
+const SECTIONS = [
+  {
+    id:1, title:"Types of IMFs",
+    instruction:"Fill in the blank for each statement about intermolecular forces.",
+    rows:[
+      ["1","The three main types of IMFs are London dispersion, dipole-dipole, and ___","hydrogen bonding / hydrogen bonds / h-bonding"],
+      ["2","London dispersion forces exist in ___ molecules","all"],
+      ["3","London forces increase with increasing ___ mass","molar / molecular"],
+      ["4","Dipole-dipole forces occur between ___ molecules","polar"],
+      ["5","Hydrogen bonding requires H bonded to ___, ___, or ___","F, O, N / N, O, F / F O N / N O F / O, N, F / F, N, O"],
+      ["6","Strongest IMF: ___","hydrogen bonding / hydrogen bonds / h-bonding"],
+      ["7","Weakest IMF: ___","London dispersion / London / dispersion"],
+      ["8","Ion-dipole forces occur between ___ and polar molecules","ions"],
+      ["9","London dispersion forces arise from temporary ___","dipoles / instantaneous dipoles"],
+      ["10","Larger electron clouds lead to ___ London dispersion forces","stronger"],
+      ["11","Dipole-dipole forces align the ___ end of one molecule with the ___ end of another","positive, negative / +, -"],
+      ["12","Ion-dipole forces are important when ionic compounds dissolve in ___","water / polar solvents"],
+      ["13","The shape of a molecule affects the strength of ___ forces","London dispersion / London / dispersion"],
+      ["14","Linear molecules have ___ London forces than branched ones of similar mass","stronger / greater"],
+      ["15","IMFs are ___ (stronger/weaker) than intramolecular bonds (covalent/ionic)","weaker"],
+      ["16","Induced dipole forces are another name for ___","London dispersion / London / dispersion"]
+    ]
+  },
+  {
+    id:2, title:"Identify the Dominant IMF",
+    instruction:"Name the dominant intermolecular force for each substance.",
+    rows:[
+      ["1","CH\u2084: dominant IMF?","London dispersion / London / dispersion"],
+      ["2","HF: dominant IMF?","hydrogen bonding / hydrogen bonds / h-bonding"],
+      ["3","HCl: dominant IMF?","dipole-dipole"],
+      ["4","H\u2082O: dominant IMF?","hydrogen bonding / hydrogen bonds / h-bonding"],
+      ["5","NH\u2083: dominant IMF?","hydrogen bonding / hydrogen bonds / h-bonding"],
+      ["6","CO\u2082: dominant IMF?","London dispersion / London / dispersion"],
+      ["7","CH\u2083OH: dominant IMF?","hydrogen bonding / hydrogen bonds / h-bonding"],
+      ["8","Ar: dominant IMF?","London dispersion / London / dispersion"],
+      ["9","N\u2082: dominant IMF?","London dispersion / London / dispersion"],
+      ["10","CH\u2083F: dominant IMF?","dipole-dipole"],
+      ["11","C\u2082H\u2085OH (ethanol): dominant IMF?","hydrogen bonding / hydrogen bonds / h-bonding"],
+      ["12","CCl\u2084: dominant IMF?","London dispersion / London / dispersion"],
+      ["13","CH\u2083NH\u2082 (methylamine): dominant IMF?","hydrogen bonding / hydrogen bonds / h-bonding"],
+      ["14","SO\u2082: dominant IMF?","dipole-dipole"],
+      ["15","Br\u2082: dominant IMF?","London dispersion / London / dispersion"],
+      ["16","HCOOH (formic acid): dominant IMF?","hydrogen bonding / hydrogen bonds / h-bonding"],
+      ["17","CH\u2083COCH\u2083 (acetone): dominant IMF?","dipole-dipole"],
+      ["18","NaCl dissolved in H\u2082O: dominant interaction?","ion-dipole"]
+    ]
+  },
+  {
+    id:3, title:"Effects on Physical Properties", type:"mc",
+    instruction:"Select the correct answer about how IMFs affect physical properties.",
+    questions:[
+      {q:"Stronger IMFs lead to ___ boiling points:", options:["Lower","Higher","Unchanged","Variable"], correct:1},
+      {q:"H\u2082O has unusually high BP because of:", options:["London forces","Dipole-dipole","Hydrogen bonding","Ionic bonds"], correct:2},
+      {q:"Which has higher BP: CH\u2084 or C\u2084H\u2081\u2080?", options:["CH\u2084 (smaller London forces)","C\u2084H\u2081\u2080 (larger London forces)","Same BP","Cannot determine"], correct:1},
+      {q:"Which has higher BP: HF or HCl?", options:["HCl (larger molecule)","HF (hydrogen bonding)","Same BP","HCl (more electrons)"], correct:1},
+      {q:"Which has higher BP: CH\u2083OH or CH\u2083CH\u2083?", options:["CH\u2083CH\u2083 (larger)","CH\u2083OH (hydrogen bonding)","Same BP","CH\u2083CH\u2083 (nonpolar)"], correct:1},
+      {q:"Surface tension is ___ for liquids with strong IMFs:", options:["Lower","Higher","Unchanged","Zero"], correct:1},
+      {q:"Viscosity is ___ for liquids with strong IMFs:", options:["Lower","Higher","Unchanged","Zero"], correct:1},
+      {q:"Volatile liquids have ___ IMFs:", options:["Strong","Weak","No","Ionic"], correct:1},
+      {q:"Stronger IMFs mean ___ vapor pressure:", options:["Higher","Lower","Same","Variable"], correct:1},
+      {q:"Which has higher surface tension: H\u2082O or hexane?", options:["Hexane","H\u2082O","Same","Cannot compare"], correct:1},
+      {q:"Capillary action occurs when ___ forces are stronger than cohesive forces:", options:["Gravitational","Adhesive","Nuclear","Magnetic"], correct:1},
+      {q:"Water rises in a glass tube because:", options:["It is pushed up by pressure","Adhesion to glass > cohesion of water","It is lighter than glass","Gravity pulls it up"], correct:1},
+      {q:"Mercury forms a convex meniscus because:", options:["Adhesion > cohesion","Cohesion > adhesion","It has no IMFs","It is magnetic"], correct:1},
+      {q:"Stronger IMFs mean ___ melting points:", options:["Lower","Higher","Same","Variable"], correct:1},
+      {q:"Stronger IMFs mean ___ heat of fusion:", options:["Lower","Higher","Same","Zero"], correct:1}
+    ]
+  },
+  {
+    id:4, title:"Hydrogen Bonding Details",
+    instruction:"Fill in the blank for each statement about hydrogen bonding.",
+    rows:[
+      ["1","H-bonding is a special case of ___ interaction","dipole-dipole"],
+      ["2","H-bonding requires H bonded to a highly ___ atom","electronegative"],
+      ["3","Ice is ___ dense than liquid water because of H-bonding","less"],
+      ["4","DNA double helix is held together by ___","hydrogen bonds / hydrogen bonding / h-bonds"],
+      ["5","Which has H-bonding: CH\u2083OH or CH\u2083OCH\u2083?","CH3OH / CH\u2083OH / methanol"],
+      ["6","Ethanol (C\u2082H\u2085OH) is miscible with water because of ___","hydrogen bonding / hydrogen bonds / h-bonding"],
+      ["7","Each water molecule can form up to ___ hydrogen bonds","4"],
+      ["8","H-bonding in water creates an ___ crystal structure in ice","hexagonal / open"],
+      ["9","Acetic acid (CH\u2083COOH) can form H-bonds because it contains ___ and ___ groups","O-H, C=O / OH, C=O"],
+      ["10","Proteins maintain their shape partly through intramolecular ___","hydrogen bonds / hydrogen bonding / h-bonds"],
+      ["11","H-bond strength is typically ___ kJ/mol (range)","5-30 / 10-40"],
+      ["12","HF has a lower BP than H\u2082O despite stronger H-bonds because each HF can only form ___ H-bond(s) per molecule","1 / one"],
+      ["13","CH\u2083CONH\u2082 (acetamide) can form H-bonds through both ___ and ___ atoms","N-H, O / N, O"],
+      ["14","The boiling point anomaly of H\u2082O, HF, and NH\u2083 is caused by ___","hydrogen bonding / hydrogen bonds / h-bonding"],
+      ["15","Like dissolves like: polar solvents dissolve ___ solutes","polar / ionic"]
+    ]
+  },
+  {
+    id:5, title:"Comparing Substances", type:"mc",
+    instruction:"Select the correct answer comparing substances and their IMFs.",
+    questions:[
+      {q:"Rank by increasing BP: CH\u2084, NH\u2083, H\u2082O", options:["H\u2082O < NH\u2083 < CH\u2084","CH\u2084 < NH\u2083 < H\u2082O","NH\u2083 < CH\u2084 < H\u2082O","CH\u2084 < H\u2082O < NH\u2083"], correct:1},
+      {q:"Why is HF's BP higher than HCl?", options:["HF has more electrons","HF has hydrogen bonding","HF is heavier","HF is nonpolar"], correct:1},
+      {q:"Why does H\u2082O have a higher BP than H\u2082S?", options:["H\u2082O is heavier","H\u2082O has stronger London forces","H\u2082O has hydrogen bonding, H\u2082S does not","H\u2082S is a gas at room temperature"], correct:2},
+      {q:"Which has the highest BP: HF, HCl, HBr, HI?", options:["HI (most electrons)","HBr (middle size)","HCl (most polar)","HF (hydrogen bonding)"], correct:3},
+      {q:"Rank by increasing BP: Ne, Ar, Kr", options:["Kr < Ar < Ne","Ne < Ar < Kr","Ar < Ne < Kr","All the same"], correct:1},
+      {q:"Why is ethanol (C\u2082H\u2085OH) liquid but dimethyl ether (CH\u2083OCH\u2083) is gas at RT?", options:["Ethanol is heavier","Ethanol has H-bonding, ether does not","Ether is ionic","Same state actually"], correct:1},
+      {q:"Which has stronger IMFs: I\u2082 or Cl\u2082?", options:["Cl\u2082 (more electronegative)","I\u2082 (more electrons, stronger London forces)","Same strength","Cl\u2082 (smaller molecule)"], correct:1},
+      {q:"Glycerol (3 OH groups) vs ethanol (1 OH group) \u2014 which is more viscous?", options:["Ethanol","Glycerol","Same viscosity","Cannot compare"], correct:1},
+      {q:"Which has higher BP: n-pentane or neopentane?", options:["Neopentane (more branched)","n-pentane (more linear, better packing)","Same BP","Cannot determine"], correct:1},
+      {q:"Which is most soluble in water?", options:["Hexane (C\u2086H\u2081\u2084)","Methanol (CH\u2083OH)","CCl\u2084","Benzene (C\u2086H\u2086)"], correct:1},
+      {q:"NaCl dissolves in water but not in hexane because:", options:["NaCl is too heavy","Water has ion-dipole interactions with NaCl","Hexane is too viscous","NaCl is covalent"], correct:1},
+      {q:"Which has the highest viscosity?", options:["Water","Honey (sugar solution)","Gasoline","Acetone"], correct:1},
+      {q:"Rank BP: CH\u2083CH\u2082CH\u2083, CH\u2083CH\u2082OH, CH\u2083OCH\u2083", options:["CH\u2083CH\u2082CH\u2083 < CH\u2083OCH\u2083 < CH\u2083CH\u2082OH","CH\u2083OCH\u2083 < CH\u2083CH\u2082CH\u2083 < CH\u2083CH\u2082OH","All the same","CH\u2083CH\u2082OH < CH\u2083OCH\u2083 < CH\u2083CH\u2082CH\u2083"], correct:0},
+      {q:"Oil and water don't mix because:", options:["Oil is heavier","Oil is nonpolar, water is polar (unlike IMFs)","They have the same density","Oil is ionic"], correct:1},
+      {q:"Which has the lowest boiling point?", options:["H\u2082O","H\u2082S","H\u2082Se","H\u2082Te"], correct:1}
+    ]
+  },
+  {
+    id:6, title:"Phase Changes & IMFs", type:"mc",
+    instruction:"Select the correct answer about phase changes and intermolecular forces.",
+    questions:[
+      {q:"Evaporation breaks ___ forces:", options:["Intramolecular (covalent)","Intermolecular","Nuclear","Ionic"], correct:1},
+      {q:"Sublimation goes from ___ to ___:", options:["Liquid to gas","Gas to solid","Solid to gas","Solid to liquid"], correct:2},
+      {q:"Condensation releases:", options:["Electrons","Energy/heat","Neutrons","Nothing"], correct:1},
+      {q:"Stronger IMFs mean ___ heat of vaporization:", options:["Lower","Higher","Same","Zero"], correct:1},
+      {q:"Which requires more energy to boil: H\u2082O or H\u2082S?", options:["H\u2082S","H\u2082O","Same energy","Neither boils"], correct:1},
+      {q:"When ice melts, what is overcome?", options:["Covalent bonds in H\u2082O","Hydrogen bonds between H\u2082O molecules","Ionic bonds","Nuclear forces"], correct:1},
+      {q:"Deposition goes from ___ to ___:", options:["Gas to liquid","Liquid to solid","Gas to solid","Solid to gas"], correct:2},
+      {q:"During boiling, temperature remains ___ until all liquid evaporates:", options:["Increasing","Decreasing","Constant","Variable"], correct:2},
+      {q:"Dry ice (solid CO\u2082) sublimes because:", options:["CO\u2082 is ionic","CO\u2082 has weak London forces between molecules","CO\u2082 has strong bonds","CO\u2082 is metallic"], correct:1},
+      {q:"At the critical point, liquid and gas phases become:", options:["Solid","Indistinguishable","Frozen","Ionic"], correct:1},
+      {q:"Freezing releases energy because:", options:["Bonds break","IMFs form, releasing energy","Mass is lost","Atoms split"], correct:1}
+    ]
+  },
+  {
+    id:7, title:"Mixed Review", type:"mc",
+    instruction:"Select the correct answer for each review question.",
+    questions:[
+      {q:"Which IMF is present in ALL molecules?", options:["Hydrogen bonding","Dipole-dipole","London dispersion","Ion-dipole"], correct:2},
+      {q:"A molecule must be ___ to have dipole-dipole forces:", options:["Nonpolar","Polar","Ionic","Metallic"], correct:1},
+      {q:"Which substance would have the highest boiling point?", options:["CH\u2084 (16 g/mol)","C\u2082H\u2086 (30 g/mol)","CH\u2083OH (32 g/mol)","C\u2083H\u2088 (44 g/mol)"], correct:2},
+      {q:"Water's high surface tension is due to:", options:["Covalent bonds","London forces","Hydrogen bonding","Low molar mass"], correct:2},
+      {q:"Which pair has ONLY London dispersion forces between them?", options:["H\u2082O and NH\u2083","CH\u2084 and C\u2082H\u2086","HCl and HBr","NaCl and H\u2082O"], correct:1},
+      {q:"Why do noble gases have very low boiling points?", options:["They are ionic","They only have weak London forces","They have strong bonds","They are radioactive"], correct:1},
+      {q:"Acetone (CH\u2083COCH\u2083) has what dominant IMF?", options:["London dispersion only","Hydrogen bonding","Dipole-dipole","Ion-dipole"], correct:2},
+      {q:"As you go down Group 17 (F\u2082, Cl\u2082, Br\u2082, I\u2082), boiling points increase because:", options:["Electronegativity increases","Hydrogen bonding increases","London dispersion forces increase with more electrons","Molecules become more polar"], correct:2},
+      {q:"Which is NOT a true statement about IMFs?", options:["They are weaker than covalent bonds","They determine boiling points","They are the same as covalent bonds","They exist between molecules"], correct:2},
+      {q:"SiH\u2084 has ___ IMFs compared to GeH\u2084:", options:["Stronger","Weaker","Identical","No"], correct:1},
+      {q:"The unusually high specific heat capacity of water is due to:", options:["Its low mass","Extensive hydrogen bonding","Ionic character","Being a gas"], correct:1},
+      {q:"CH\u2083CH\u2082CH\u2082OH vs CH\u2083CH(OH)CH\u2083: which has the higher BP?", options:["CH\u2083CH\u2082CH\u2082OH (1-propanol)","CH\u2083CH(OH)CH\u2083 (2-propanol)","Same BP","Cannot determine"], correct:0}
+    ]
+  },
+  {
+    id:8, title:"IMF Strength Ranking", type:"arrange",
+    instruction:"Arrange the words in the correct order.",
+    sentences:[
+      {prompt:"Order IMFs from WEAKEST to STRONGEST:", words:["London","dispersion","<","dipole-dipole","<","hydrogen","bonding"]},
+      {prompt:"Order by increasing boiling point:", words:["CH4","<","NH3","<","H2O"]},
+      {prompt:"Order by increasing boiling point:", words:["Ne","<","Ar","<","Kr","<","Xe"]},
+      {prompt:"Order by increasing strength of London forces:", words:["F2","<","Cl2","<","Br2","<","I2"]},
+      {prompt:"Order by increasing viscosity:", words:["acetone","<","water","<","glycerol"]},
+      {prompt:"Order surface tension from lowest to highest:", words:["hexane","<","ethanol","<","water"]},
+      {prompt:"Steps to identify dominant IMF:", words:["check","polarity,","check","for","N-H/O-H/F-H,","determine","strongest","force"]}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>1. IMF Strength Hierarchy (strongest to weakest)</h3><table><tr><th>IMF Type</th><th>Occurs Between</th><th>Strength (kJ/mol)</th><th>Example</th></tr><tr><td>Ion-dipole</td><td>Ions + polar molecules</td><td>50\u2212600</td><td>NaCl dissolving in H\u2082O</td></tr><tr><td>Hydrogen bonding</td><td>H bonded to F, O, or N</td><td>10\u221240</td><td>H\u2082O, NH\u2083, HF, DNA base pairs</td></tr><tr><td>Dipole-dipole</td><td>Polar molecules</td><td>5\u221225</td><td>HCl, acetone, SO\u2082</td></tr><tr><td>Ion-induced dipole</td><td>Ion + nonpolar molecule</td><td>3\u221215</td><td>Fe\u00B2\u207A + O\u2082 in hemoglobin</td></tr><tr><td>Dipole-induced dipole</td><td>Polar + nonpolar</td><td>2\u221210</td><td>HCl + Ar</td></tr><tr><td>London dispersion (LDF)</td><td>ALL molecules</td><td>0.05\u221240</td><td>Ar, CH\u2084, I\u2082</td></tr></table><p><span class="rule">Key:</span> London dispersion forces are ALWAYS present in all molecules. They are the ONLY force in nonpolar molecules.</p><h3>2. Hydrogen Bonding (detailed)</h3><p><span class="rule">Requirements:</span> H must be directly bonded to F, O, or N (highly electronegative atoms with lone pairs). The H then interacts with a lone pair on F, O, or N of ANOTHER molecule.</p><p><span class="rule">Common misconception:</span> H bonded to Cl does NOT hydrogen bond (Cl is not electronegative enough despite having lone pairs).</p><table><tr><th>Can H-bond</th><th>Cannot H-bond</th></tr><tr><td>H\u2082O (O\u2013H), NH\u2083 (N\u2013H), HF (F\u2013H)</td><td>HCl, H\u2082S, PH\u2083, CH\u2084</td></tr><tr><td>Alcohols (R\u2013OH), Carboxylic acids (COOH)</td><td>Ethers (R\u2013O\u2013R, no O\u2013H)</td></tr><tr><td>Amines (R\u2013NH\u2082), Amides</td><td>Alkanes, alkenes</td></tr></table><p><span class="rule">Note:</span> Ethers can ACCEPT H-bonds (O has lone pairs) but cannot DONATE them (no O\u2013H).</p><h3>3. London Dispersion Forces (LDF)</h3><p><span class="rule">Origin:</span> Temporary, instantaneous dipoles from random electron movement induce dipoles in neighboring molecules.</p><p><span class="rule">LDF strength increases with:</span></p><p>1. <strong>Molar mass / number of electrons</strong> \u2192 more electrons = more polarizable = stronger LDF</p><p>2. <strong>Surface area</strong> \u2192 longer, linear molecules have stronger LDF than compact, branched ones</p><p><span class="rule">Example:</span> F\u2082 (gas) &lt; Cl\u2082 (gas) &lt; Br\u2082 (liquid) &lt; I\u2082 (solid) \u2014 all nonpolar, only LDF, but increasing electrons.</p><p>n-pentane (bp 36\u00B0C) &gt; neopentane (bp 10\u00B0C) \u2014 same formula, but linear has more surface area contact.</p><h3>4. How to Predict IMFs Present</h3><p><span class="rule">Decision flowchart:</span></p><p>1. Is the substance ionic? \u2192 Ion-dipole (when dissolved), ionic bonds in crystal</p><p>2. Does it have O\u2013H, N\u2013H, or F\u2013H bonds? \u2192 Hydrogen bonding + dipole-dipole + LDF</p><p>3. Is the molecule polar? \u2192 Dipole-dipole + LDF</p><p>4. Is it nonpolar? \u2192 LDF only</p><p><span class="rule">Remember:</span> ALL molecules have LDF. Larger forces don\'t replace LDF, they add to it.</p><h3>5. Effects on Physical Properties</h3><table><tr><th>Property</th><th>Stronger IMFs \u2192</th><th>Explanation</th></tr><tr><td>Boiling point</td><td>Higher</td><td>More energy needed to overcome attractions</td></tr><tr><td>Melting point</td><td>Higher</td><td>Harder to disrupt solid structure</td></tr><tr><td>Viscosity</td><td>Higher</td><td>More resistance to flow</td></tr><tr><td>Surface tension</td><td>Higher</td><td>Stronger inward pull on surface molecules</td></tr><tr><td>Vapor pressure</td><td>Lower</td><td>Fewer molecules escape to gas phase</td></tr><tr><td>Rate of evaporation</td><td>Slower</td><td>Harder to escape liquid</td></tr><tr><td>Solubility (in water)</td><td>Higher if polar/H-bond</td><td>"Like dissolves like"</td></tr></table><h3>6. Key Comparisons & Examples</h3><table><tr><th>Substance</th><th>MW</th><th>BP (\u00B0C)</th><th>Dominant IMF</th><th>Why</th></tr><tr><td>H\u2082O</td><td>18</td><td>100</td><td>H-bonding</td><td>O\u2013H bonds, 2 lone pairs</td></tr><tr><td>H\u2082S</td><td>34</td><td>\u221260</td><td>Dipole-dipole</td><td>Polar but no H-bonding (S not F/O/N)</td></tr><tr><td>HF</td><td>20</td><td>19</td><td>H-bonding</td><td>F\u2013H bond</td></tr><tr><td>HCl</td><td>36</td><td>\u221285</td><td>Dipole-dipole</td><td>Polar, no H-bonding</td></tr><tr><td>CH\u2084</td><td>16</td><td>\u2212161</td><td>LDF only</td><td>Nonpolar, small</td></tr><tr><td>C\u2085H\u2081\u2082</td><td>72</td><td>36</td><td>LDF only</td><td>Nonpolar but larger = stronger LDF</td></tr></table><p><span class="rule">Anomaly of water:</span> Despite low MW (18), H\u2082O has unusually high BP (100\u00B0C) due to extensive H-bonding network (each molecule can form up to 4 H-bonds).</p><p><span class="rule">Ice floats:</span> H-bonding creates open hexagonal lattice in ice, making solid less dense than liquid. This is UNIQUE to water and critical for aquatic life.</p><h3>7. Common Mistakes</h3><p>1. Saying CH\u2084 has dipole-dipole forces (it is tetrahedral and nonpolar \u2192 LDF only)</p><p>2. Confusing intramolecular bonds (covalent, ionic) with intermolecular forces (between molecules)</p><p>3. Forgetting that CO\u2082 is nonpolar (linear, dipoles cancel) despite having polar C=O bonds</p><p>4. Thinking H-bonding can occur with any H atom (must be bonded to F, O, or N)</p><p>5. Forgetting that LDF increases with molecular SIZE, not just polarity</p>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 IMFs, hydrogen bonding, physical properties \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

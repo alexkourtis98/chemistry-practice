@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Vapor Pressure & Clausius-Clapeyron</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Vapor Pressure & Clausius-Clapeyron</h1>
+<p class="subtitle">Deep practice &mdash; vapor pressure, dynamic equilibrium, Clausius-Clapeyron, Raoult's law</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_85';
+const SECTIONS = [
+  {
+    id:1, title:"Fill: Vapor pressure fundamentals",
+    instruction:"Complete each statement about vapor pressure.",
+    rows:[
+      ["1","Vapor pressure is the pressure exerted by a ___ in equilibrium with its liquid","vapor / gas"],
+      ["2","At dynamic equilibrium, the rate of evaporation equals the rate of ___","condensation"],
+      ["3","Vapor pressure ___ as temperature increases (increases/decreases)","increases"],
+      ["4","A liquid with high vapor pressure is said to be ___","volatile"],
+      ["5","A liquid with low vapor pressure has ___ intermolecular forces (strong/weak)","strong"],
+      ["6","The normal boiling point is the temperature where vapor pressure equals ___ atm","1 / 1 atm / 760 mmHg"],
+      ["7","Water's vapor pressure at 100\u00B0C is ___ mmHg","760"],
+      ["8","Ether has ___ vapor pressure than water at the same temperature (higher/lower)","higher"],
+      ["9","Mercury has ___ vapor pressure than water at the same temperature (higher/lower)","lower"],
+      ["10","Vapor pressure depends on the ___ of the liquid, not the amount","identity / nature / type"],
+      ["11","Vapor pressure does NOT depend on the ___ of the container","volume / size / shape"],
+      ["12","At the boiling point, vapor pressure equals ___ pressure","atmospheric / external"],
+      ["13","Increasing altitude ___ the boiling point of water (raises/lowers)","lowers"],
+      ["14","In a pressure cooker, the boiling point is ___ than 100\u00B0C (higher/lower)","higher"],
+      ["15","Nonvolatile solutes ___ the vapor pressure of a solvent (raise/lower)","lower"]
+    ]
+  },
+  {
+    id:2, title:"Fill: Clausius-Clapeyron equation",
+    instruction:"Complete statements about the Clausius-Clapeyron equation.",
+    rows:[
+      ["1","The Clausius-Clapeyron equation relates vapor pressure to ___","temperature"],
+      ["2","The two-point form is: ln(P\u2082/P\u2081) = -\u0394Hvap/R \u00D7 (1/T\u2082 - ___)","1/T\u2081 / 1/T1"],
+      ["3","R in the Clausius-Clapeyron equation = ___ J/(mol\u00B7K)","8.314"],
+      ["4","Temperatures in the C-C equation must be in ___ (K or \u00B0C)","K / kelvin / kelvins"],
+      ["5","To convert \u00B0C to K, add ___","273 / 273.15"],
+      ["6","\u0394Hvap in the C-C equation must be in units of ___ (J/mol or kJ/mol with R=8.314)","J/mol"],
+      ["7","If \u0394Hvap is given in kJ/mol, you must ___ by 1000 before using in C-C","multiply"],
+      ["8","A plot of ln(P) vs 1/T gives a ___ line (straight/curved)","straight"],
+      ["9","The slope of ln(P) vs 1/T equals ___","-\u0394Hvap/R / -deltaHvap/R"],
+      ["10","A steeper slope on a ln(P) vs 1/T plot means a ___ \u0394Hvap (larger/smaller)","larger / higher"],
+      ["11","Water: \u0394Hvap = 40.7 kJ/mol = ___ J/mol","40700 / 40,700"],
+      ["12","Ethanol: \u0394Hvap = 38.6 kJ/mol. This is ___ than water's (larger/smaller)","smaller / lower"],
+      ["13","The normal boiling point of water in Kelvin is ___ K","373 / 373.15"],
+      ["14","At T = 25\u00B0C = ___ K, water's vapor pressure is about 23.8 mmHg","298 / 298.15"],
+      ["15","If P\u2081 = 760 mmHg at T\u2081 = 373 K, and we want P at 353 K, P\u2082 will be ___ 760 (less/more)","less / less than"]
+    ]
+  },
+  {
+    id:3, title:"MC: Vapor pressure concepts", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Which liquid has the highest vapor pressure at 25\u00B0C?", options:["Water (\u0394Hvap=40.7 kJ/mol)","Ethanol (\u0394Hvap=38.6 kJ/mol)","Diethyl ether (\u0394Hvap=26.5 kJ/mol)","Mercury (\u0394Hvap=59.1 kJ/mol)"], correct:2},
+      {q:"Vapor pressure increases with temperature because:", options:["The liquid becomes denser","More molecules have enough KE to escape","The container expands","Intermolecular forces get stronger"], correct:1},
+      {q:"A substance boils when:", options:["Temperature reaches 100\u00B0C","Vapor pressure equals atmospheric pressure","All liquid evaporates","Pressure drops to zero"], correct:1},
+      {q:"Which has a lower boiling point?", options:["A substance with strong IMFs","A substance with weak IMFs (high vapor pressure)","They are the same","Cannot determine"], correct:1},
+      {q:"At the normal boiling point:", options:["Vapor pressure = 0","Vapor pressure = 1 atm","Vapor pressure = 2 atm","Vapor pressure depends on the liquid"], correct:1},
+      {q:"Dynamic equilibrium in a closed container means:", options:["Evaporation stops","Condensation stops","Evaporation rate = condensation rate","Pressure is zero"], correct:2},
+      {q:"Adding a nonvolatile solute to a solvent:", options:["Increases vapor pressure","Decreases vapor pressure","Has no effect","Doubles vapor pressure"], correct:1},
+      {q:"Which factor does NOT affect vapor pressure?", options:["Temperature","Nature of liquid","Volume of container","Intermolecular forces"], correct:2},
+      {q:"A liquid in an open container will:", options:["Reach equilibrium vapor pressure","Evaporate completely","Never evaporate","Condense"], correct:1},
+      {q:"On a vapor pressure vs temperature curve, the curve is:", options:["Linear","Exponential (curves upward)","Constant","Linear then drops"], correct:1},
+      {q:"The Clausius-Clapeyron equation linearizes the VP vs T relationship by plotting:", options:["P vs T","P vs 1/T","ln(P) vs T","ln(P) vs 1/T"], correct:3},
+      {q:"Two liquids A and B: A has higher vapor pressure at 25\u00B0C. Which boils at a lower temperature?", options:["Liquid A","Liquid B","They boil at the same T","Cannot determine"], correct:0},
+      {q:"At higher altitudes, atmospheric pressure is lower, so water boils at:", options:["Higher temperature","Lower temperature","100\u00B0C always","It doesn't boil"], correct:1},
+      {q:"In Denver (elevation ~1600 m), water boils at approximately:", options:["100\u00B0C","95\u00B0C","105\u00B0C","90\u00B0C"], correct:1}
+    ]
+  },
+  {
+    id:4, title:"Fill: Clausius-Clapeyron calculations",
+    instruction:"Use the Clausius-Clapeyron equation. R = 8.314 J/(mol\u00B7K). Round to reasonable precision.",
+    rows:[
+      ["1","Water: P\u2081 = 23.8 mmHg at T\u2081 = 298 K. \u0394Hvap = 40,700 J/mol. Find P at 313 K. 1/T\u2082 - 1/T\u2081 = 1/313 - 1/298 = ___ (scientific notation, ~)","- 1.61 \u00D7 10\u207B\u2074 / -1.61e-4 / -0.000161"],
+      ["2","Continuing: -\u0394Hvap/R = -40700/8.314 = ___","-4894 / -4893 / -4895"],
+      ["3","Continuing: ln(P\u2082/23.8) = (-4894)(-1.61\u00D710\u207B\u2074) \u2248 ___","0.788 / 0.79 / 0.787"],
+      ["4","Continuing: P\u2082/23.8 = e^0.788 \u2248 ___","2.20 / 2.2 / 2.19"],
+      ["5","Continuing: P\u2082 \u2248 ___ mmHg","52.4 / 52 / 52.1 / 52.3"],
+      ["6","Ethanol: P\u2081 = 44 mmHg at 20\u00B0C (293 K). \u0394Hvap = 38,600 J/mol. Find P at 40\u00B0C (313 K). ln(P\u2082/44) \u2248 ___","1.01 / 1.0 / 1.02"],
+      ["7","Continuing: P\u2082 \u2248 ___ mmHg","121 / 120 / 122"],
+      ["8","If P\u2081 = 100 mmHg at 50\u00B0C and P\u2082 = 400 mmHg at 80\u00B0C, find \u0394Hvap. ln(400/100) = ___","1.386 / 1.39"],
+      ["9","Continuing: 1/T\u2082 - 1/T\u2081 = 1/353 - 1/323 = ___ ","-2.64 \u00D7 10\u207B\u2074 / -2.64e-4 / -0.000264"],
+      ["10","Continuing: \u0394Hvap = -R \u00D7 ln(P\u2082/P\u2081) / (1/T\u2082 - 1/T\u2081) \u2248 ___ J/mol","43600 / 43,600 / 43700 / 43,700 / 43500 / 43,500"],
+      ["11","At what temperature does water have a vapor pressure of 355 mmHg? (Use P\u2081=760 at 373 K.) Answer in K.","353 / 352 / 354"],
+      ["12","At what temperature does water have a vapor pressure of 92 mmHg? (P\u2081=23.8 at 298 K.) Answer in K.","323 / 322 / 324"]
+    ]
+  },
+  {
+    id:5, title:"MC: Clausius-Clapeyron applications", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"In ln(P\u2082/P\u2081) = -\u0394Hvap/R \u00D7 (1/T\u2082 - 1/T\u2081), if T\u2082 > T\u2081 then (1/T\u2082 - 1/T\u2081) is:", options:["Positive","Negative","Zero","Cannot determine"], correct:1},
+      {q:"If (1/T\u2082 - 1/T\u2081) is negative and -\u0394Hvap/R is negative, then ln(P\u2082/P\u2081) is:", options:["Positive (P\u2082 > P\u2081)","Negative (P\u2082 < P\u2081)","Zero","Undefined"], correct:0},
+      {q:"This confirms that as T increases, vapor pressure:", options:["Decreases","Increases","Stays the same","Oscillates"], correct:1},
+      {q:"If \u0394Hvap doubles (everything else constant), the vapor pressure increase with temperature is:", options:["Halved","Doubled","More dramatic","Less dramatic"], correct:2},
+      {q:"Two substances have the same P at T\u2081. Substance A has higher \u0394Hvap. At T\u2082 > T\u2081:", options:["A has higher P","A has lower P (VP rises slower with higher \u0394Hvap)","They have equal P","Cannot determine"], correct:1},
+      {q:"The C-C equation assumes \u0394Hvap is:", options:["Temperature dependent","Constant over the temperature range","Zero","Infinite"], correct:1},
+      {q:"Water: \u0394Hvap = 40.7 kJ/mol. Acetone: \u0394Hvap = 31.3 kJ/mol. Which is more volatile?", options:["Water","Acetone (lower \u0394Hvap = easier to evaporate)","They are equal","Cannot determine without more data"], correct:1},
+      {q:"If you measure P at two temperatures, you can calculate:", options:["Molar mass","\u0394Hvap","Density","Molarity"], correct:1},
+      {q:"The unit of \u0394Hvap in the C-C equation when R = 8.314 J/(mol\u00B7K) must be:", options:["kJ/mol","J/g","J/mol","cal/mol"], correct:2},
+      {q:"At the critical point:", options:["Liquid and gas become indistinguishable","Vapor pressure is zero","The substance is always solid","Temperature is 0 K"], correct:0},
+      {q:"Above the critical temperature, a substance:", options:["Cannot exist as a liquid (regardless of pressure)","Is always a solid","Has zero vapor pressure","Decomposes"], correct:0},
+      {q:"A substance with \u0394Hvap = 25 kJ/mol vs one with 50 kJ/mol: which reaches 760 mmHg VP at a lower T?", options:["25 kJ/mol substance (weaker IMFs, lower bp)","50 kJ/mol substance","Same temperature","Cannot determine"], correct:0}
+    ]
+  },
+  {
+    id:6, title:"Fill: Raoult's law",
+    instruction:"Apply Raoult's law: P = \u03C7 \u00B7 P\u00B0 (vapor pressure of solution = mole fraction \u00D7 pure VP).",
+    rows:[
+      ["1","Raoult's law states: P(solution) = ___ \u00D7 P\u00B0(solvent)","\u03C7(solvent) / chi(solvent) / mole fraction of solvent / X(solvent)"],
+      ["2","If \u03C7(solvent) = 0.90 and P\u00B0 = 100 mmHg, then P(solution) = ___ mmHg","90"],
+      ["3","If \u03C7(solvent) = 0.80 and P\u00B0 = 200 mmHg, then P(solution) = ___ mmHg","160"],
+      ["4","A solution has 3 mol solute and 7 mol solvent. \u03C7(solvent) = ___","0.70 / 0.7"],
+      ["5","Continuing #4: if P\u00B0(solvent) = 150 mmHg, P(solution) = ___ mmHg","105"],
+      ["6","The vapor pressure LOWERING is \u0394P = P\u00B0 - P = ___  \u00D7 P\u00B0","\u03C7(solute) / chi(solute) / mole fraction of solute / X(solute)"],
+      ["7","If \u03C7(solute) = 0.15 and P\u00B0 = 760 mmHg, \u0394P = ___ mmHg","114"],
+      ["8","Raoult's law is obeyed ideally when solute-solvent interactions are ___ to solvent-solvent interactions","similar / equal"],
+      ["9","A solution that obeys Raoult's law is called a(n) ___ solution","ideal"],
+      ["10","Positive deviation from Raoult's law means actual VP is ___ predicted (higher/lower)","higher"],
+      ["11","Negative deviation from Raoult's law means actual VP is ___ predicted (higher/lower)","lower"],
+      ["12","Positive deviation occurs when solute-solvent interactions are ___ than pure component interactions","weaker"],
+      ["13","Negative deviation occurs when solute-solvent interactions are ___ than pure component interactions","stronger"],
+      ["14","Adding 1 mol of NaCl to water gives ___ mol of solute particles (it dissociates)","2"],
+      ["15","For electrolyte solutions, use the van 't Hoff factor i: \u0394P = i \u00D7 \u03C7(solute) \u00D7 P\u00B0. For NaCl, i \u2248 ___","2"]
+    ]
+  },
+  {
+    id:7, title:"MC: Raoult's law problems", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"A solution of 2 mol glucose in 8 mol water. \u03C7(water) = 8/10 = 0.80. If P\u00B0(water) = 23.8 mmHg at 25\u00B0C:", options:["P = 19.0 mmHg","P = 23.8 mmHg","P = 29.8 mmHg","P = 4.76 mmHg"], correct:0},
+      {q:"Adding more nonvolatile solute to a solution will:", options:["Increase vapor pressure","Decrease vapor pressure further","Have no effect","Increase boiling point and vapor pressure"], correct:1},
+      {q:"Which solution has the lowest vapor pressure (same solvent, same total moles)?", options:["0.1 mol solute","0.3 mol solute","0.5 mol solute","Pure solvent"], correct:2},
+      {q:"For a solution of two volatile liquids A and B, total vapor pressure:", options:["P(total) = \u03C7\u2090P\u00B0\u2090 + \u03C7\u1D47P\u00B0\u1D47","P(total) = P\u00B0\u2090 + P\u00B0\u1D47","P(total) = \u03C7\u2090 + \u03C7\u1D47","P(total) = P\u00B0\u2090 \u00D7 P\u00B0\u1D47"], correct:0},
+      {q:"Benzene (P\u00B0=95.1 mmHg) and toluene (P\u00B0=28.4 mmHg) form an ideal solution. With \u03C7(benzene)=0.40:", options:["P = 38.0 + 17.0 = 55.0 mmHg","P = 95.1 + 28.4 = 123.5 mmHg","P = 38.0 mmHg","P = 17.0 mmHg"], correct:0},
+      {q:"An ethanol-water mixture shows ___ deviation from Raoult's law:", options:["No deviation","Positive deviation (weaker H-bonds between unlike molecules)","Negative deviation","Sometimes positive, sometimes negative"], correct:1},
+      {q:"Acetone-chloroform mixtures show ___ deviation because they form H-bonds:", options:["Positive","Negative (stronger interactions than pure components)","No","Variable"], correct:1},
+      {q:"A solution with positive deviation from Raoult's law has:", options:["Higher VP than predicted, lower boiling point","Lower VP than predicted, higher boiling point","No change in boiling point","Exactly predicted VP"], correct:0},
+      {q:"If NaCl (i=2) is dissolved in water: 0.1 mol NaCl in 5 mol water. Effective \u03C7(solute):", options:["0.1/5.1","0.2/5.2","0.1/5.2","0.2/5.1"], correct:1},
+      {q:"Continuing: P(solution) = \u03C7(water) \u00D7 P\u00B0 = (5.0/5.2) \u00D7 23.8 =", options:["22.9 mmHg","23.8 mmHg","21.5 mmHg","19.0 mmHg"], correct:0},
+      {q:"A nonvolatile solute has a vapor pressure of:", options:["Same as solvent","Higher than solvent","Essentially zero","760 mmHg"], correct:2},
+      {q:"Boiling point elevation and vapor pressure lowering are related: lower VP means ___ boiling point:", options:["Lower","Higher","Same","Cannot determine"], correct:1}
+    ]
+  },
+  {
+    id:8, title:"Fill: Factors affecting vapor pressure",
+    instruction:"Explain how each factor affects vapor pressure.",
+    rows:[
+      ["1","Stronger intermolecular forces \u2192 ___ vapor pressure (higher/lower)","lower"],
+      ["2","Higher temperature \u2192 ___ vapor pressure (higher/lower)","higher"],
+      ["3","Larger molecular weight (same IMF type) \u2192 ___ vapor pressure (higher/lower)","lower"],
+      ["4","Hydrogen bonding in a liquid \u2192 ___ vapor pressure (higher/lower)","lower"],
+      ["5","London dispersion forces only (no H-bonding) \u2192 ___ vapor pressure (higher/lower)","higher / relatively higher"],
+      ["6","Adding a nonvolatile solute \u2192 ___ vapor pressure (higher/lower)","lower"],
+      ["7","Surface area of the liquid affects the ___ of evaporation but NOT the equilibrium VP","rate"],
+      ["8","The vapor pressure of a pure liquid is ___ (intensive/extensive) property","intensive"],
+      ["9","Diethyl ether (C\u2082H\u2085OC\u2082H\u2085) has ___ VP than ethanol (C\u2082H\u2085OH) because ether has weaker IMFs","higher"],
+      ["10","Water has a ___ VP than expected for its molecular weight due to strong hydrogen bonding","lower / unusually low"]
+    ]
+  },
+  {
+    id:9, title:"Arrange: Vapor pressure statements", type:"arrange",
+    instruction:"Click the words in the correct order.",
+    sentences:[
+      {prompt:"Vapor pressure increases exponentially with temperature", words:["Vapor pressure","increases","exponentially","with","temperature"]},
+      {prompt:"A liquid boils when its vapor pressure equals atmospheric pressure", words:["A liquid","boils","when","its vapor pressure","equals","atmospheric pressure"]},
+      {prompt:"Nonvolatile solutes lower the vapor pressure of the solvent", words:["Nonvolatile solutes","lower","the vapor pressure","of","the solvent"]},
+      {prompt:"The Clausius-Clapeyron equation relates vapor pressure to temperature", words:["The Clausius-Clapeyron equation","relates","vapor pressure","to","temperature"]},
+      {prompt:"Strong intermolecular forces result in low vapor pressure", words:["Strong","intermolecular forces","result in","low","vapor pressure"]},
+      {prompt:"Raoult's law states vapor pressure equals mole fraction times pure vapor pressure", words:["Raoult's law","states","vapor pressure","equals","mole fraction","times","pure vapor pressure"]}
+    ]
+  },
+  {
+    id:10, title:"MC: Comparing vapor pressures", type:"mc",
+    instruction:"Compare vapor pressures of different substances.",
+    questions:[
+      {q:"Rank vapor pressure at 25\u00B0C (highest to lowest): water, ethanol, diethyl ether", options:["Water > ethanol > ether","Ether > ethanol > water","Ethanol > ether > water","Ether > water > ethanol"], correct:1},
+      {q:"Why does ethanol have higher VP than water?", options:["Ethanol is lighter","Ethanol has weaker hydrogen bonding (only one OH)","Ethanol has stronger IMFs","Ethanol molecules are smaller"], correct:1},
+      {q:"Hexane (C\u2086H\u2081\u2084) vs decane (C\u2081\u2080H\u2082\u2082): which has higher VP?", options:["Decane (larger)","Hexane (smaller, weaker LDF)","Equal","Cannot determine"], correct:1},
+      {q:"CH\u2083OH vs CH\u2083CH\u2082CH\u2082CH\u2083 (similar MW): which has lower VP?", options:["CH\u2083OH (H-bonding lowers VP)","Butane","Equal VP","Cannot compare"], correct:0},
+      {q:"At 20\u00B0C: water VP = 17.5 mmHg. At 30\u00B0C: VP = 31.8 mmHg. The VP nearly ___ for a 10\u00B0C rise:", options:["Stays the same","Doubles","Triples","Halves"], correct:1},
+      {q:"Which has the lowest normal boiling point?", options:["Water (VP low at RT)","Diethyl ether (VP high at RT)","Glycerol (VP very low at RT)","Mercury (VP extremely low at RT)"], correct:1},
+      {q:"Perfume evaporates from skin because:", options:["Skin provides energy, molecules overcome IMFs and enter gas phase","Perfume is ionic","Skin is a catalyst","Perfume has zero VP"], correct:0},
+      {q:"In a closed container, if you remove some vapor:", options:["More liquid evaporates until equilibrium is restored","Nothing happens","All liquid evaporates","Pressure stays the same"], correct:0},
+      {q:"Two beakers, one with water, one with ethanol, in a closed room. Over time:", options:["Both reach equilibrium separately","Water will absorb ethanol vapor","Nothing changes","Both freeze"], correct:0},
+      {q:"Acetone evaporates faster than water because acetone has:", options:["Stronger H-bonds","Lower \u0394Hvap and higher vapor pressure","Higher boiling point","Larger molecules"], correct:1}
+    ]
+  },
+  {
+    id:11, title:"Fill: Boiling point and external pressure",
+    instruction:"Complete statements about boiling and pressure effects.",
+    rows:[
+      ["1","Boiling occurs throughout the liquid, while evaporation occurs only at the ___","surface"],
+      ["2","At 1 atm, water boils at ___\u00B0C","100"],
+      ["3","At 0.5 atm, water would boil at ___ 100\u00B0C (above/below)","below"],
+      ["4","In a vacuum, water would boil at ___ temperature (very high/very low/room)","very low / room / low"],
+      ["5","Pressure cookers increase the boiling point to about ___ \u00B0C (approximately)","120 / 121"],
+      ["6","Autoclaves sterilize using steam at ___ than atmospheric pressure (higher/lower)","higher"],
+      ["7","The boiling point of water on Mt. Everest (~0.34 atm) is approximately ___ \u00B0C","70 / 71 / 69"],
+      ["8","Boiling is a ___ process (endothermic/exothermic)","endothermic"],
+      ["9","The difference between evaporation and boiling: boiling forms ___ throughout the liquid","bubbles / vapor bubbles"],
+      ["10","Evaporation occurs at ___ temperature (any/only boiling point)","any"],
+      ["11","The heat of vaporization at the boiling point is used to convert liquid to gas at ___ temperature","constant"],
+      ["12","Water's high boiling point (100\u00B0C) compared to H\u2082S (-60\u00B0C) is due to ___","hydrogen bonding / hydrogen bonds / H-bonding"]
+    ]
+  },
+  {
+    id:12, title:"MC: Comprehensive vapor pressure review", type:"mc",
+    instruction:"Mixed review questions.",
+    questions:[
+      {q:"Which statement about vapor pressure is FALSE?", options:["It increases with temperature","It depends on the amount of liquid","It is related to IMF strength","It equals atmospheric pressure at the boiling point"], correct:1},
+      {q:"The Clausius-Clapeyron equation can be used to:", options:["Find VP at a new temperature given VP at another temperature","Calculate molecular weight","Determine crystal structure","Measure pH"], correct:0},
+      {q:"If a substance has \u0394Hvap = 0, it would:", options:["Never evaporate","Be a permanent gas (no liquid phase at that condition)","Have infinite vapor pressure","Have zero vapor pressure"], correct:1},
+      {q:"Raoult's law applies best to:", options:["Concentrated electrolyte solutions","Dilute, ideal solutions","Gases only","Solid mixtures"], correct:1},
+      {q:"The vapor above an ideal solution of A and B is enriched in:", options:["The less volatile component","The more volatile component","Both equally","Neither"], correct:1},
+      {q:"This principle is the basis of:", options:["Crystallization","Distillation","Filtration","Precipitation"], correct:1},
+      {q:"Relative humidity is defined as:", options:["Actual VP of water / Saturation VP at that temperature \u00D7 100%","Temperature / Dew point","Mass of water / Mass of air","VP of water / 760 mmHg"], correct:0},
+      {q:"At 100% relative humidity:", options:["Air is completely dry","Water vapor is at its saturation pressure (dew point = temperature)","Rain must be falling","VP is zero"], correct:1},
+      {q:"Freeze-drying works by:", options:["Heating food above 100\u00B0C","Sublimating ice under low pressure","Condensing water vapor","Dissolving food in water"], correct:1},
+      {q:"Henry's law (P = kH \u00D7 C) describes:", options:["Vapor pressure of pure liquids","Solubility of gases in liquids","Boiling point elevation","Osmotic pressure"], correct:1},
+      {q:"CO\u2082 in soda: opening the bottle ___ pressure, so CO\u2082 ___ solubility:", options:["Increases, increases","Decreases, decreases (gas escapes)","Decreases, increases","Increases, decreases"], correct:1},
+      {q:"The triple point of water (0.01\u00B0C, 611.7 Pa) is where:", options:["Only ice exists","Solid, liquid, and gas all coexist in equilibrium","Only gas exists","Water decomposes"], correct:1}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Vapor Pressure & Clausius-Clapeyron \u2014 Complete Reference</h3>' +
+'<h3>Vapor Pressure Basics</h3>' +
+'<ul>' +
+'<li><span class="rule">Vapor pressure</span>: pressure exerted by vapor in equilibrium with its liquid in a closed container</li>' +
+'<li>At <span class="rule">dynamic equilibrium</span>: rate of evaporation = rate of condensation</li>' +
+'<li>VP increases with temperature (exponentially)</li>' +
+'<li>VP depends on: nature of liquid (IMFs), temperature. NOT on amount or container size</li>' +
+'<li><span class="rule">Normal boiling point</span>: T where VP = 1 atm (760 mmHg)</li>' +
+'</ul>' +
+'<h3>Clausius-Clapeyron Equation</h3>' +
+'<p><span class="rule">ln(P\u2082/P\u2081) = -\u0394H<sub>vap</sub>/R \u00D7 (1/T\u2082 - 1/T\u2081)</span></p>' +
+'<table><tr><th>Variable</th><th>Meaning</th><th>Units</th></tr>' +
+'<tr><td>P\u2081, P\u2082</td><td>Vapor pressures</td><td>any (same units)</td></tr>' +
+'<tr><td>T\u2081, T\u2082</td><td>Temperatures</td><td><span class="rule">Kelvin (K)</span></td></tr>' +
+'<tr><td>\u0394H<sub>vap</sub></td><td>Heat of vaporization</td><td><span class="rule">J/mol</span> (with R=8.314)</td></tr>' +
+'<tr><td>R</td><td>Gas constant</td><td>8.314 J/(mol\u00B7K)</td></tr></table>' +
+'<p>Linear form: ln(P) = -\u0394H<sub>vap</sub>/(RT) + C</p>' +
+'<p>Plot ln(P) vs 1/T \u2192 straight line, slope = -\u0394H<sub>vap</sub>/R</p>' +
+'<h3>Common \u0394H<sub>vap</sub> Values</h3>' +
+'<table><tr><th>Substance</th><th>\u0394H<sub>vap</sub> (kJ/mol)</th><th>BP (\u00B0C)</th></tr>' +
+'<tr><td>Water</td><td>40.7</td><td>100</td></tr>' +
+'<tr><td>Ethanol</td><td>38.6</td><td>78.4</td></tr>' +
+'<tr><td>Acetone</td><td>31.3</td><td>56.1</td></tr>' +
+'<tr><td>Diethyl ether</td><td>26.5</td><td>34.6</td></tr>' +
+'<tr><td>Mercury</td><td>59.1</td><td>357</td></tr></table>' +
+'<h3>Raoult\'s Law</h3>' +
+'<p><span class="rule">P<sub>solution</sub> = \u03C7<sub>solvent</sub> \u00D7 P\u00B0<sub>solvent</sub></span></p>' +
+'<p>VP lowering: \u0394P = \u03C7<sub>solute</sub> \u00D7 P\u00B0<sub>solvent</sub></p>' +
+'<p>For two volatile components: P<sub>total</sub> = \u03C7\u2090P\u00B0\u2090 + \u03C7\u1D47P\u00B0\u1D47</p>' +
+'<h3>Deviations from Raoult\'s Law</h3>' +
+'<table><tr><th>Type</th><th>Cause</th><th>Effect</th></tr>' +
+'<tr><td><span class="rule">Positive</span></td><td>Weaker A-B interactions</td><td>VP higher than predicted</td></tr>' +
+'<tr><td><span class="rule">Negative</span></td><td>Stronger A-B interactions</td><td>VP lower than predicted</td></tr>' +
+'<tr><td>Ideal</td><td>Similar A-A, B-B, A-B interactions</td><td>VP matches prediction</td></tr></table>' +
+'<h3>Factors Affecting VP</h3>' +
+'<ul>' +
+'<li>Higher T \u2192 higher VP</li>' +
+'<li>Weaker IMFs \u2192 higher VP (more volatile)</li>' +
+'<li>Smaller molecules \u2192 generally higher VP</li>' +
+'<li>Adding nonvolatile solute \u2192 lower VP</li>' +
+'</ul>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 vapor pressure, dynamic equilibrium, Clausius-Clapeyron, Raoult\'s law \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

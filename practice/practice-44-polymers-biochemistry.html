@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice 44 — Polymers & Biochemistry Basics</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Practice 44 &mdash; Polymers &amp; Biochemistry Basics</h1>
+<p class="subtitle">Deep practice &mdash; polymers, carbohydrates, lipids, proteins, nucleic acids</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_44';
+const SECTIONS = [
+  {
+    id:1, title:"Polymer Basics",
+    instruction:"Fill in the blank for each polymer question.",
+    rows:[
+      ["1","A polymer is a large molecule made of repeating ___","monomers / units"],
+      ["2","The process of forming polymers is called ___","polymerization"],
+      ["3","Polyethylene is made from ___ monomers","ethylene / ethene / CH2=CH2"],
+      ["4","Addition polymers are made from monomers with ___ bonds","double"],
+      ["5","Condensation polymers release ___ when forming","water / a small molecule / H2O"],
+      ["6","PVC stands for ___","polyvinyl chloride"],
+      ["7","The monomer for PVC is ___","vinyl chloride / chloroethene"],
+      ["8","nCH\u2082=CH\u2082 \u2192 (-CH\u2082-CH\u2082-)n is ___ polymerization","addition"],
+      ["9","The degree of polymerization (n) represents the number of ___","repeating units / monomers"],
+      ["10","Cross-linking between polymer chains increases ___","rigidity / strength / hardness"],
+      ["11","Thermoplastics can be ___ and reshaped","melted / heated / softened"],
+      ["12","Thermosets ___ (can/cannot) be remelted after setting","cannot"],
+      ["13","Vulcanization adds ___ cross-links to rubber","sulfur"],
+      ["14","Biodegradable polymers are broken down by ___","microorganisms / bacteria / enzymes"],
+      ["15","Copolymers are made from ___ different monomers","two / 2 / multiple"]
+    ]
+  },
+  {
+    id:2, title:"Common Polymers & Properties",
+    instruction:"Fill in the blank for each common polymer question.",
+    rows:[
+      ["1","Polyethylene (PE): monomer?","ethene / ethylene"],
+      ["2","Polypropylene (PP): monomer?","propene / propylene"],
+      ["3","Polystyrene (PS): monomer?","styrene"],
+      ["4","PTFE (Teflon): monomer?","tetrafluoroethylene"],
+      ["5","PET: used in ___ bottles","water / plastic / drink"],
+      ["6","Nylon is a ___ polymer","condensation"],
+      ["7","Polyester is a ___ polymer","condensation"],
+      ["8","Natural rubber is poly___","isoprene"],
+      ["9","HDPE stands for ___","high-density polyethylene"],
+      ["10","LDPE stands for ___","low-density polyethylene"],
+      ["11","HDPE has ___ (more/less) branching than LDPE","less"],
+      ["12","Kevlar is used in ___ because of its strength","bulletproof vests / body armor"],
+      ["13","Nylon is made from diamine + ___","dicarboxylic acid / diacid"],
+      ["14","Polyester is made from diol + ___","dicarboxylic acid / diacid"],
+      ["15","PVC is used for ___ and flooring","pipes"],
+      ["16","Polystyrene foam is commonly called ___","styrofoam"],
+      ["17","Teflon is non-stick because of strong ___ bonds","C-F / carbon-fluorine"],
+      ["18","Bakelite was the first synthetic ___ polymer","thermoset / thermosetting"]
+    ]
+  },
+  {
+    id:3, title:"Carbohydrates",
+    instruction:"Fill in the blank for each carbohydrate question.",
+    rows:[
+      ["1","General formula: Cn(H\u2082O)n or ___","CnH2nOn"],
+      ["2","Simplest sugar unit is a ___","monosaccharide"],
+      ["3","Glucose formula: ___","C6H12O6 / C\u2086H\u2081\u2082O\u2086"],
+      ["4","Two monosaccharides joined = ___","disaccharide"],
+      ["5","Sucrose = glucose + ___","fructose"],
+      ["6","Starch is a ___ of glucose","polymer / polysaccharide"],
+      ["7","Cellulose is made of ___ units","glucose"],
+      ["8","Animals store glucose as ___","glycogen"],
+      ["9","Lactose = glucose + ___","galactose"],
+      ["10","Maltose = glucose + ___","glucose"],
+      ["11","The bond linking sugars is called a ___ bond","glycosidic"],
+      ["12","Starch has two forms: amylose (linear) and ___","amylopectin"],
+      ["13","Cellulose cannot be digested by humans because we lack the enzyme ___","cellulase"],
+      ["14","Chitin is a polysaccharide found in ___ exoskeletons","insect / crustacean / arthropod"],
+      ["15","Reducing sugars can reduce ___ reagent (Cu\u00B2\u207a \u2192 Cu\u207a)","Fehling's / Benedict's / Tollen's"],
+      ["16","Glucose is an ___ (aldose/ketose)","aldose"],
+      ["17","Fructose is a ___ (aldose/ketose)","ketose"]
+    ]
+  },
+  {
+    id:4, title:"Lipids (Fats & Oils)",
+    instruction:"Fill in the blank for each lipids question.",
+    rows:[
+      ["1","Fats are esters of ___ and fatty acids","glycerol"],
+      ["2","Saturated fats have ___ double bonds","no / zero / 0"],
+      ["3","Unsaturated fats have ___ double bonds in the chain","one or more"],
+      ["4","Saturated fats are ___ at room temperature","solid"],
+      ["5","Unsaturated fats are ___ at room temperature","liquid / oils"],
+      ["6","Hydrogenation converts oils to ___","solid fats / margarine"],
+      ["7","Trans fats are produced by partial ___","hydrogenation"],
+      ["8","Phospholipids have ___ fatty acid tails and a phosphate head","two / 2"],
+      ["9","Cell membranes are made of a ___ bilayer","phospholipid"],
+      ["10","Saponification of fats produces ___ and glycerol","soap"],
+      ["11","Fatty acids with one double bond are called ___","monounsaturated"],
+      ["12","Fatty acids with multiple double bonds are called ___","polyunsaturated"],
+      ["13","Omega-3 fatty acids have a double bond at the ___ carbon from the end","third / 3rd / 3"],
+      ["14","Steroids like ___ are also classified as lipids","cholesterol"],
+      ["15","Waxes are esters of fatty acids and long-chain ___","alcohols"]
+    ]
+  },
+  {
+    id:5, title:"Proteins",
+    instruction:"Fill in the blank for each protein question.",
+    rows:[
+      ["1","Proteins are polymers of ___","amino acids"],
+      ["2","Amino acids are linked by ___ bonds","peptide"],
+      ["3","A peptide bond forms by ___ reaction","condensation"],
+      ["4","There are ___ standard amino acids","20"],
+      ["5","The shape of a protein determines its ___","function"],
+      ["6","Enzymes are ___ that catalyze reactions","proteins"],
+      ["7","Denaturation destroys a protein's ___","shape / structure / 3D structure"],
+      ["8","The primary structure is the ___ sequence","amino acid"],
+      ["9","Secondary structure includes alpha ___ and beta sheets","helix / helices"],
+      ["10","Tertiary structure is the overall ___ shape of a single polypeptide","3D / three-dimensional"],
+      ["11","Quaternary structure involves ___ polypeptide chains","multiple / two or more"],
+      ["12","An amino acid has an amino group (-NH\u2082) and a ___ group (-COOH)","carboxyl / carboxylic acid"],
+      ["13","The R group (side chain) determines the ___ of each amino acid","identity / properties"],
+      ["14","Denaturation can be caused by heat, pH changes, or ___","heavy metals / organic solvents / chemicals"],
+      ["15","Hemoglobin has ___ (primary/quaternary) structure","quaternary"],
+      ["16","Enzymes lower the ___ energy of reactions","activation"],
+      ["17","The specific region where substrate binds on an enzyme is the ___ site","active"]
+    ]
+  },
+  {
+    id:6, title:"Nucleic Acids (DNA/RNA)", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"DNA stands for ___", options:["Deoxyribose nucleic acid","Deoxyribonucleic acid","Dinitrogen acid","Dynamic nucleic acid"], correct:1},
+      {q:"RNA stands for ___", options:["Ribose nucleic acid","Reactive nucleic acid","Ribonucleic acid","Reductive nucleic acid"], correct:2},
+      {q:"DNA monomers are called ___", options:["Amino acids","Nucleotides","Monosaccharides","Fatty acids"], correct:1},
+      {q:"DNA bases: A pairs with ___", options:["C","G","T","U"], correct:2},
+      {q:"DNA bases: C pairs with ___", options:["A","T","G","U"], correct:2},
+      {q:"DNA has a ___ helix structure", options:["Single","Double","Triple","Quadruple"], correct:1},
+      {q:"A nucleotide consists of a base, a sugar, and a ___", options:["Amino acid","Fatty acid","Phosphate group","Peptide bond"], correct:2},
+      {q:"DNA uses the sugar ___, RNA uses ___", options:["Ribose, deoxyribose","Deoxyribose, ribose","Glucose, fructose","Sucrose, maltose"], correct:1},
+      {q:"In RNA, A pairs with ___", options:["T","C","U","G"], correct:2},
+      {q:"DNA is usually ___ stranded, RNA is usually ___ stranded", options:["Single, double","Double, single","Both double","Both single"], correct:1},
+      {q:"The backbone of DNA is made of alternating ___ and phosphates", options:["Bases","Sugars (deoxyribose)","Amino acids","Fatty acids"], correct:1},
+      {q:"A-T base pairs have ___ hydrogen bonds", options:["1","2","3","4"], correct:1},
+      {q:"G-C base pairs have ___ hydrogen bonds", options:["1","2","3","4"], correct:2},
+      {q:"mRNA carries genetic information from nucleus to ___", options:["Mitochondria","Ribosome","Cell membrane","Golgi body"], correct:1},
+      {q:"The process of copying DNA to mRNA is called:", options:["Translation","Replication","Transcription","Mutation"], correct:2}
+    ]
+  },
+  {
+    id:7, title:"Mixed Review", type:"mc",
+    instruction:"Select the correct answer for each review question.",
+    questions:[
+      {q:"Which polymer is formed by addition polymerization?", options:["Nylon","Polyester","Polyethylene","Protein"], correct:2},
+      {q:"Cellulose and starch are both polymers of:", options:["Fructose","Amino acids","Glucose","Glycerol"], correct:2},
+      {q:"The bond linking amino acids in proteins is called:", options:["Glycosidic bond","Ester bond","Peptide bond","Hydrogen bond"], correct:2},
+      {q:"Which biomolecule stores genetic information?", options:["Proteins","Lipids","Carbohydrates","DNA"], correct:3},
+      {q:"Saturated fats differ from unsaturated fats because they have:", options:["Double bonds","No double bonds","Peptide bonds","Glycosidic bonds"], correct:1},
+      {q:"Condensation polymerization releases:", options:["CO\u2082","O\u2082","A small molecule (e.g. H\u2082O)","Heat only"], correct:2},
+      {q:"The monomer of natural rubber is:", options:["Ethylene","Styrene","Isoprene","Propylene"], correct:2},
+      {q:"Which is NOT a biomolecule class?", options:["Carbohydrates","Polymers","Proteins","Lipids"], correct:1},
+      {q:"Which level of protein structure involves multiple polypeptide chains?", options:["Primary","Secondary","Tertiary","Quaternary"], correct:3},
+      {q:"Phospholipids are important because they form:", options:["Bones","Cell membranes","DNA","Enzymes"], correct:1},
+      {q:"Which carbohydrate is a disaccharide?", options:["Glucose","Starch","Sucrose","Cellulose"], correct:2},
+      {q:"PLA (polylactic acid) is a ___ polymer:", options:["Non-biodegradable","Biodegradable","Metallic","Ceramic"], correct:1},
+      {q:"ATP (adenosine triphosphate) is a modified:", options:["Amino acid","Fatty acid","Nucleotide","Monosaccharide"], correct:2}
+    ]
+  },
+  {
+    id:8, title:"Polymer Types", type:"arrange",
+    instruction:"Arrange the words in the correct order.",
+    sentences:[
+      {prompt:"Addition polymers (monomer -> polymer):", words:["ethene","->","polyethylene;","propene","->","polypropylene;","styrene","->","polystyrene"]},
+      {prompt:"Condensation polymer components:", words:["diamine","+","diacid","->","nylon","+","water"]},
+      {prompt:"Protein structure hierarchy:", words:["primary","->","secondary","->","tertiary","->","quaternary"]},
+      {prompt:"Carbohydrate classification by size:", words:["monosaccharide","->","disaccharide","->","polysaccharide"]},
+      {prompt:"DNA base pairing rules:", words:["A","pairs","with","T;","C","pairs","with","G"]},
+      {prompt:"Four biomolecule classes:", words:["carbohydrates,","lipids,","proteins,","nucleic","acids"]},
+      {prompt:"Lipid types by saturation:", words:["saturated","(no","double","bonds)","->","monounsaturated","(one)","->","polyunsaturated","(many)"]}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>1. Addition vs Condensation Polymerization</h3><table><tr><th>Feature</th><th>Addition (Chain-Growth)</th><th>Condensation (Step-Growth)</th></tr><tr><td>Monomer requirement</td><td>C=C double bond</td><td>Two functional groups (e.g., \u2013OH + \u2013COOH)</td></tr><tr><td>Mechanism</td><td>\u03c0 bond opens, monomers chain together</td><td>Functional groups react, release H\u2082O (or HCl, etc.)</td></tr><tr><td>Atoms in polymer</td><td>ALL atoms from monomers retained</td><td>Small molecule lost per bond formed</td></tr><tr><td>Initiator</td><td>Free radical, cation, or anion</td><td>Heat or acid catalyst</td></tr><tr><td>MW growth</td><td>Rapid (chain adds one at a time)</td><td>Gradual (any two can react)</td></tr></table><h3>2. Common Polymers</h3><table><tr><th>Polymer</th><th>Monomer</th><th>Type</th><th>Uses</th></tr><tr><td>Polyethylene (PE)</td><td>CH\u2082=CH\u2082</td><td>Addition</td><td>Bags, bottles, film</td></tr><tr><td>Polypropylene (PP)</td><td>CH\u2082=CHCH\u2083</td><td>Addition</td><td>Containers, fibers</td></tr><tr><td>Polyvinyl chloride (PVC)</td><td>CH\u2082=CHCl</td><td>Addition</td><td>Pipes, flooring</td></tr><tr><td>Polystyrene (PS)</td><td>CH\u2082=CHC\u2086H\u2085</td><td>Addition</td><td>Packaging, insulation</td></tr><tr><td>Teflon (PTFE)</td><td>CF\u2082=CF\u2082</td><td>Addition</td><td>Non-stick coatings</td></tr><tr><td>Nylon 6,6</td><td>Diamine + diacid</td><td>Condensation</td><td>Textiles, rope</td></tr><tr><td>Polyester (PET)</td><td>Diol + diacid</td><td>Condensation</td><td>Bottles, clothing</td></tr><tr><td>Natural rubber</td><td>Isoprene</td><td>Addition</td><td>Tires, gloves</td></tr></table><h3>3. The Four Biomolecule Classes</h3><table><tr><th>Class</th><th>Monomer</th><th>Bond</th><th>Functions</th><th>Examples</th></tr><tr><td>Carbohydrates</td><td>Monosaccharides (glucose, fructose, galactose)</td><td>Glycosidic</td><td>Quick energy, structural support, cell recognition</td><td>Glucose, starch, glycogen, cellulose, chitin</td></tr><tr><td>Lipids</td><td>Glycerol + 3 fatty acids</td><td>Ester</td><td>Long-term energy, membranes, insulation, hormones</td><td>Fats, oils, phospholipids, steroids, waxes</td></tr><tr><td>Proteins</td><td>Amino acids (20 types)</td><td>Peptide (amide)</td><td>Enzymes, structure, transport, defense, signaling</td><td>Enzymes, keratin, hemoglobin, antibodies, collagen</td></tr><tr><td>Nucleic Acids</td><td>Nucleotides (sugar + base + phosphate)</td><td>Phosphodiester</td><td>Genetic information, protein synthesis</td><td>DNA, RNA, ATP</td></tr></table><h3>4. Carbohydrates in Detail</h3><table><tr><th>Type</th><th>Size</th><th>Examples</th><th>Notes</th></tr><tr><td>Monosaccharide</td><td>1 sugar unit</td><td>Glucose (C\u2086H\u2081\u2082O\u2086), fructose, galactose</td><td>Simplest, sweet, soluble</td></tr><tr><td>Disaccharide</td><td>2 units</td><td>Sucrose (G+F), lactose (G+Gal), maltose (G+G)</td><td>Formed by dehydration synthesis</td></tr><tr><td>Polysaccharide</td><td>Many units</td><td>Starch (plants), glycogen (animals), cellulose (plants)</td><td>Storage or structural</td></tr></table><p><span class="rule">Key:</span> Starch and cellulose are both glucose polymers, but differ in glycosidic bond type (\u03b1 vs \u03b2). Humans digest starch but NOT cellulose (fiber).</p><h3>5. Lipids in Detail</h3><p><span class="rule">Saturated vs unsaturated:</span></p><table><tr><th></th><th>Saturated</th><th>Unsaturated</th></tr><tr><td>Bonds</td><td>All C\u2013C single bonds</td><td>One or more C=C double bonds</td></tr><tr><td>Shape</td><td>Straight chains, pack tightly</td><td>Kinked chains, pack loosely</td></tr><tr><td>State at RT</td><td>Solid (fats: butter, lard)</td><td>Liquid (oils: olive, canola)</td></tr><tr><td>Source</td><td>Mostly animal</td><td>Mostly plant/fish</td></tr></table><p><span class="rule">Phospholipids:</span> Glycerol + 2 fatty acids + phosphate group. Amphipathic (hydrophilic head, hydrophobic tails). Form cell membranes (lipid bilayer).</p><h3>6. Proteins: Structure Levels</h3><table><tr><th>Level</th><th>Description</th><th>Bonds/Forces</th></tr><tr><td>Primary (1\u00B0)</td><td>Linear sequence of amino acids</td><td>Peptide bonds (covalent)</td></tr><tr><td>Secondary (2\u00B0)</td><td>\u03b1-helix or \u03b2-pleated sheet</td><td>Hydrogen bonds (backbone N\u2013H\u2026O=C)</td></tr><tr><td>Tertiary (3\u00B0)</td><td>3D folding of entire chain</td><td>H-bonds, disulfide bridges, hydrophobic, ionic</td></tr><tr><td>Quaternary (4\u00B0)</td><td>Multiple polypeptide chains together</td><td>Same as tertiary between subunits</td></tr></table><p><span class="rule">Amino acid structure:</span> Central C bonded to: \u2013NH\u2082 (amino), \u2013COOH (carboxyl), \u2013H, and \u2013R (side chain). The R group determines identity and properties.</p><p><span class="rule">Peptide bond:</span> Formed by condensation between \u2013NH\u2082 of one AA and \u2013COOH of another. Releases H\u2082O. This is an amide bond (C\u2013N).</p><h3>7. Enzymes</h3><p><span class="rule">Definition:</span> Biological catalysts (proteins) that speed up reactions by lowering Ea.</p><p><span class="rule">Properties:</span> Highly specific (lock-and-key or induced fit model), reusable, affected by pH, temperature, and inhibitors.</p><p><span class="rule">Active site:</span> Region where substrate binds. Shape complementarity is critical.</p><p><span class="rule">Denaturation:</span> Loss of 3D structure (and function) due to heat, extreme pH, or chemicals. Primary structure unchanged but higher-order structure disrupted.</p><h3>8. DNA vs RNA</h3><table><tr><th>Feature</th><th>DNA</th><th>RNA</th></tr><tr><td>Sugar</td><td>Deoxyribose</td><td>Ribose</td></tr><tr><td>Bases</td><td>A, T, C, G</td><td>A, U, C, G</td></tr><tr><td>Structure</td><td>Double helix</td><td>Single strand (usually)</td></tr><tr><td>Location</td><td>Nucleus</td><td>Nucleus + cytoplasm</td></tr><tr><td>Function</td><td>Stores genetic info</td><td>Protein synthesis (mRNA, tRNA, rRNA)</td></tr><tr><td>Stability</td><td>Very stable</td><td>Less stable (degraded faster)</td></tr></table><p><span class="rule">Base pairing rules:</span> A\u2014T with 2 H-bonds, C\u2014G with 3 H-bonds (in DNA). In RNA: A\u2014U with 2 H-bonds.</p><p><span class="rule">Nucleotide structure:</span> Phosphate group + 5-carbon sugar + nitrogenous base. Backbone = sugar-phosphate chain linked by phosphodiester bonds.</p><p><span class="rule">Central dogma:</span> DNA \u2192 (transcription) \u2192 mRNA \u2192 (translation) \u2192 Protein</p><h3>9. Dehydration Synthesis vs Hydrolysis</h3><table><tr><th></th><th>Dehydration Synthesis</th><th>Hydrolysis</th></tr><tr><td>Process</td><td>Monomers join, release H\u2082O</td><td>Polymer breaks, consumes H\u2082O</td></tr><tr><td>Energy</td><td>Requires energy (anabolic)</td><td>Releases energy (catabolic)</td></tr><tr><td>Result</td><td>Builds polymers</td><td>Breaks down polymers</td></tr><tr><td>Examples</td><td>Protein synthesis, starch formation</td><td>Digestion, ATP hydrolysis</td></tr></table>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 polymers, carbohydrates, lipids, proteins, nucleic acids \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

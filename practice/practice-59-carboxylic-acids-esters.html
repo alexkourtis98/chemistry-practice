@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice 59 — Carboxylic Acids & Esters</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Practice 59 &mdash; Carboxylic Acids &amp; Esters</h1>
+<p class="subtitle">Deep practice &mdash; -COOH group, naming, acidity, esterification, saponification</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_59';
+const SECTIONS = [
+  {
+    id:1, title:"Carboxylic Acid Structure",
+    instruction:"Fill in the blank about the -COOH functional group.",
+    rows:[
+      ["1","The functional group of carboxylic acids is ___","-COOH / COOH / carboxyl"],
+      ["2","The simplest carboxylic acid is ___ acid (IUPAC)","methanoic"],
+      ["3","Methanoic acid is commonly called ___ acid","formic"],
+      ["4","CH\u2083COOH is ___ acid (IUPAC name)","ethanoic"],
+      ["5","Ethanoic acid is commonly called ___ acid","acetic"],
+      ["6","CH\u2083CH\u2082COOH is ___ acid (IUPAC name)","propanoic"],
+      ["7","Propanoic acid is commonly called ___ acid","propionic"],
+      ["8","The -COOH group contains both a ___ and a hydroxyl group","carbonyl / C=O"],
+      ["9","The carboxyl carbon is always numbered carbon ___","1"],
+      ["10","Benzoic acid has a -COOH on a ___ ring","benzene / phenyl / aromatic"],
+      ["11","Long-chain carboxylic acids (12-20 C) are called ___ acids","fatty"],
+      ["12","Stearic acid (C\u2081\u2087H\u2083\u2085COOH) has ___ total carbons","18"],
+      ["13","Oleic acid is an unsaturated fatty acid with one ___","double bond / C=C"],
+      ["14","The -COOH carbon is ___ hybridized","sp2"],
+      ["15","Lactic acid is produced during ___ in muscles","anaerobic respiration / fermentation"]
+    ]
+  },
+  {
+    id:2, title:"Naming Carboxylic Acids",
+    instruction:"Fill in the blank about IUPAC naming of carboxylic acids.",
+    rows:[
+      ["1","Carboxylic acids use the suffix ___","-oic acid / oic acid"],
+      ["2","A 4-carbon carboxylic acid is ___ acid","butanoic"],
+      ["3","Butanoic acid is commonly called ___ acid","butyric"],
+      ["4","A 5-carbon carboxylic acid is ___ acid","pentanoic"],
+      ["5","HOOC-COOH (2 COOH groups, 2 carbons) is ___ acid","oxalic / ethanedioic"],
+      ["6","HOOCCH\u2082COOH (3 carbons, 2 COOH) is ___ acid","malonic / propanedioic"],
+      ["7","HOOC(CH\u2082)\u2082COOH (4 carbons, 2 COOH) is ___ acid","succinic / butanedioic"],
+      ["8","Acids with two -COOH groups are called ___ acids","dicarboxylic"],
+      ["9","A 6-carbon carboxylic acid is ___ acid","hexanoic / caproic"],
+      ["10","CH\u2083CH(Cl)COOH is called ___","2-chloropropanoic acid"],
+      ["11","CH\u2083CH(OH)COOH is called ___ (common: lactic acid)","2-hydroxypropanoic acid"],
+      ["12","The amino acid alanine has both -COOH and ___ groups","-NH2 / amino"],
+      ["13","Acrylic acid (CH\u2082=CHCOOH) is called ___ acid (IUPAC)","propenoic / 2-propenoic"],
+      ["14","A 3-carbon acid with Br on C2 is called ___","2-bromopropanoic acid"],
+      ["15","Phthalic acid is a ___ with two -COOH groups on a benzene ring","dicarboxylic acid"]
+    ]
+  },
+  {
+    id:3, title:"Acidity of Carboxylic Acids", type:"mc",
+    instruction:"Select the correct answer about carboxylic acid acidity.",
+    questions:[
+      {q:"Carboxylic acids are more acidic than alcohols because:", options:["They have more hydrogen atoms","The conjugate base is resonance-stabilized","They are larger molecules","They contain oxygen"], correct:1},
+      {q:"The conjugate base of a carboxylic acid (carboxylate ion) has:", options:["A localized negative charge","Two equivalent resonance structures","No charge","A positive charge"], correct:1},
+      {q:"Typical Ka values for carboxylic acids are around:", options:["10\u207B\u00B2","10\u207B\u2075","10\u207B\u00B9\u2070","10\u207B\u00B9\u2074"], correct:1},
+      {q:"Electron-withdrawing groups near -COOH make the acid:", options:["Weaker","Stronger","Neutral","No effect"], correct:1},
+      {q:"Which is a stronger acid?", options:["CH\u2083COOH (acetic)","ClCH\u2082COOH (chloroacetic)","CH\u2083CH\u2082OH (ethanol)","CH\u2084 (methane)"], correct:1},
+      {q:"Carboxylic acids are classified as ___ acids:", options:["Strong","Weak","Neither","Depends on chain length"], correct:1},
+      {q:"Rank acidity: CH\u2083COOH, FCH\u2082COOH, ClCH\u2082COOH, BrCH\u2082COOH (strongest first):", options:["FCH\u2082COOH > ClCH\u2082COOH > BrCH\u2082COOH > CH\u2083COOH","CH\u2083COOH > ClCH\u2082COOH > FCH\u2082COOH > BrCH\u2082COOH","BrCH\u2082COOH > ClCH\u2082COOH > FCH\u2082COOH > CH\u2083COOH","All equal"], correct:0},
+      {q:"Cl\u2082CHCOOH is ___ acidic than ClCH\u2082COOH:", options:["Less","Equally","More","Cannot compare"], correct:2},
+      {q:"Electron-donating groups (alkyl) near -COOH make the acid:", options:["Stronger","Weaker","No effect","More soluble"], correct:1},
+      {q:"The inductive effect of halogens ___ with distance from -COOH:", options:["Increases","Stays the same","Decreases","Reverses"], correct:2},
+      {q:"Trifluoroacetic acid (CF\u2083COOH) is a ___ acid compared to acetic acid:", options:["Weaker","Similar","Much stronger","Not an acid"], correct:2},
+      {q:"Formic acid (HCOOH) is ___ acidic than acetic acid (CH\u2083COOH):", options:["Less","Equally","More","Not comparable"], correct:2}
+    ]
+  },
+  {
+    id:4, title:"Ester Formation and Naming",
+    instruction:"Fill in the blank about ester formation (esterification).",
+    rows:[
+      ["1","Ester formation: carboxylic acid + alcohol \u2192 ___ + water","ester"],
+      ["2","This reaction is called ___ (or Fischer esterification)","esterification / condensation"],
+      ["3","Esterification typically requires an ___ catalyst","acid / H+ / H2SO4"],
+      ["4","CH\u2083COOH + CH\u2083OH \u2192 CH\u2083COOCH\u2083 + ___","H2O / water"],
+      ["5","The ester functional group is ___","-COO- / COO / COOR / -COOR"],
+      ["6","In ester naming, the alcohol part comes ___ (first/second)","first"],
+      ["7","CH\u2083COOCH\u2082CH\u2083 is called ethyl ___","ethanoate / acetate"],
+      ["8","Esters use the suffix ___","-oate / oate"],
+      ["9","HCOOCH\u2083 is called methyl ___","methanoate / formate"],
+      ["10","CH\u2083CH\u2082COOCH\u2083 is called methyl ___","propanoate"],
+      ["11","CH\u2083COOCH(CH\u2083)\u2082 is called isopropyl ___","ethanoate / acetate"],
+      ["12","Fischer esterification is a ___ (reversible/irreversible) reaction","reversible"],
+      ["13","To push esterification forward, use excess ___ or remove water","alcohol / acid"],
+      ["14","The ester bond is formed between the ___ of the acid and the -OH of the alcohol","C=O / carbonyl / carboxyl"],
+      ["15","Aspirin is formed by esterification of salicylic acid with ___ anhydride","acetic"],
+      ["16","A lactone is a ___ ester (cyclic/linear)","cyclic"]
+    ]
+  },
+  {
+    id:5, title:"Ester Properties and Derivatives", type:"mc",
+    instruction:"Select the correct answer about ester properties and carboxylic acid derivatives.",
+    questions:[
+      {q:"Esters are known for having:", options:["Foul odors","Pleasant fruity smells","No smell","Fishy smell"], correct:1},
+      {q:"Compared to carboxylic acids of similar size, esters have:", options:["Higher boiling points","Similar boiling points","Lower boiling points","Much higher boiling points"], correct:2},
+      {q:"Why do esters have lower boiling points than acids?", options:["They are heavier","They cannot form hydrogen bonds with themselves","They are more polar","They are ionic"], correct:1},
+      {q:"Fats and oils are examples of:", options:["Alcohols","Carboxylic acids","Esters (triglycerides)","Ethers"], correct:2},
+      {q:"Banana smell is due to the ester:", options:["Methyl butanoate","Isoamyl acetate (isopentyl acetate)","Ethyl methanoate","Octyl ethanoate"], correct:1},
+      {q:"Polyester is a polymer made by repeated ___ reactions:", options:["Addition","Esterification / condensation","Combustion","Substitution"], correct:1},
+      {q:"Rank reactivity of carboxylic acid derivatives: acid chloride, ester, anhydride, amide:", options:["Amide > ester > anhydride > acid chloride","Acid chloride > anhydride > ester > amide","Ester > acid chloride > amide > anhydride","All equal"], correct:1},
+      {q:"An acid chloride (RCOCl) is the ___ reactive carboxylic acid derivative:", options:["Least","Moderately","Most","Not a derivative"], correct:2},
+      {q:"An amide (RCONH\u2082) is the ___ reactive carboxylic acid derivative:", options:["Most","Moderately","Least","Not a derivative"], correct:2},
+      {q:"An acid anhydride has the structure:", options:["RCOOH","RCOCl","RCOOCOR","RCOOR"], correct:2},
+      {q:"Waxes are esters of long-chain fatty acids with long-chain ___:", options:["Amines","Alcohols","Ketones","Ethers"], correct:1},
+      {q:"Biodiesel is made by ___ of vegetable oils:", options:["Combustion","Transesterification","Saponification","Oxidation"], correct:1}
+    ]
+  },
+  {
+    id:6, title:"Hydrolysis & Saponification",
+    instruction:"Fill in the blank about ester hydrolysis and saponification.",
+    rows:[
+      ["1","Ester + water \u2192 ___ + alcohol (acid hydrolysis)","carboxylic acid / acid"],
+      ["2","Hydrolysis is the ___ of esterification","reverse / opposite"],
+      ["3","Ester + NaOH \u2192 ___ + alcohol","sodium carboxylate / salt / soap"],
+      ["4","Base-catalyzed ester hydrolysis is called ___","saponification"],
+      ["5","Saponification of fats produces ___ and glycerol","soap / sodium carboxylate"],
+      ["6","Glycerol has ___ hydroxyl (-OH) groups","3 / three"],
+      ["7","Soap molecules have a hydrophilic ___ end and a hydrophobic ___ end","head, tail / ionic, hydrocarbon / polar, nonpolar"],
+      ["8","The hydrophilic head of soap is the ___ ion","carboxylate / COO-"],
+      ["9","The hydrophobic tail of soap is the long ___ chain","hydrocarbon / carbon / alkyl"],
+      ["10","In hard water, soap forms ___ (precipitates) with Ca\u00B2\u207A and Mg\u00B2\u207A","scum / insoluble salts"],
+      ["11","Detergents differ from soaps by having a ___ head group","sulfonate / sulfate"],
+      ["12","Acid hydrolysis of an ester requires ___ catalyst","acid / H+"],
+      ["13","Base hydrolysis (saponification) is ___ (reversible/irreversible)","irreversible"],
+      ["14","Transesterification replaces one ___ group with another","alcohol / alkoxy / OR"],
+      ["15","Biodiesel: triglyceride + methanol \u2192 fatty acid methyl esters + ___","glycerol"]
+    ]
+  },
+  {
+    id:7, title:"Esterification Steps Word Arrange", type:"arrange",
+    instruction:"Arrange the words to form correct statements about carboxylic acid and ester chemistry.",
+    sentences:[
+      {prompt:"Fischer esterification equation:", words:["carboxylic","acid","+","alcohol","->","ester","+","water"]},
+      {prompt:"Saponification equation:", words:["ester","+","NaOH","->","sodium","carboxylate","+","alcohol"]},
+      {prompt:"Why carboxylic acids are acidic:", words:["carboxylate","ion","stabilized","by","two","equivalent","resonance","structures"]},
+      {prompt:"Inductive effect on acidity:", words:["electron-withdrawing","groups","increase","acidity","of","carboxylic","acids"]},
+      {prompt:"Soap mechanism:", words:["hydrophilic","head","dissolves","in","water,","hydrophobic","tail","dissolves","in","grease"]},
+      {prompt:"Acid derivative reactivity order:", words:["acid","chloride",">","anhydride",">","ester",">","amide"]},
+      {prompt:"Biodiesel production:", words:["triglyceride","+","methanol","->","FAME","+","glycerol"]},
+      {prompt:"Fischer esterification is catalyzed by:", words:["concentrated","sulfuric","acid","as","catalyst"]}
+    ]
+  },
+  {
+    id:8, title:"Mixed Review",
+    instruction:"Fill in the blank (mixed carboxylic acid and ester problems).",
+    rows:[
+      ["1","The IUPAC name for HCOOH is ___ acid","methanoic"],
+      ["2","Vinegar contains about 5% ___ acid","acetic / ethanoic"],
+      ["3","CH\u2083COOC\u2082H\u2085 is named ethyl ___","ethanoate / acetate"],
+      ["4","Esterification is a ___ reaction (condensation/addition)","condensation"],
+      ["5","The product of saponification of a fat is ___ and glycerol","soap"],
+      ["6","Carboxylic acids are more acidic than alcohols due to ___ stabilization of the conjugate base","resonance"],
+      ["7","Citric acid (in citrus fruits) contains ___ -COOH groups","3 / three"],
+      ["8","Aspirin (acetylsalicylic acid) contains both a carboxylic acid and an ___ group","ester"],
+      ["9","Short-chain carboxylic acids (1-4 C) are ___ in water","soluble / miscible"],
+      ["10","Long-chain carboxylic acids are ___ in water","insoluble"],
+      ["11","Acetic acid has a ___ (vinegar/fruity/fishy) smell","vinegar / sharp / pungent"],
+      ["12","Ibuprofen is a carboxylic acid used as an ___ drug","anti-inflammatory / NSAID / pain reliever"],
+      ["13","PET (polyethylene terephthalate) is a common ___ plastic","polyester"],
+      ["14","Omega-3 fatty acids have a double bond at the ___ carbon from the end","3 / third"],
+      ["15","Acyl chlorides are formed from RCOOH + ___ (thionyl chloride)","SOCl2"]
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Carboxylic Acids & Esters Reference</h3>' +
+'<p><span class="rule">Carboxylic Acid (-COOH):</span> Contains both a carbonyl (C=O) and a hydroxyl (-OH) on the same carbon. The -COOH carbon is always C#1. Suffix: -oic acid. The carboxyl C is sp\u00B2 hybridized.</p>' +
+'<table><tr><th>IUPAC</th><th>Common Name</th><th>Formula</th><th>Found In</th></tr>' +
+'<tr><td>Methanoic acid</td><td>Formic acid</td><td>HCOOH</td><td>Ant stings</td></tr>' +
+'<tr><td>Ethanoic acid</td><td>Acetic acid</td><td>CH\u2083COOH</td><td>Vinegar (5%)</td></tr>' +
+'<tr><td>Propanoic acid</td><td>Propionic acid</td><td>C\u2082H\u2085COOH</td><td>Swiss cheese</td></tr>' +
+'<tr><td>Butanoic acid</td><td>Butyric acid</td><td>C\u2083H\u2087COOH</td><td>Rancid butter</td></tr>' +
+'<tr><td>2-hydroxypropanoic</td><td>Lactic acid</td><td>CH\u2083CH(OH)COOH</td><td>Sore muscles</td></tr>' +
+'<tr><td>Citric acid</td><td>Citric acid</td><td>C\u2086H\u2088O\u2087 (3 COOH)</td><td>Citrus fruits</td></tr></table>' +
+'<p><span class="rule">Why Most Acidic Organic Group:</span> When -COOH donates H\u207A, the conjugate base (carboxylate ion, COO\u207B) is stabilized by TWO equivalent resonance structures \u2192 negative charge delocalized equally over both oxygens. This makes carboxylic acids much more acidic than alcohols (pKa ~4-5 vs ~16 for alcohols). They are still weak acids (Ka ~ 10\u207B\u2075).</p>' +
+'<p><span class="rule">Factors Affecting Acidity:</span></p>' +
+'<p>Ka values: formic (HCOOH) > acetic (CH\u2083COOH) > propionic (C\u2082H\u2085COOH) \u2014 acidity decreases with longer chain (electron-donating alkyl groups destabilize COO\u207B).</p>' +
+'<p><span class="rule">Inductive Effect:</span> Electron-withdrawing groups (EWG) near -COOH INCREASE acidity by stabilizing the negative charge on COO\u207B. Order: FCH\u2082COOH > ClCH\u2082COOH > BrCH\u2082COOH > CH\u2083COOH. More EWGs = stronger acid (Cl\u2082CHCOOH > ClCH\u2082COOH). CF\u2083COOH (trifluoroacetic acid) is much stronger than CH\u2083COOH. Effect decreases with distance from -COOH.</p>' +
+'<p><span class="rule">Esterification (Fischer):</span> RCOOH + R\u2019OH \u2194 RCOOR\u2019 + H\u2082O. Acid catalyst (conc. H\u2082SO\u2084). Reversible reaction. Push forward by excess alcohol/acid or removing water.</p>' +
+'<p><span class="rule">Ester Naming:</span> [Alcohol part]-yl [acid part]-oate. The alcohol part comes FIRST. Examples: CH\u2083COOCH\u2082CH\u2083 = ethyl ethanoate (ethyl acetate). HCOOCH\u2083 = methyl methanoate. Esters have pleasant fruity smells (isoamyl acetate = banana, octyl acetate = orange).</p>' +
+'<p><span class="rule">Hydrolysis (Reverse of Esterification):</span> Ester + H\u2082O \u2192 Acid + Alcohol (with acid catalyst, reversible).</p>' +
+'<p><span class="rule">Saponification (Base Hydrolysis):</span> Ester + NaOH \u2192 Sodium carboxylate (soap) + Alcohol. IRREVERSIBLE (unlike acid hydrolysis). Fat (triglyceride) + 3NaOH \u2192 3 soap molecules + glycerol. Soap: hydrophilic carboxylate head (dissolves in water) + hydrophobic hydrocarbon tail (dissolves in grease).</p>' +
+'<p><span class="rule">Acid Derivatives Reactivity Order:</span> Acyl chloride (RCOCl) > Acid anhydride (RCOOCOR) > Ester (RCOOR\u2019) > Amide (RCONH\u2082). Most reactive \u2192 least reactive. Better leaving group = more reactive.</p>' +
+'<p><span class="rule">Common Applications:</span> Aspirin = acetylsalicylic acid (ester of salicylic acid + acetic anhydride). PET = polyester plastic. Biodiesel = transesterification of triglycerides with methanol \u2192 FAME + glycerol. Waxes = esters of long-chain fatty acids + long-chain alcohols. Ibuprofen = carboxylic acid NSAID.</p>' +
+'<p><span class="rule">Properties:</span> Short-chain acids (1-4 C) are water-soluble, pungent smell. Long-chain acids (fatty acids) are insoluble. Esters have lower BP than acids (cannot self-H-bond). Esters are less soluble in water than acids.</p>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 -COOH group, naming, acidity, esterification, saponification \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

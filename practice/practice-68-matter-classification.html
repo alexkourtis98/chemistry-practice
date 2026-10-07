@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Matter Classification</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Matter Classification</h1>
+<p class="subtitle">Deep practice &mdash; elements, compounds, mixtures, physical/chemical changes</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_68';
+const SECTIONS = [
+  {
+    id:1, title:"Classify: Element, Compound, or Mixture",
+    instruction:"Write 'element', 'compound', or 'mixture'.",
+    rows:[
+      ["1","NaCl (table salt)","compound"],
+      ["2","Air","mixture"],
+      ["3","Gold (Au)","element"],
+      ["4","H\u2082O (water)","compound"],
+      ["5","Oxygen gas (O\u2082)","element"],
+      ["6","Bronze (copper + tin)","mixture"],
+      ["7","CO\u2082 (carbon dioxide)","compound"],
+      ["8","Diamond (pure carbon)","element"],
+      ["9","Milk","mixture"],
+      ["10","Iron (Fe)","element"],
+      ["11","Glucose (C\u2086H\u2081\u2082O\u2086)","compound"],
+      ["12","Trail mix","mixture"],
+      ["13","Helium (He)","element"],
+      ["14","Sulfuric acid (H\u2082SO\u2084)","compound"],
+      ["15","Blood","mixture"],
+      ["16","Nitrogen gas (N\u2082)","element"],
+      ["17","Rust (Fe\u2082O\u2083)","compound"],
+      ["18","Salad dressing (oil + vinegar)","mixture"],
+      ["19","Neon (Ne)","element"],
+      ["20","Baking soda (NaHCO\u2083)","compound"]
+    ]
+  },
+  {
+    id:2, title:"Homogeneous or Heterogeneous",
+    instruction:"Write 'homogeneous' or 'heterogeneous'.",
+    rows:[
+      ["1","Salt water","homogeneous"],
+      ["2","Sand and water","heterogeneous"],
+      ["3","Air","homogeneous"],
+      ["4","Oil and water","heterogeneous"],
+      ["5","Vinegar","homogeneous"],
+      ["6","Granite","heterogeneous"],
+      ["7","Sugar dissolved in water","homogeneous"],
+      ["8","Soil","heterogeneous"],
+      ["9","Rubbing alcohol solution","homogeneous"],
+      ["10","Chicken noodle soup","heterogeneous"],
+      ["11","Brass (copper + zinc alloy)","homogeneous"],
+      ["12","Concrete","heterogeneous"],
+      ["13","Tea (without leaves)","homogeneous"],
+      ["14","Orange juice with pulp","heterogeneous"],
+      ["15","Stainless steel","homogeneous"],
+      ["16","Trail mix","heterogeneous"],
+      ["17","Filtered apple juice","homogeneous"],
+      ["18","Blood","heterogeneous"],
+      ["19","Tap water","homogeneous"],
+      ["20","Italian salad dressing","heterogeneous"]
+    ]
+  },
+  {
+    id:3, title:"MC: Matter Classification", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"A pure substance made of only one type of atom is:", options:["A compound","A mixture","An element","A solution"], correct:2},
+      {q:"A pure substance made of two or more elements chemically bonded is:", options:["An element","A heterogeneous mixture","A compound","A homogeneous mixture"], correct:2},
+      {q:"Which is a homogeneous mixture?", options:["Sand in water","Oil and vinegar","Salt water","Granite"], correct:2},
+      {q:"Which is a heterogeneous mixture?", options:["Air","Brass","Sugar water","Salad"], correct:3},
+      {q:"An alloy is classified as:", options:["An element","A compound","A homogeneous mixture","A heterogeneous mixture"], correct:2},
+      {q:"Which can be separated by physical means?", options:["A compound","A mixture","An element","An atom"], correct:1},
+      {q:"Water (H\u2082O) is classified as:", options:["An element","A homogeneous mixture","A compound","A heterogeneous mixture"], correct:2},
+      {q:"Which describes a solution?", options:["Heterogeneous mixture","Pure substance","Homogeneous mixture","Compound"], correct:2},
+      {q:"Distilled water is:", options:["An element","A compound","A homogeneous mixture","A heterogeneous mixture"], correct:1},
+      {q:"Which is NOT a pure substance?", options:["Gold","Water","Carbon dioxide","Air"], correct:3},
+      {q:"Which statement is true about compounds?", options:["They can be physically separated","They have variable composition","They have fixed ratios of elements","They are always gases"], correct:2},
+      {q:"Smoke is an example of:", options:["An element","A compound","A homogeneous mixture","A heterogeneous mixture"], correct:3},
+      {q:"A suspension is:", options:["Homogeneous","Heterogeneous","A pure substance","An element"], correct:1},
+      {q:"Which best describes matter?", options:["Only solid objects","Anything with mass and volume","Only things you can see","Only atoms"], correct:1},
+      {q:"Diamond and graphite are both pure carbon. They are:", options:["Isotopes","Isomers","Allotropes","Compounds"], correct:2},
+      {q:"A colloid (like fog) is classified as:", options:["Homogeneous","Heterogeneous","A compound","An element"], correct:1},
+      {q:"Which pair are both compounds?", options:["O\u2082 and N\u2082","NaCl and H\u2082O","Fe and Au","Air and steel"], correct:1},
+      {q:"The components of a mixture:", options:["Are chemically bonded","Keep their individual properties","Cannot be separated","Always exist in fixed ratios"], correct:1},
+      {q:"Which is a pure substance?", options:["Milk","Orange juice","Table sugar (sucrose)","Blood"], correct:2},
+      {q:"Soda water (CO\u2082 dissolved in H\u2082O) is:", options:["A compound","An element","A homogeneous mixture","A heterogeneous mixture"], correct:2}
+    ]
+  },
+  {
+    id:4, title:"Physical or Chemical Property",
+    instruction:"Write 'physical' or 'chemical'.",
+    rows:[
+      ["1","Boiling point","physical"],
+      ["2","Flammability","chemical"],
+      ["3","Color","physical"],
+      ["4","Reactivity with acid","chemical"],
+      ["5","Density","physical"],
+      ["6","Ability to rust","chemical"],
+      ["7","Melting point","physical"],
+      ["8","Toxicity","chemical"],
+      ["9","Hardness","physical"],
+      ["10","Ability to tarnish","chemical"],
+      ["11","Odor","physical"],
+      ["12","Corrosiveness","chemical"],
+      ["13","Conductivity","physical"],
+      ["14","Combustibility","chemical"],
+      ["15","Solubility","physical"]
+    ]
+  },
+  {
+    id:5, title:"Physical or Chemical Change",
+    instruction:"Write 'physical' or 'chemical'.",
+    rows:[
+      ["1","Ice melting","physical"],
+      ["2","Iron rusting","chemical"],
+      ["3","Wood burning","chemical"],
+      ["4","Sugar dissolving in water","physical"],
+      ["5","Egg frying","chemical"],
+      ["6","Glass breaking","physical"],
+      ["7","Milk souring","chemical"],
+      ["8","Water boiling","physical"],
+      ["9","Silver tarnishing","chemical"],
+      ["10","Paper tearing","physical"],
+      ["11","Baking a cake","chemical"],
+      ["12","Cutting hair","physical"],
+      ["13","Fireworks exploding","chemical"],
+      ["14","Dry ice sublimating","physical"],
+      ["15","Food digesting","chemical"]
+    ]
+  },
+  {
+    id:6, title:"MC: States of Matter", type:"mc",
+    instruction:"Select the correct answer about states of matter and phase changes.",
+    questions:[
+      {q:"In a solid, particles:", options:["Move freely and are far apart","Vibrate in fixed positions","Slide past each other","Have no energy"], correct:1},
+      {q:"In a gas, particles:", options:["Are tightly packed","Vibrate in place","Move freely and fill their container","Slide over each other"], correct:2},
+      {q:"Melting is a change from:", options:["Liquid to gas","Solid to liquid","Gas to liquid","Liquid to solid"], correct:1},
+      {q:"Sublimation is a change from:", options:["Solid to gas directly","Gas to solid directly","Liquid to gas","Solid to liquid"], correct:0},
+      {q:"Condensation is a change from:", options:["Solid to liquid","Liquid to gas","Gas to liquid","Solid to gas"], correct:2},
+      {q:"Deposition is a change from:", options:["Solid to gas","Gas to solid directly","Liquid to solid","Gas to liquid"], correct:1},
+      {q:"Which phase change releases energy?", options:["Melting","Evaporation","Sublimation","Freezing"], correct:3},
+      {q:"Which phase change absorbs energy?", options:["Freezing","Condensation","Deposition","Vaporization"], correct:3},
+      {q:"Plasma is:", options:["The same as gas","A superheated state with ionized particles","A very cold solid","A type of liquid"], correct:1},
+      {q:"At the boiling point:", options:["Only the surface evaporates","Bubbles form throughout the liquid","The substance decomposes","The temperature keeps rising"], correct:1},
+      {q:"The temperature during a phase change:", options:["Increases rapidly","Decreases rapidly","Remains constant","Fluctuates"], correct:2},
+      {q:"Evaporation occurs:", options:["Only at boiling point","At any temperature, at the surface","Only in a vacuum","Only with chemical changes"], correct:1},
+      {q:"Which state of matter has a definite volume but no definite shape?", options:["Solid","Liquid","Gas","Plasma"], correct:1},
+      {q:"Which state of matter has neither definite shape nor definite volume?", options:["Solid","Liquid","Gas","Only plasma"], correct:2},
+      {q:"The process of a liquid becoming a solid is called:", options:["Melting","Freezing / Solidification","Condensation","Deposition"], correct:1}
+    ]
+  },
+  {
+    id:7, title:"Separation Techniques",
+    instruction:"Name the best separation technique for each scenario.",
+    rows:[
+      ["1","Separate sand from water","filtration"],
+      ["2","Separate salt from water","evaporation / distillation"],
+      ["3","Separate iron filings from sand","magnetism / magnet"],
+      ["4","Separate alcohol from water","distillation"],
+      ["5","Separate different ink pigments","chromatography"],
+      ["6","Separate oil from water","separating funnel / decanting"],
+      ["7","Separate a mixture of gold and sand by density","panning / density separation"],
+      ["8","Separate cream from milk","centrifugation / centrifuge"],
+      ["9","Get pure water from salt water","distillation"],
+      ["10","Separate gravel from sand","sieving / screening"]
+    ]
+  },
+  {
+    id:8, title:"MC: Properties and Changes", type:"mc",
+    instruction:"Select the correct answer about intensive/extensive properties and changes.",
+    questions:[
+      {q:"An intensive property is one that:", options:["Depends on the amount of matter","Does not depend on the amount of matter","Only applies to gases","Only applies to solids"], correct:1},
+      {q:"Which is an intensive property?", options:["Mass","Volume","Temperature","Weight"], correct:2},
+      {q:"Which is an extensive property?", options:["Density","Boiling point","Mass","Color"], correct:2},
+      {q:"Density is classified as:", options:["Extensive","Intensive","Neither","Both"], correct:1},
+      {q:"Evidence of a chemical change includes:", options:["Change in shape","Change in size","Gas production, color change, or energy release","Dissolving"], correct:2},
+      {q:"Which is NOT evidence of a chemical change?", options:["Formation of a precipitate","Color change","Change in state","Production of gas"], correct:2},
+      {q:"Dissolving sugar in water is a ___ change:", options:["Chemical","Physical","Nuclear","Both"], correct:1},
+      {q:"Which property depends on sample size?", options:["Melting point","Density","Volume","Hardness"], correct:2},
+      {q:"Malleability (ability to be hammered into sheets) is:", options:["A chemical property","A physical property","An extensive property","Not a property"], correct:1},
+      {q:"When a candle burns, both ___ and ___ changes occur:", options:["Nuclear and chemical","Physical and chemical","Physical and physical","Chemical and chemical"], correct:1}
+    ]
+  },
+  {
+    id:9, title:"Identify the Substance Type",
+    instruction:"From the description, classify: element, compound, homogeneous mixture, or heterogeneous mixture.",
+    rows:[
+      ["1","A yellow solid that contains only one type of atom (S\u2088)","element"],
+      ["2","A clear liquid that boils at 100\u00B0C and is made of H and O atoms bonded together","compound"],
+      ["3","A clear liquid where you can see two separate layers","heterogeneous mixture"],
+      ["4","A shiny metal made of only copper atoms","element"],
+      ["5","A white crystalline solid that decomposes into sodium and chlorine when electrolyzed","compound"],
+      ["6","A clear, colorless liquid that contains dissolved CO\u2082 gas","homogeneous mixture"],
+      ["7","A rock sample showing distinct grains of different minerals","heterogeneous mixture"],
+      ["8","A gas made of N\u2082 and O\u2082 molecules uniformly distributed","homogeneous mixture"],
+      ["9","A white powder made of Ca, C, and O atoms in fixed ratio (CaCO\u2083)","compound"],
+      ["10","A coin made of uniform copper-nickel alloy","homogeneous mixture"]
+    ]
+  },
+  {
+    id:10, title:"Arrange: Build Definitions", type:"arrange",
+    instruction:"Click the words in the correct order to form the definition.",
+    sentences:[
+      {prompt:"A compound is made of two or more elements chemically bonded", words:["A compound","is made of","two or more","elements","chemically bonded"]},
+      {prompt:"A mixture can be separated by physical methods", words:["A mixture","can be","separated","by physical","methods"]},
+      {prompt:"Homogeneous mixtures have uniform composition throughout", words:["Homogeneous mixtures","have","uniform composition","throughout"]},
+      {prompt:"Physical changes do not alter the chemical identity", words:["Physical changes","do not","alter","the chemical","identity"]},
+      {prompt:"Chemical changes produce new substances with different properties", words:["Chemical changes","produce","new substances","with different","properties"]}
+    ]
+  },
+  {
+    id:11, title:"MC: Tricky Classification", type:"mc",
+    instruction:"These are designed to be tricky. Think carefully.",
+    questions:[
+      {q:"Steel (iron + carbon alloy) is:", options:["A compound","An element","A homogeneous mixture","A heterogeneous mixture"], correct:2},
+      {q:"Is dissolving NaCl in water a physical or chemical change?", options:["Physical","Chemical","Both","Neither"], correct:0},
+      {q:"Milk is classified as:", options:["A solution","A compound","A colloid (heterogeneous)","A pure substance"], correct:2},
+      {q:"Which is true about elements?", options:["They can be broken down by chemical means","They contain only one kind of atom","They are always solids","They are always found alone in nature"], correct:1},
+      {q:"Electrolysis of water is a:", options:["Physical change","Chemical change","Phase change","Not a change"], correct:1},
+      {q:"A bronze statue is:", options:["An element","A compound","A homogeneous mixture (alloy)","A heterogeneous mixture"], correct:2},
+      {q:"Tearing aluminum foil is:", options:["A chemical change","A physical change","A nuclear change","Decomposition"], correct:1},
+      {q:"Salt water left to evaporate leaves salt behind. This shows salt water is:", options:["A compound","An element","A mixture","A pure substance"], correct:2},
+      {q:"Which is a physical property of copper?", options:["It turns green in air","It conducts electricity","It reacts with nitric acid","It corrodes"], correct:1},
+      {q:"Fog is classified as:", options:["A solution","A compound","A colloid (heterogeneous)","An element"], correct:2}
+    ]
+  },
+  {
+    id:12, title:"Real-World Classification",
+    instruction:"Classify each everyday material: element, compound, homogeneous mixture, or heterogeneous mixture.",
+    rows:[
+      ["1","Tap water (contains dissolved minerals)","homogeneous mixture"],
+      ["2","A copper wire","element"],
+      ["3","Table sugar (C\u2081\u2082H\u2082\u2082O\u2081\u2081)","compound"],
+      ["4","Pizza","heterogeneous mixture"],
+      ["5","14-karat gold jewelry (gold + other metals)","homogeneous mixture"]
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/\u03ac/g,'\u03b1').replace(/\u03ad/g,'\u03b5').replace(/\u03ae/g,'\u03b7').replace(/\u03af/g,'\u03b9')
+       .replace(/\u03cc/g,'\u03bf').replace(/\u03cd/g,'\u03c5').replace(/\u03ce/g,'\u03c9').replace(/\u0390/g,'\u03b9').replace(/\u03b0/g,'\u03c5');
+  s = s.replace(/\u2080/g,'0').replace(/\u2081/g,'1').replace(/\u2082/g,'2').replace(/\u2083/g,'3').replace(/\u2084/g,'4')
+       .replace(/\u2085/g,'5').replace(/\u2086/g,'6').replace(/\u2087/g,'7').replace(/\u2088/g,'8').replace(/\u2089/g,'9');
+  s = s.replace(/\u207a/g,'+').replace(/\u207b/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Matter Classification \u2014 Complete Reference</h3>' +
+'<p>All <span class="rule">matter</span> has mass and occupies space (volume).</p>' +
+'<h3>Classification Tree</h3>' +
+'<table><tr><th>Category</th><th>Definition</th><th>Examples</th></tr>' +
+'<tr><td><span class="rule">Pure Substance</span></td><td>Fixed composition, cannot be separated physically</td><td>Water, gold, NaCl</td></tr>' +
+'<tr><td>&nbsp;&nbsp;\u2192 Element</td><td>One type of atom only; listed on periodic table</td><td>Au, O\u2082, Fe, He</td></tr>' +
+'<tr><td>&nbsp;&nbsp;\u2192 Compound</td><td>Two or more elements chemically bonded in fixed ratio</td><td>H\u2082O, CO\u2082, NaCl</td></tr>' +
+'<tr><td><span class="rule">Mixture</span></td><td>Two or more substances physically combined, variable composition</td><td>Air, salt water, soil</td></tr>' +
+'<tr><td>&nbsp;&nbsp;\u2192 Homogeneous</td><td>Uniform composition throughout (solutions)</td><td>Salt water, air, alloys, vinegar</td></tr>' +
+'<tr><td>&nbsp;&nbsp;\u2192 Heterogeneous</td><td>Non-uniform, distinct regions or phases visible</td><td>Sand+water, granite, salad, blood</td></tr></table>' +
+'<h3>Key Differences</h3>' +
+'<ul>' +
+'<li><span class="rule">Elements</span> cannot be broken down by chemical means</li>' +
+'<li><span class="rule">Compounds</span> can be decomposed into elements by chemical means (e.g., electrolysis)</li>' +
+'<li><span class="rule">Mixtures</span> can be separated by physical means (filtration, distillation, chromatography, etc.)</li>' +
+'<li>Compounds have <span class="rule">fixed ratios</span> (law of definite proportions); mixtures have variable composition</li>' +
+'</ul>' +
+'<h3>Physical vs Chemical Properties</h3>' +
+'<p><span class="rule">Physical property:</span> Can be observed without changing the substance\'s chemical identity. Examples: color, density, melting point, boiling point, hardness, conductivity, solubility, odor.</p>' +
+'<p><span class="rule">Chemical property:</span> Describes how a substance reacts or changes into a new substance. Examples: flammability, reactivity, corrosiveness, toxicity, ability to rust or tarnish.</p>' +
+'<h3>Physical vs Chemical Changes</h3>' +
+'<p><span class="rule">Physical change:</span> Changes form/appearance but NOT chemical composition. Examples: melting, freezing, boiling, dissolving, cutting, breaking.</p>' +
+'<p><span class="rule">Chemical change:</span> Produces new substance(s) with different properties. Evidence: gas production, color change, precipitate formation, energy change (heat/light), odor change.</p>' +
+'<h3>Intensive vs Extensive Properties</h3>' +
+'<p><span class="rule">Intensive:</span> Do NOT depend on sample size \u2014 density, temperature, boiling point, color, hardness.</p>' +
+'<p><span class="rule">Extensive:</span> DO depend on sample size \u2014 mass, volume, length, weight, energy.</p>' +
+'<h3>States of Matter</h3>' +
+'<table><tr><th>State</th><th>Shape</th><th>Volume</th><th>Particle Motion</th></tr>' +
+'<tr><td>Solid</td><td>Definite</td><td>Definite</td><td>Vibrate in place</td></tr>' +
+'<tr><td>Liquid</td><td>Indefinite (takes container shape)</td><td>Definite</td><td>Slide past each other</td></tr>' +
+'<tr><td>Gas</td><td>Indefinite</td><td>Indefinite (fills container)</td><td>Move freely, fast</td></tr>' +
+'<tr><td>Plasma</td><td>Indefinite</td><td>Indefinite</td><td>Ionized, extremely fast</td></tr></table>' +
+'<h3>Phase Changes</h3>' +
+'<ul>' +
+'<li>Melting: solid \u2192 liquid (absorbs energy)</li>' +
+'<li>Freezing: liquid \u2192 solid (releases energy)</li>' +
+'<li>Vaporization/Boiling: liquid \u2192 gas (absorbs energy)</li>' +
+'<li>Condensation: gas \u2192 liquid (releases energy)</li>' +
+'<li>Sublimation: solid \u2192 gas directly (absorbs energy)</li>' +
+'<li>Deposition: gas \u2192 solid directly (releases energy)</li>' +
+'</ul>' +
+'<h3>Separation Techniques</h3>' +
+'<table><tr><th>Technique</th><th>Separates by</th><th>Example</th></tr>' +
+'<tr><td>Filtration</td><td>Particle size (solid from liquid)</td><td>Sand from water</td></tr>' +
+'<tr><td>Distillation</td><td>Boiling point difference</td><td>Salt water \u2192 pure water</td></tr>' +
+'<tr><td>Evaporation</td><td>Volatility (liquid leaves, solid stays)</td><td>Getting salt from salt water</td></tr>' +
+'<tr><td>Chromatography</td><td>Solubility/affinity differences</td><td>Separating ink pigments</td></tr>' +
+'<tr><td>Magnetism</td><td>Magnetic properties</td><td>Iron filings from sand</td></tr>' +
+'<tr><td>Centrifugation</td><td>Density (spinning)</td><td>Cream from milk</td></tr>' +
+'<tr><td>Decanting</td><td>Density (pouring off liquid)</td><td>Oil from water</td></tr></table>';
+
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 elements, compounds, mixtures, physical/chemical changes \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

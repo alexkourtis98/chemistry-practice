@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Chair Conformations</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Chair Conformations</h1>
+<p class="subtitle">Deep practice &mdash; axial, equatorial, ring flips, 1,3-diaxial interactions</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_78';
+const SECTIONS = [
+  {
+    id:1, title:"Fill: Chair conformation basics",
+    instruction:"Fill in the correct term or value about cyclohexane chair conformations.",
+    rows:[
+      ["1","Number of axial positions in cyclohexane","6"],
+      ["2","Number of equatorial positions in cyclohexane","6"],
+      ["3","Large groups prefer the ___ position","equatorial"],
+      ["4","The most stable conformation of cyclohexane","chair"],
+      ["5","Total number of C\u2013H bonds in cyclohexane","12"],
+      ["6","In a chair conformation, all C\u2013C bonds are ___","staggered"],
+      ["7","The chair conformation is free of ___ strain","torsional / angle"],
+      ["8","Cyclohexane has ___ carbons in its ring","6 / six"],
+      ["9","The ideal bond angle for sp\u00B3 carbon is ___","109.5 / 109.5\u00B0"],
+      ["10","The C\u2013C\u2013C bond angle in the chair conformation is approximately ___","111 / 111\u00B0 / 109.5 / 109.5\u00B0"],
+      ["11","In a chair, ___ axial bonds point up and ___ point down","3, 3 / three, three"],
+      ["12","Adjacent axial bonds alternate between ___ and ___","up, down / up and down"],
+      ["13","Equatorial bonds alternate between ___ up and ___ down","slightly up, slightly down / up, down"],
+      ["14","A ring flip converts the chair to another ___","chair"],
+      ["15","The process of converting one chair to another is called a ring ___","flip"],
+      ["16","Cyclohexane is ___ (planar/non-planar)","non-planar"],
+      ["17","The chair conformation has no ___ strain and no ___ strain","angle, torsional / torsional, angle"],
+      ["18","In a chair, each carbon has one ___ and one ___ hydrogen","axial, equatorial / equatorial, axial"],
+      ["19","The two chair conformations of cyclohexane are ___","equivalent / identical / equal in energy"],
+      ["20","Cyclohexane exists predominantly in the ___ conformation","chair"]
+    ]
+  },
+  {
+    id:2, title:"Fill: Axial vs equatorial",
+    instruction:"Fill in the correct description for axial and equatorial positions.",
+    rows:[
+      ["1","Axial bonds point ___ or ___","up, down / straight up and down"],
+      ["2","Equatorial bonds point ___","outward / slightly outward"],
+      ["3","Axial bonds are ___ to the ring axis (parallel/perpendicular)","parallel"],
+      ["4","Equatorial bonds are roughly in the ___ of the ring","plane"],
+      ["5","On the 'up' carbons, the axial bond points ___","up"],
+      ["6","On the 'down' carbons, the axial bond points ___","down"],
+      ["7","Equatorial bonds make an angle of about ___ degrees with the ring plane","109.5 / ~109"],
+      ["8","Large substituents are more stable in the ___ position","equatorial"],
+      ["9","Axial substituents experience ___ interactions","1,3-diaxial"],
+      ["10","Equatorial substituents avoid ___ interactions","1,3-diaxial"],
+      ["11","In a Newman projection of the chair, equatorial groups are ___","anti"],
+      ["12","In a Newman projection of the chair, axial groups are ___","gauche"],
+      ["13","The equatorial position has ___ steric strain than axial","less"],
+      ["14","Number of 1,3-diaxial interactions for one axial substituent","2 / two"],
+      ["15","After a ring flip, all axial bonds become ___","equatorial"]
+    ]
+  },
+  {
+    id:3, title:"MC: Chair conformation concepts", type:"mc",
+    instruction:"Select the correct answer about chair conformations.",
+    questions:[
+      {q:"Why is the chair conformation of cyclohexane the most stable?", options:["All bonds are eclipsed","All bonds are staggered","The ring is planar","It has angle strain"], correct:1},
+      {q:"Why do large groups prefer equatorial positions?", options:["Equatorial bonds are longer","Equatorial avoids 1,3-diaxial interactions","Equatorial is closer to the ring","There is no preference"], correct:1},
+      {q:"What is a 1,3-diaxial interaction?", options:["Interaction between adjacent equatorial groups","Steric repulsion between parallel axial groups on carbons 1 and 3","Bond angle strain","Torsional strain from eclipsing"], correct:1},
+      {q:"A 1,3-diaxial interaction is similar to which acyclic conformation?", options:["Anti","Eclipsed","Gauche","Fully eclipsed"], correct:2},
+      {q:"What is an A-value?", options:["The atomic number","The energy difference between axial and equatorial conformations","The bond angle","The activation energy"], correct:1},
+      {q:"A larger A-value means:", options:["Stronger preference for axial","Stronger preference for equatorial","No preference","Weaker bonds"], correct:1},
+      {q:"Which substituent has the largest A-value?", options:["H","CH\u2083","C(CH\u2083)\u2083 (t-butyl)","F"], correct:2},
+      {q:"How many 1,3-diaxial interactions does an axial methyl group have?", options:["1","2","3","4"], correct:1},
+      {q:"In methylcyclohexane, the more stable chair has methyl:", options:["Axial","Equatorial","Either, they are equal","It depends on temperature"], correct:1},
+      {q:"What happens during a ring flip?", options:["The ring breaks and reforms","All axial become equatorial and vice versa","The molecule changes to a different compound","Only some positions change"], correct:1},
+      {q:"The boat conformation of cyclohexane is less stable than the chair because:", options:["It has larger bond angles","It has eclipsing and flagpole interactions","It has fewer carbons","It is planar"], correct:1},
+      {q:"What are flagpole interactions?", options:["Interactions between equatorial groups","Steric repulsion between the two 'flagpole' hydrogens in the boat","Interactions between axial and equatorial groups","Bond stretching"], correct:1},
+      {q:"The twist-boat is:", options:["More stable than the chair","More stable than the regular boat","Less stable than the boat","Equal to the chair"], correct:1},
+      {q:"cis-Substituents on a cyclohexane ring are:", options:["Both axial or both equatorial","One axial and one equatorial","Always both equatorial","Always both axial"], correct:0},
+      {q:"trans-Substituents on a cyclohexane ring are:", options:["Both axial or both equatorial","One axial and one equatorial","Always both equatorial","Always both axial"], correct:1},
+      {q:"For cis-1,4-dimethylcyclohexane, the two methyls are:", options:["Both axial or both equatorial","One axial and one equatorial","Always equatorial","Not possible on cyclohexane"], correct:0},
+      {q:"For trans-1,4-dimethylcyclohexane, the two methyls are:", options:["Both axial or both equatorial","One axial and one equatorial","Always equatorial","Always axial"], correct:1},
+      {q:"Which is more stable: cis-1,3-dimethylcyclohexane or trans-1,3-dimethylcyclohexane?", options:["cis (both equatorial possible)","trans (both equatorial possible)","They are equal","Depends on temperature"], correct:1},
+      {q:"The percentage of methylcyclohexane with methyl equatorial at room temperature is approximately:", options:["50%","75%","95%","100%"], correct:2},
+      {q:"A t-butyl group on cyclohexane is said to 'lock' the chair because:", options:["It bonds to three carbons","Its A-value is so large it never goes axial","It makes the ring rigid","It prevents ring flipping entirely"], correct:1}
+    ]
+  },
+  {
+    id:4, title:"Fill: Ring flip results",
+    instruction:"Describe what happens after a ring flip.",
+    rows:[
+      ["1","After a ring flip, axial becomes ___","equatorial"],
+      ["2","After a ring flip, equatorial becomes ___","axial"],
+      ["3","After a ring flip, 'up' substituents stay ___ (up/down)","up"],
+      ["4","After a ring flip, 'down' substituents stay ___ (up/down)","down"],
+      ["5","cis-1,3-Dimethylcyclohexane: both equatorial possible?","no"],
+      ["6","trans-1,3-Dimethylcyclohexane: both equatorial possible?","yes"],
+      ["7","cis-1,2-Dimethylcyclohexane: both equatorial possible?","no"],
+      ["8","trans-1,2-Dimethylcyclohexane: both equatorial possible?","yes"],
+      ["9","cis-1,4-Dimethylcyclohexane: both equatorial possible?","yes"],
+      ["10","trans-1,4-Dimethylcyclohexane: both equatorial possible?","no"],
+      ["11","For monosubstituted cyclohexane, which chair is more stable?","equatorial / the one with substituent equatorial"],
+      ["12","For disubstituted, the more stable chair has the ___ group equatorial","larger / bigger"],
+      ["13","Ring flip does NOT change the ___ relationship (cis/trans)","cis/trans / cis or trans"],
+      ["14","Ring flip does NOT break any ___","bonds"],
+      ["15","Ring flip changes ___ and ___ positions but not up/down","axial, equatorial / axial and equatorial"],
+      ["16","In methylcyclohexane, the ring flip interconverts axial-methyl and ___-methyl chairs","equatorial"],
+      ["17","The energy barrier for cyclohexane ring flip is about ___ kJ/mol","45 / 45 kJ/mol"],
+      ["18","At room temperature, ring flipping is ___ (fast/slow)","fast"],
+      ["19","For gem-disubstituted cyclohexane (both on same carbon), ring flip gives ___ energy","equal / the same / identical"],
+      ["20","When both chairs of a disubstituted cyclohexane have one group axial, the more stable chair has the ___ group equatorial","larger / bigger / bulkier"]
+    ]
+  },
+  {
+    id:5, title:"MC: Substituted cyclohexanes", type:"mc",
+    instruction:"Select the correct answer about substituted cyclohexanes.",
+    questions:[
+      {q:"The A-value of H is:", options:["0 kJ/mol","3.8 kJ/mol","7.6 kJ/mol","22.8 kJ/mol"], correct:0},
+      {q:"The A-value of CH\u2083 is approximately:", options:["0 kJ/mol","3.8 kJ/mol","7.6 kJ/mol","22.8 kJ/mol"], correct:2},
+      {q:"The A-value of t-butyl is approximately:", options:["3.8 kJ/mol","7.6 kJ/mol","11.4 kJ/mol","22.8 kJ/mol or greater"], correct:3},
+      {q:"For ethylcyclohexane, the preferred conformation has ethyl:", options:["Axial","Equatorial","No preference","It alternates"], correct:1},
+      {q:"For trans-1,2-dimethylcyclohexane, the more stable chair has:", options:["Both methyls axial","Both methyls equatorial","One axial, one equatorial","Cannot be determined"], correct:1},
+      {q:"For cis-1,3-dimethylcyclohexane, in the more stable chair:", options:["Both methyls are equatorial","Both methyls are axial","One is axial and one is equatorial","The two chairs are equal energy"], correct:2},
+      {q:"For trans-1-t-butyl-4-methylcyclohexane, the most stable chair has:", options:["t-Butyl axial, methyl equatorial","t-Butyl equatorial, methyl axial","Both equatorial","Both axial"], correct:1},
+      {q:"If two groups are cis on C1 and C2 of cyclohexane, they are:", options:["Both up or both down","One up and one down","Always equatorial","Always axial"], correct:0},
+      {q:"cis-1,4-Dimethylcyclohexane can have both methyls equatorial because:", options:["C1 and C4 are adjacent","On C1 and C4, same-side means one up-axial and one down-equatorial, but after flip both equatorial","1,4-positions allow both to point the same direction as equatorial","It is actually impossible"], correct:2},
+      {q:"Which disubstituted cyclohexane is the most stable?", options:["trans-1,2-dimethyl","trans-1,3-dimethyl","trans-1,4-dimethyl","They are all equal"], correct:2},
+      {q:"A gem-dimethylcyclohexane (1,1-dimethyl) always has:", options:["Both methyls axial","Both methyls equatorial","One axial and one equatorial","It depends on the chair"], correct:2},
+      {q:"For cis-1-t-butyl-3-methylcyclohexane:", options:["Both can be equatorial","t-Butyl equatorial forces methyl axial","t-Butyl is always axial","The compound doesn't exist"], correct:1},
+      {q:"Fluorocyclohexane has a ___ A-value compared to methylcyclohexane:", options:["Larger","Smaller","Equal","Zero"], correct:1},
+      {q:"The A-value of OH is relatively small because:", options:["OH is very bulky","The O\u2013H bond can rotate to minimize strain","OH has no lone pairs","OH is charged"], correct:1},
+      {q:"For a trisubstituted cyclohexane, the most stable chair puts the ___ groups equatorial:", options:["Smallest","Most","Largest","It doesn't matter"], correct:2}
+    ]
+  },
+  {
+    id:6, title:"Fill: 1,3-diaxial interactions",
+    instruction:"Fill in the correct answer about 1,3-diaxial interactions.",
+    rows:[
+      ["1","1,3-Diaxial strain is similar to ___ interaction in Newman projections","gauche"],
+      ["2","Larger substituent = ___ A-value","larger / higher / bigger"],
+      ["3","An axial methyl group has ___ 1,3-diaxial interactions with axial H","2 / two"],
+      ["4","Each CH\u2083/H 1,3-diaxial interaction costs about ___ kJ/mol","3.8 / 3.8 kJ/mol"],
+      ["5","The total energy penalty for axial CH\u2083 is about ___ kJ/mol","7.6 / 7.6 kJ/mol"],
+      ["6","1,3-Diaxial interactions occur between substituents on C1 and C___ or C___","3, 5 / C3, C5"],
+      ["7","The distance between 1,3-diaxial groups is about ___ \u00C5","2.5 / 2.5-2.6"],
+      ["8","A-value is defined as \u0394G\u00B0 for the equilibrium: axial \u21CC ___","equatorial"],
+      ["9","The A-value of isopropyl [CH(CH\u2083)\u2082] is about ___ kJ/mol","9.2 / 9 / 9.2 kJ/mol"],
+      ["10","The A-value of phenyl (C\u2086H\u2085) is about ___ kJ/mol","12 / 11.7 / 12.1"],
+      ["11","1,3-Diaxial strain is a type of ___ strain","steric"],
+      ["12","Equatorial groups avoid 1,3-diaxial interactions because they point ___","outward / away from the ring"],
+      ["13","Axial groups point ___ along the ring axis, causing close contact with other axial groups","up or down / parallel"],
+      ["14","The A-value of Cl is about ___ kJ/mol","2.2 / 2.0 / 2.2 kJ/mol"],
+      ["15","The A-value of Br is about ___ kJ/mol","2.4 / 2.0 / 2.4 kJ/mol"]
+    ]
+  },
+  {
+    id:7, title:"MC: cis/trans on cyclohexane", type:"mc",
+    instruction:"Select the correct answer about cis/trans relationships on cyclohexane.",
+    questions:[
+      {q:"cis means substituents are on the ___ face of the ring:", options:["Same","Opposite","Adjacent","Alternating"], correct:0},
+      {q:"trans means substituents are on ___ faces of the ring:", options:["Same","Opposite","Adjacent","Neither"], correct:1},
+      {q:"cis-1,2-Disubstituted: the groups are one ___ and one ___:", options:["Both axial","Both equatorial","One axial, one equatorial","It varies"], correct:2},
+      {q:"trans-1,2-Disubstituted: the groups are:", options:["One axial, one equatorial","Both axial or both equatorial","Always both axial","Always both equatorial"], correct:1},
+      {q:"cis-1,3-Disubstituted: the groups are:", options:["One axial, one equatorial","Both axial or both equatorial","Always both equatorial","Always both axial"], correct:1},
+      {q:"trans-1,3-Disubstituted: the groups are:", options:["Both axial or both equatorial","One axial, one equatorial","Always both equatorial","Always both axial"], correct:1},
+      {q:"cis-1,4-Disubstituted: the groups are:", options:["One axial, one equatorial","Both axial or both equatorial","Always both equatorial","Always both axial"], correct:1},
+      {q:"trans-1,4-Disubstituted: the groups are:", options:["Both axial or both equatorial","One axial, one equatorial","Always both equatorial","Always both axial"], correct:1},
+      {q:"Which is more stable: cis or trans-1,4-dimethylcyclohexane?", options:["cis (both equatorial possible)","trans","They are equal","Depends on temperature"], correct:0},
+      {q:"Which is more stable: cis or trans-1,2-dimethylcyclohexane?", options:["cis","trans (both equatorial possible)","They are equal","Depends on substituent size"], correct:1}
+    ]
+  },
+  {
+    id:8, title:"Fill: A-values",
+    instruction:"Give the approximate A-value or identify the substituent.",
+    rows:[
+      ["1","A-value of CH\u2083","7.6 kJ/mol / 7.6 / 1.8 kcal/mol"],
+      ["2","A-value of CH\u2082CH\u2083 (ethyl)","8.0 / 7.5 / 1.8 kcal/mol"],
+      ["3","A-value of C(CH\u2083)\u2083 (t-butyl)","22.8 / >20 / 5.5 kcal/mol"],
+      ["4","A-value of F","1.0 / 0.25 kcal/mol"],
+      ["5","A-value of Cl","2.2 / 0.53 kcal/mol"],
+      ["6","A-value of OH","3.4 / 0.87 kcal/mol / 3.4 kJ/mol"],
+      ["7","A-value of NH\u2082","7.1 / 1.7 kcal/mol"],
+      ["8","Substituent with A-value of 0","H / hydrogen"],
+      ["9","Relative A-value order: F ___ Cl ___ Br","< / less than"],
+      ["10","A-value of COOH","5.9 / 5.9 kJ/mol / 1.4 kcal/mol"]
+    ]
+  },
+  {
+    id:9, title:"Word Arrange: Build chair rules", type:"arrange",
+    instruction:"Click the words in the correct order.",
+    sentences:[
+      {prompt:"Large substituents prefer the equatorial position to avoid 1,3-diaxial interactions", words:["Large substituents","prefer","the equatorial","position","to avoid","1,3-diaxial","interactions"]},
+      {prompt:"A ring flip converts all axial positions to equatorial and vice versa", words:["A ring flip","converts","all axial","positions to","equatorial","and vice versa"]},
+      {prompt:"The chair conformation has all bonds in staggered arrangements", words:["The chair","conformation","has all bonds","in staggered","arrangements"]},
+      {prompt:"The t-butyl group locks the cyclohexane ring in one chair conformation", words:["The t-butyl group","locks","the cyclohexane ring","in one","chair conformation"]},
+      {prompt:"cis substituents are on the same face of the cyclohexane ring", words:["cis substituents","are on","the same face","of the","cyclohexane ring"]}
+    ]
+  },
+  {
+    id:10, title:"MC: Most stable chair", type:"mc",
+    instruction:"Identify the most stable chair conformation.",
+    questions:[
+      {q:"Methylcyclohexane: most stable chair has methyl:", options:["Axial","Equatorial","No preference","Depends on temperature"], correct:1},
+      {q:"t-Butylcyclohexane: most stable chair has t-butyl:", options:["Axial","Equatorial","No preference","Either works"], correct:1},
+      {q:"trans-1,2-Dimethylcyclohexane: most stable chair has:", options:["Both axial","Both equatorial","One axial, one equatorial","Equal energy chairs"], correct:1},
+      {q:"cis-1,3-Dimethylcyclohexane: most stable chair has:", options:["Both equatorial","Both axial","One axial, one equatorial (equal energy chairs)","Cannot be determined"], correct:2},
+      {q:"trans-1-t-butyl-3-methylcyclohexane: most stable chair has:", options:["t-Butyl axial, methyl equatorial","t-Butyl equatorial, methyl equatorial","t-Butyl equatorial, methyl axial","Both axial"], correct:1},
+      {q:"cis-1-t-butyl-4-methylcyclohexane: most stable chair has:", options:["t-Butyl equatorial, methyl axial","Both equatorial","t-Butyl axial, methyl equatorial","Both axial"], correct:0},
+      {q:"trans-1,4-Di-t-butylcyclohexane: most stable chair has:", options:["Both equatorial","Both axial","One axial, one equatorial","No stable chair exists"], correct:2},
+      {q:"cis-1,3-Di-t-butylcyclohexane: the two chairs are:", options:["Equal energy (one axial, one equatorial each)","One has both equatorial","One has both axial","The molecule is too strained to exist"], correct:0},
+      {q:"For 1,1-dimethylcyclohexane, the two chair conformations are:", options:["Different in energy","Equal in energy","One doesn't exist","Both have strain"], correct:1},
+      {q:"Chlorocyclohexane: most stable chair has Cl:", options:["Axial","Equatorial","No preference","Depends on solvent"], correct:1}
+    ]
+  },
+  {
+    id:11, title:"Fill: Boat conformation",
+    instruction:"Fill in the correct answer about the boat conformation.",
+    rows:[
+      ["1","The boat conformation has ___ strain","flagpole / eclipsing / torsional"],
+      ["2","In the boat, four carbons are in the same ___","plane"],
+      ["3","The two hydrogens that point toward each other in the boat are called ___ hydrogens","flagpole"],
+      ["4","The boat conformation is about ___ kJ/mol less stable than the chair","30 / 29 / 30 kJ/mol"],
+      ["5","The twist-boat is about ___ kJ/mol more stable than the regular boat","6 / 5-6 / 6 kJ/mol"],
+      ["6","The boat conformation has ___ interactions where 4 C\u2013H bonds are eclipsed","eclipsing"],
+      ["7","Boat cyclohexane has ___ (more/less) torsional strain than chair","more"],
+      ["8","The twist-boat relieves some ___ strain compared to the regular boat","torsional / eclipsing / flagpole"],
+      ["9","The half-chair is the ___ energy conformation of cyclohexane","highest"],
+      ["10","Order of stability: chair > ___ > boat > half-chair","twist-boat"]
+    ]
+  },
+  {
+    id:12, title:"MC: Tricky chair problems", type:"mc",
+    instruction:"Think carefully about these challenging chair conformation problems.",
+    questions:[
+      {q:"The twist-boat conformation is:", options:["More stable than the chair","An energy minimum between boat and chair","The transition state for ring flipping","More stable than the boat but less stable than the chair"], correct:3},
+      {q:"For a gem-disubstituted cyclohexane (e.g., 1,1-dimethyl), which statement is true?", options:["One methyl is always axial and one equatorial","Both can be equatorial","Both are always axial","The two chairs have different energies"], correct:0},
+      {q:"A t-butyl group effectively 'locks' the chair because:", options:["It cannot physically fit in the axial position","Its A-value is so large the axial conformer is negligible","It forms an extra bond to the ring","It prevents ring flipping"], correct:1},
+      {q:"In cis-decalin, the ring junction hydrogens are:", options:["Both axial","Both equatorial","One axial, one equatorial","It depends on the ring"], correct:2},
+      {q:"In trans-decalin, the ring junction hydrogens are:", options:["Both axial or both equatorial","One axial, one equatorial","Always both equatorial","Trans-decalin is not stable"], correct:0},
+      {q:"For cis-1,2-dimethylcyclohexane, the two chair conformations:", options:["Are equal in energy","Have different energies; the diequatorial is more stable","Have different energies, but neither has both equatorial","The molecule can't exist as a chair"], correct:2},
+      {q:"Which has the smallest A-value among the halogens?", options:["F","Cl","Br","I"], correct:0},
+      {q:"The A-value measures:", options:["Bond strength","The free energy difference between axial and equatorial conformers","Bond angle","Electronegativity"], correct:1},
+      {q:"In a disubstituted cyclohexane where both groups cannot be equatorial simultaneously, the preferred chair has:", options:["The larger group equatorial","The smaller group equatorial","Equal populations of both chairs","Both groups axial"], correct:0},
+      {q:"Cyclohexane itself has ___ 1,3-diaxial interactions:", options:["0","6","12","3"], correct:1}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Chair Conformations \u2014 Complete Reference</h3>' +
+'<h3>Cyclohexane Chair Conformation</h3>' +
+'<p>The <span class="rule">chair conformation</span> is the most stable conformation of cyclohexane. All C\u2013C bonds are perfectly staggered, eliminating both torsional and angle strain.</p>' +
+'<h3>Axial and Equatorial Positions</h3>' +
+'<table><tr><th>Position</th><th>Direction</th><th>Count</th><th>Steric Environment</th></tr>' +
+'<tr><td><span class="rule">Axial</span></td><td>Straight up or down (parallel to ring axis)</td><td>6 (3 up, 3 down)</td><td>Close to other axial groups on C1,3,5</td></tr>' +
+'<tr><td><span class="rule">Equatorial</span></td><td>Outward from ring (roughly in ring plane)</td><td>6 (alternating slightly up/down)</td><td>Points away, minimal steric contact</td></tr></table>' +
+'<p>Adjacent carbons alternate: if C1 has axial-up, C2 has axial-down, C3 has axial-up, etc.</p>' +
+'<h3>Ring Flip</h3>' +
+'<p>A <span class="rule">ring flip</span> converts one chair to another. ALL axial bonds become equatorial and ALL equatorial bonds become axial. Substituents that were "up" stay "up" and "down" stay "down".</p>' +
+'<p>The ring flip does NOT break any bonds and does NOT change cis/trans relationships.</p>' +
+'<h3>1,3-Diaxial Interactions</h3>' +
+'<p><span class="rule">1,3-Diaxial strain</span> is the steric repulsion between an axial substituent and the axial hydrogens (or other groups) on carbons two positions away (C1\u2194C3, C1\u2194C5).</p>' +
+'<p>This interaction is equivalent to a <span class="rule">gauche interaction</span> in a Newman projection. Each axial CH\u2083 has TWO 1,3-diaxial interactions (\u22483.8 kJ/mol each, total 7.6 kJ/mol).</p>' +
+'<h3>A-Values (Common Substituents)</h3>' +
+'<table><tr><th>Group</th><th>A-value (kJ/mol)</th><th>A-value (kcal/mol)</th></tr>' +
+'<tr><td>H</td><td>0</td><td>0</td></tr>' +
+'<tr><td>F</td><td>1.0</td><td>0.25</td></tr>' +
+'<tr><td>Cl</td><td>2.2</td><td>0.53</td></tr>' +
+'<tr><td>Br</td><td>2.4</td><td>0.57</td></tr>' +
+'<tr><td>OH</td><td>3.4</td><td>0.87</td></tr>' +
+'<tr><td>CH\u2083</td><td><span class="rule">7.6</span></td><td>1.8</td></tr>' +
+'<tr><td>CH\u2082CH\u2083</td><td>8.0</td><td>1.8</td></tr>' +
+'<tr><td>CH(CH\u2083)\u2082</td><td>9.2</td><td>2.2</td></tr>' +
+'<tr><td><span class="rule">C(CH\u2083)\u2083</span></td><td>>22.8</td><td>>5.5</td></tr></table>' +
+'<h3>Boat Conformation</h3>' +
+'<p>The <span class="rule">boat</span> conformation is less stable than the chair (\u224830 kJ/mol higher). It has <span class="rule">eclipsing interactions</span> (4 pairs of eclipsed C\u2013H bonds) and <span class="rule">flagpole interactions</span> (two H atoms pointing toward each other).</p>' +
+'<p>The <span class="rule">twist-boat</span> is slightly more stable than the boat (\u22486 kJ/mol lower) but still much less stable than the chair.</p>' +
+'<h3>cis/trans on Cyclohexane Rings</h3>' +
+'<table><tr><th>Relationship</th><th>1,2-</th><th>1,3-</th><th>1,4-</th></tr>' +
+'<tr><td><span class="rule">cis</span> (same face)</td><td>1 ax + 1 eq</td><td>Both ax or both eq</td><td>Both ax or both eq</td></tr>' +
+'<tr><td><span class="rule">trans</span> (opposite faces)</td><td>Both ax or both eq</td><td>1 ax + 1 eq</td><td>1 ax + 1 eq</td></tr></table>' +
+'<h3>Key Rules</h3>' +
+'<ul>' +
+'<li>Large groups <span class="rule">strongly prefer equatorial</span> positions</li>' +
+'<li>t-Butyl group effectively <span class="rule">locks</span> the ring (A-value > 22.8 kJ/mol)</li>' +
+'<li>When both groups cannot be equatorial, put the <span class="rule">larger group equatorial</span></li>' +
+'<li>gem-Disubstituted cyclohexanes always have one group axial, one equatorial</li>' +
+'</ul>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 axial, equatorial, ring flips, 1,3-diaxial interactions \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

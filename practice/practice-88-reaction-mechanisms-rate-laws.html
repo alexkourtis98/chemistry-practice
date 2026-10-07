@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Reaction Mechanisms & Rate Laws</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Reaction Mechanisms & Rate Laws</h1>
+<p class="subtitle">Deep practice &mdash; elementary steps, molecularity, rate-determining step, catalysts</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_88';
+const SECTIONS = [
+  {
+    id:1, title:"Fill: Elementary reactions and molecularity",
+    instruction:"Complete each statement about elementary reactions.",
+    rows:[
+      ["1","An elementary reaction occurs in a ___ step","single / one"],
+      ["2","The molecularity of an elementary step is the number of ___ molecules","reactant / reacting"],
+      ["3","A unimolecular reaction involves ___ reactant molecule(s)","one / 1"],
+      ["4","A bimolecular reaction involves ___ reactant molecules","two / 2"],
+      ["5","A termolecular reaction involves ___ reactant molecules","three / 3"],
+      ["6","Termolecular reactions are ___ because three-body collisions are unlikely","rare / very rare / uncommon"],
+      ["7","For an elementary step A \u2192 products, rate = ___","k[A]"],
+      ["8","For an elementary step A + B \u2192 products, rate = ___","k[A][B]"],
+      ["9","For an elementary step 2A \u2192 products, rate = ___","k[A]^2 / k[A]\u00B2"],
+      ["10","For an elementary step A + B + C \u2192 products, rate = ___","k[A][B][C]"],
+      ["11","For elementary reactions, the rate law can be written directly from the ___","stoichiometry / balanced equation / coefficients"],
+      ["12","For overall (non-elementary) reactions, the rate law must be determined ___","experimentally / by experiment"],
+      ["13","The order of an elementary reaction equals its ___","molecularity"],
+      ["14","A unimolecular elementary step is ___ order","first / 1st"],
+      ["15","A bimolecular elementary step is ___ order","second / 2nd"]
+    ]
+  },
+  {
+    id:2, title:"Fill: Rate-determining step",
+    instruction:"Answer questions about the rate-determining step (RDS).",
+    rows:[
+      ["1","The rate-determining step is the ___ step in a mechanism","slowest / slow"],
+      ["2","The overall rate law is determined by the ___ step","rate-determining / slowest / rate limiting"],
+      ["3","The rate-determining step acts as a ___ for the overall reaction","bottleneck"],
+      ["4","Steps after the RDS are typically ___ and do not affect the rate","fast"],
+      ["5","An intermediate is a species that is ___ in one step and consumed in another","produced / formed / generated"],
+      ["6","Intermediates appear in the mechanism but NOT in the ___ equation","overall / net / balanced"],
+      ["7","A catalyst appears in the mechanism but is ___ at the end","regenerated / unchanged / not consumed"],
+      ["8","If step 1 (slow): A + B \u2192 C, step 2 (fast): C + D \u2192 E, the rate law is rate = ___","k[A][B]"],
+      ["9","If the RDS involves an intermediate, we must use the ___ approximation","pre-equilibrium / steady-state / equilibrium"],
+      ["10","In pre-equilibrium, the fast step before the RDS reaches ___","equilibrium"],
+      ["11","The sum of all elementary steps must equal the ___ reaction","overall / net"],
+      ["12","Species that cancel when steps are added are called ___","intermediates"],
+      ["13","The activation energy of the RDS is ___ than other steps","larger / higher / greater"],
+      ["14","On an energy diagram, the RDS has the ___ energy barrier","highest / tallest / largest"],
+      ["15","The number of elementary steps in a mechanism is called the ___ of the mechanism","complexity / number of steps"]
+    ]
+  },
+  {
+    id:3, title:"MC: Writing rate laws from mechanisms", type:"mc",
+    instruction:"Determine the rate law from the given mechanism.",
+    questions:[
+      {q:"Step 1 (slow): NO\u2082 + NO\u2082 \u2192 NO\u2083 + NO. Rate law = ?", options:["rate = k[NO\u2082]","rate = k[NO\u2082]\u00B2","rate = k[NO\u2083][NO]","rate = k[NO\u2082][NO]"], correct:1},
+      {q:"Step 1 (fast eq): NO + Br\u2082 \u21CC NOBr\u2082. Step 2 (slow): NOBr\u2082 + NO \u2192 2NOBr. Overall rate law?", options:["rate = k[NO][Br\u2082]","rate = k[NO]\u00B2[Br\u2082]","rate = k[NOBr\u2082][NO]","rate = k[Br\u2082]"], correct:1},
+      {q:"Step 1 (slow): H\u2082O\u2082 + I\u207B \u2192 H\u2082O + IO\u207B. Step 2 (fast): H\u2082O\u2082 + IO\u207B \u2192 H\u2082O + O\u2082 + I\u207B. Rate law?", options:["rate = k[H\u2082O\u2082]\u00B2","rate = k[H\u2082O\u2082][I\u207B]","rate = k[H\u2082O\u2082][IO\u207B]","rate = k[I\u207B]"], correct:1},
+      {q:"Step 1 (fast eq): Cl\u2082 \u21CC 2Cl. Step 2 (slow): Cl + CHCl\u2083 \u2192 HCl + CCl\u2083. Rate law?", options:["rate = k[Cl\u2082][CHCl\u2083]","rate = k[Cl][CHCl\u2083]","rate = k[Cl\u2082]^(1/2)[CHCl\u2083]","rate = k[CHCl\u2083]"], correct:2},
+      {q:"For the mechanism in Q4, [Cl] is an intermediate. Using equilibrium: K = [Cl]\u00B2/[Cl\u2082], so [Cl] = :", options:["K[Cl\u2082]","(K[Cl\u2082])^(1/2)","K/[Cl\u2082]","K\u00B2[Cl\u2082]"], correct:1},
+      {q:"A one-step mechanism A + 2B \u2192 C has rate law:", options:["rate = k[A][B]","rate = k[A][B]\u00B2","rate = k[A]\u00B2[B]","rate = k[C]"], correct:1},
+      {q:"Step 1 (slow): A \u2192 B. Step 2 (fast): B + C \u2192 D. The rate law is:", options:["rate = k[A]","rate = k[A][C]","rate = k[B][C]","rate = k[A][B]"], correct:0},
+      {q:"If the observed rate law is rate = k[A][B]\u00B2, the RDS must involve:", options:["1 molecule of A and 2 of B","Only A","Only B","Cannot determine from rate law alone"], correct:3},
+      {q:"A mechanism with a fast pre-equilibrium produces an intermediate X. The rate law will contain:", options:["[X] directly","Concentrations of the species forming X","Neither","[X]\u00B2"], correct:1},
+      {q:"Step 1 (fast eq): 2NO \u21CC N\u2082O\u2082. Step 2 (slow): N\u2082O\u2082 + O\u2082 \u2192 2NO\u2082. Rate law?", options:["rate = k[NO]\u00B2[O\u2082]","rate = k[N\u2082O\u2082][O\u2082]","rate = k[NO][O\u2082]","rate = k[NO\u2082]\u00B2"], correct:0},
+      {q:"The intermediate in Q10 is:", options:["NO","O\u2082","N\u2082O\u2082","NO\u2082"], correct:2},
+      {q:"A catalyst that is in the same phase as reactants is called:", options:["Heterogeneous","Homogeneous","Enzymatic","Autocatalytic"], correct:1},
+      {q:"A catalyst that is in a different phase from reactants is called:", options:["Homogeneous","Heterogeneous","Enzymatic","Inhibitor"], correct:1},
+      {q:"The overall order for rate = k[A]^(1/2)[B] is:", options:["1","1.5","2","2.5"], correct:1},
+      {q:"Fractional orders in rate laws suggest:", options:["Experimental error","A multi-step mechanism","A one-step mechanism","Zero-order kinetics"], correct:1}
+    ]
+  },
+  {
+    id:4, title:"Fill: Identify intermediates and catalysts",
+    instruction:"Given a mechanism, identify intermediates and catalysts.",
+    rows:[
+      ["1","Step 1: A + B \u2192 C. Step 2: C + D \u2192 E + B. The intermediate is ___","C"],
+      ["2","In the mechanism above, the catalyst is ___","B"],
+      ["3","Step 1: 2NO \u2192 N\u2082O\u2082. Step 2: N\u2082O\u2082 + H\u2082 \u2192 N\u2082O + H\u2082O. The intermediate is ___","N2O2 / N\u2082O\u2082"],
+      ["4","Step 1: O\u2083 \u2192 O\u2082 + O. Step 2: O\u2083 + O \u2192 2O\u2082. The intermediate is ___","O / atomic oxygen"],
+      ["5","In the mechanism: Step 1: Cl\u2082 \u2192 2Cl (with light). Step 2: Cl + CH\u2084 \u2192 CH\u2083 + HCl. Step 3: CH\u2083 + Cl\u2082 \u2192 CH\u2083Cl + Cl. The intermediates are ___","Cl and CH3 / Cl, CH3 / Cl, CH\u2083"],
+      ["6","Step 1: H\u2082O\u2082 + I\u207B \u2192 H\u2082O + IO\u207B. Step 2: H\u2082O\u2082 + IO\u207B \u2192 H\u2082O + O\u2082 + I\u207B. Catalyst = ___","I- / I\u207B / iodide"],
+      ["7","In Q6, the intermediate is ___","IO- / IO\u207B / hypoiodite"],
+      ["8","Overall reaction from Q6: 2H\u2082O\u2082 \u2192 ___","2H2O + O2 / 2H\u2082O + O\u2082"],
+      ["9","Step 1: Enzyme + Substrate \u2192 ES complex. Step 2: ES \u2192 Enzyme + Product. The catalyst is ___","enzyme / the enzyme"],
+      ["10","In Q9, the intermediate is ___","ES complex / ES / enzyme-substrate complex"],
+      ["11","A species that appears in the mechanism but not in the overall equation is either a(n) ___ or a(n) ___","intermediate, catalyst / catalyst, intermediate"],
+      ["12","An intermediate is ___ (consumed/regenerated) during the reaction","consumed / used up"],
+      ["13","A catalyst is ___ (consumed/regenerated) during the reaction","regenerated / reformed / recovered"],
+      ["14","To find the overall reaction, ___ all elementary steps and cancel species appearing on both sides","add / sum"],
+      ["15","If Mn\u00B2\u207A catalyzes a reaction and MnO\u2084\u207B forms in step 1 but Mn\u00B2\u207A is reformed in step 3, MnO\u2084\u207B is a(n) ___","intermediate"]
+    ]
+  },
+  {
+    id:5, title:"MC: Molecularity and elementary steps", type:"mc",
+    instruction:"Identify molecularity and properties of elementary steps.",
+    questions:[
+      {q:"A \u2192 B + C is:", options:["Unimolecular","Bimolecular","Termolecular","Zero-molecular"], correct:0},
+      {q:"A + B \u2192 C is:", options:["Unimolecular","Bimolecular","Termolecular","Cannot tell"], correct:1},
+      {q:"2A + B \u2192 C + D is:", options:["Bimolecular","Termolecular","Unimolecular","Quadrimolecular"], correct:1},
+      {q:"Why are termolecular steps rare?", options:["They violate conservation of mass","Three molecules rarely collide simultaneously","They are always endothermic","They require a catalyst"], correct:1},
+      {q:"The molecularity of a step is always:", options:["A positive integer","A fraction","Determined experimentally","Equal to the overall order"], correct:0},
+      {q:"Can the overall reaction order be fractional?", options:["No, never","Yes, if the mechanism has multiple steps","Only for zero-order","Only for catalyzed reactions"], correct:1},
+      {q:"For the elementary step 2NO + O\u2082 \u2192 2NO\u2082, the rate law is:", options:["rate = k[NO][O\u2082]","rate = k[NO]\u00B2[O\u2082]","rate = k[NO\u2082]\u00B2","rate = k[NO]\u00B2"], correct:1},
+      {q:"This step (Q7) is:", options:["Unimolecular","Bimolecular","Termolecular","Not elementary (too many reactants)"], correct:2},
+      {q:"The reverse of a unimolecular step is:", options:["Always unimolecular","Bimolecular (2 products combine)","Termolecular","Cannot determine"], correct:1},
+      {q:"An elementary step can have an order of:", options:["0","Fractional","1, 2, or 3 only","Any positive number"], correct:2},
+      {q:"Radioactive decay (one nucleus \u2192 products) is:", options:["Bimolecular","Termolecular","Unimolecular","Zero-order"], correct:2},
+      {q:"For A + A \u2192 products (elementary), the molecularity is:", options:["1","2","Depends on conditions","Cannot determine"], correct:1},
+      {q:"The overall order of a reaction can be:", options:["Only integers","Only 1, 2, or 3","Any number including fractions and zero","Only positive integers"], correct:2},
+      {q:"A proposed mechanism must satisfy:", options:["Elementary steps sum to overall reaction AND rate law matches experiment","Only the sum condition","Only the rate law condition","Neither, it just needs to be reasonable"], correct:0},
+      {q:"If a mechanism predicts rate = k[A]\u00B2 but experiment shows rate = k[A], the mechanism is:", options:["Correct","Incorrect","Needs more steps","Correct but imprecise"], correct:1}
+    ]
+  },
+  {
+    id:6, title:"Fill: Catalyst effects",
+    instruction:"Answer questions about catalysts and their effects.",
+    rows:[
+      ["1","A catalyst increases reaction rate by lowering the ___","activation energy / Ea"],
+      ["2","A catalyst does NOT change the ___ of the reaction","equilibrium / thermodynamics / deltaG / deltaH"],
+      ["3","A catalyst does NOT change the ___ constant K","equilibrium"],
+      ["4","A catalyst speeds up both the ___ and reverse reactions equally","forward"],
+      ["5","A heterogeneous catalyst is typically a ___ with reactants in gas or liquid phase","solid / solid surface"],
+      ["6","In heterogeneous catalysis, reactants ___ onto the catalyst surface","adsorb"],
+      ["7","The process of molecules sticking to a surface is called ___","adsorption"],
+      ["8","Pt, Pd, and Ni are common ___ catalysts used in hydrogenation","heterogeneous / metal"],
+      ["9","A catalytic converter in a car uses ___ catalysts like Pt and Rh","heterogeneous / metal"],
+      ["10","Enzymes are biological ___ catalysts","homogeneous"],
+      ["11","The Michaelis-Menten equation describes enzyme kinetics: v = Vmax[S]/(Km + ___)","[S] / S"],
+      ["12","At high [S], enzyme kinetics approaches ___ order (the enzyme is saturated)","zero / 0th / 0"],
+      ["13","At low [S], enzyme kinetics approaches ___ order","first / 1st / 1"],
+      ["14","Km (Michaelis constant) equals the substrate concentration at ___ of Vmax","half / 1/2 / 50%"],
+      ["15","An inhibitor ___ the reaction rate","decreases / slows / reduces"]
+    ]
+  },
+  {
+    id:7, title:"MC: Catalysts and energy diagrams", type:"mc",
+    instruction:"Questions about catalysts, energy diagrams, and enzyme kinetics.",
+    questions:[
+      {q:"On an energy diagram, a catalyst:", options:["Raises the activation energy","Lowers the activation energy","Changes the enthalpy of reaction","Shifts the equilibrium"], correct:1},
+      {q:"A catalyst provides:", options:["More energy to reactants","An alternative pathway with lower Ea","Additional reactants","Higher temperature"], correct:1},
+      {q:"The energy of products relative to reactants with a catalyst:", options:["Is lower","Is higher","Is unchanged","Depends on the catalyst"], correct:2},
+      {q:"In heterogeneous catalysis, the steps are:", options:["Adsorption, reaction, desorption","Absorption, reaction, excretion","Dissolution, reaction, precipitation","Mixing, reaction, separation"], correct:0},
+      {q:"Catalytic poisoning occurs when:", options:["The catalyst decomposes","A substance blocks active sites on the catalyst","The temperature is too high","The catalyst dissolves"], correct:1},
+      {q:"Autocatalysis means:", options:["The catalyst is automatic","A product of the reaction acts as a catalyst","The reaction does not need a catalyst","The catalyst is heterogeneous"], correct:1},
+      {q:"An enzyme's active site:", options:["Accepts any substrate","Is specific to certain substrates (lock-and-key)","Is always made of metal","Changes the equilibrium"], correct:1},
+      {q:"Competitive inhibition:", options:["Blocks the active site","Changes the enzyme permanently","Increases Vmax","Decreases Km"], correct:0},
+      {q:"A negative catalyst (inhibitor) ___ the activation energy:", options:["Lowers","Raises","Does not change","Eliminates"], correct:1},
+      {q:"Enzymes typically function best at a specific ___ and temperature:", options:["Pressure","pH","Volume","Concentration only"], correct:1},
+      {q:"Zeolites are examples of:", options:["Homogeneous catalysts","Heterogeneous catalysts","Enzymes","Inhibitors"], correct:1},
+      {q:"In the Haber process (N\u2082 + 3H\u2082 \u2192 2NH\u2083), Fe acts as a ___ catalyst:", options:["Homogeneous","Heterogeneous","Enzymatic","Autocatalytic"], correct:1},
+      {q:"A catalyst appears in the rate law if it participates in or before the ___:", options:["Last step","Rate-determining step","Product formation","Equilibrium"], correct:1},
+      {q:"For the catalyzed decomposition of H\u2082O\u2082 by MnO\u2082, MnO\u2082 is:", options:["Consumed","An intermediate","A heterogeneous catalyst","A product"], correct:2},
+      {q:"The turnover number of an enzyme is:", options:["The number of substrates it can bind","The number of reactions catalyzed per unit time per enzyme","The molecular weight","The number of active sites"], correct:1}
+    ]
+  },
+  {
+    id:8, title:"Fill: Steady-state approximation",
+    instruction:"Apply the steady-state approximation to mechanisms.",
+    rows:[
+      ["1","The steady-state approximation assumes that the concentration of an intermediate is approximately ___","constant / unchanging / steady"],
+      ["2","Mathematically, d[intermediate]/dt \u2248 ___","0 / zero"],
+      ["3","This approximation is valid when the intermediate is ___ and consumed quickly","reactive / unstable / short-lived"],
+      ["4","For Step 1: A \u21CC B (k\u2081, k\u208B\u2081), Step 2: B \u2192 C (k\u2082). Using SSA on B: k\u2081[A] = (k\u208B\u2081 + k\u2082)[B]. So [B] = ___","k1[A]/(k-1 + k2) / k\u2081[A]/(k\u208B\u2081 + k\u2082)"],
+      ["5","From Q4, rate = k\u2082[B] = k\u2081k\u2082[A]/(k\u208B\u2081 + ___)","\u006B\u0032 / k2 / k\u2082"],
+      ["6","If k\u208B\u2081 >> k\u2082, the expression simplifies to rate = (k\u2081k\u2082/k\u208B\u2081)[A] = ___[A]","K1k2 / Kk2 / (k1/k-1)k2"],
+      ["7","If k\u2082 >> k\u208B\u2081, the expression simplifies to rate = ___[A]","k1 / k\u2081"],
+      ["8","The pre-equilibrium approximation assumes the first step reaches ___ before the slow step","equilibrium"],
+      ["9","Pre-equilibrium gives K\u2081 = k\u2081/k\u208B\u2081 = [B]/[A], so [B] = ___","K1[A] / K\u2081[A]"],
+      ["10","The steady-state and pre-equilibrium methods give the same result when ___","k-1 >> k2 / k\u208B\u2081 >> k\u2082 / the reverse of step 1 is much faster than step 2"],
+      ["11","The Lindemann mechanism for unimolecular reactions involves: A + A \u2192 A* + A, then A* \u2192 ___","products / P"],
+      ["12","In the Lindemann mechanism, A* is the ___","intermediate / activated molecule / energized molecule"],
+      ["13","At high pressure (many collisions), the Lindemann mechanism predicts ___ order kinetics","first / 1st"],
+      ["14","At low pressure (few collisions), the Lindemann mechanism predicts ___ order kinetics","second / 2nd"],
+      ["15","The steady-state approximation is more general than the ___ approximation","pre-equilibrium / equilibrium"]
+    ]
+  },
+  {
+    id:9, title:"Arrange: Mechanism analysis steps", type:"arrange",
+    instruction:"Click the words in the correct order.",
+    sentences:[
+      {prompt:"The rate-determining step is the slowest step in the mechanism", words:["The","rate-determining","step","is","the","slowest","step","in","the","mechanism"]},
+      {prompt:"A catalyst lowers the activation energy without being consumed", words:["A","catalyst","lowers","the","activation","energy","without","being","consumed"]},
+      {prompt:"Intermediates are produced in one step and consumed in another", words:["Intermediates","are","produced","in","one","step","and","consumed","in","another"]},
+      {prompt:"The rate law is determined by the slow step of the mechanism", words:["The","rate","law","is","determined","by","the","slow","step","of","the","mechanism"]},
+      {prompt:"Elementary steps must add up to give the overall balanced equation", words:["Elementary","steps","must","add","up","to","give","the","overall","balanced","equation"]}
+    ]
+  },
+  {
+    id:10, title:"MC: Advanced mechanism problems", type:"mc",
+    instruction:"Challenging questions on mechanisms and rate laws.",
+    questions:[
+      {q:"For 2O\u2083 \u2192 3O\u2082, mechanism: Step 1 (fast eq): O\u2083 \u21CC O\u2082 + O. Step 2 (slow): O\u2083 + O \u2192 2O\u2082. Rate = ?", options:["k[O\u2083]\u00B2/[O\u2082]","k[O\u2083][O]","k[O\u2083]\u00B2","k[O\u2082][O]"], correct:0},
+      {q:"In Q1, [O] is eliminated by noting K = [O\u2082][O]/[O\u2083], so [O] = :", options:["K[O\u2083]/[O\u2082]","K[O\u2082]/[O\u2083]","K[O\u2083][O\u2082]","K/[O\u2083]"], correct:0},
+      {q:"A chain reaction has three stages:", options:["Initiation, propagation, termination","Start, middle, end","Slow, medium, fast","Elementary, complex, catalyzed"], correct:0},
+      {q:"In a chain reaction, radicals are generated in the ___ step:", options:["Propagation","Termination","Initiation","Equilibrium"], correct:2},
+      {q:"Chain propagation steps:", options:["Create new radicals from existing ones","Destroy radicals","Create the first radicals","Are always slow"], correct:0},
+      {q:"Chain termination occurs when:", options:["Radicals are formed","Two radicals combine","Temperature decreases","A catalyst is added"], correct:1},
+      {q:"The chain length is defined as:", options:["Number of propagation cycles per initiation event","Length of the polymer formed","Number of elementary steps","Time of the reaction"], correct:0},
+      {q:"For the reaction 2NO\u2082 + F\u2082 \u2192 2NO\u2082F, mechanism: Step 1 (slow): NO\u2082 + F\u2082 \u2192 NO\u2082F + F. Step 2 (fast): NO\u2082 + F \u2192 NO\u2082F. Rate = ?", options:["k[NO\u2082]\u00B2[F\u2082]","k[NO\u2082][F\u2082]","k[F\u2082]","k[NO\u2082][F]"], correct:1},
+      {q:"The intermediate in Q8 is:", options:["NO\u2082F","F (fluorine atom)","F\u2082","NO\u2082"], correct:1},
+      {q:"If experimental rate = k[A]^0[B]^2, what does this tell us about the mechanism?", options:["A is not involved in or before the RDS","A is the catalyst","B is the catalyst","The reaction is zero-order overall"], correct:0},
+      {q:"A reaction goes faster at higher pressure in the gas phase if the RDS is:", options:["Unimolecular","Bimolecular or termolecular","Always faster at higher P","Never affected by P"], correct:1},
+      {q:"Photochemical reactions are initiated by:", options:["Heat","Light (photons)","Catalysts","Pressure"], correct:1},
+      {q:"The quantum yield of a photochemical reaction is:", options:["Number of molecules reacted per photon absorbed","Energy of the photon","Wavelength of light","Speed of reaction"], correct:0},
+      {q:"In SN1 reactions, the RDS is:", options:["Nucleophilic attack","Formation of the carbocation (unimolecular)","Proton transfer","Elimination"], correct:1},
+      {q:"In SN2 reactions, the mechanism is:", options:["Two-step with carbocation intermediate","One-step (bimolecular)","Three-step","Radical chain"], correct:1}
+    ]
+  },
+  {
+    id:11, title:"Fill: Derive overall reactions from mechanisms",
+    instruction:"Add the elementary steps and write the overall reaction.",
+    rows:[
+      ["1","Step 1: A + B \u2192 C. Step 2: C \u2192 D + E. Overall: A + B \u2192 ___","D + E"],
+      ["2","Step 1: 2A \u2192 B. Step 2: B + C \u2192 D. Overall: 2A + C \u2192 ___","D"],
+      ["3","Step 1: NO + NO \u2192 N\u2082O\u2082. Step 2: N\u2082O\u2082 + O\u2082 \u2192 2NO\u2082. Overall: 2NO + O\u2082 \u2192 ___","2NO2 / 2NO\u2082"],
+      ["4","Step 1: Cl\u2082 \u2192 2Cl. Step 2: Cl + H\u2082 \u2192 HCl + H. Step 3: H + Cl\u2082 \u2192 HCl + Cl. Net propagation: H\u2082 + Cl\u2082 \u2192 ___","2HCl"],
+      ["5","Step 1: 2NO \u21CC N\u2082O\u2082. Step 2: N\u2082O\u2082 + H\u2082 \u2192 N\u2082O + H\u2082O. Step 3: N\u2082O + H\u2082 \u2192 N\u2082 + H\u2082O. Overall: 2NO + 2H\u2082 \u2192 ___","N2 + 2H2O / N\u2082 + 2H\u2082O"],
+      ["6","In Q5, the intermediates are ___ and ___","N2O2, N2O / N\u2082O\u2082, N\u2082O / N2O2 and N2O"],
+      ["7","Step 1: H\u2082O\u2082 + I\u207B \u2192 H\u2082O + IO\u207B. Step 2: H\u2082O\u2082 + IO\u207B \u2192 H\u2082O + O\u2082 + I\u207B. Overall: 2H\u2082O\u2082 \u2192 ___","2H2O + O2 / 2H\u2082O + O\u2082"],
+      ["8","Step 1: O\u2083 \u2192 O\u2082 + O. Step 2: O + O\u2083 \u2192 2O\u2082. Overall: 2O\u2083 \u2192 ___","3O2 / 3O\u2082"],
+      ["9","Intermediate in Q8: ___","O / atomic oxygen"],
+      ["10","Step 1: Ce\u2074\u207A + Mn\u00B2\u207A \u2192 Ce\u00B3\u207A + Mn\u00B3\u207A. Step 2: Ce\u2074\u207A + Mn\u00B3\u207A \u2192 Ce\u00B3\u207A + Mn\u2074\u207A. Step 3: Mn\u2074\u207A + Tl\u207A \u2192 Mn\u00B2\u207A + Tl\u00B3\u207A. Catalyst = ___","Mn2+ / Mn\u00B2\u207A / manganese(II)"],
+      ["11","In Q10, overall: 2Ce\u2074\u207A + Tl\u207A \u2192 ___","2Ce3+ + Tl3+ / 2Ce\u00B3\u207A + Tl\u00B3\u207A"],
+      ["12","In Q10, intermediates are ___ and ___","Mn3+, Mn4+ / Mn\u00B3\u207A, Mn\u2074\u207A / Mn3+ and Mn4+"],
+      ["13","Step 1: ES \u2192 E + P (Michaelis-Menten simplified). If Step 0: E + S \u2192 ES, overall: S \u2192 ___","P / product"],
+      ["14","In enzyme catalysis (Q13), the enzyme E is the ___","catalyst"],
+      ["15","The ES complex in Q13 is the ___","intermediate"]
+    ]
+  },
+  {
+    id:12, title:"Arrange: Order of analysis for proposed mechanisms", type:"arrange",
+    instruction:"Arrange the steps for validating a proposed mechanism.",
+    sentences:[
+      {prompt:"Write out all proposed elementary steps", words:["Write","out","all","proposed","elementary","steps"]},
+      {prompt:"Verify that elementary steps sum to the overall reaction", words:["Verify","that","elementary","steps","sum","to","the","overall","reaction"]},
+      {prompt:"Identify the rate-determining step as the slowest step", words:["Identify","the","rate-determining","step","as","the","slowest","step"]},
+      {prompt:"Write the rate law from the rate-determining step", words:["Write","the","rate","law","from","the","rate-determining","step"]},
+      {prompt:"Eliminate intermediates using pre-equilibrium or steady-state", words:["Eliminate","intermediates","using","pre-equilibrium","or","steady-state"]},
+      {prompt:"Compare the predicted rate law with experimental data", words:["Compare","the","predicted","rate","law","with","experimental","data"]}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Reaction Mechanisms & Rate Laws \u2014 Complete Reference</h3>' +
+'<h3>Elementary Reactions</h3>' +
+'<table><tr><th>Molecularity</th><th>Example</th><th>Rate Law</th><th>Order</th></tr>' +
+'<tr><td><span class="rule">Unimolecular</span></td><td>A \u2192 products</td><td>rate = k[A]</td><td>1st</td></tr>' +
+'<tr><td><span class="rule">Bimolecular</span></td><td>A + B \u2192 products</td><td>rate = k[A][B]</td><td>2nd</td></tr>' +
+'<tr><td><span class="rule">Bimolecular</span></td><td>2A \u2192 products</td><td>rate = k[A]\u00B2</td><td>2nd</td></tr>' +
+'<tr><td><span class="rule">Termolecular</span></td><td>A + B + C \u2192 products</td><td>rate = k[A][B][C]</td><td>3rd</td></tr></table>' +
+'<h3>Key Definitions</h3>' +
+'<ul>' +
+'<li><span class="rule">Elementary reaction:</span> occurs in a single step</li>' +
+'<li><span class="rule">Rate-determining step (RDS):</span> slowest step, controls overall rate</li>' +
+'<li><span class="rule">Intermediate:</span> formed in one step, consumed in another (not in overall equation)</li>' +
+'<li><span class="rule">Catalyst:</span> speeds up reaction, regenerated at end (not consumed)</li></ul>' +
+'<h3>Deriving Rate Laws from Mechanisms</h3>' +
+'<ol>' +
+'<li>Write the rate law from the RDS</li>' +
+'<li>If the RDS rate law contains an intermediate, eliminate it</li>' +
+'<li>Use pre-equilibrium: set K = k\u2081/k\u208B\u2081 for fast preceding step</li>' +
+'<li>Or use steady-state: set d[intermediate]/dt = 0</li></ol>' +
+'<h3>Catalysts</h3>' +
+'<table><tr><th>Type</th><th>Phase</th><th>Examples</th></tr>' +
+'<tr><td><span class="rule">Homogeneous</span></td><td>Same as reactants</td><td>Enzymes, acid catalysis</td></tr>' +
+'<tr><td><span class="rule">Heterogeneous</span></td><td>Different (usually solid)</td><td>Pt, Pd, Ni surfaces, zeolites</td></tr></table>' +
+'<p>Catalysts lower Ea, provide alternative pathway, do NOT change \u0394H or K.</p>' +
+'<h3>Enzyme Kinetics</h3>' +
+'<p><span class="rule">Michaelis-Menten:</span> v = V_max[S]/(K_m + [S])</p>' +
+'<ul>' +
+'<li>Low [S]: first-order in [S]</li>' +
+'<li>High [S]: zero-order (saturated)</li>' +
+'<li>K_m = [S] at half V_max</li></ul>';
+
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 elementary steps, molecularity, rate-determining step, catalysts \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

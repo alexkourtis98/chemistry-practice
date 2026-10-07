@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice 66 — Comprehensive Final Review</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:750px;width:100%;max-height:85vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+.theory-content hr{border:none;border-top:1px solid #333;margin:12px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Practice 66 &mdash; Comprehensive Final Review</h1>
+<p class="subtitle">Master review &mdash; all general + organic chemistry topics, exam-style</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_66';
+const SECTIONS = [
+  {
+    id:1, title:"Atomic Structure & Quantum Numbers",
+    instruction:"Fill in the blank about atomic structure and quantum mechanics.",
+    rows:[
+      ["1","The principal quantum number (n) determines the ___ and size of the orbital","energy level"],
+      ["2","The angular momentum quantum number (l) determines the ___ of the orbital","shape"],
+      ["3","For n=3, the possible values of l are ___","0, 1, 2"],
+      ["4","The quantum number l = 0 corresponds to the ___ subshell","s"],
+      ["5","The quantum number l = 1 corresponds to the ___ subshell","p"],
+      ["6","The quantum number l = 2 corresponds to the ___ subshell","d"],
+      ["7","The quantum number l = 3 corresponds to the ___ subshell","f"],
+      ["8","The maximum number of electrons in the n=2 shell is ___","8"],
+      ["9","The maximum number of electrons in a d subshell is ___","10"],
+      ["10","The maximum number of electrons in an f subshell is ___","14"],
+      ["11","The electron configuration of Fe (Z=26) is [Ar] ___","3d6 4s2 / 3d\u2076 4s\u00B2"],
+      ["12","The electron configuration of Cu (Z=29) is [Ar] ___","3d10 4s1 / 3d\u00B9\u2070 4s\u00B9"],
+      ["13","Hund's rule states that electrons occupy orbitals ___ before pairing","singly"],
+      ["14","The Pauli exclusion principle: no two electrons can have the same ___ quantum numbers","4 / four"],
+      ["15","The Aufbau principle says electrons fill orbitals from ___ to highest energy","lowest"]
+    ]
+  },
+  {
+    id:2, title:"Periodic Trends", type:"mc",
+    instruction:"Select the correct answer about periodic trends.",
+    questions:[
+      {q:"Across a period (left to right), atomic radius generally:", options:["Increases","Decreases","Stays the same","Oscillates"], correct:1},
+      {q:"Down a group, atomic radius generally:", options:["Decreases","Stays the same","Increases","Oscillates"], correct:2},
+      {q:"Down a group, ionization energy generally:", options:["Increases","Decreases","Stays the same","Doubles"], correct:1},
+      {q:"Across a period, ionization energy generally:", options:["Decreases","Stays the same","Increases","Halves"], correct:2},
+      {q:"Which element has the highest electronegativity?", options:["Oxygen","Nitrogen","Fluorine","Chlorine"], correct:2},
+      {q:"Electronegativity generally increases:", options:["Down a group","Across a period (left to right)","Down and to the left","Neither direction"], correct:1},
+      {q:"Isotopes have the same number of ___ but different ___:", options:["Neutrons, protons","Protons, neutrons","Electrons, protons","Protons, electrons"], correct:1},
+      {q:"The element with Z=17 is:", options:["Fluorine","Chlorine","Bromine","Argon"], correct:1},
+      {q:"Cations are ___ than their parent atoms:", options:["Larger","Smaller","The same size","Sometimes larger"], correct:1},
+      {q:"Anions are ___ than their parent atoms:", options:["Smaller","Larger","The same size","Sometimes smaller"], correct:1},
+      {q:"Electron affinity becomes more negative (more favorable) going:", options:["Down a group","Across a period (left to right)","Down and left","Up and left"], correct:1},
+      {q:"Noble gases have ___ ionization energies:", options:["Very low","Moderate","Very high","Zero"], correct:2},
+      {q:"Alkali metals have ___ ionization energies:", options:["Very high","Moderate","Very low","Zero"], correct:2},
+      {q:"The most metallic element (excluding radioactive) is:", options:["Sodium","Potassium","Cesium","Lithium"], correct:2},
+      {q:"Metallic character increases:", options:["Up and right","Down and left","Up and left","Down and right"], correct:1}
+    ]
+  },
+  {
+    id:3, title:"Bonding & Molecular Geometry",
+    instruction:"Fill in the blank about chemical bonding.",
+    rows:[
+      ["1","A Lewis structure shows ___ electrons around atoms","valence"],
+      ["2","VSEPR stands for Valence Shell Electron Pair ___","Repulsion"],
+      ["3","CH\u2084 has a ___ molecular geometry","tetrahedral"],
+      ["4","H\u2082O has a ___ molecular geometry","bent / V-shaped"],
+      ["5","NH\u2083 has a ___ molecular geometry","trigonal pyramidal"],
+      ["6","CO\u2082 has a ___ molecular geometry","linear"],
+      ["7","BF\u2083 has a ___ molecular geometry","trigonal planar"],
+      ["8","sp\u00B3 hybridization gives ___ bond angle(s)","109.5"],
+      ["9","sp\u00B2 hybridization gives ___ bond angle(s)","120"],
+      ["10","sp hybridization gives ___ bond angle(s)","180"],
+      ["11","A molecule with a net dipole moment is ___","polar"],
+      ["12","CO\u2082 is nonpolar despite having polar bonds because the dipoles ___","cancel / cancel out"],
+      ["13","An ionic bond forms between a ___ and a nonmetal","metal"],
+      ["14","A covalent bond involves the ___ of electrons","sharing"],
+      ["15","Metallic bonding involves a sea of ___ electrons","delocalized / free"]
+    ]
+  },
+  {
+    id:4, title:"Nomenclature: All Types",
+    instruction:"Fill in the blank about chemical nomenclature.",
+    rows:[
+      ["1","NaCl is named sodium ___","chloride"],
+      ["2","CaCO\u2083 is named calcium ___","carbonate"],
+      ["3","FeCl\u2083 is named iron(___)  chloride","III"],
+      ["4","Fe\u2082O\u2083 is named iron(___) oxide","III"],
+      ["5","CuSO\u2084 is named copper(___) sulfate","II"],
+      ["6","N\u2082O\u2085 is named dinitrogen ___","pentoxide / pentaoxide"],
+      ["7","PCl\u2083 is named phosphorus ___","trichloride"],
+      ["8","HCl (aqueous) is named ___ acid","hydrochloric"],
+      ["9","H\u2082SO\u2084 is named ___ acid","sulfuric"],
+      ["10","HNO\u2083 is named ___ acid","nitric"],
+      ["11","CH\u2083COOH is the formula for ___ acid","acetic"],
+      ["12","The polyatomic ion SO\u2084\u00B2\u207B is called ___","sulfate"],
+      ["13","The polyatomic ion NO\u2083\u207B is called ___","nitrate"],
+      ["14","The polyatomic ion PO\u2084\u00B3\u207B is called ___","phosphate"],
+      ["15","The polyatomic ion NH\u2084\u207A is called ___","ammonium"]
+    ]
+  },
+  {
+    id:5, title:"Stoichiometry & Solutions",
+    instruction:"Fill in the blank about stoichiometry and solutions.",
+    rows:[
+      ["1","In 4Fe + 3O\u2082 \u2192 2Fe\u2082O\u2083, the coefficient of Fe is ___","4"],
+      ["2","The limiting reagent is the reactant that is completely ___ first","consumed / used up"],
+      ["3","Percent yield = (actual yield / ___ yield) \u00D7 100","theoretical"],
+      ["4","Combustion of a hydrocarbon produces CO\u2082 and ___","H2O / water"],
+      ["5","In a redox reaction, the species that loses electrons is ___","oxidized"],
+      ["6","In a redox reaction, the species that gains electrons is ___","reduced"],
+      ["7","Molarity (M) = moles of solute / ___ of solution","liters / L / volume in liters"],
+      ["8","A 1 M NaCl solution contains ___ mole(s) of NaCl per liter","1 / one"],
+      ["9","Dilution equation: M\u2081V\u2081 = ___","M2V2"],
+      ["10","Avogadro's number is approximately ___","6.022 x 10^23 / 6.022e23"],
+      ["11","One mole of any gas at STP occupies ___ liters","22.4"],
+      ["12","The molar mass of H\u2082O is approximately ___ g/mol","18"],
+      ["13","The molar mass of NaCl is approximately ___ g/mol","58.5 / 58.44"],
+      ["14","In a precipitation reaction, an ___ solid forms from two aqueous solutions","insoluble"],
+      ["15","OIL RIG stands for: Oxidation Is ___, Reduction Is Gain","Loss"]
+    ]
+  },
+  {
+    id:6, title:"Acids, Bases & Equilibrium", type:"mc",
+    instruction:"Select the correct answer about acids, bases, and equilibrium.",
+    questions:[
+      {q:"Molarity (M) is defined as moles of solute per:", options:["Kilogram of solvent","Liter of solution","Gram of solvent","Mole of solvent"], correct:1},
+      {q:"pH = 4.0 corresponds to [H\u207A] =", options:["10\u207B\u2074 M","4 M","10\u2074 M","0.4 M"], correct:0},
+      {q:"A buffer solution resists changes in:", options:["Temperature","Volume","pH","Concentration"], correct:2},
+      {q:"Ksp is the solubility product for:", options:["Strong acids","Gases","Sparingly soluble salts","Buffers"], correct:2},
+      {q:"Le Chatelier's principle: adding more reactant shifts equilibrium to the:", options:["Left (reactants)","Right (products)","No change","Depends on temperature"], correct:1},
+      {q:"At the equivalence point of a strong acid-strong base titration, pH =", options:["0","4","7","14"], correct:2},
+      {q:"Increasing temperature for an endothermic reaction shifts equilibrium:", options:["Left","Right","No effect","Stops the reaction"], correct:1},
+      {q:"A Bronsted-Lowry acid is a ___ donor:", options:["Electron","Proton (H\u207A)","Neutron","Hydroxide"], correct:1},
+      {q:"A Bronsted-Lowry base is a ___ acceptor:", options:["Electron","Proton (H\u207A)","Neutron","Hydroxide"], correct:1},
+      {q:"A Lewis acid is an electron pair:", options:["Donor","Acceptor","Sharer","Neither"], correct:1},
+      {q:"A strong acid ___ completely in water:", options:["Precipitates","Ionizes/dissociates","Evaporates","Solidifies"], correct:1},
+      {q:"HCl, HBr, HI, HNO\u2083, H\u2082SO\u2084, and HClO\u2084 are all:", options:["Weak acids","Strong acids","Bases","Buffers"], correct:1},
+      {q:"The pH of pure water at 25\u00B0C is:", options:["0","7","14","1"], correct:1},
+      {q:"pH + pOH = ___ at 25\u00B0C:", options:["7","10","14","1"], correct:2},
+      {q:"A conjugate base is formed when an acid ___ a proton:", options:["Gains","Loses","Shares","Destroys"], correct:1}
+    ]
+  },
+  {
+    id:7, title:"Thermodynamics & Kinetics", type:"mc",
+    instruction:"Select the correct answer about thermodynamics and kinetics.",
+    questions:[
+      {q:"If \u0394H < 0, the reaction is:", options:["Endothermic","Exothermic","At equilibrium","Nonspontaneous"], correct:1},
+      {q:"If \u0394H > 0, the reaction is:", options:["Exothermic","Endothermic","At equilibrium","Spontaneous"], correct:1},
+      {q:"A spontaneous reaction has \u0394G:", options:["> 0","= 0","< 0","= infinity"], correct:2},
+      {q:"At equilibrium, \u0394G =", options:["< 0","> 0","0","infinity"], correct:2},
+      {q:"\u0394G = \u0394H - T\u0394S is the equation for:", options:["Enthalpy","Entropy","Gibbs free energy","Kinetic energy"], correct:2},
+      {q:"Hess's law states that enthalpy change depends only on:", options:["Temperature","Pathway","Initial and final states","Pressure"], correct:2},
+      {q:"q = mc\u0394T: c stands for:", options:["Concentration","Speed of light","Specific heat capacity","Celsius temperature"], correct:2},
+      {q:"Activation energy (Ea) is lowered by:", options:["Increasing temperature","Adding more reactant","Using a catalyst","Increasing pressure"], correct:2},
+      {q:"The Arrhenius equation relates rate constant to:", options:["Concentration and volume","Temperature and activation energy","Pressure and entropy","Mass and velocity"], correct:1},
+      {q:"A first-order reaction has a rate law: rate = k[A]. Doubling [A]:", options:["Doubles the rate","Quadruples the rate","Has no effect","Halves the rate"], correct:0},
+      {q:"A second-order reaction: rate = k[A]\u00B2. Doubling [A]:", options:["Doubles the rate","Quadruples the rate","Has no effect","Triples the rate"], correct:1},
+      {q:"A zero-order reaction rate is:", options:["Proportional to [A]","Independent of [A]","Proportional to [A]\u00B2","Always zero"], correct:1},
+      {q:"The half-life of a first-order reaction is:", options:["t\u00BD = 0.693/k","t\u00BD = 1/(k[A]\u2080)","t\u00BD = [A]\u2080/(2k)","t\u00BD = k/0.693"], correct:0},
+      {q:"Entropy (\u0394S) increases when:", options:["Gas becomes liquid","Liquid becomes solid","Solid dissolves in water","Temperature decreases"], correct:2},
+      {q:"An exothermic reaction with increasing entropy (\u0394H<0, \u0394S>0) is:", options:["Always nonspontaneous","Sometimes spontaneous","Always spontaneous","Never occurs"], correct:2}
+    ]
+  },
+  {
+    id:8, title:"Electrochemistry & Nuclear Chemistry",
+    instruction:"Fill in the blank about electrochemistry and nuclear chemistry.",
+    rows:[
+      ["1","In a galvanic (voltaic) cell, the anode is the site of ___","oxidation"],
+      ["2","In a galvanic cell, the cathode is the site of ___","reduction"],
+      ["3","Electrons flow from ___ to cathode in a galvanic cell","anode"],
+      ["4","The salt bridge maintains ___ neutrality in a galvanic cell","electrical / charge"],
+      ["5","A positive cell potential (E\u00B0cell > 0) means the reaction is ___","spontaneous"],
+      ["6","In electrolysis, ___ energy drives a non-spontaneous reaction","electrical"],
+      ["7","Alpha (\u03B1) decay emits a ___ nucleus (2p + 2n)","helium / He-4 / He"],
+      ["8","Beta (\u03B2) decay converts a neutron into a proton and emits a(n) ___","electron / beta particle / e-"],
+      ["9","Gamma (\u03B3) radiation is high-energy ___ radiation","electromagnetic / photon"],
+      ["10","The half-life (t\u00BD) is the time for ___ of a radioactive sample to decay","half / 50%"]
+    ]
+  },
+  {
+    id:9, title:"Organic Chemistry Fundamentals",
+    instruction:"Fill in the blank about organic chemistry.",
+    rows:[
+      ["1","The general formula for alkanes is ___","CnH2n+2"],
+      ["2","The general formula for alkenes is ___","CnH2n"],
+      ["3","The general formula for alkynes is ___","CnH2n-2"],
+      ["4","The IUPAC name for CH\u2083CH\u2082CH\u2083 is ___","propane"],
+      ["5","The functional group -OH is called ___","hydroxyl / alcohol"],
+      ["6","The functional group -CHO is called ___","aldehyde"],
+      ["7","The functional group -CO- (between two carbons) is called ___","ketone / carbonyl"],
+      ["8","The functional group -COOH is called ___","carboxyl / carboxylic acid"],
+      ["9","The functional group -NH\u2082 is called ___","amino / amine"],
+      ["10","The functional group -COOR is called ___","ester"],
+      ["11","An amide has the functional group ___","-CONH2 / -CONHR"],
+      ["12","Methanol (CH\u2083OH) is a primary ___","alcohol"],
+      ["13","Benzene (C\u2086H\u2086) is the simplest ___ compound","aromatic"],
+      ["14","Structural isomers have the same ___ but different structural arrangements","molecular formula"],
+      ["15","A chiral carbon is bonded to ___ different groups","4 / four"]
+    ]
+  },
+  {
+    id:10, title:"Organic Reactions & Mechanisms", type:"mc",
+    instruction:"Select the correct answer about organic reactions.",
+    questions:[
+      {q:"Addition of HBr to an alkene is an example of:", options:["Substitution","Elimination","Addition","Condensation"], correct:2},
+      {q:"Markovnikov's rule states that H adds to the carbon with:", options:["Fewer hydrogens","More hydrogens","More substituents","No hydrogens"], correct:1},
+      {q:"Saponification is the hydrolysis of an ester with:", options:["Acid","Base (NaOH/KOH)","Water only","Alcohol"], correct:1},
+      {q:"Esterification is the reaction of a carboxylic acid with:", options:["An amine","An alkane","An alcohol","A ketone"], correct:2},
+      {q:"Combustion of methane: CH\u2084 + 2O\u2082 \u2192", options:["CO + 2H\u2082O","CO\u2082 + 2H\u2082O","CO\u2082 + H\u2082O","2CO\u2082 + 2H\u2082O"], correct:1},
+      {q:"Polyethylene is made by ___ polymerization of ethylene:", options:["Condensation","Addition","Substitution","Elimination"], correct:1},
+      {q:"Nylon is made by ___ polymerization:", options:["Addition","Free radical","Condensation","Ring-opening"], correct:2},
+      {q:"Halogenation of an alkane (e.g., CH\u2084 + Cl\u2082) is a ___ reaction:", options:["Addition","Substitution (free radical)","Elimination","Condensation"], correct:1},
+      {q:"Dehydration of an alcohol produces:", options:["An ester","An ether or alkene","A carboxylic acid","An amine"], correct:1},
+      {q:"Hydrogenation of an alkene adds ___ across the double bond:", options:["H\u2082O","HCl","H\u2082","O\u2082"], correct:2},
+      {q:"Oxidation of a primary alcohol first produces:", options:["A ketone","An aldehyde","A carboxylic acid","An ester"], correct:1},
+      {q:"Further oxidation of an aldehyde produces:", options:["A ketone","An alcohol","A carboxylic acid","An ether"], correct:2},
+      {q:"Oxidation of a secondary alcohol produces:", options:["An aldehyde","A ketone","A carboxylic acid","An ester"], correct:1},
+      {q:"Enantiomers are non-superimposable ___ images:", options:["X-ray","Mirror","Identical","Inverse"], correct:1},
+      {q:"The benzene ring is characteristic of ___ compounds:", options:["Aliphatic","Aromatic","Cycloalkane","Alkyne"], correct:1}
+    ]
+  },
+  {
+    id:11, title:"Biochemistry Review", type:"mc",
+    instruction:"Select the correct answer about biochemistry.",
+    questions:[
+      {q:"Glucose is a:", options:["Disaccharide","Polysaccharide","Monosaccharide","Lipid"], correct:2},
+      {q:"Sucrose = glucose +:", options:["Galactose","Glucose","Fructose","Ribose"], correct:2},
+      {q:"Starch is composed of:", options:["Amylose + amylopectin","Cellulose + chitin","Glycogen + amylose","Fructose polymers"], correct:0},
+      {q:"Triglycerides are formed from glycerol + 3:", options:["Amino acids","Nucleotides","Fatty acids","Monosaccharides"], correct:2},
+      {q:"The monomer of proteins is:", options:["Nucleotide","Fatty acid","Amino acid","Glucose"], correct:2},
+      {q:"The four levels of protein structure are:", options:["A, B, C, D","Primary, secondary, tertiary, quaternary","Core, shell, surface, complex","Linear, planar, cubic, spherical"], correct:1},
+      {q:"DNA base pairing: A pairs with ___ and G pairs with ___:", options:["G, C","C, T","T, C","U, A"], correct:2},
+      {q:"The central dogma is:", options:["RNA \u2192 DNA \u2192 Protein","DNA \u2192 RNA \u2192 Protein","Protein \u2192 RNA \u2192 DNA","DNA \u2192 Protein \u2192 RNA"], correct:1},
+      {q:"Enzymes are biological:", options:["Fuels","Catalysts","Substrates","Inhibitors"], correct:1},
+      {q:"Cellulose is indigestible by humans because we lack:", options:["Amylase","Lipase","Cellulase","Protease"], correct:2}
+    ]
+  },
+  {
+    id:12, title:"Functional Groups & Isomerism",
+    instruction:"Fill in the blank about functional groups and isomerism.",
+    rows:[
+      ["1","Ethanol (CH\u2083CH\u2082OH) contains the ___ functional group","hydroxyl / alcohol / -OH"],
+      ["2","Ethanal (CH\u2083CHO) contains the ___ functional group","aldehyde / -CHO"],
+      ["3","Propanone (CH\u2083COCH\u2083) contains the ___ functional group","ketone / carbonyl"],
+      ["4","Ethanoic acid (CH\u2083COOH) contains the ___ functional group","carboxyl / -COOH"],
+      ["5","Ethylamine (CH\u2083CH\u2082NH\u2082) contains the ___ functional group","amino / amine / -NH2"],
+      ["6","Ethyl ethanoate (CH\u2083COOCH\u2082CH\u2083) contains the ___ functional group","ester / -COOR"],
+      ["7","Butane and methylpropane are ___ isomers","structural / constitutional"],
+      ["8","Cis-2-butene and trans-2-butene are ___ isomers","geometric / cis-trans / stereoisomers"],
+      ["9","D-alanine and L-alanine are ___","enantiomers / optical isomers"],
+      ["10","A compound with one chiral center has ___ stereoisomers","2"]
+    ]
+  },
+  {
+    id:13, title:"Comprehensive MC Exam", type:"mc",
+    instruction:"Final exam-style questions covering all topics.",
+    questions:[
+      {q:"The number of protons in an atom equals its:", options:["Mass number","Atomic number","Neutron number","Electron configuration"], correct:1},
+      {q:"An atom with 6 protons and 8 neutrons has a mass number of:", options:["6","8","14","2"], correct:2},
+      {q:"Which type of bond has the greatest difference in electronegativity?", options:["Nonpolar covalent","Polar covalent","Ionic","Metallic"], correct:2},
+      {q:"What is the oxidation state of S in H\u2082SO\u2084?", options:["+2","+4","+6","-2"], correct:2},
+      {q:"A 0.1 M NaOH solution has a pH of approximately:", options:["1","7","13","14"], correct:2},
+      {q:"The hybridization of carbon in ethylene (C\u2082H\u2084) is:", options:["sp","sp\u00B2","sp\u00B3","sp\u00B3d"], correct:1},
+      {q:"The hybridization of carbon in acetylene (C\u2082H\u2082) is:", options:["sp","sp\u00B2","sp\u00B3","sp\u00B3d"], correct:0},
+      {q:"Which of the following is a strong base?", options:["NH\u2083","NaOH","CH\u2083COOH","H\u2082CO\u2083"], correct:1},
+      {q:"The coordination number in [Co(NH\u2083)\u2086]\u00B3\u207A is:", options:["3","4","6","12"], correct:2},
+      {q:"A ligand is a molecule or ion that:", options:["Accepts electrons from metal","Donates electron pairs to metal","Shares protons with metal","Replaces the metal"], correct:1},
+      {q:"How many sigma and pi bonds are in a triple bond?", options:["3 sigma","1 sigma + 2 pi","2 sigma + 1 pi","3 pi"], correct:1},
+      {q:"The ideal gas law is:", options:["PV = nRT","PV = mRT","P = nRT/V","All of the above"], correct:0},
+      {q:"At STP, 1 mole of an ideal gas occupies:", options:["11.2 L","22.4 L","44.8 L","1 L"], correct:1},
+      {q:"Which element has the electron configuration [Ne] 3s\u00B2 3p\u00B3?", options:["Nitrogen","Phosphorus","Arsenic","Bismuth"], correct:1},
+      {q:"London dispersion forces are present in:", options:["Only nonpolar molecules","Only polar molecules","Only ionic compounds","All molecules"], correct:3},
+      {q:"Hydrogen bonding occurs between H and:", options:["Any element","C, Si, Ge","N, O, F","S, P, Cl"], correct:2},
+      {q:"The shape of SF\u2086 is:", options:["Tetrahedral","Trigonal bipyramidal","Octahedral","Square planar"], correct:2},
+      {q:"Diamond and graphite are ___ of carbon:", options:["Isotopes","Isomers","Allotropes","Ions"], correct:2},
+      {q:"The process of a solid turning directly into a gas is called:", options:["Evaporation","Sublimation","Condensation","Deposition"], correct:1},
+      {q:"Colligative properties depend on the ___ of solute particles:", options:["Type","Size","Number","Charge"], correct:2}
+    ]
+  },
+  {
+    id:14, title:"Key Concept Sequences", type:"arrange",
+    instruction:"Arrange the words in the correct order.",
+    sentences:[
+      {prompt:"Increasing order of bond strength:", words:["Single","bond","<","double","bond","<","triple","bond"]},
+      {prompt:"Order of intermolecular forces (weakest to strongest):", words:["London","dispersion","<","dipole-dipole","<","hydrogen","bonding"]},
+      {prompt:"Central dogma of molecular biology:", words:["DNA","is","transcribed","to","RNA","then","translated","to","protein"]},
+      {prompt:"Redox mnemonic:", words:["OIL","(oxidation","is","loss)","RIG","(reduction","is","gain)"]},
+      {prompt:"pH scale: acid to base:", words:["pH","0","=","strong","acid,","pH","7","=","neutral,","pH","14","=","strong","base"]},
+      {prompt:"Gibbs free energy equation:", words:["delta-G","=","delta-H","minus","T","times","delta-S"]},
+      {prompt:"Protein structure levels:", words:["Primary","secondary","tertiary","quaternary"]},
+      {prompt:"Organic functional group oxidation:", words:["Alcohol","to","aldehyde","to","carboxylic","acid"]},
+      {prompt:"Carbohydrate complexity:", words:["Monosaccharide","disaccharide","oligosaccharide","polysaccharide"]},
+      {prompt:"Electromagnetic spectrum (increasing energy):", words:["Radio","microwave","infrared","visible","ultraviolet","X-ray","gamma"]}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>MASTER FORMULA & REFERENCE SHEET</h3>' +
+'<p style="color:#c85028;font-weight:700;text-align:center">Complete Exam Cheat Sheet</p>' +
+'<p><span class="rule">KEY CONSTANTS:</span></p>' +
+'<table><tr><th>Constant</th><th>Symbol</th><th>Value</th></tr>' +
+'<tr><td>Planck\u2019s constant</td><td>h</td><td>6.626 \u00D7 10\u207B\u00B3\u2074 J\u00B7s</td></tr>' +
+'<tr><td>Speed of light</td><td>c</td><td>3.00 \u00D7 10\u2078 m/s</td></tr>' +
+'<tr><td>Gas constant</td><td>R</td><td>8.314 J/(mol\u00B7K) = 0.08206 L\u00B7atm/(mol\u00B7K)</td></tr>' +
+'<tr><td>Faraday constant</td><td>F</td><td>96,485 C/mol</td></tr>' +
+'<tr><td>Avogadro\u2019s number</td><td>N\u2090</td><td>6.022 \u00D7 10\u00B2\u00B3 mol\u207B\u00B9</td></tr>' +
+'<tr><td>Water autoionization</td><td>K\u2095</td><td>1.0 \u00D7 10\u207B\u00B9\u2074 at 25\u00B0C</td></tr>' +
+'<tr><td>Boltzmann constant</td><td>k\u0042</td><td>1.381 \u00D7 10\u207B\u00B2\u00B3 J/K</td></tr>' +
+'<tr><td>Rydberg constant</td><td>R\u2095</td><td>1.097 \u00D7 10\u2077 m\u207B\u00B9</td></tr>' +
+'<tr><td>Electron mass</td><td>m\u2091</td><td>9.109 \u00D7 10\u207B\u00B3\u00B9 kg</td></tr></table>' +
+'<hr>' +
+'<p><span class="rule">ATOMIC STRUCTURE:</span></p>' +
+'<p>Quantum numbers: n (principal, 1,2,3...), l (angular, 0 to n-1: s,p,d,f), m\u2097 (magnetic, -l to +l), m\u209B (spin, \u00B11/2)</p>' +
+'<p>Max e\u207B per subshell: s=2, p=6, d=10, f=14. Max per shell: 2n\u00B2</p>' +
+'<p>E = -13.6/n\u00B2 eV (H atom). E = h\u03BD = hc/\u03BB. de Broglie: \u03BB = h/mv</p>' +
+'<p>Aufbau: 1s 2s 2p 3s 3p 4s 3d 4p 5s 4d 5p 6s 4f 5d 6p...</p>' +
+'<p>Hund\u2019s rule: fill orbitals singly first (max spin). Pauli: max 2 e\u207B per orbital, opposite spins.</p>' +
+'<hr>' +
+'<p><span class="rule">PERIODIC TRENDS:</span></p>' +
+'<table><tr><th>Property</th><th>Across Period (L\u2192R)</th><th>Down Group</th></tr>' +
+'<tr><td>Atomic radius</td><td>Decreases</td><td>Increases</td></tr>' +
+'<tr><td>Ionization energy</td><td>Increases</td><td>Decreases</td></tr>' +
+'<tr><td>Electronegativity</td><td>Increases</td><td>Decreases</td></tr>' +
+'<tr><td>Electron affinity</td><td>Increases (more negative)</td><td>Decreases</td></tr>' +
+'<tr><td>Metallic character</td><td>Decreases</td><td>Increases</td></tr></table>' +
+'<hr>' +
+'<p><span class="rule">BONDING & MOLECULAR GEOMETRY:</span></p>' +
+'<table><tr><th>Hybridization</th><th>Bond Angle</th><th>Geometry</th><th>Example</th></tr>' +
+'<tr><td>sp</td><td>180\u00B0</td><td>Linear</td><td>CO\u2082, C\u2082H\u2082</td></tr>' +
+'<tr><td>sp\u00B2</td><td>120\u00B0</td><td>Trigonal planar</td><td>BF\u2083, C\u2082H\u2084</td></tr>' +
+'<tr><td>sp\u00B3</td><td>109.5\u00B0</td><td>Tetrahedral</td><td>CH\u2084, NH\u2084\u207A</td></tr>' +
+'<tr><td>sp\u00B3d</td><td>90\u00B0/120\u00B0</td><td>Trigonal bipyramidal</td><td>PCl\u2085</td></tr>' +
+'<tr><td>sp\u00B3d\u00B2</td><td>90\u00B0</td><td>Octahedral</td><td>SF\u2086</td></tr></table>' +
+'<p>VSEPR: Lone pairs take up more space than bonding pairs. Lone pairs reduce bond angles.</p>' +
+'<p>With lone pairs: sp\u00B3 + 1 LP = trigonal pyramidal (107\u00B0, NH\u2083). sp\u00B3 + 2 LP = bent (104.5\u00B0, H\u2082O).</p>' +
+'<hr>' +
+'<p><span class="rule">INTERMOLECULAR FORCES (IMF) STRENGTH ORDER:</span></p>' +
+'<p>Ion-ion > Ion-dipole > Hydrogen bonding > Dipole-dipole > London dispersion (van der Waals)</p>' +
+'<p>H-bonding requires: H bonded to F, O, or N (highly electronegative, small atoms)</p>' +
+'<p>London forces increase with: more electrons, larger molar mass, larger surface area</p>' +
+'<hr>' +
+'<p><span class="rule">STOICHIOMETRY:</span></p>' +
+'<p>n = m/M (moles = mass/molar mass). n = N/N\u2090 (moles = particles/Avogadro)</p>' +
+'<p>M (molarity) = mol solute / L solution. Dilution: M\u2081V\u2081 = M\u2082V\u2082</p>' +
+'<p>%yield = (actual yield / theoretical yield) \u00D7 100%</p>' +
+'<p>Limiting reagent: the reactant that runs out first (determines max product)</p>' +
+'<hr>' +
+'<p><span class="rule">SOLUTIONS & ACID-BASE:</span></p>' +
+'<p>pH = -log[H\u207A]. pOH = -log[OH\u207B]. pH + pOH = 14 (at 25\u00B0C)</p>' +
+'<p>K\u2095 = [H\u207A][OH\u207B] = 1.0 \u00D7 10\u207B\u00B9\u2074. Strong acids: HCl, HBr, HI, HNO\u2083, H\u2082SO\u2084, HClO\u2084</p>' +
+'<p>Strong bases: LiOH, NaOH, KOH, Ca(OH)\u2082, Sr(OH)\u2082, Ba(OH)\u2082</p>' +
+'<p>Weak acid: Ka = [H\u207A][A\u207B]/[HA]. Weak base: Kb = [BH\u207A][OH\u207B]/[B]</p>' +
+'<p>Ka \u00D7 Kb = K\u2095 (conjugate pair). pKa = -log Ka</p>' +
+'<p>Henderson-Hasselbalch: pH = pKa + log([A\u207B]/[HA])</p>' +
+'<p>Buffer: weak acid + conjugate base (or weak base + conjugate acid). Resists pH change.</p>' +
+'<hr>' +
+'<p><span class="rule">THERMODYNAMICS:</span></p>' +
+'<p>q = mc\u0394T (heat = mass \u00D7 specific heat \u00D7 temp change)</p>' +
+'<p>\u0394H < 0 = exothermic (releases heat). \u0394H > 0 = endothermic (absorbs heat)</p>' +
+'<p>\u0394G = \u0394H - T\u0394S (Gibbs free energy)</p>' +
+'<p>\u0394G < 0 = spontaneous. \u0394G > 0 = nonspontaneous. \u0394G = 0 = equilibrium</p>' +
+'<p>Hess\u2019s Law: \u0394H\u00B0rxn = \u03A3\u0394H\u00B0f(products) - \u03A3\u0394H\u00B0f(reactants)</p>' +
+'<hr>' +
+'<p><span class="rule">KINETICS:</span></p>' +
+'<p>Rate = k[A]\u207F (rate law). k = rate constant. n = order (determined experimentally)</p>' +
+'<p>Arrhenius: k = Ae\u207B\u1D31\u1D43\u002F\u1D3F\u1D40 (higher T \u2192 larger k \u2192 faster reaction)</p>' +
+'<p>Catalyst: lowers Ea, increases rate, NOT consumed, does NOT change \u0394G or equilibrium</p>' +
+'<p>Half-life (1st order): t\u00BD = 0.693/k</p>' +
+'<hr>' +
+'<p><span class="rule">EQUILIBRIUM:</span></p>' +
+'<p>K = [products]/[reactants] (each raised to stoichiometric coefficient)</p>' +
+'<p>Q vs K: Q < K \u2192 forward. Q > K \u2192 reverse. Q = K \u2192 equilibrium</p>' +
+'<p>Le Ch\u00E2telier: system shifts to counteract stress (conc, pressure, temp)</p>' +
+'<p>Ksp = solubility product. If Q > Ksp, precipitate forms.</p>' +
+'<hr>' +
+'<p><span class="rule">ORGANIC FUNCTIONAL GROUPS:</span></p>' +
+'<table><tr><th>Group</th><th>Structure</th><th>Suffix</th><th>Example</th></tr>' +
+'<tr><td>Alkane</td><td>C-C (single)</td><td>-ane</td><td>Methane, C\u2099H\u2082\u2099\u208A\u2082</td></tr>' +
+'<tr><td>Alkene</td><td>C=C (double)</td><td>-ene</td><td>Ethene, C\u2099H\u2082\u2099</td></tr>' +
+'<tr><td>Alkyne</td><td>C\u2261C (triple)</td><td>-yne</td><td>Ethyne, C\u2099H\u2082\u2099\u208B\u2082</td></tr>' +
+'<tr><td>Alcohol</td><td>-OH</td><td>-ol</td><td>Ethanol</td></tr>' +
+'<tr><td>Aldehyde</td><td>-CHO</td><td>-al</td><td>Ethanal</td></tr>' +
+'<tr><td>Ketone</td><td>-CO-</td><td>-one</td><td>Propanone</td></tr>' +
+'<tr><td>Carboxylic acid</td><td>-COOH</td><td>-oic acid</td><td>Ethanoic acid</td></tr>' +
+'<tr><td>Ester</td><td>-COO-</td><td>-oate</td><td>Ethyl ethanoate</td></tr>' +
+'<tr><td>Amine</td><td>-NH\u2082</td><td>-amine</td><td>Methylamine</td></tr>' +
+'<tr><td>Amide</td><td>-CONH\u2082</td><td>-amide</td><td>Ethanamide</td></tr>' +
+'<tr><td>Ether</td><td>R-O-R\u2019</td><td>(ether)</td><td>Diethyl ether</td></tr>' +
+'<tr><td>Halide</td><td>-X (F,Cl,Br,I)</td><td>halo-</td><td>Chloromethane</td></tr></table>' +
+'<hr>' +
+'<p><span class="rule">NAMING RULES SUMMARY:</span></p>' +
+'<p>1. Find longest carbon chain containing the principal functional group</p>' +
+'<p>2. Number from end closest to highest-priority group</p>' +
+'<p>3. Priority: -COOH > -CHO > -CO- > -OH > -NH\u2082 > C=C > C\u2261C</p>' +
+'<p>4. Name substituents as prefixes with position numbers</p>' +
+'<p>5. Use di-, tri-, tetra- for multiple identical substituents</p>' +
+'<p>6. Alphabetize prefixes (ignore di-, tri- when alphabetizing)</p>' +
+'<hr>' +
+'<p><span class="rule">REACTION MECHANISMS:</span></p>' +
+'<p>SN2: 1 step, backside attack, inversion. Strong Nu + 1\u00B0/methyl + polar aprotic solvent.</p>' +
+'<p>SN1: 2 steps (C\u207A), racemization. Weak Nu + 3\u00B0 + polar protic solvent.</p>' +
+'<p>E2: 1 step, anti-periplanar. Strong base + any substrate + high temp.</p>' +
+'<p>E1: 2 steps (C\u207A), Zaitsev product. Weak base + 3\u00B0 + high temp.</p>' +
+'<p>Carbocation stability: 3\u00B0 > 2\u00B0 > 1\u00B0 > methyl (benzylic/allylic also stable)</p>' +
+'<hr>' +
+'<p><span class="rule">OXIDATION SERIES:</span></p>' +
+'<p>1\u00B0 alcohol \u2192 aldehyde \u2192 carboxylic acid</p>' +
+'<p>2\u00B0 alcohol \u2192 ketone</p>' +
+'<p>3\u00B0 alcohol \u2192 no reaction</p>' +
+'<p>Tollens\u2019 test (Ag\u207A): aldehydes only \u2192 silver mirror. Benedict\u2019s (Cu\u00B2\u207A): aldehydes/reducing sugars \u2192 brick-red.</p>' +
+'<hr>' +
+'<p><span class="rule">BIOCHEMISTRY SUMMARY:</span></p>' +
+'<p>Carbohydrates: C\u2099(H\u2082O)\u2099. Monosaccharides (glucose, fructose), disaccharides (sucrose, lactose, maltose), polysaccharides (starch, glycogen, cellulose).</p>' +
+'<p>Lipids: Triglycerides (glycerol + 3 FA), phospholipids (cell membranes), steroids (cholesterol). Fats = solid/saturated, oils = liquid/unsaturated.</p>' +
+'<p>Proteins: 20 amino acids, peptide bonds (-CO-NH-). 4 levels of structure (1\u00B0 sequence, 2\u00B0 \u03B1-helix/\u03B2-sheet, 3\u00B0 3D fold, 4\u00B0 subunits). Denaturation = loss of shape.</p>' +
+'<p>Nucleic Acids: DNA (deoxyribose, A-T 2 H-bonds, G-C 3 H-bonds, double helix). RNA (ribose, A-U, single strand). Central dogma: DNA \u2192 RNA \u2192 Protein. Codons: AUG=start(Met), UAA/UAG/UGA=stop. 64 codons total.</p>' +
+'<hr>' +
+'<p><span class="rule">ELECTROCHEMISTRY:</span></p>' +
+'<p>E\u00B0cell = E\u00B0cathode - E\u00B0anode. \u0394G\u00B0 = -nFE\u00B0. Positive E\u00B0 = spontaneous (galvanic cell).</p>' +
+'<p>Nernst: E = E\u00B0 - (RT/nF)lnQ. Anode = oxidation. Cathode = reduction.</p>' +
+'<p>OIL RIG: Oxidation Is Loss, Reduction Is Gain (of electrons).</p>' +
+'<hr>' +
+'<p><span class="rule">GAS LAWS:</span></p>' +
+'<p>PV = nRT. Combined: P\u2081V\u2081/T\u2081 = P\u2082V\u2082/T\u2082. Dalton: P\u209C\u2092\u209C = P\u2081 + P\u2082 + ...</p>' +
+'<p>STP: 0\u00B0C (273.15 K), 1 atm. Molar volume at STP = 22.4 L/mol.</p>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Master review \u2014 all general + organic chemistry topics, exam-style \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

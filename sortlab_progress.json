@@ -1,0 +1,15 @@
+{
+  "levels": {
+    "0": {
+      "stars": 1,
+      "xp": 255
+    }
+  },
+  "stats": {
+    "totalXP": 255,
+    "totalGames": 1,
+    "totalSorted": 18,
+    "totalWrong": 7,
+    "bestStreak": 8
+  }
+}

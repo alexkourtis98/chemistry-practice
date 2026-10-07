@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice 23 — Lewis Structures</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Practice 23 — Lewis Structures</h1>
+<p class="subtitle">Deep practice &mdash; valence electrons, bonds, formal charge, resonance</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_23';
+const SECTIONS = [
+  {
+    id:1, title:"Counting Valence Electrons (Elements)",
+    instruction:"Write the number of valence electrons for each element.",
+    rows:[
+      ["1","How many valence electrons does H have?","1"],
+      ["2","How many valence electrons does C have?","4"],
+      ["3","How many valence electrons does N have?","5"],
+      ["4","How many valence electrons does O have?","6"],
+      ["5","How many valence electrons does F have?","7"],
+      ["6","How many valence electrons does S have?","6"],
+      ["7","How many valence electrons does P have?","5"],
+      ["8","How many valence electrons does Cl have?","7"],
+      ["9","How many valence electrons does Br have?","7"],
+      ["10","How many valence electrons does I have?","7"],
+      ["11","How many valence electrons does Si have?","4"],
+      ["12","How many valence electrons does Se have?","6"],
+      ["13","How many valence electrons does B have?","3"],
+      ["14","How many valence electrons does Xe have?","8"],
+      ["15","How many valence electrons does Na have?","1"],
+      ["16","How many valence electrons does Al have?","3"],
+      ["17","The number of valence electrons equals the ___ number for main group elements.","group"]
+    ]
+  },
+  {
+    id:2, title:"Total Valence Electrons in Molecules",
+    instruction:"Calculate the total number of valence electrons in each molecule or ion.",
+    rows:[
+      ["1","H\u2082O","8"],
+      ["2","CO\u2082","16"],
+      ["3","NH\u2083","8"],
+      ["4","CH\u2084","8"],
+      ["5","HCN","10"],
+      ["6","CCl\u2084","32"],
+      ["7","SO\u2082","18"],
+      ["8","NO\u2083\u207B (include the extra e\u207B)","24"],
+      ["9","NH\u2084\u207A (subtract one e\u207B)","8"],
+      ["10","SO\u2084\u00B2\u207B","32"],
+      ["11","ClO\u2083\u207B","26"],
+      ["12","PO\u2084\u00B3\u207B","32"],
+      ["13","XeF\u2082","22"],
+      ["14","ICl\u2084\u207B","36"],
+      ["15","BrF\u2083","28"],
+      ["16","N\u2082O","16"],
+      ["17","C\u2082H\u2082 (acetylene)","10"],
+      ["18","H\u2082CO (formaldehyde)","12"],
+      ["19","CN\u207B","10"],
+      ["20","SCN\u207B","16"]
+    ]
+  },
+  {
+    id:3, title:"Bond Types in Lewis Structures",
+    instruction:"Identify the bond type or electron pair count.",
+    rows:[
+      ["1","H\u2082 has a ___ bond","single"],
+      ["2","O\u2082 has a ___ bond","double"],
+      ["3","N\u2082 has a ___ bond","triple"],
+      ["4","CO\u2082: each C\u2013O bond is a ___ bond","double"],
+      ["5","How many lone pairs on O in H\u2082O?","2"],
+      ["6","How many lone pairs on N in NH\u2083?","1"],
+      ["7","How many bonding pairs in CH\u2084?","4"],
+      ["8","How many lone pairs on central atom of CO\u2082?","0"],
+      ["9","HCl: how many lone pairs on Cl?","3"],
+      ["10","F\u2082: how many lone pairs on each F?","3"],
+      ["11","CO: what type of bond between C and O?","triple"],
+      ["12","CS\u2082: what type of bond between C and each S?","double"],
+      ["13","How many total lone pairs in H\u2082O (on all atoms)?","2"],
+      ["14","How many total lone pairs in NF\u2083 (on all atoms)?","10"],
+      ["15","Each bonding pair consists of ___ electrons.","2"],
+      ["16","Each lone pair consists of ___ electrons.","2"],
+      ["17","A single bond has ___ electron(s) shared.","2"],
+      ["18","A double bond has ___ electrons shared.","4"],
+      ["19","A triple bond has ___ electrons shared.","6"]
+    ]
+  },
+  {
+    id:4, title:"Lewis Structures for Larger Molecules",
+    instruction:"Answer questions about Lewis structures of larger or more complex species.",
+    rows:[
+      ["1","SO\u2084\u00B2\u207B: how many lone pairs on S?","0"],
+      ["2","ClO\u2083\u207B: how many lone pairs on Cl?","1"],
+      ["3","XeF\u2082: how many lone pairs on Xe?","3"],
+      ["4","BrF\u2083: how many lone pairs on Br?","1 / 2"],
+      ["5","PCl\u2085: how many bonding pairs around P?","5"],
+      ["6","SF\u2084: how many lone pairs on S?","1"],
+      ["7","ICl\u2084\u207B: how many lone pairs on I?","2"],
+      ["8","XeF\u2084: how many lone pairs on Xe?","2"],
+      ["9","Total valence electrons in BF\u2083?","24"],
+      ["10","Total valence electrons in PCl\u2085?","40"],
+      ["11","Total valence electrons in SF\u2086?","48"],
+      ["12","Total valence electrons in XeF\u2084?","36"],
+      ["13","In SO\u2084\u00B2\u207B, each S\u2013O bond is best described as having a bond order of ___","1.5"],
+      ["14","How many bonds (counting double as one) does C form in CO\u2082?","2"],
+      ["15","In H\u2082CO, how many lone pairs on O?","2"]
+    ]
+  },
+  {
+    id:5, title:"Octet Rule Exceptions", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Which element can have an expanded octet?",options:["C","N","S","O"],correct:2},
+      {q:"BF\u2083 is an example of...",options:["Expanded octet","Incomplete octet (B has 6 electrons)","Normal octet","Odd-electron molecule"],correct:1},
+      {q:"Which molecule has an odd number of electrons?",options:["CO\u2082","H\u2082O","NO","CH\u2084"],correct:2},
+      {q:"PCl\u2085: how many electrons around P?",options:["6","8","10","12"],correct:2},
+      {q:"SF\u2086: how many electrons around S?",options:["8","10","12","14"],correct:2},
+      {q:"Which element CANNOT exceed the octet?",options:["P","S","N","Cl"],correct:2},
+      {q:"BeH\u2082 has ___ electrons around Be.",options:["2","4","6","8"],correct:1},
+      {q:"NO\u2082 is an odd-electron molecule because its total valence electrons = ___",options:["16","17","18","19"],correct:1},
+      {q:"ClF\u2083 has an expanded octet on Cl with ___ electrons around it.",options:["8","10","12","14"],correct:1},
+      {q:"Which of these can expand its octet?",options:["C","O","N","P"],correct:3},
+      {q:"AlCl\u2083 has ___ electrons around Al (incomplete octet).",options:["4","6","8","10"],correct:1},
+      {q:"Only elements from period ___ and beyond can have expanded octets.",options:["1","2","3","4"],correct:2},
+      {q:"Expanded octets are possible because these elements have accessible ___ orbitals.",options:["s","p","d","f"],correct:2},
+      {q:"XeF\u2082 has ___ electrons around Xe.",options:["8","10","12","14"],correct:1},
+      {q:"Which molecule obeys the octet rule for ALL atoms?",options:["BF\u2083","NO","CH\u2084","PCl\u2085"],correct:2}
+    ]
+  },
+  {
+    id:6, title:"Formal Charge",
+    instruction:"Answer questions about formal charge calculations.",
+    rows:[
+      ["1","Formal charge = valence e\u207B \u2212 ___ \u2212 ___","lone pair electrons - bonding electrons/2 / nonbonding - bonds / lone pairs - 1/2 bonding / nonbonding electrons - bonding electrons/2"],
+      ["2","The best Lewis structure has formal charges closest to ___","zero / 0"],
+      ["3","In O\u2082 (double bond, 2 lone pairs on each O): formal charge on each O?","0"],
+      ["4","In CO\u2082 (two double bonds): formal charge on C?","0"],
+      ["5","Negative formal charges should go on the more ___ atom","electronegative"],
+      ["6","If an atom has 5 valence e\u207B, 2 lone pair e\u207B, and 3 bonds: its formal charge is ___","0"],
+      ["7","In CO (triple bond): C has 1 lone pair, 3 bonds. Formal charge on C?","-1"],
+      ["8","In CO (triple bond): O has 1 lone pair, 3 bonds. Formal charge on O?","+1"],
+      ["9","In NO\u2083\u207B, if N has 0 lone pairs and 4 bonds (1 double, 2 single): formal charge on N?","+1"],
+      ["10","In SO\u2084\u00B2\u207B, if S has 0 lone pairs and 4 bonds: formal charge on S?","+2"],
+      ["11","Each O in SO\u2084\u00B2\u207B with 3 lone pairs and 1 bond has formal charge ___","-1"],
+      ["12","The sum of all formal charges must equal the ___","overall charge / charge of the ion / total charge / charge"],
+      ["13","If two Lewis structures exist, the one with formal charges closer to zero is ___","better / preferred / more stable"],
+      ["14","In the best structure of SCN\u207B, the negative formal charge is on ___","N / nitrogen"],
+      ["15","Formal charge is a bookkeeping tool. It does NOT represent actual ___","charge / electron density / charges on atoms"]
+    ]
+  },
+  {
+    id:7, title:"Resonance Structures", type:"mc",
+    instruction:"Select the correct answer about resonance.",
+    questions:[
+      {q:"How many equivalent resonance structures does NO\u2083\u207B have?",options:["1","2","3","4"],correct:2},
+      {q:"O\u2083 has ___ resonance structures.",options:["1","2","3","4"],correct:1},
+      {q:"CO\u2083\u00B2\u207B has ___ resonance structures.",options:["1","2","3","4"],correct:2},
+      {q:"Resonance structures differ only in the position of...",options:["Atoms","Electrons / double bonds","Lone pairs only","Bond lengths"],correct:1},
+      {q:"The actual structure of a resonance hybrid is...",options:["One of the resonance structures","An average / hybrid of all resonance structures","Always the one with the most double bonds","Impossible to determine"],correct:1},
+      {q:"In CO\u2083\u00B2\u207B, each C\u2013O bond order is approximately...",options:["1","1.33","1.5","2"],correct:1},
+      {q:"SO\u2082 has ___ resonance structures.",options:["1","2","3","4"],correct:1},
+      {q:"NO\u2082\u207B has ___ resonance structures.",options:["1","2","3","4"],correct:1},
+      {q:"In benzene (C\u2086H\u2086), each C\u2013C bond order is approximately...",options:["1","1.5","2","3"],correct:1},
+      {q:"Which statement about resonance is FALSE?",options:["The molecule flips between resonance structures","All resonance structures are valid Lewis structures","The real structure is a hybrid","Resonance stabilizes the molecule"],correct:0},
+      {q:"How many resonance structures does SO\u2083 have?",options:["1","2","3","6"],correct:2},
+      {q:"PO\u2084\u00B3\u207B has how many equivalent resonance structures?",options:["2","3","4","6"],correct:2},
+      {q:"In NO\u2083\u207B, the N\u2013O bond order is approximately:",options:["1","1.33","1.5","2"],correct:1},
+      {q:"Resonance structures are connected by ___ arrows.",options:["Equilibrium (\u21CC)","Double-headed (\u2194)","Single (\u2192)","Curved"], correct:1},
+      {q:"The more resonance structures a molecule has, the ___ stable it generally is.",options:["Less","More","Equally","Cannot determine"],correct:1}
+    ]
+  },
+  {
+    id:8, title:"Best Lewis Structure Selection", type:"mc",
+    instruction:"Select the best Lewis structure based on formal charges and rules.",
+    questions:[
+      {q:"For CNO\u207B, which arrangement is best?",options:["O\u2013C\u2013N (FC: O=-2, C=+1, N=0)","C\u2013N\u2013O (FC: C=-2, N=+1, O=0)","N\u2013C\u2013O (FC: N=-1, C=0, O=0)","O\u2013N\u2013C (FC: O=-1, N=+1, C=-1)"],correct:2},
+      {q:"When choosing between structures, negative FC should be on the:",options:["Central atom","Least electronegative atom","Most electronegative atom","Hydrogen"],correct:2},
+      {q:"A structure where ALL atoms have FC = 0 is generally:",options:["The worst structure","The best structure","Impossible","Only for diatomics"],correct:1},
+      {q:"In SCN\u207B, which atom should bear the negative formal charge?",options:["S (EN=2.5)","C (EN=2.5)","N (EN=3.0)","Distributed equally"],correct:2},
+      {q:"Adjacent atoms with the same sign of formal charge makes a structure:",options:["Better","Worse","No effect","Impossible"],correct:1},
+      {q:"For N\u2082O (total 16 e\u207B), the structure N=N=O with FC(N)=-1,0 and FC(O)+1 vs N\u2261N\u2013O with FC(N)=-1,+1,FC(O)-1. Which is better?",options:["N=N=O (all FC closer to 0)","N\u2261N\u2013O","Both equally good","Neither is valid"],correct:0},
+      {q:"A Lewis structure with a +2 formal charge on fluorine would be:",options:["The best structure","Acceptable","Very unlikely / bad (F is most electronegative)","Neutral"],correct:2},
+      {q:"The number of bonds C typically forms in Lewis structures is:",options:["2","3","4","5"],correct:2}
+    ]
+  },
+  {
+    id:9, title:"Drawing Lewis Structures \u2014 Mixed",
+    instruction:"For each molecule, answer the given question about its Lewis structure.",
+    rows:[
+      ["1","H\u2082S: how many lone pairs on the central atom (S)?","2"],
+      ["2","CS\u2082: what type of bond between C and each S?","double"],
+      ["3","PH\u2083: how many lone pairs on P?","1"],
+      ["4","Total valence electrons in ClO\u207B?","14"],
+      ["5","SiH\u2084: how many bonding pairs around Si?","4"],
+      ["6","HCN: what type of bond between C and N?","triple"],
+      ["7","Total valence electrons in SO\u2083\u00B2\u207B?","26"],
+      ["8","OF\u2082: how many lone pairs on the central atom (O)?","2"],
+      ["9","H\u2082CO: what type of bond between C and O?","double"],
+      ["10","NF\u2083: how many lone pairs on N?","1"],
+      ["11","Total valence electrons in CH\u2083Cl?","14"],
+      ["12","HOCl: how many lone pairs on O?","2"],
+      ["13","Total valence electrons in C\u2082H\u2084 (ethene)?","12"],
+      ["14","In C\u2082H\u2084, what type of bond between the two C atoms?","double"],
+      ["15","In C\u2082H\u2082 (acetylene), what type of bond between the two C atoms?","triple"],
+      ["16","SO\u2083: how many lone pairs on S (with resonance)?","0"],
+      ["17","Total valence electrons in N\u2082H\u2084 (hydrazine)?","14"],
+      ["18","In N\u2082H\u2084, each N has ___ lone pair(s).","1"]
+    ]
+  },
+  {
+    id:10, title:"Lewis Structure Steps (Word Arrange)", type:"arrange",
+    instruction:"Arrange the steps for drawing Lewis structures in the correct order.",
+    sentences:[
+      {prompt:"Steps to draw a Lewis structure:", words:["Count","total","valence","electrons","Connect","atoms","with","single","bonds","Complete","octets","on","outer","atoms","Place","remaining","on","central","Form","multiple","bonds","if","needed"]},
+      {prompt:"Order of priority when placing electrons:", words:["Outer","atoms","first","then","central","atom"]},
+      {prompt:"When central atom lacks an octet:", words:["Convert","lone","pairs","to","bonding","pairs"]},
+      {prompt:"For ions, adjust electron count:", words:["Add","electrons","for","anions","subtract","for","cations"]}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Lewis Structures - Complete Reference</h3><p><span class="rule">Steps to Draw a Lewis Structure:</span></p><p><strong>Step 1:</strong> Count total valence electrons. For anions, ADD electrons equal to charge. For cations, SUBTRACT electrons equal to charge.</p><p><strong>Step 2:</strong> Draw the skeleton structure. Place the least electronegative atom in the center (never H). Connect atoms with single bonds (each uses 2 e\u207B).</p><p><strong>Step 3:</strong> Distribute remaining electrons. Complete octets on outer atoms first (start with most electronegative).</p><p><strong>Step 4:</strong> Place any remaining electrons on the central atom.</p><p><strong>Step 5:</strong> If central atom lacks an octet, convert lone pairs from outer atoms into bonding pairs (form double or triple bonds).</p><p><span class="rule">Bond Types:</span></p><table><tr><th>Bond</th><th>Electrons Shared</th><th>Example</th></tr><tr><td>Single bond (\u2013)</td><td>2 e\u207B</td><td>H\u2013H, C\u2013H</td></tr><tr><td>Double bond (=)</td><td>4 e\u207B</td><td>O=C=O, C=C</td></tr><tr><td>Triple bond (\u2261)</td><td>6 e\u207B</td><td>N\u2261N, C\u2261O</td></tr></table><p><span class="rule">Formal Charge (FC):</span></p><p>FC = V \u2212 N \u2212 B/2</p><p>V = valence electrons of the free atom</p><p>N = nonbonding (lone pair) electrons on the atom</p><p>B = bonding electrons around the atom</p><p>Best structure: (1) FC closest to zero on all atoms, (2) negative FC on the more electronegative atom, (3) no adjacent atoms with same-sign FC.</p><p>Sum of all formal charges = overall charge of the species.</p><p><span class="rule">Resonance Structures:</span></p><p>When multiple valid Lewis structures can be drawn that differ ONLY in the placement of electrons (not atoms), they are resonance structures. The real molecule is a <strong>resonance hybrid</strong>, an average of all contributing structures. Connected by double-headed arrows (\u2194). More resonance structures = more stability. Bond order in a hybrid = (total bonds between a pair) / (number of resonance structures).</p><p><span class="rule">Octet Rule Exceptions:</span></p><table><tr><th>Type</th><th>Examples</th><th>Electrons on Central Atom</th><th>Notes</th></tr><tr><td>Incomplete octet (&lt;8)</td><td>BF\u2083 (B: 6e\u207B), BeCl\u2082 (Be: 4e\u207B), AlCl\u2083 (Al: 6e\u207B)</td><td>4 or 6</td><td>B, Be, Al are electron-deficient</td></tr><tr><td>Odd-electron molecules</td><td>NO (11 e\u207B), NO\u2082 (17 e\u207B)</td><td>Odd total</td><td>Free radicals, paramagnetic</td></tr><tr><td>Expanded octet (&gt;8)</td><td>PCl\u2085 (10), SF\u2086 (12), XeF\u2082 (10), ICl\u2084\u207B (12)</td><td>10 or 12</td><td>Period 3+ only (accessible d orbitals)</td></tr></table><p><span class="rule">Key Rule:</span> Period 2 elements (C, N, O, F) can NEVER exceed the octet. Only elements in Period 3 and beyond (P, S, Cl, Br, I, Xe) can have expanded octets.</p><p><span class="rule">Common Lewis Structures:</span></p><table><tr><th>Molecule</th><th>Total e\u207B</th><th>Bond Type</th><th>Lone Pairs (central)</th></tr><tr><td>H\u2082O</td><td>8</td><td>2 single</td><td>2</td></tr><tr><td>CO\u2082</td><td>16</td><td>2 double</td><td>0</td></tr><tr><td>NH\u2083</td><td>8</td><td>3 single</td><td>1</td></tr><tr><td>HCN</td><td>10</td><td>1 single + 1 triple</td><td>0 on C, 1 on N</td></tr><tr><td>O\u2082</td><td>12</td><td>1 double</td><td>2 on each O</td></tr><tr><td>N\u2082</td><td>10</td><td>1 triple</td><td>1 on each N</td></tr></table><p><span class="rule">Valence Electrons by Group:</span></p><table><tr><th>Element</th><th>Group</th><th>Valence e\u207B</th></tr><tr><td>H</td><td>1</td><td>1</td></tr><tr><td>C, Si</td><td>14</td><td>4</td></tr><tr><td>N, P</td><td>15</td><td>5</td></tr><tr><td>O, S, Se</td><td>16</td><td>6</td></tr><tr><td>F, Cl, Br, I</td><td>17</td><td>7</td></tr><tr><td>Noble gases (Xe)</td><td>18</td><td>8</td></tr><tr><td>Na, K, Li</td><td>1</td><td>1</td></tr><tr><td>B, Al</td><td>13</td><td>3</td></tr></table>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 valence electrons, bonds, formal charge, resonance \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

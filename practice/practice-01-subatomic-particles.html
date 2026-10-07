@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Subatomic Particles</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Subatomic Particles</h1>
+<p class="subtitle">Deep practice &mdash; subatomic particles, Z, A, neutrons</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_01';
+const SECTIONS = [
+  {
+    id:1, title:"Fill in: Identify the particle",
+    instruction:"Write the name of the particle described.",
+    rows:[
+      ["1","Positive charge, in the nucleus","proton"],
+      ["2","Negative charge, in shells","electron"],
+      ["3","Zero charge, in the nucleus","neutron"],
+      ["4","Mass \u2248 1 u, positive","proton"],
+      ["5","Mass \u2248 0, negative","electron"],
+      ["6","Z = number of ___","protons"],
+      ["7","A = number of ___ + ___","protons + neutrons / p + n"],
+      ["8","A \u2212 Z = ___","neutrons"],
+      ["9","Has a charge of +1","proton"],
+      ["10","Has a charge of -1","electron"],
+      ["11","Has a charge of 0","neutron"],
+      ["12","Discovered by Thomson (cathode rays)","electron"],
+      ["13","Discovered by Rutherford (gold foil)","proton / nucleus"],
+      ["14","Discovered by Chadwick in 1932","neutron"],
+      ["15","Its number changes between isotopes","neutron"],
+      ["16","Its number defines the element's identity","proton"],
+      ["17","The lightest subatomic particle","electron"],
+      ["18","Found outside the nucleus in energy levels","electron"],
+      ["19","Mass \u2248 1.673 \u00D7 10\u207B\u00B2\u2077 kg","proton"],
+      ["20","Mass \u2248 9.109 \u00D7 10\u207B\u00B3\u00B9 kg","electron"]
+    ]
+  },
+  {
+    id:2, title:"Calculate neutrons (A \u2212 Z)",
+    instruction:"Calculate the number of neutrons: N = A \u2212 Z.",
+    rows:[
+      ["1","Na: Z=11, A=23 \u2192 N=?","12"],
+      ["2","C: Z=6, A=14 \u2192 N=?","8"],
+      ["3","Fe: Z=26, A=56 \u2192 N=?","30"],
+      ["4","U: Z=92, A=238 \u2192 N=?","146"],
+      ["5","O: Z=8, A=16 \u2192 N=?","8"],
+      ["6","Ca: Z=20, A=40 \u2192 N=?","20"],
+      ["7","Cl: Z=17, A=35 \u2192 N=?","18"],
+      ["8","Au: Z=79, A=197 \u2192 N=?","118"],
+      ["9","P: Z=15, A=31 \u2192 N=?","16"],
+      ["10","Br: Z=35, A=80 \u2192 N=?","45"],
+      ["11","Sn: Z=50, A=119 \u2192 N=?","69"],
+      ["12","Pb: Z=82, A=207 \u2192 N=?","125"],
+      ["13","I: Z=53, A=127 \u2192 N=?","74"],
+      ["14","Mn: Z=25, A=55 \u2192 N=?","30"],
+      ["15","Zn: Z=30, A=65 \u2192 N=?","35"],
+      ["16","Kr: Z=36, A=84 \u2192 N=?","48"],
+      ["17","Ti: Z=22, A=48 \u2192 N=?","26"],
+      ["18","Si: Z=14, A=28 \u2192 N=?","14"],
+      ["19","Hg: Z=80, A=201 \u2192 N=?","121"],
+      ["20","Bi: Z=83, A=209 \u2192 N=?","126"]
+    ]
+  },
+  {
+    id:3, title:"MC: Subatomic particles", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"What determines the element?", options:["The mass number A","The atomic number Z","The number of neutrons","The number of electrons"], correct:1},
+      {q:"Where is most of the mass located?", options:["In the shells","In the electrons","In the nucleus","Equally everywhere"], correct:2},
+      {q:"The mass of the electron compared to the proton?", options:["Same","Double","1/1836","1/100"], correct:2},
+      {q:"What does the mass number A represent?", options:["Protons only","Neutrons only","Protons + neutrons","Protons + electrons"], correct:2},
+      {q:"A neutral atom has equal numbers of:", options:["Protons and neutrons","Protons and electrons","Neutrons and electrons","All particles"], correct:1},
+      {q:"Neutrons contribute to:", options:["Charge only","Mass only","Charge and mass","Chemical properties"], correct:1},
+      {q:"Where are the electrons located?", options:["In the nucleus","In shells/orbitals","Outside the atom","In the neutrons"], correct:1},
+      {q:"Atomic number Z of oxygen?", options:["6","7","8","16"], correct:2},
+      {q:"Which particle was discovered last?", options:["Proton","Electron","Neutron","Quark"], correct:2},
+      {q:"An atom of carbon-12 has how many neutrons?", options:["12","6","8","14"], correct:1},
+      {q:"Which particle has the smallest mass?", options:["Proton","Neutron","Electron","They are all equal"], correct:2},
+      {q:"If Z=26, the element is:", options:["Cobalt","Manganese","Iron","Nickel"], correct:2},
+      {q:"The nucleus contains:", options:["Protons only","Neutrons only","Protons and neutrons","Protons and electrons"], correct:2},
+      {q:"A proton is made of which quarks?", options:["3 up quarks","2 up + 1 down","1 up + 2 down","2 down + 1 up"], correct:1},
+      {q:"A neutron is made of which quarks?", options:["3 down quarks","2 up + 1 down","1 up + 2 down","3 up quarks"], correct:2},
+      {q:"What is the relative charge of a proton?", options:["+2","+1","0","-1"], correct:1},
+      {q:"The mass number A is always:", options:["Equal to Z","Greater than or equal to Z","Less than Z","Double Z"], correct:1},
+      {q:"Which is NOT a subatomic particle?", options:["Proton","Neutron","Photon","Electron"], correct:2},
+      {q:"If an atom has 11 protons and 12 neutrons, A=?", options:["11","12","23","1"], correct:2},
+      {q:"Two atoms with the same Z but different A are:", options:["Ions","Isotopes","Isomers","Allotropes"], correct:1}
+    ]
+  },
+  {
+    id:4, title:"True or False",
+    instruction:"Write true or false.",
+    rows:[
+      ["1","Neutrons have a negative charge","false"],
+      ["2","Atomic number Z = number of protons","true"],
+      ["3","The mass of the atom is mainly in the electrons","false"],
+      ["4","A neutral atom has equal protons and electrons","true"],
+      ["5","Protons are found in the shells","false"],
+      ["6","A \u2212 Z = number of neutrons","true"],
+      ["7","The proton is heavier than the neutron","false"],
+      ["8","Electrons orbit the nucleus at fixed distances","true"],
+      ["9","Changing the number of protons changes the element","true"],
+      ["10","An atom with 6 protons and 7 neutrons has A=13","true"],
+      ["11","The nucleus is positively charged","true"],
+      ["12","Neutrons help stabilize the nucleus","true"],
+      ["13","An electron has the same mass as a proton","false"],
+      ["14","Protons and neutrons are called nucleons","true"],
+      ["15","Z can never equal A","false"],
+      ["16","A hydrogen-1 atom has no neutrons","true"],
+      ["17","The atomic number can be a decimal","false"],
+      ["18","Quarks are found inside electrons","false"]
+    ]
+  },
+  {
+    id:5, title:"Fill: Element data from periodic table",
+    instruction:"Given Z and A, calculate the number of neutrons.",
+    rows:[
+      ["1","H: Z=1, A=1, neutrons=?","0"],
+      ["2","He: Z=2, A=4, neutrons=?","2"],
+      ["3","Li: Z=3, A=7, neutrons=?","4"],
+      ["4","N: Z=7, A=14, neutrons=?","7"],
+      ["5","Al: Z=13, A=27, neutrons=?","14"],
+      ["6","Ar: Z=18, A=40, neutrons=?","22"],
+      ["7","Cu: Z=29, A=64, neutrons=?","35"],
+      ["8","Ag: Z=47, A=108, neutrons=?","61"],
+      ["9","Be: Z=4, A=9, neutrons=?","5"],
+      ["10","B: Z=5, A=11, neutrons=?","6"],
+      ["11","F: Z=9, A=19, neutrons=?","10"],
+      ["12","Ne: Z=10, A=20, neutrons=?","10"],
+      ["13","S: Z=16, A=32, neutrons=?","16"],
+      ["14","K: Z=19, A=39, neutrons=?","20"],
+      ["15","Sc: Z=21, A=45, neutrons=?","24"],
+      ["16","Co: Z=27, A=59, neutrons=?","32"],
+      ["17","Ga: Z=31, A=70, neutrons=?","39"],
+      ["18","Rb: Z=37, A=85, neutrons=?","48"],
+      ["19","Xe: Z=54, A=131, neutrons=?","77"],
+      ["20","Pt: Z=78, A=195, neutrons=?","117"]
+    ]
+  },
+  {
+    id:6, title:"Reverse: Given neutrons, find A",
+    instruction:"A = Z + N. Calculate A.",
+    rows:[
+      ["1","C: Z=6, N=6, A=?","12"],
+      ["2","C: Z=6, N=8, A=?","14"],
+      ["3","Cl: Z=17, N=18, A=?","35"],
+      ["4","Cl: Z=17, N=20, A=?","37"],
+      ["5","Fe: Z=26, N=30, A=?","56"],
+      ["6","H: Z=1, N=0, A=?","1"],
+      ["7","H: Z=1, N=1, A=?","2"],
+      ["8","H: Z=1, N=2, A=?","3"],
+      ["9","O: Z=8, N=8, A=?","16"],
+      ["10","O: Z=8, N=10, A=?","18"],
+      ["11","N: Z=7, N=7, A=?","14"],
+      ["12","N: Z=7, N=8, A=?","15"],
+      ["13","U: Z=92, N=143, A=?","235"],
+      ["14","U: Z=92, N=146, A=?","238"],
+      ["15","Pb: Z=82, N=124, A=?","206"],
+      ["16","Pb: Z=82, N=126, A=?","208"],
+      ["17","Ca: Z=20, N=20, A=?","40"],
+      ["18","Ca: Z=20, N=24, A=?","44"],
+      ["19","K: Z=19, N=21, A=?","40"],
+      ["20","Ar: Z=18, N=22, A=?","40"]
+    ]
+  },
+  {
+    id:7, title:"Particle properties: charges and masses",
+    instruction:"Fill in the charge or mass as requested.",
+    rows:[
+      ["1","Charge of a proton in elementary charge units","+1"],
+      ["2","Charge of an electron in elementary charge units","-1"],
+      ["3","Charge of a neutron","0"],
+      ["4","Mass of proton in amu (atomic mass units)","1 / 1.007"],
+      ["5","Mass of neutron in amu","1 / 1.009"],
+      ["6","Mass of electron in amu","0 / 0.0005 / 1/1836"],
+      ["7","How many times heavier is a proton than an electron?","1836"],
+      ["8","Total charge of 3 protons and 3 electrons","0"],
+      ["9","Total charge of 11 protons and 10 electrons","+1"],
+      ["10","Total charge of 8 protons and 10 electrons","-2"]
+    ]
+  },
+  {
+    id:8, title:"MC: Quarks and advanced", type:"mc",
+    instruction:"Select the correct answer about quarks and particle structure.",
+    questions:[
+      {q:"How many quarks make up a proton?", options:["1","2","3","6"], correct:2},
+      {q:"How many quarks make up a neutron?", options:["1","2","3","6"], correct:2},
+      {q:"What is the quark composition of a proton?", options:["uuu","uud","udd","ddd"], correct:1},
+      {q:"What is the quark composition of a neutron?", options:["uuu","uud","udd","ddd"], correct:2},
+      {q:"The charge of an up quark is:", options:["+1","+2/3","-1/3","-2/3"], correct:1},
+      {q:"The charge of a down quark is:", options:["+1","+2/3","-1/3","-2/3"], correct:2},
+      {q:"Protons and neutrons are collectively called:", options:["Leptons","Nucleons","Bosons","Quarks"], correct:1},
+      {q:"Which particle is a lepton?", options:["Proton","Neutron","Electron","Up quark"], correct:2},
+      {q:"The nucleus occupies what fraction of the atom's volume?", options:["About half","About 1/100","About 1/10000","A tiny fraction (10\u207B\u00B9\u2075)"], correct:3},
+      {q:"What holds protons together in the nucleus?", options:["Gravity","Electromagnetic force","Strong nuclear force","Weak nuclear force"], correct:2}
+    ]
+  },
+  {
+    id:9, title:"Find Z given element name",
+    instruction:"Write the atomic number Z of each element.",
+    rows:[
+      ["1","Hydrogen Z=?","1"],
+      ["2","Carbon Z=?","6"],
+      ["3","Nitrogen Z=?","7"],
+      ["4","Oxygen Z=?","8"],
+      ["5","Sodium Z=?","11"],
+      ["6","Chlorine Z=?","17"],
+      ["7","Iron Z=?","26"],
+      ["8","Gold Z=?","79"],
+      ["9","Helium Z=?","2"],
+      ["10","Neon Z=?","10"],
+      ["11","Sulfur Z=?","16"],
+      ["12","Calcium Z=?","20"],
+      ["13","Potassium Z=?","19"],
+      ["14","Silver Z=?","47"],
+      ["15","Copper Z=?","29"]
+    ]
+  },
+  {
+    id:10, title:"Complete the atom: all particles",
+    instruction:"Given partial info, find the missing value.",
+    rows:[
+      ["1","Element X: 6 protons, 6 neutrons, 6 electrons. What is it?","carbon / C"],
+      ["2","Element X: Z=11, A=23, electrons (neutral)=?","11"],
+      ["3","Element X: 17 protons, 18 neutrons. A=?","35"],
+      ["4","Element X: Z=26, A=56. Neutrons=? Electrons(neutral)=?","30, 26 / 30"],
+      ["5","Element X: 8 protons, A=16. Element name?","oxygen / O"],
+      ["6","Element X: 79 protons, 118 neutrons. A=? Element?","197, gold / 197, Au / 197"],
+      ["7","Element X: Z=20, A=40, N=?","20"],
+      ["8","Element X: A=39, N=20. Z=? Element?","19, potassium / 19, K / 19"],
+      ["9","Element X: Z=15, A=31, e\u207B(neutral)=?","15"],
+      ["10","Element X: N=30, A=56. Z=? Element?","26, iron / 26, Fe / 26"]
+    ]
+  },
+  {
+    id:11, title:"Word Arrange: Build the sentence", type:"arrange",
+    instruction:"Click the words in the correct order.",
+    sentences:[
+      {prompt:"What is in the nucleus?", words:["Protons","and","neutrons"]},
+      {prompt:"A = protons + neutrons", words:["A","=","protons","+","neutrons"]},
+      {prompt:"Z determines the element", words:["Z","determines","the","element"]},
+      {prompt:"Electrons have negligible mass", words:["Electrons","have","negligible","mass"]},
+      {prompt:"Neutrons have zero charge", words:["Neutrons","have","zero","charge"]},
+      {prompt:"The nucleus contains most of the mass", words:["The","nucleus","contains","most","of the","mass"]},
+      {prompt:"N = A minus Z", words:["N","=","A","minus","Z"]},
+      {prompt:"A proton has 2 up and 1 down quark", words:["A proton","has","2 up","and","1 down","quark"]},
+      {prompt:"Electrons orbit in shells around the nucleus", words:["Electrons","orbit","in shells","around","the nucleus"]},
+      {prompt:"Protons and neutrons are nucleons", words:["Protons","and","neutrons","are","nucleons"]}
+    ]
+  },
+  {
+    id:12, title:"MC: Tricky edge cases", type:"mc",
+    instruction:"These are designed to be tricky. Think carefully.",
+    questions:[
+      {q:"Can two different elements have the same mass number A?", options:["Never","Yes, they are called isobars","Only isotopes can","Only noble gases"], correct:1},
+      {q:"Can an atom have more neutrons than protons?", options:["Never","Only hydrogen","Yes, most heavy elements do","Only radioactive atoms"], correct:2},
+      {q:"An atom has Z=1, A=1. How many neutrons?", options:["1","2","0","Cannot determine"], correct:2},
+      {q:"If you add a proton to nitrogen (Z=7), you get:", options:["Nitrogen-8","Carbon","Oxygen","A heavier nitrogen isotope"], correct:2},
+      {q:"Which has more neutrons: Fe-56 or Fe-58?", options:["Fe-56","Fe-58","They are equal","Cannot determine"], correct:1},
+      {q:"If an atom has 20 protons, it is ALWAYS:", options:["Calcium","An ion","Neutral","Calcium-40"], correct:0},
+      {q:"An atom has equal protons and neutrons. Which could it be?", options:["C-12","Na-23","U-238","All of the above"], correct:0},
+      {q:"The total number of particles (p+n+e) in neutral C-12 is:", options:["12","18","6","24"], correct:1},
+      {q:"Which element has Z=0?", options:["Hydrogen","Helium","No element has Z=0","Neutronium"], correct:2},
+      {q:"If you remove a neutron from C-13, you get:", options:["C-12","B-12","N-13","Nothing, it's impossible"], correct:0}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Subatomic Particles \u2014 Complete Reference</h3>' +
+'<table><tr><th>Particle</th><th>Symbol</th><th>Charge</th><th>Mass (amu)</th><th>Mass (kg)</th><th>Location</th></tr>' +
+'<tr><td>Proton</td><td>p\u207A</td><td>+1</td><td>1.007</td><td>1.673 \u00D7 10\u207B\u00B2\u2077</td><td>Nucleus</td></tr>' +
+'<tr><td>Neutron</td><td>n\u2070</td><td>0</td><td>1.009</td><td>1.675 \u00D7 10\u207B\u00B2\u2077</td><td>Nucleus</td></tr>' +
+'<tr><td>Electron</td><td>e\u207B</td><td>\u22121</td><td>\u22480 (1/1836)</td><td>9.109 \u00D7 10\u207B\u00B3\u00B9</td><td>Shells/orbitals</td></tr></table>' +
+'<h3>Key Formulas</h3>' +
+'<p><span class="rule">Z</span> = atomic number = number of protons = number of electrons (neutral atom)</p>' +
+'<p><span class="rule">A</span> = mass number = protons + neutrons (nucleons)</p>' +
+'<p><span class="rule">N</span> = A \u2212 Z = number of neutrons</p>' +
+'<p><span class="rule">Z defines the element.</span> Change Z = change element. Change N = different isotope.</p>' +
+'<h3>Nuclear Notation</h3>' +
+'<p>Written as: <span class="rule">\u1D2C<sub>Z</sub>X</span> where A is top (mass number), Z is bottom (atomic number), X is element symbol.</p>' +
+'<p>Example: \u00B2\u00B3<sub>11</sub>Na means Z=11, A=23, so N = 23\u221211 = 12 neutrons.</p>' +
+'<h3>Quark Composition</h3>' +
+'<table><tr><th>Particle</th><th>Quarks</th><th>Charge calculation</th></tr>' +
+'<tr><td>Proton</td><td><span class="rule">uud</span> (2 up + 1 down)</td><td>+2/3 + 2/3 \u2212 1/3 = +1</td></tr>' +
+'<tr><td>Neutron</td><td><span class="rule">udd</span> (1 up + 2 down)</td><td>+2/3 \u2212 1/3 \u2212 1/3 = 0</td></tr></table>' +
+'<p>Up quark: charge = +2/3 | Down quark: charge = \u22121/3</p>' +
+'<h3>Key Facts</h3>' +
+'<ul>' +
+'<li>Protons and neutrons are called <span class="rule">nucleons</span></li>' +
+'<li>The electron is a <span class="rule">lepton</span> (not made of quarks)</li>' +
+'<li>The nucleus is tiny (\u224810\u207B\u00B9\u2075 of atom volume) but has >99.9% of the mass</li>' +
+'<li>A proton is <span class="rule">1836\u00D7</span> heavier than an electron</li>' +
+'<li>A neutral atom: protons = electrons (charges cancel)</li>' +
+'</ul>' +
+'<h3>Discoveries</h3>' +
+'<ul>' +
+'<li>Electron: <span class="rule">Thomson</span> (1897, cathode rays)</li>' +
+'<li>Nucleus/Proton: <span class="rule">Rutherford</span> (1911, gold foil)</li>' +
+'<li>Neutron: <span class="rule">Chadwick</span> (1932)</li>' +
+'</ul>' +
+'<h3>Common Mistakes</h3>' +
+'<ul>' +
+'<li>A is NOT the number of protons (that is Z)</li>' +
+'<li>Electrons have negligible mass, not zero mass</li>' +
+'<li>Neutrons have 0 charge but are NOT lighter than protons</li>' +
+'<li>Z can equal A (hydrogen-1: Z=1, A=1, N=0)</li>' +
+'</ul>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 subatomic particles, Z, A, neutrons \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

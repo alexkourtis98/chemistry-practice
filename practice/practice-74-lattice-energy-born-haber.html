@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Lattice Energy & Born-Haber Cycle</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Lattice Energy & Born-Haber Cycle</h1>
+<p class="subtitle">Deep practice &mdash; lattice energy trends, Born-Haber cycle calculations</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_74';
+const SECTIONS = [
+  {
+    id:1, title:"Fill: Lattice energy definition",
+    instruction:"Complete each statement about lattice energy.",
+    rows:[
+      ["1","Lattice energy is the energy required to separate an ionic compound into ___","gaseous ions / gas phase ions / isolated gaseous ions"],
+      ["2","Lattice energy can also be defined as the energy released when ___ form a solid ionic compound","gaseous ions / gas-phase ions"],
+      ["3","Lattice energy is always ___ (positive/negative) when defined as energy to separate ions","positive / +"],
+      ["4","A higher lattice energy means a ___ ionic bond","stronger / more stable"],
+      ["5","Lattice energy is measured in units of ___","kJ/mol / kJ per mol"],
+      ["6","The lattice energy of NaCl is approximately ___ kJ/mol","787 / 786 / 788"],
+      ["7","Compounds with high lattice energy tend to have ___ melting points","high / higher"],
+      ["8","Lattice energy depends on ionic ___ and ionic ___","charge and size / charges and radii / charge and radius"],
+      ["9","The equation for Coulomb\u2019s law applied to lattice energy: E \u221D ___","q1 q2 / r / (q1 * q2) / r / q1q2/r"],
+      ["10","In Coulomb\u2019s law, q\u2081 and q\u2082 represent the ___ of the ions","charges / ionic charges"],
+      ["11","In Coulomb\u2019s law, r represents the ___ between ion centers","distance / interionic distance / radius"],
+      ["12","Lattice energy is a measure of the ___ of the ionic crystal","stability / strength"],
+      ["13","The Born-Land\u00E9 equation is used to ___ lattice energy","calculate / predict / estimate"],
+      ["14","MgO has a ___ lattice energy than NaCl because both ions have higher charges","higher / greater / larger"],
+      ["15","LiF has a ___ lattice energy than LiI because F\u207B is smaller than I\u207B","higher / greater / larger"]
+    ]
+  },
+  {
+    id:2, title:"Fill: Lattice energy trends",
+    instruction:"Predict the effect on lattice energy.",
+    rows:[
+      ["1","Higher ionic charge \u2192 lattice energy is ___","higher / greater / larger / increases"],
+      ["2","Smaller ionic radius \u2192 lattice energy is ___","higher / greater / larger / increases"],
+      ["3","Larger ionic radius \u2192 lattice energy is ___","lower / smaller / decreases"],
+      ["4","Going down Group 1 (Li\u2192Cs), cation size increases, so LE ___","decreases / gets lower / gets smaller"],
+      ["5","Going down Group 17 (F\u2192I), anion size increases, so LE ___","decreases / gets lower / gets smaller"],
+      ["6","Comparing NaCl and MgCl\u2082: Mg\u00B2\u207A has higher charge, so MgCl\u2082 has ___ LE","higher / greater / larger"],
+      ["7","Comparing NaCl and NaF: F\u207B is smaller than Cl\u207B, so NaF has ___ LE","higher / greater / larger"],
+      ["8","Comparing LiF and CsF: Li\u207A is much smaller than Cs\u207A, so LiF has ___ LE","higher / greater / larger"],
+      ["9","Comparing MgO and NaCl: MgO has ___ LE because of +2/\u22122 charges vs +1/\u22121","higher / greater / larger / much higher"],
+      ["10","Comparing CaO and BaO: Ca\u00B2\u207A is smaller than Ba\u00B2\u207A, so CaO has ___ LE","higher / greater / larger"],
+      ["11","Comparing NaF and KBr: NaF has ___ LE (smaller ions)","higher / greater / larger"],
+      ["12","Comparing Al\u2082O\u2083 and Na\u2082O: Al\u00B3\u207A has higher charge, so Al\u2082O\u2083 has ___ LE","higher / greater / larger / much higher"],
+      ["13","Comparing CaCl\u2082 and CaBr\u2082: Cl\u207B is smaller than Br\u207B, so CaCl\u2082 has ___ LE","higher / greater / larger"],
+      ["14","Comparing MgS and MgO: O\u00B2\u207B is smaller than S\u00B2\u207B, so MgO has ___ LE","higher / greater / larger"],
+      ["15","Comparing KCl and RbCl: K\u207A is smaller than Rb\u207A, so KCl has ___ LE","higher / greater / larger"],
+      ["16","Compound with highest LE among NaCl, KCl, RbCl, CsCl is ___","NaCl"],
+      ["17","Compound with lowest LE among LiF, LiCl, LiBr, LiI is ___","LiI"],
+      ["18","Compound with highest LE among NaCl, MgO, Al\u2082O\u2083, KBr is ___","Al2O3 / Al\u2082O\u2083"],
+      ["19","Between NaBr and MgBr\u2082, ___ has higher LE","MgBr2 / MgBr\u2082"],
+      ["20","Between BaO and MgO, ___ has higher LE","MgO"]
+    ]
+  },
+  {
+    id:3, title:"MC: Compare lattice energies", type:"mc",
+    instruction:"Select the compound with the higher lattice energy.",
+    questions:[
+      {q:"Which has higher lattice energy?", options:["NaCl (787 kJ/mol)","MgO (3850 kJ/mol)","They are equal","Cannot determine"], correct:1},
+      {q:"Which has higher lattice energy?", options:["LiF","LiCl","LiBr","LiI"], correct:0},
+      {q:"Which has higher lattice energy?", options:["NaF","KF","RbF","CsF"], correct:0},
+      {q:"Which has higher lattice energy?", options:["CaCl\u2082","CaBr\u2082","CaI\u2082","They are all equal"], correct:0},
+      {q:"Which has higher lattice energy?", options:["NaCl","KCl","RbCl","CsCl"], correct:0},
+      {q:"Which has the LOWEST lattice energy?", options:["LiF","NaCl","KBr","CsI"], correct:3},
+      {q:"Which has higher lattice energy?", options:["MgCl\u2082","NaCl","KCl","RbCl"], correct:0},
+      {q:"Why does MgO have much higher LE than NaCl?", options:["Mg is heavier","Both ions have \u00B12 charges and smaller radii","\u00B11 charges","MgO is covalent"], correct:1},
+      {q:"Which pair has the greatest difference in lattice energy?", options:["NaCl vs KCl","LiF vs CsI","NaF vs NaCl","KBr vs KI"], correct:1},
+      {q:"Rank from highest to lowest LE: NaF, NaCl, NaBr, NaI", options:["NaF > NaCl > NaBr > NaI","NaI > NaBr > NaCl > NaF","All equal","NaCl > NaF > NaBr > NaI"], correct:0},
+      {q:"Which has higher LE: BaO or SrO?", options:["BaO (Ba\u00B2\u207A is larger)","SrO (Sr\u00B2\u207A is smaller)","They are equal","Cannot determine"], correct:1},
+      {q:"Which has higher LE: Na\u2082O or MgO?", options:["Na\u2082O","MgO","Equal","Depends on temperature"], correct:1},
+      {q:"Why does Al\u2082O\u2083 have very high LE?", options:["Large ions","Al\u00B3\u207A has +3 charge and is small","Al is a metal","O is electronegative"], correct:1},
+      {q:"Which has the highest LE?", options:["NaCl","CaO","Al\u2082O\u2083","KBr"], correct:2},
+      {q:"Lattice energy of BeO compared to MgO:", options:["BeO > MgO (Be\u00B2\u207A smaller)","BeO < MgO","BeO = MgO","Cannot compare"], correct:0},
+      {q:"Which alkali halide has the highest LE?", options:["CsI","NaCl","LiF","KBr"], correct:2},
+      {q:"If ionic charges double, lattice energy approximately:", options:["Doubles","Quadruples","Halves","Stays the same"], correct:1},
+      {q:"If interionic distance doubles, lattice energy:", options:["Doubles","Quadruples","Halves","Stays the same"], correct:2},
+      {q:"Which has higher LE: SrCl\u2082 or SrBr\u2082?", options:["SrCl\u2082 (Cl\u207B smaller)","SrBr\u2082 (Br\u207B larger)","Equal","Depends on crystal structure"], correct:0},
+      {q:"The lattice energy of MgF\u2082 is very high because:", options:["Both ions are small and Mg has +2 charge","F is electronegative","Mg is a light element","All of the above contribute"], correct:0}
+    ]
+  },
+  {
+    id:4, title:"Fill: Rank compounds by lattice energy",
+    instruction:"Rank from highest to lowest lattice energy.",
+    rows:[
+      ["1","Rank: NaCl, KCl, LiCl (highest first)","LiCl, NaCl, KCl / LiCl > NaCl > KCl"],
+      ["2","Rank: NaF, NaCl, NaBr (highest first)","NaF, NaCl, NaBr / NaF > NaCl > NaBr"],
+      ["3","Rank: MgO, CaO, BaO (highest first)","MgO, CaO, BaO / MgO > CaO > BaO"],
+      ["4","Rank: LiF, NaCl, KBr, CsI (highest first)","LiF, NaCl, KBr, CsI / LiF > NaCl > KBr > CsI"],
+      ["5","Rank: NaCl, MgO, Al\u2082O\u2083 (highest first)","Al2O3, MgO, NaCl / Al\u2082O\u2083 > MgO > NaCl"],
+      ["6","Rank: CaF\u2082, CaCl\u2082, CaBr\u2082 (highest first)","CaF2, CaCl2, CaBr2 / CaF\u2082 > CaCl\u2082 > CaBr\u2082"],
+      ["7","Rank: LiF, LiCl, LiBr, LiI (highest first)","LiF, LiCl, LiBr, LiI / LiF > LiCl > LiBr > LiI"],
+      ["8","Rank: BeO, MgO, CaO (highest first)","BeO, MgO, CaO / BeO > MgO > CaO"],
+      ["9","Rank: NaF, MgF\u2082, AlF\u2083 (highest first)","AlF3, MgF2, NaF / AlF\u2083 > MgF\u2082 > NaF"],
+      ["10","Rank: KF, KCl, KBr, KI (highest first)","KF, KCl, KBr, KI / KF > KCl > KBr > KI"],
+      ["11","Rank: SrO, BaO, MgO (highest first)","MgO, SrO, BaO / MgO > SrO > BaO"],
+      ["12","Rank: Na\u2082O, MgO, Al\u2082O\u2083 (highest first)","Al2O3, MgO, Na2O / Al\u2082O\u2083 > MgO > Na\u2082O"],
+      ["13","Rank: RbCl, NaCl, LiCl (highest first)","LiCl, NaCl, RbCl / LiCl > NaCl > RbCl"],
+      ["14","Rank: MgS, MgO, MgCl\u2082 (highest first)","MgO, MgS, MgCl2 / MgO > MgS > MgCl\u2082"],
+      ["15","Rank: CsCl, NaCl, LiCl, MgCl\u2082 (highest first)","MgCl2, LiCl, NaCl, CsCl / MgCl\u2082 > LiCl > NaCl > CsCl"]
+    ]
+  },
+  {
+    id:5, title:"MC: Born-Haber cycle steps", type:"mc",
+    instruction:"Identify each step in the Born-Haber cycle.",
+    questions:[
+      {q:"M(s) \u2192 M(g) is called:", options:["Ionization","Sublimation","Dissociation","Electron affinity"], correct:1},
+      {q:"M(g) \u2192 M\u207A(g) + e\u207B is called:", options:["Sublimation","Electron affinity","First ionization energy","Lattice energy"], correct:2},
+      {q:"X(g) + e\u207B \u2192 X\u207B(g) is called:", options:["Ionization energy","Electron affinity","Dissociation","Sublimation"], correct:1},
+      {q:"\u00BDX\u2082(g) \u2192 X(g) is called:", options:["Sublimation","Bond dissociation energy","Ionization","Electron affinity"], correct:1},
+      {q:"M\u207A(g) + X\u207B(g) \u2192 MX(s) releases the:", options:["Ionization energy","Electron affinity","Lattice energy","Bond energy"], correct:2},
+      {q:"The overall reaction M(s) + \u00BDX\u2082(g) \u2192 MX(s) gives the:", options:["Lattice energy","Enthalpy of formation (\u0394H\u00B0f)","Ionization energy","Sublimation energy"], correct:1},
+      {q:"In the Born-Haber cycle, which step is always endothermic?", options:["Lattice energy","Electron affinity","Ionization energy","Formation of the compound"], correct:2},
+      {q:"Sublimation energy is always:", options:["Exothermic","Endothermic","Zero","Depends on the metal"], correct:1},
+      {q:"Electron affinity for halogens is generally:", options:["Endothermic","Exothermic (negative)","Zero","Very large positive"], correct:1},
+      {q:"Bond dissociation of X\u2082 is:", options:["Exothermic","Endothermic","Zero","Depends on X"], correct:1},
+      {q:"For MgO, M(g) \u2192 M\u00B2\u207A(g) + 2e\u207B requires:", options:["IE\u2081 only","IE\u2082 only","IE\u2081 + IE\u2082","Electron affinity"], correct:2},
+      {q:"For O\u00B2\u207B, how many electron affinity steps are needed?", options:["One","Two (EA\u2081 + EA\u2082)","Three","None"], correct:1},
+      {q:"The second electron affinity (adding e\u207B to X\u207B) is:", options:["Exothermic","Endothermic","Zero","Same as first EA"], correct:1},
+      {q:"The Born-Haber cycle is an application of:", options:["Le Chatelier's principle","Hess's law","Avogadro's law","Boyle's law"], correct:1},
+      {q:"Which value cannot be measured directly and is often calculated via Born-Haber?", options:["Ionization energy","Electron affinity","Lattice energy","Sublimation energy"], correct:2},
+      {q:"In the cycle for NaCl: Na(s) \u2192 Na(g) energy is the ___ of Na:", options:["Ionization energy","Electron affinity","Sublimation energy","Lattice energy"], correct:2},
+      {q:"The sum of all Born-Haber steps equals:", options:["Zero (Hess's law, closed cycle)","Lattice energy","Ionization energy","Cannot determine"], correct:0},
+      {q:"For CaCl\u2082, how many dissociation half-steps for Cl\u2082?", options:["One (gives 1 Cl)","Two Cl atoms needed, so full bond dissociation","Three","None"], correct:1},
+      {q:"Which step in the Born-Haber cycle for NaCl is the most exothermic?", options:["Sublimation","Ionization","Lattice energy (released)","Bond dissociation"], correct:2},
+      {q:"The enthalpy of formation can be calculated if all other Born-Haber values are known:", options:["True","False","Only for monovalent ions","Only for NaCl"], correct:0}
+    ]
+  },
+  {
+    id:6, title:"Fill: Born-Haber calculations",
+    instruction:"Use Hess\u2019s law: \u0394H\u00B0f = \u0394H_sub + IE + \u00BD\u0394H_diss + EA + (\u2212LE). Solve for the unknown.",
+    rows:[
+      ["1","NaCl: \u0394H\u00B0f = \u2212411, \u0394H_sub = 108, IE = 496, \u00BD\u0394H_diss = 121, EA = \u2212349. Find LE.","787 / 787 kJ/mol"],
+      ["2","KCl: \u0394H\u00B0f = \u2212437, \u0394H_sub = 89, IE = 419, \u00BD\u0394H_diss = 121, EA = \u2212349. Find LE.","717 / 717 kJ/mol"],
+      ["3","LiF: \u0394H\u00B0f = \u2212616, \u0394H_sub = 161, IE = 520, \u00BD\u0394H_diss = 79, EA = \u2212328. Find LE.","1048 / 1048 kJ/mol"],
+      ["4","NaBr: \u0394H\u00B0f = \u2212361, \u0394H_sub = 108, IE = 496, \u00BD\u0394H_diss = 96, EA = \u2212325. Find LE.","736 / 736 kJ/mol"],
+      ["5","If LE = 787, \u0394H_sub = 108, IE = 496, \u00BD\u0394H_diss = 121, EA = \u2212349. Find \u0394H\u00B0f.","-411 / -411 kJ/mol"],
+      ["6","If \u0394H\u00B0f = \u2212641, \u0394H_sub = 178, IE\u2081+IE\u2082 = 2188, \u0394H_diss = 498, EA\u2081+EA\u2082 = 141. Find LE for MgO.","3896 / 3896 kJ/mol / ~3850"],
+      ["7","Energy to sublime sodium: Na(s) \u2192 Na(g) = ___ kJ/mol","108 / 107"],
+      ["8","First ionization energy of Na = ___ kJ/mol","496 / 495"],
+      ["9","Bond dissociation energy of Cl\u2082 = 242 kJ/mol. Energy for \u00BDCl\u2082 \u2192 Cl = ___","121 / 121 kJ/mol"],
+      ["10","Electron affinity of Cl = ___ kJ/mol","-349 / -348"],
+      ["11","In Born-Haber for NaCl, the sum of endothermic steps is 108+496+121 = ___ kJ","725 / 725 kJ"],
+      ["12","The exothermic steps in NaCl Born-Haber are EA (\u2212349) and LE (\u2212787), total = ___","-1136 / -1136 kJ"],
+      ["13","Net: 725 + (\u22121136) = ___ kJ/mol (\u0394H\u00B0f of NaCl)","-411 / -411 kJ/mol"],
+      ["14","For CaF\u2082: two F atoms needed, so dissociation energy used is ___ times \u00BD\u0394H_diss(F\u2082)","2 / two"],
+      ["15","For CaF\u2082: ionization requires IE\u2081 + IE\u2082 because Ca forms Ca___","2+ / Ca2+ / Ca\u00B2\u207A"]
+    ]
+  },
+  {
+    id:7, title:"MC: Coulomb\u2019s law and lattice energy", type:"mc",
+    instruction:"Apply Coulomb\u2019s law: E \u221D (q\u2081 \u00D7 q\u2082) / r.",
+    questions:[
+      {q:"According to Coulomb's law, lattice energy increases when:", options:["Charges increase","Distance increases","Both charges and distance increase","Temperature increases"], correct:0},
+      {q:"If ionic charges triple (from \u00B11 to \u00B13), LE increases by a factor of:", options:["3","6","9","27"], correct:2},
+      {q:"If interionic distance is halved, LE:", options:["Doubles","Quadruples","Halves","Stays the same"], correct:0},
+      {q:"MgO vs NaCl: charges are 2\u00D72=4 vs 1\u00D71=1. The charge factor alone predicts MgO LE is ___ times NaCl:", options:["2","4","8","16"], correct:1},
+      {q:"Why is lattice energy not perfectly predicted by Coulomb's law alone?", options:["Crystal structure matters too","Temperature effects","Electrons don't exist","Coulomb's law is wrong"], correct:0},
+      {q:"The Madelung constant accounts for:", options:["Crystal geometry / structure","Temperature","Pressure","Electron affinity"], correct:0},
+      {q:"Born-Mayer equation adds a ___ term to improve Coulomb's prediction:", options:["Temperature","Repulsion","Gravitational","Magnetic"], correct:1},
+      {q:"For NaCl structure, the Madelung constant is approximately:", options:["1.748","2.000","1.000","3.000"], correct:0},
+      {q:"Which factor has a LARGER effect on LE: doubling charge or halving radius?", options:["Doubling charge (4x effect)","Halving radius (2x effect)","Equal effect","Cannot compare"], correct:0},
+      {q:"Coulomb's law predicts that lattice energy is ___ proportional to interionic distance:", options:["Directly","Inversely","Exponentially","Not related"], correct:1},
+      {q:"For an ionic compound M\u00B2\u207AX\u00B2\u207B vs M\u207AX\u207B with same r, LE ratio is:", options:["2:1","4:1","1:1","8:1"], correct:1},
+      {q:"The Born exponent n depends on:", options:["Electron configuration of the ions","Temperature only","Pressure only","Mass of the ions"], correct:0},
+      {q:"For isoelectronic ions (same e\u207B config), smaller ion means:", options:["Higher LE","Lower LE","Same LE","Cannot determine"], correct:0},
+      {q:"The unit cell parameter affects LE through:", options:["The interionic distance r","The Madelung constant","Both r and Madelung constant","Neither"], correct:2},
+      {q:"Kapustinskii equation estimates LE using:", options:["Only charges and radii, no crystal structure","Only crystal structure","Only temperature","Mass and volume"], correct:0}
+    ]
+  },
+  {
+    id:8, title:"Fill: Energy terms in Born-Haber",
+    instruction:"Name the energy term described.",
+    rows:[
+      ["1","Energy to remove an electron from a gaseous atom","ionization energy / IE / first ionization energy"],
+      ["2","Energy change when a gaseous atom gains an electron","electron affinity / EA"],
+      ["3","Energy to convert a solid metal to gaseous atoms","sublimation energy / enthalpy of sublimation"],
+      ["4","Energy to break a diatomic molecule into atoms","bond dissociation energy / dissociation energy"],
+      ["5","Energy to separate an ionic solid into gaseous ions","lattice energy / LE"],
+      ["6","Enthalpy change for forming a compound from its elements","enthalpy of formation / heat of formation"],
+      ["7","Energy for Na(g) \u2192 Na\u207A(g) + e\u207B","ionization energy / IE / first ionization energy"],
+      ["8","Energy for Cl(g) + e\u207B \u2192 Cl\u207B(g)","electron affinity / EA"],
+      ["9","Energy for Cl\u2082(g) \u2192 2Cl(g)","bond dissociation energy / dissociation energy"],
+      ["10","Energy for Na\u207A(g) + Cl\u207B(g) \u2192 NaCl(s)","lattice energy / LE"]
+    ]
+  },
+  {
+    id:9, title:"Arrange: Build Born-Haber steps", type:"arrange",
+    instruction:"Click the words in the correct order.",
+    sentences:[
+      {prompt:"First step: sublime the metal", words:["M(s)","becomes","M(g)","sublimation"]},
+      {prompt:"Second step: ionize the metal atom", words:["M(g)","loses","an electron","to form","M+(g)"]},
+      {prompt:"Third step: dissociate the halogen molecule", words:["Half","X2(g)","becomes","X(g)"]},
+      {prompt:"Fourth step: electron affinity of the halogen", words:["X(g)","gains","an electron","to form","X-(g)"]},
+      {prompt:"Final step: ions combine to form the lattice", words:["M+(g)","and","X-(g)","form","MX(s)","releasing","lattice energy"]}
+    ]
+  },
+  {
+    id:10, title:"MC: Lattice energy applications", type:"mc",
+    instruction:"How does lattice energy relate to physical properties?",
+    questions:[
+      {q:"Higher lattice energy generally means:", options:["Lower melting point","Higher melting point","Lower boiling point","No effect on melting point"], correct:1},
+      {q:"MgO (LE = 3850 kJ/mol) vs NaCl (LE = 787 kJ/mol). Which melts at a higher T?", options:["NaCl","MgO","Same melting point","Cannot determine"], correct:1},
+      {q:"Compounds with high LE tend to be:", options:["Highly soluble in water","Poorly soluble in water","Always soluble","Gaseous"], correct:1},
+      {q:"For a salt to dissolve, the hydration energy must:", options:["Be less than LE","Exceed or be close to LE","Be zero","Equal the sublimation energy"], correct:1},
+      {q:"Which is more soluble in water?", options:["MgO (very high LE)","NaCl (moderate LE)","Al\u2082O\u2083 (very high LE)","CaO (high LE)"], correct:1},
+      {q:"Lattice energy affects hardness: higher LE means:", options:["Softer crystal","Harder crystal","No effect","More brittle only"], correct:1},
+      {q:"The thermal stability of an ionic compound increases with:", options:["Decreasing lattice energy","Increasing lattice energy","Decreasing charge","Increasing ion size"], correct:1},
+      {q:"Lattice energy can help predict:", options:["Only melting points","Solubility, melting point, and hardness","Only solubility","Only color"], correct:1},
+      {q:"Why is CaF\u2082 (fluorite) used as a flux in metallurgy?", options:["Low LE, melts easily","High LE, very stable","It is radioactive","It is magnetic"], correct:1},
+      {q:"Comparing NaCl and CsCl, which has a higher melting point?", options:["NaCl (higher LE due to smaller Na\u207A)","CsCl (larger ions)","Same","CsCl (different structure)"], correct:0}
+    ]
+  },
+  {
+    id:11, title:"Fill: Enthalpy calculations from Born-Haber",
+    instruction:"Calculate the missing value using the Born-Haber cycle.",
+    rows:[
+      ["1","Given: \u0394H\u00B0f(NaCl) = \u2212411 kJ. The reaction is Na(s) + \u00BDCl\u2082(g) \u2192 NaCl(s). This means NaCl formation is ___ (exo/endo)","exothermic / exo"],
+      ["2","All sublimation energies are ___ (positive/negative)","positive / +"],
+      ["3","All ionization energies are ___ (positive/negative)","positive / +"],
+      ["4","All bond dissociation energies are ___ (positive/negative)","positive / +"],
+      ["5","Electron affinity for halogens is ___ (positive/negative)","negative / -"],
+      ["6","Lattice energy (energy released on forming lattice) is ___ (positive/negative)","negative / -"],
+      ["7","Sum of all Born-Haber steps in a closed cycle = ___","0 / zero"],
+      ["8","\u0394H\u00B0f = \u0394H_sub + IE + \u00BD\u0394H_diss + EA \u2212 LE. Rearranging: LE = ___","\u0394H_sub + IE + \u00BD\u0394H_diss + EA \u2212 \u0394H\u00B0f / sub + IE + diss + EA - Hf"],
+      ["9","For KBr: \u0394H\u00B0f = \u2212394, \u0394H_sub = 89, IE = 419, \u00BD\u0394H_diss = 96, EA = \u2212325. LE = ?","673 / 673 kJ/mol"],
+      ["10","For LiCl: \u0394H\u00B0f = \u2212409, \u0394H_sub = 161, IE = 520, \u00BD\u0394H_diss = 121, EA = \u2212349. LE = ?","862 / 862 kJ/mol"]
+    ]
+  },
+  {
+    id:12, title:"MC: Tricky lattice energy questions", type:"mc",
+    instruction:"Think carefully about these challenging questions.",
+    questions:[
+      {q:"Why can\u2019t lattice energy be measured directly?", options:["It requires absolute zero","You can\u2019t isolate gaseous ions from a crystal in one step","It is too small","It doesn\u2019t exist"], correct:1},
+      {q:"The Born-Haber LE for NaCl (787 kJ/mol) vs theoretical Coulomb LE (770 kJ/mol): the difference suggests:", options:["NaCl has some covalent character","NaCl is purely ionic","The theory is wrong","Temperature effects"], correct:0},
+      {q:"For AgI, the experimental LE is much higher than Coulomb prediction because:", options:["AgI has significant covalent character","AgI is purely ionic","Ag is very heavy","I is very light"], correct:0},
+      {q:"Lattice energy of CsCl vs NaCl: CsCl has a different crystal structure. This means:", options:["Crystal structure has NO effect on LE","Madelung constant differs, affecting LE","CsCl always has higher LE","Structure only affects color"], correct:1},
+      {q:"Which would have the highest lattice energy?", options:["NaCl (+1/\u22121)","MgO (+2/\u22122)","AlN (+3/\u22123)","KBr (+1/\u22121)"], correct:2},
+      {q:"Lattice energy of a hypothetical NaCl\u2082 (if Na could be +2) would be:", options:["Similar to NaCl","Much higher than NaCl","Much lower than NaCl","Zero"], correct:1},
+      {q:"The Kapustinskii equation is useful because it:", options:["Requires no knowledge of crystal structure","Is exact","Only works for NaCl","Measures LE directly"], correct:0},
+      {q:"For transition metal oxides, LE is often higher than predicted because:", options:["Crystal field stabilization energy contributes","Temperature effects","They are molecular","Transition metals are light"], correct:0},
+      {q:"Lattice energy is most useful for predicting properties of:", options:["Molecular compounds","Ionic compounds","Metallic compounds","Gaseous compounds"], correct:1},
+      {q:"If you know all Born-Haber values except EA, you can calculate EA. True or false?", options:["True (Hess's law)","False","Only for Group 1","Only for halogens"], correct:0}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Lattice Energy & Born-Haber Cycle \u2014 Complete Reference</h3>' +
+'<h3>Lattice Energy Definition</h3>' +
+'<p><span class="rule">Lattice energy (LE)</span> = energy released when gaseous ions form a solid ionic compound, OR energy required to separate a solid ionic compound into gaseous ions.</p>' +
+'<p>Convention: LE is positive when defined as separation energy (endothermic direction).</p>' +
+'<h3>Coulomb\u2019s Law</h3>' +
+'<p><span class="rule">LE \u221D (q\u2081 \u00D7 q\u2082) / r</span></p>' +
+'<ul>' +
+'<li>Higher charge = higher LE (quadruples if both charges double)</li>' +
+'<li>Smaller ions = smaller r = higher LE</li>' +
+'<li>Charge effect is stronger than size effect</li>' +
+'</ul>' +
+'<h3>Trends</h3>' +
+'<table><tr><th>Factor</th><th>Effect on LE</th><th>Example</th></tr>' +
+'<tr><td>Higher charge</td><td>Higher LE</td><td>MgO >> NaCl</td></tr>' +
+'<tr><td>Smaller cation</td><td>Higher LE</td><td>LiF > NaF > KF</td></tr>' +
+'<tr><td>Smaller anion</td><td>Higher LE</td><td>NaF > NaCl > NaBr > NaI</td></tr>' +
+'<tr><td>Both smaller</td><td>Much higher LE</td><td>LiF >> CsI</td></tr></table>' +
+'<h3>Born-Haber Cycle</h3>' +
+'<p>Application of <span class="rule">Hess\u2019s law</span> to calculate lattice energy indirectly.</p>' +
+'<p>Steps for MX (e.g., NaCl):</p>' +
+'<table><tr><th>Step</th><th>Process</th><th>Energy Term</th><th>Sign</th></tr>' +
+'<tr><td>1</td><td>M(s) \u2192 M(g)</td><td>Sublimation (\u0394H_sub)</td><td>+</td></tr>' +
+'<tr><td>2</td><td>M(g) \u2192 M\u207A(g) + e\u207B</td><td>Ionization energy (IE)</td><td>+</td></tr>' +
+'<tr><td>3</td><td>\u00BDX\u2082(g) \u2192 X(g)</td><td>\u00BD Dissociation (\u00BD\u0394H_diss)</td><td>+</td></tr>' +
+'<tr><td>4</td><td>X(g) + e\u207B \u2192 X\u207B(g)</td><td>Electron affinity (EA)</td><td>\u2212</td></tr>' +
+'<tr><td>5</td><td>M\u207A(g) + X\u207B(g) \u2192 MX(s)</td><td>Lattice energy (\u2212LE)</td><td>\u2212</td></tr></table>' +
+'<p><span class="rule">\u0394H\u00B0f = \u0394H_sub + IE + \u00BD\u0394H_diss + EA \u2212 LE</span></p>' +
+'<p>Rearranging: <span class="rule">LE = \u0394H_sub + IE + \u00BD\u0394H_diss + EA \u2212 \u0394H\u00B0f</span></p>' +
+'<h3>Applications</h3>' +
+'<ul>' +
+'<li>Higher LE \u2192 higher melting point</li>' +
+'<li>Higher LE \u2192 harder crystal</li>' +
+'<li>Higher LE \u2192 lower solubility (unless hydration energy compensates)</li>' +
+'<li>Higher LE \u2192 greater thermal stability</li>' +
+'</ul>' +
+'<h3>Common Lattice Energies</h3>' +
+'<table><tr><th>Compound</th><th>LE (kJ/mol)</th><th>Charges</th></tr>' +
+'<tr><td>LiF</td><td>1037</td><td>\u00B11</td></tr>' +
+'<tr><td>NaCl</td><td>787</td><td>\u00B11</td></tr>' +
+'<tr><td>KBr</td><td>672</td><td>\u00B11</td></tr>' +
+'<tr><td>CsI</td><td>600</td><td>\u00B11</td></tr>' +
+'<tr><td>MgO</td><td>3850</td><td>\u00B12</td></tr>' +
+'<tr><td>CaO</td><td>3461</td><td>\u00B12</td></tr>' +
+'<tr><td>Al\u2082O\u2083</td><td>15916</td><td>+3/\u22122</td></tr></table>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 lattice energy trends, Born-Haber cycle calculations \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

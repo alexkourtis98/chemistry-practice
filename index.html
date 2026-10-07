@@ -1,0 +1,2370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chemistry Exercises - FYE12</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:2em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.practice-link{color:#c85028;font-size:1.1em;text-decoration:none;padding:2px 8px;border:1px solid #c85028;border-radius:4px;transition:background .2s,color .2s;flex-shrink:0}
+.practice-link:hover{background:#c85028;color:#fff}
+.practice-badge{font-size:.75em;color:#888;background:rgba(200,80,40,.15);padding:2px 8px;border-radius:10px;display:none}
+.practice-badge.has-progress{display:inline-block}
+.practice-badge.complete{background:rgba(46,204,113,.15);color:#2ecc71}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:500px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+.theory-content ul{margin:6px 0;padding-left:18px}
+.theory-content li{margin:3px 0;font-size:.9em}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div>Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Chemistry Exercises - FYE12</h1>
+<p class="subtitle">112 interactive General &amp; Organic Chemistry exercises</p>
+<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:16px;padding:0 20px">
+  <a href="match-madness.html" style="color:#c85028;font-weight:600;text-decoration:none;border:1px solid #c85028;padding:6px 14px;border-radius:6px;font-size:.85em;transition:all .2s" onmouseover="this.style.background='#c85028';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='#c85028'">Match Madness</a>
+  <a href="chem-fall.html" style="color:#c85028;font-weight:600;text-decoration:none;border:1px solid #c85028;padding:6px 14px;border-radius:6px;font-size:.85em;transition:all .2s" onmouseover="this.style.background='#c85028';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='#c85028'">Chem Fall</a>
+  <a href="sort-lab.html" style="color:#c85028;font-weight:600;text-decoration:none;border:1px solid #c85028;padding:6px 14px;border-radius:6px;font-size:.85em;transition:all .2s" onmouseover="this.style.background='#c85028';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='#c85028'">Sort Lab</a>
+  <a href="chem-memory.html" style="color:#c85028;font-weight:600;text-decoration:none;border:1px solid #c85028;padding:6px 14px;border-radius:6px;font-size:.85em;transition:all .2s" onmouseover="this.style.background='#c85028';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='#c85028'">Chem Memory</a>
+  <a href="element-hunt.html" style="color:#c85028;font-weight:600;text-decoration:none;border:1px solid #c85028;padding:6px 14px;border-radius:6px;font-size:.85em;transition:all .2s" onmouseover="this.style.background='#c85028';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='#c85028'">Element Hunt</a>
+  <a href="balance-blitz.html" style="color:#c85028;font-weight:600;text-decoration:none;border:1px solid #c85028;padding:6px 14px;border-radius:6px;font-size:.85em;transition:all .2s" onmouseover="this.style.background='#c85028';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='#c85028'">Balance Blitz</a>
+  <a href="fill-diagram.html" style="color:#c85028;font-weight:600;text-decoration:none;border:1px solid #c85028;padding:6px 14px;border-radius:6px;font-size:.85em;transition:all .2s" onmouseover="this.style.background='#c85028';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='#c85028'">Fill Diagram</a>
+  <a href="periodic-table-game.html" style="color:#c85028;font-weight:600;text-decoration:none;border:1px solid #c85028;padding:6px 14px;border-radius:6px;font-size:.85em;transition:all .2s" onmouseover="this.style.background='#c85028';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='#c85028'">Periodic Table</a>
+  <a href="periodic-speed.html" style="color:#c85028;font-weight:600;text-decoration:none;border:1px solid #c85028;padding:6px 14px;border-radius:6px;font-size:.85em;transition:all .2s" onmouseover="this.style.background='#c85028';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='#c85028'">Speed Challenge</a>
+  <a href="periodic-trends.html" style="color:#c85028;font-weight:600;text-decoration:none;border:1px solid #c85028;padding:6px 14px;border-radius:6px;font-size:.85em;transition:all .2s" onmouseover="this.style.background='#c85028';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='#c85028'">Periodic Trends</a>
+</div>
+
+<div class="container" id="app"></div>
+
+<script>
+function chemFormat(s) {
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  s = s.replace(/([A-Za-z\)])(\d+)/g, '$1<sub>$2</sub>');
+  s = s.replace(/(\d*)([\+\-])$/g, '<sup>$1$2</sup>');
+  return s;
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  // Greek accent normalization
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  // Subscript/superscript normalization
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+const EXERCISES = [
+  {
+    id:1, title:"Subatomic Particles: Fill in",
+    instruction:"Write the particle that matches the description.",
+    cols:["#","Description","Your Answer","Solution"],
+    rows:[
+      ["1","Positive charge, in the nucleus","proton"],
+      ["2","Negative charge, in shells","electron"],
+      ["3","No charge, in the nucleus","neutron"],
+      ["4","Determines the element (Z = number of ___)","protons"],
+      ["5","A − Z = number of ___","neutrons"],
+      ["6","Mass ≈ 0 (1/1836 of a proton)","electron"]
+    ]
+  },
+  {
+    id:2, title:"Z, A, Neutrons: Calculations",
+    instruction:"Calculate the number of protons (Z), mass number (A), or neutrons.",
+    cols:["#","Element / Data","Find","Your Answer","Solution"],
+    rows:[
+      ["1","Na: Z=11, A=23","neutrons = ?","12"],
+      ["2","C: Z=6, A=12","neutrons = ?","6"],
+      ["3","¹⁴C: Z=6","neutrons = ?","8"],
+      ["4","Fe: Z=26, A=56","neutrons = ?","30"],
+      ["5","Cl: Z=17, A=35","neutrons = ?","18"],
+      ["6","O: Z=8, A=16","neutrons = ?","8"],
+      ["7","U: Z=92, A=238","neutrons = ?","146"],
+      ["8","Ca: Z=20, A=40","neutrons = ?","20"]
+    ]
+  },
+  {
+    id:3, title:"Isotopes",
+    instruction:"Answer the questions about isotopes.",
+    cols:["#","Question","Your Answer","Solution"],
+    rows:[
+      ["1","Isotopes have the same number of ___","protons / Z"],
+      ["2","Isotopes differ in the number of ___","neutrons"],
+      ["3","¹²C and ¹⁴C: how many protons do BOTH have?","6"],
+      ["4","¹²C: neutrons?","6"],
+      ["5","¹⁴C: neutrons?","8"],
+      ["6","Cl: 75% ³⁵Cl + 25% ³⁷Cl. Atomic weight?","35.5"]
+    ]
+  },
+  {
+    id:4, title:"Ions: cations & anions",
+    instruction:"Write the ion that each element forms.",
+    cols:["#","Element (Group)","Your Answer","Solution"],
+    rows:[
+      ["1","Na (group 1)","Na+ / Na⁺"],
+      ["2","K (group 1)","K+ / K⁺"],
+      ["3","Mg (group 2)","Mg2+ / Mg²⁺"],
+      ["4","Ca (group 2)","Ca2+ / Ca²⁺"],
+      ["5","Al (group 13)","Al3+ / Al³⁺"],
+      ["6","O (group 16)","O2- / O²⁻"],
+      ["7","S (group 16)","S2- / S²⁻"],
+      ["8","Cl (group 17)","Cl- / Cl⁻"],
+      ["9","F (group 17)","F- / F⁻"],
+      ["10","N (group 15)","N3- / N³⁻"]
+    ]
+  },
+  {
+    id:5, title:"Valence Electrons from the Periodic Table",
+    instruction:"How many valence electrons does each element have? (Groups 13-18: valence = group − 10)",
+    cols:["#","Element (Group)","Your Answer","Solution"],
+    rows:[
+      ["1","Na (group 1)","1"],
+      ["2","Mg (group 2)","2"],
+      ["3","Al (group 13)","3"],
+      ["4","C (group 14)","4"],
+      ["5","N (group 15)","5"],
+      ["6","O (group 16)","6"],
+      ["7","Cl (group 17)","7"],
+      ["8","Ar (group 18)","8"],
+      ["9","P (group 15)","5"],
+      ["10","S (group 16)","6"]
+    ]
+  },
+  {
+    id:6, title:"Criss-cross: binary compound formulas",
+    instruction:"Write the chemical formula. Remember: charge of one becomes subscript of the other, then simplify.",
+    cols:["#","Cation + Anion","Your Answer","Solution"],
+    rows:[
+      ["1","Na⁺ + Cl⁻","NaCl"],
+      ["2","Mg²⁺ + O²⁻","MgO"],
+      ["3","Ca²⁺ + Cl⁻","CaCl2 / CaCl₂"],
+      ["4","Al³⁺ + O²⁻","Al2O3 / Al₂O₃"],
+      ["5","K⁺ + S²⁻","K2S / K₂S"],
+      ["6","Mg²⁺ + N³⁻","Mg3N2 / Mg₃N₂"],
+      ["7","Na⁺ + O²⁻","Na2O / Na₂O"],
+      ["8","Ca²⁺ + F⁻","CaF2 / CaF₂"]
+    ]
+  },
+  {
+    id:7, title:"The 7 Polyatomic Ions",
+    instruction:"Write the formula of each polyatomic ion.",
+    cols:["#","Name","Your Answer","Solution"],
+    rows:[
+      ["1","Hydroxide","OH- / OH⁻"],
+      ["2","Nitrate","NO3- / NO₃⁻"],
+      ["3","Ammonium","NH4+ / NH₄⁺"],
+      ["4","Carbonate","CO32- / CO₃²⁻"],
+      ["5","Sulfate","SO42- / SO₄²⁻"],
+      ["6","Phosphate","PO43- / PO₄³⁻"],
+      ["7","Bicarbonate","HCO3- / HCO₃⁻"]
+    ]
+  },
+  {
+    id:8, title:"Criss-cross with Polyatomics",
+    instruction:"Write the chemical formula. Watch the parentheses!",
+    cols:["#","Cation + Anion","Your Answer","Solution"],
+    rows:[
+      ["1","Na⁺ + OH⁻","NaOH"],
+      ["2","Ca²⁺ + OH⁻","Ca(OH)2 / Ca(OH)₂"],
+      ["3","Mg²⁺ + NO₃⁻","Mg(NO3)2 / Mg(NO₃)₂"],
+      ["4","Al³⁺ + OH⁻","Al(OH)3 / Al(OH)₃"],
+      ["5","Al³⁺ + SO₄²⁻","Al2(SO4)3 / Al₂(SO₄)₃"],
+      ["6","NH₄⁺ + SO₄²⁻","(NH4)2SO4 / (NH₄)₂SO₄"],
+      ["7","Ca²⁺ + PO₄³⁻","Ca3(PO4)2 / Ca₃(PO₄)₂"],
+      ["8","K⁺ + CO₃²⁻","K2CO3 / K₂CO₃"]
+    ]
+  },
+  {
+    id:9, title:"Binary Compound Nomenclature",
+    instruction:"Write the name of each compound. Rule: [metal name] + [nonmetal root + -ide]",
+    cols:["#","Formula","Your Answer","Solution"],
+    rows:[
+      ["1","NaCl","sodium chloride"],
+      ["2","MgO","magnesium oxide"],
+      ["3","K₂S","potassium sulfide"],
+      ["4","CaCl₂","calcium chloride"],
+      ["5","Al₂O₃","aluminum oxide / aluminium oxide"],
+      ["6","CaF₂","calcium fluoride"],
+      ["7","Na₃P","sodium phosphide"],
+      ["8","MgCl₂","magnesium chloride"]
+    ]
+  },
+  {
+    id:10, title:"Transition Metal Nomenclature",
+    instruction:"Write the name. Remember: Roman numeral = charge of the metal.",
+    cols:["#","Formula","Your Answer","Solution"],
+    rows:[
+      ["1","FeO","iron (II) oxide / iron(II) oxide"],
+      ["2","Fe₂O₃","iron (III) oxide / iron(III) oxide"],
+      ["3","FeCl₂","iron (II) chloride / iron(II) chloride"],
+      ["4","FeCl₃","iron (III) chloride / iron(III) chloride"],
+      ["5","CuCl","copper (I) chloride / copper(I) chloride"],
+      ["6","CuCl₂","copper (II) chloride / copper(II) chloride"],
+      ["7","CuO","copper (II) oxide / copper(II) oxide"],
+      ["8","Cu₂O","copper (I) oxide / copper(I) oxide"]
+    ]
+  },
+  {
+    id:11, title:"Polyatomic Compound Nomenclature",
+    instruction:"Write the name of the compound.",
+    cols:["#","Formula","Your Answer","Solution"],
+    rows:[
+      ["1","NaOH","sodium hydroxide"],
+      ["2","Ca(OH)₂","calcium hydroxide"],
+      ["3","KNO₃","potassium nitrate"],
+      ["4","Na₂CO₃","sodium carbonate"],
+      ["5","Ca₃(PO₄)₂","calcium phosphate"],
+      ["6","Al₂(SO₄)₃","aluminum sulfate / aluminium sulfate"],
+      ["7","(NH₄)₂SO₄","ammonium sulfate"],
+      ["8","Fe₂(SO₄)₃","iron (III) sulfate / iron(III) sulfate"]
+    ]
+  },
+  {
+    id:12, title:"Mole Calculations: n = m / M",
+    instruction:"Calculate the moles (n), mass (m), or molar mass (M).",
+    cols:["#","Problem","Your Answer","Solution"],
+    rows:[
+      ["1","46 g Na → n = ? (M=23)","2 / 2 mol"],
+      ["2","6 g C → n = ? (M=12)","0.5 / 0.5 mol"],
+      ["3","36 g H₂O → n = ? (M=18)","2 / 2 mol"],
+      ["4","222 g CaCl₂ → n = ? (M=111)","2 / 2 mol"],
+      ["5","148 g Ca(OH)₂ → n = ? (M=74)","2 / 2 mol"],
+      ["6","3 mol NaCl → m = ? (M=58.5)","175.5 / 175.5 g"],
+      ["7","0.5 mol H₂SO₄ → m = ? (M=98)","49 / 49 g"],
+      ["8","2.5 mol Al₂O₃ → m = ? (M=102)","255 / 255 g"],
+      ["9","100 g / 4 mol → M = ?","25 / 25 g/mol"],
+      ["10","98 g H₂SO₄ → n = ? (M=98)","1 / 1 mol"]
+    ]
+  },
+  {
+    id:13, title:"Molar Mass Calculation (M)",
+    instruction:"Calculate the molar mass (M) of each compound. Use: H=1, C=12, N=14, O=16, Na=23, Mg=24, Al=27, S=32, Cl=35.5, K=39, Ca=40, Fe=56",
+    cols:["#","Compound","Your Answer","Solution"],
+    rows:[
+      ["1","H₂O","18 / 18 g/mol"],
+      ["2","NaCl","58.5 / 58.5 g/mol"],
+      ["3","CO₂","44 / 44 g/mol"],
+      ["4","H₂SO₄","98 / 98 g/mol"],
+      ["5","CaCl₂","111 / 111 g/mol"],
+      ["6","Ca(OH)₂","74 / 74 g/mol"],
+      ["7","Fe₂O₃","160 / 160 g/mol"],
+      ["8","Al₂O₃","102 / 102 g/mol"],
+      ["9","Mg(OH)₂","58 / 58 g/mol"],
+      ["10","(NH₄)₂SO₄","132 / 132 g/mol"]
+    ]
+  },
+  {
+    id:14, title:"Multiple Choice Questions", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"What determines which element an atom is?", options:["Mass number (A)","Number of neutrons","Atomic number (Z)","Number of electrons"], correct:2},
+      {q:"Isotopes have:", options:["Same A, different Z","Same Z, different A","Same Z, same A","Different Z, different A"], correct:1},
+      {q:"An atom loses electrons, it becomes:", options:["Anion","Cation","Isotope","Noble gas"], correct:1},
+      {q:"The octet rule means:", options:["8 protons in the nucleus","8 neutrons in the nucleus","8 e⁻ in the outer shell","8 isotopes"], correct:2},
+      {q:"Criss-cross: Ca²⁺ + Cl⁻ →", options:["CaCl","Ca₂Cl","CaCl₂","ClCa₂"], correct:2},
+      {q:"1 mol = how many particles?", options:["6.022 × 10²²","6.022 × 10²³","3.01 × 10²³","6.022 × 10²⁴"], correct:1},
+      {q:"n = m / M. If m = 36g H₂O, n = ?", options:["1 mol","2 mol","3 mol","0.5 mol"], correct:1},
+      {q:"Which polyatomic ion is positive?", options:["OH⁻","NO₃⁻","NH₄⁺","SO₄²⁻"], correct:2}
+    ]
+  },
+  {
+    id:15, title:"Mixed Challenge: Think and Answer",
+    instruction:"A mix of all topics. Take your time.",
+    cols:["#","Question","Your Answer","Solution"],
+    rows:[
+      ["1","NaCl: name?","sodium chloride"],
+      ["2","FeO: name (with Roman numeral)?","iron (II) oxide / iron(II) oxide"],
+      ["3","Al³⁺ + SO₄²⁻ → formula?","Al2(SO4)3 / Al₂(SO₄)₃"],
+      ["4","M of Ca(OH)₂ = ?","74 / 74 g/mol"],
+      ["5","160 g Fe₂O₃ → n = ?","1 / 1 mol"],
+      ["6","How many valence e⁻ does S (group 16) have?","6"],
+      ["7","Formula: ammonium sulfate?","(NH4)2SO4 / (NH₄)₂SO₄"],
+      ["8","Ca: Z=20, A=40. Neutrons?","20"],
+      ["9","Fe₂(SO₄)₃: charge of Fe = ?","+3 / 3+"],
+      ["10","What ion does Br (group 17) form?","Br- / Br⁻"]
+    ]
+  },
+  {
+    id:16, title:"Isotopic Abundance Calculations",
+    instruction:"Calculate the average atomic weight: sum(mass x fraction). Convert % to decimal first.",
+    cols:["#","Problem","Your Answer","Solution"],
+    rows:[
+      ["1","Cl: 75.77% ³⁵Cl (34.97u) + 24.23% ³⁷Cl (36.97u). Atomic weight?","35.45 / 35.5"],
+      ["2","Cu: 69.17% ⁶³Cu (62.93u) + 30.83% ⁶⁵Cu (64.93u). Atomic weight?","63.55 / 63.5"],
+      ["3","B: 19.9% ¹⁰B (10.01u) + 80.1% ¹¹B (11.01u). Atomic weight?","10.81 / 10.8"],
+      ["4","Br: 50.69% ⁷⁹Br (78.92u) + 49.31% ⁸¹Br (80.92u). Atomic weight?","79.90 / 79.9 / 80"],
+      ["5","Li: 7.59% ⁶Li (6.02u) + 92.41% ⁷Li (7.02u). Atomic weight?","6.94 / 6.9"],
+      ["6","Si: 92.23% ²⁸Si (27.98u) + 4.68% ²⁹Si (28.98u) + 3.09% ³⁰Si (29.97u). Atomic weight?","28.09 / 28.1"],
+      ["7","If avg mass = 10.81 and isotopes at 10 and 11, which dominates?","11 / ¹¹B / B-11"],
+      ["8","Convert 69.17% to decimal","0.6917"]
+    ]
+  },
+  {
+    id:17, title:"Isobars vs Isotopes", type:"mc",
+    instruction:"Isotopes: same Z, different A. Isobars: same A, different Z.",
+    questions:[
+      {q:"¹²C and ¹⁴C are:", options:["Isotopes","Isobars","Identical","Isoelectronic"], correct:0},
+      {q:"¹⁴C and ¹⁴N are:", options:["Isotopes","Isobars","Identical","Impossible"], correct:1},
+      {q:"⁴⁰K and ⁴⁰Ar are:", options:["Isotopes","Isobars","Radioactive","Stable"], correct:1},
+      {q:"Isotopes have the same chemical properties because:", options:["Same mass","Same electron configuration","Same neutrons","Same A"], correct:1},
+      {q:"¹⁴C is radioactive. It is used for:", options:["Nuclear energy","C-14 dating","Medical imaging","Food processing"], correct:1},
+      {q:"Tritium (³H) has ___ neutrons:", options:["0","1","2","3"], correct:2},
+      {q:"Deuterium (²H) is also symbolized as:", options:["T","D","He","Li"], correct:1},
+      {q:"A nuclide is defined by:", options:["Z only","A only","Z and N (protons + neutrons)","Electrons"], correct:2}
+    ]
+  },
+  {
+    id:18, title:"Covalent Compound Nomenclature (Greek prefixes)",
+    instruction:"Nonmetal + nonmetal = covalent compound, use Greek prefixes (mono, di, tri, tetra, penta...)",
+    cols:["#","Formula or Name","Your Answer","Solution"],
+    rows:[
+      ["1","CO₂: name?","carbon dioxide"],
+      ["2","N₂O₅: name?","dinitrogen pentoxide"],
+      ["3","SO₃: name?","sulfur trioxide"],
+      ["4","PCl₅: name?","phosphorus pentachloride"],
+      ["5","Carbon monoxide → formula?","CO"],
+      ["6","Sulfur hexafluoride → formula?","SF6 / SF₆"],
+      ["7","CCl₄: name?","carbon tetrachloride"],
+      ["8","Dinitrogen monoxide → formula?","N2O / N₂O"]
+    ]
+  },
+  {
+    id:19, title:"Acid Nomenclature",
+    instruction:"-ide → hydro___ic acid. -ate → ___ic acid. -ite → ___ous acid.",
+    cols:["#","Formula","Your Answer","Solution"],
+    rows:[
+      ["1","HCl: name?","hydrochloric acid"],
+      ["2","H₂SO₄: name?","sulfuric acid"],
+      ["3","HNO₃: name?","nitric acid"],
+      ["4","HBr: name?","hydrobromic acid"],
+      ["5","H₂SO₃: name?","sulfurous acid"],
+      ["6","HNO₂: name?","nitrous acid"],
+      ["7","H₃PO₄: name?","phosphoric acid"],
+      ["8","H₂CO₃: name?","carbonic acid"]
+    ]
+  },
+  {
+    id:20, title:"Final Mixed Challenge (harder)", type:"mc",
+    instruction:"A mix of ALL topics. Exam-level.",
+    questions:[
+      {q:"Cl: 75.77% ³⁵Cl + 24.23% ³⁷Cl. Which isotope dominates?", options:["³⁵Cl","³⁷Cl","Equal","Unknown"], correct:0},
+      {q:"¹⁴C and ¹⁴N are:", options:["Isotopes","Isobars","Isoelectronic","Same element"], correct:1},
+      {q:"N₂O₄ is named:", options:["Nitrogen tetroxide","Dinitrogen tetroxide","Nitrogen oxide","Tetranitrogen dioxide"], correct:1},
+      {q:"HNO₃ is named:", options:["Hydronitric acid","Nitric acid","Nitrous acid","Hydrogen nitrate"], correct:1},
+      {q:"SnCl₄: charge of Sn?", options:["+1","+2","+3","+4"], correct:3},
+      {q:"Ag always forms:", options:["Ag²⁺","Ag⁺","Ag³⁺","Variable"], correct:1},
+      {q:"Ca(NO₃)₂: how many O atoms total?", options:["2","3","6","4"], correct:2},
+      {q:"n = m/M. 222g CaCl₂ (M=111) = ? mol", options:["0.5","1","2","3"], correct:2}
+    ]
+  },
+  {
+    id:21, title:"Quantum Numbers & Electron Configuration",
+    instruction:"Fill in the quantum number or electron configuration.",
+    cols:["#","Question","Your Answer","Solution"],
+    rows:[
+      ["1","What are the 4 quantum numbers?","n, l, ml, ms / n l ml ms"],
+      ["2","For n=3, what are the possible values of l?","0, 1, 2 / 0,1,2"],
+      ["3","For l=2, what are the possible ml values?","-2, -1, 0, 1, 2 / -2,-1,0,1,2"],
+      ["4","What are the possible values of ms?","+1/2, -1/2 / +1/2 and -1/2"],
+      ["5","Electron configuration of Na (Z=11)?","1s2 2s2 2p6 3s1 / 1s²2s²2p⁶3s¹"],
+      ["6","Electron configuration of Cl (Z=17)?","1s2 2s2 2p6 3s2 3p5 / 1s²2s²2p⁶3s²3p⁵"],
+      ["7","What orbital type has l=1?","p"],
+      ["8","Max electrons in a shell with n=3?","18"]
+    ]
+  },
+  {
+    id:22, title:"Periodic Trends", type:"mc",
+    instruction:"Select the correct answer about periodic trends.",
+    questions:[
+      {q:"Atomic radius increases:", options:["Left to right across a period","Top to bottom in a group","Toward the upper right","Randomly"], correct:1},
+      {q:"Ionization energy generally increases:", options:["Down a group","Left to right across a period","Toward the lower left","From nonmetals to metals"], correct:1},
+      {q:"Electronegativity is highest for:", options:["Francium (Fr)","Fluorine (F)","Cesium (Cs)","Helium (He)"], correct:1},
+      {q:"Which has the largest atomic radius?", options:["Li","Na","K","Rb"], correct:3},
+      {q:"Electron affinity becomes more negative (exothermic):", options:["Down a group","Left to right (generally)","In noble gases","In alkali metals"], correct:1},
+      {q:"Which element has the highest ionization energy?", options:["Na","Mg","Al","Ne"], correct:3},
+      {q:"Metallic character increases:", options:["Left to right","Top to bottom","Upper right","Toward halogens"], correct:1}
+    ]
+  },
+  {
+    id:23, title:"Lewis Structures",
+    instruction:"Determine valence electrons, bonds, or lone pairs for each molecule.",
+    cols:["#","Question","Your Answer","Solution"],
+    rows:[
+      ["1","Total valence electrons in H₂O?","8"],
+      ["2","Total valence electrons in CO₂?","16"],
+      ["3","Total valence electrons in NH₃?","8"],
+      ["4","How many lone pairs on O in H₂O?","2"],
+      ["5","How many lone pairs on N in NH₃?","1"],
+      ["6","Total valence electrons in CH₄?","8"],
+      ["7","How many bonds in O₂ (double bond)?","2"],
+      ["8","Total valence electrons in PCl₃?","26"]
+    ]
+  },
+  {
+    id:24, title:"VSEPR & Molecular Geometry",
+    instruction:"Give the molecular geometry (shape) of each molecule.",
+    cols:["#","Molecule","Your Answer","Solution"],
+    rows:[
+      ["1","CO₂ (2 bonds, 0 lone pairs on C)","linear"],
+      ["2","H₂O (2 bonds, 2 lone pairs on O)","bent"],
+      ["3","NH₃ (3 bonds, 1 lone pair on N)","trigonal pyramidal"],
+      ["4","CH₄ (4 bonds, 0 lone pairs on C)","tetrahedral"],
+      ["5","BF₃ (3 bonds, 0 lone pairs on B)","trigonal planar"],
+      ["6","PCl₅ (5 bonds, 0 lone pairs on P)","trigonal bipyramidal"],
+      ["7","SF₆ (6 bonds, 0 lone pairs on S)","octahedral"],
+      ["8","SO₂ (2 bonds, 1 lone pair on S)","bent"]
+    ]
+  },
+  {
+    id:25, title:"Balancing Chemical Equations",
+    instruction:"Write the correct coefficient(s) to balance each equation. Format: a,b,c,d for each species left to right.",
+    cols:["#","Unbalanced Equation","Your Answer","Solution"],
+    rows:[
+      ["1","_H₂ + _O₂ → _H₂O","2,1,2"],
+      ["2","_N₂ + _H₂ → _NH₃","1,3,2"],
+      ["3","_Fe + _O₂ → _Fe₂O₃","4,3,2"],
+      ["4","_CH₄ + _O₂ → _CO₂ + _H₂O","1,2,1,2"],
+      ["5","_Al + _HCl → _AlCl₃ + _H₂","2,6,2,3"],
+      ["6","_C₃H₈ + _O₂ → _CO₂ + _H₂O","1,5,3,4"],
+      ["7","_Na + _H₂O → _NaOH + _H₂","2,2,2,1"],
+      ["8","_KClO₃ → _KCl + _O₂","2,2,3"]
+    ]
+  },
+  {
+    id:26, title:"Types of Chemical Reactions", type:"mc",
+    instruction:"Identify the type of reaction.",
+    questions:[
+      {q:"2H₂ + O₂ → 2H₂O", options:["Decomposition","Single replacement","Synthesis (combination)","Double replacement"], correct:2},
+      {q:"2KClO₃ → 2KCl + 3O₂", options:["Synthesis","Decomposition","Combustion","Single replacement"], correct:1},
+      {q:"Zn + CuSO₄ → ZnSO₄ + Cu", options:["Synthesis","Decomposition","Single replacement","Double replacement"], correct:2},
+      {q:"AgNO₃ + NaCl → AgCl + NaNO₃", options:["Synthesis","Decomposition","Single replacement","Double replacement"], correct:3},
+      {q:"CH₄ + 2O₂ → CO₂ + 2H₂O", options:["Synthesis","Decomposition","Single replacement","Combustion"], correct:3},
+      {q:"2Na + Cl₂ → 2NaCl", options:["Synthesis","Decomposition","Single replacement","Combustion"], correct:0},
+      {q:"CaCO₃ → CaO + CO₂", options:["Synthesis","Decomposition","Single replacement","Combustion"], correct:1}
+    ]
+  },
+  {
+    id:27, title:"Solutions & Concentration",
+    instruction:"Calculate molarity (M = n/V) or use the dilution equation M₁V₁ = M₂V₂.",
+    cols:["#","Problem","Your Answer","Solution"],
+    rows:[
+      ["1","2 mol NaCl in 1 L solution. M = ?","2 / 2 M"],
+      ["2","0.5 mol in 250 mL. M = ?","2 / 2 M"],
+      ["3","M = 0.1 M, V = 2 L. n = ?","0.2 / 0.2 mol"],
+      ["4","M₁=6M, V₁=100mL, V₂=600mL. M₂ = ?","1 / 1 M"],
+      ["5","M₁=12M, V₁=50mL, M₂=3M. V₂ = ?","200 / 200 mL"],
+      ["6","58.5 g NaCl (M=58.5) in 500 mL. Molarity = ?","2 / 2 M"],
+      ["7","How many grams of NaOH (M=40) for 1L of 0.5M?","20 / 20 g"],
+      ["8","What does 'dilute' mean?","add solvent / add water"]
+    ]
+  },
+  {
+    id:28, title:"Gas Laws",
+    instruction:"Apply the gas laws: PV=nRT, Boyle's (P₁V₁=P₂V₂), Charles's (V₁/T₁=V₂/T₂). R=0.0821 L·atm/(mol·K).",
+    cols:["#","Problem","Your Answer","Solution"],
+    rows:[
+      ["1","Boyle: P₁=2atm, V₁=3L, P₂=6atm. V₂=?","1 / 1 L"],
+      ["2","Charles: V₁=4L, T₁=200K, T₂=400K. V₂=?","8 / 8 L"],
+      ["3","Ideal gas: n=1mol, T=273K, P=1atm. V=? (round)","22.4 / 22.4 L"],
+      ["4","STP means T=? K","273 / 273 K"],
+      ["5","STP means P=? atm","1 / 1 atm"],
+      ["6","Combined: P₁V₁/T₁ = P₂V₂/T₂. Name?","combined gas law"],
+      ["7","If T doubles (constant P,n), V ___","doubles"],
+      ["8","If P doubles (constant T,n), V ___","halves / is halved"]
+    ]
+  },
+  {
+    id:29, title:"Acids, Bases & pH",
+    instruction:"Calculate pH, pOH, or identify acid/base properties.",
+    cols:["#","Question","Your Answer","Solution"],
+    rows:[
+      ["1","pH = -log[H⁺]. If [H⁺]=0.01M, pH=?","2"],
+      ["2","If pH=3, [H⁺]=?","0.001 / 1e-3 / 10^-3"],
+      ["3","pH + pOH = ?","14"],
+      ["4","If pH=5, pOH=?","9"],
+      ["5","Is HCl a strong or weak acid?","strong"],
+      ["6","Is CH₃COOH (acetic acid) strong or weak?","weak"],
+      ["7","NaOH is a strong ___","base"],
+      ["8","pH < 7 is ___, pH > 7 is ___","acidic, basic / acid, base"]
+    ]
+  },
+  {
+    id:30, title:"Redox Reactions",
+    instruction:"Assign oxidation numbers or identify the oxidizing/reducing agent.",
+    cols:["#","Question","Your Answer","Solution"],
+    rows:[
+      ["1","Oxidation number of O in most compounds?","-2"],
+      ["2","Oxidation number of H in most compounds?","+1"],
+      ["3","Oxidation number of any element in its elemental form?","0"],
+      ["4","In NaCl: oxidation number of Na?","+1"],
+      ["5","In NaCl: oxidation number of Cl?","-1"],
+      ["6","Zn + Cu²⁺ → Zn²⁺ + Cu. What is oxidized?","Zn / zinc"],
+      ["7","Zn + Cu²⁺ → Zn²⁺ + Cu. What is the reducing agent?","Zn / zinc"],
+      ["8","Oxidation is ___ of electrons","loss / losing"]
+    ]
+  },
+  {
+    id:31, title:"Intro to Organic Chemistry", type:"mc",
+    instruction:"Select the correct answer about organic chemistry basics.",
+    questions:[
+      {q:"Organic chemistry is the study of compounds containing:", options:["Oxygen","Nitrogen","Carbon","All metals"], correct:2},
+      {q:"Carbon can form how many covalent bonds?", options:["2","3","4","6"], correct:2},
+      {q:"The hybridization of carbon in methane (CH₄) is:", options:["sp","sp²","sp³","unhybridized"], correct:2},
+      {q:"The simplest hydrocarbon is:", options:["Ethane","Methane","Propane","Benzene"], correct:1},
+      {q:"Hydrocarbons contain only:", options:["C and O","C and N","C and H","C, H, and O"], correct:2},
+      {q:"An sp² hybridized carbon forms a ___ bond:", options:["Single only","Double","Triple","No bond"], correct:1},
+      {q:"Which is NOT a hydrocarbon?", options:["CH₄","C₂H₆","C₂H₅OH","C₃H₈"], correct:2}
+    ]
+  },
+  {
+    id:32, title:"Alkane Naming (IUPAC)",
+    instruction:"Name the alkane or give the formula. Prefix: meth(1), eth(2), prop(3), but(4), pent(5), hex(6), hept(7), oct(8), non(9), dec(10).",
+    cols:["#","Question","Your Answer","Solution"],
+    rows:[
+      ["1","CH₄ = ?","methane"],
+      ["2","C₂H₆ = ?","ethane"],
+      ["3","C₃H₈ = ?","propane"],
+      ["4","C₅H₁₂ = ?","pentane"],
+      ["5","C₁₀H₂₂ = ?","decane"],
+      ["6","General formula for alkanes?","CnH2n+2 / CₙH₂ₙ₊₂"],
+      ["7","2-methylpropane has how many C atoms total?","4"],
+      ["8","The suffix for alkanes is?","-ane"]
+    ]
+  },
+  {
+    id:33, title:"Alkenes & Alkynes",
+    instruction:"Name the compound or answer about double/triple bonds.",
+    cols:["#","Question","Your Answer","Solution"],
+    rows:[
+      ["1","General formula for alkenes?","CnH2n / CₙH₂ₙ"],
+      ["2","General formula for alkynes?","CnH2n-2 / CₙH₂ₙ₋₂"],
+      ["3","C₂H₄ = ?","ethene / ethylene"],
+      ["4","C₂H₂ = ?","ethyne / acetylene"],
+      ["5","C₃H₆ = ?","propene / propylene"],
+      ["6","Suffix for alkenes?","-ene"],
+      ["7","Suffix for alkynes?","-yne"],
+      ["8","cis-2-butene: the two CH₃ groups are on the ___ side","same"]
+    ]
+  },
+  {
+    id:34, title:"Functional Groups",
+    instruction:"Identify the functional group or give its name.",
+    cols:["#","Group / Description","Your Answer","Solution"],
+    rows:[
+      ["1","-OH group is called?","hydroxyl / alcohol"],
+      ["2","-COOH group is called?","carboxyl / carboxylic acid"],
+      ["3","-NH₂ group is called?","amino / amine"],
+      ["4","-CHO group is called?","aldehyde"],
+      ["5","C=O (within chain) group is called?","carbonyl / ketone"],
+      ["6","-O- (between two carbons) is called?","ether"],
+      ["7","R-COO-R' is called?","ester"],
+      ["8","Suffix for alcohols?","-ol"]
+    ]
+  },
+  {
+    id:35, title:"Thermochemistry",
+    instruction:"Calculate using q = mcΔT or answer about enthalpy.",
+    cols:["#","Question","Your Answer","Solution"],
+    rows:[
+      ["1","q = mcΔT. m=100g, c=4.18 J/g°C, ΔT=10°C. q=?","4180 / 4180 J"],
+      ["2","Exothermic reactions have ΔH that is ___ (positive/negative)","negative"],
+      ["3","Endothermic reactions ___ heat","absorb"],
+      ["4","Exothermic reactions ___ heat","release"],
+      ["5","ΔH = H(products) − H(reactants). True or false?","true"],
+      ["6","Hess's law: enthalpy change depends on ___ and ___ states only","initial, final / initial and final"],
+      ["7","Specific heat of water (J/g°C)?","4.18 / 4.184"],
+      ["8","If q is negative, the process is ___","exothermic"]
+    ]
+  },
+  {
+    id:36, title:"Chemical Kinetics", type:"mc",
+    instruction:"Select the correct answer about reaction rates.",
+    questions:[
+      {q:"Increasing temperature generally ___ the reaction rate:", options:["Decreases","Has no effect","Increases","Stops the reaction"], correct:2},
+      {q:"A catalyst works by:", options:["Increasing temperature","Lowering activation energy","Adding more reactant","Changing products"], correct:1},
+      {q:"The rate law rate = k[A]² is ___ order with respect to A:", options:["Zero","First","Second","Third"], correct:2},
+      {q:"Activation energy (Ea) is:", options:["Energy released by the reaction","Minimum energy needed to start a reaction","Energy of the products","Always negative"], correct:1},
+      {q:"Increasing concentration of reactants generally:", options:["Decreases rate","Has no effect","Increases rate","Changes products"], correct:2},
+      {q:"A catalyst is ___ in the reaction:", options:["Consumed","Not consumed","A product","A reactant"], correct:1},
+      {q:"Surface area affects rate: a powder reacts ___ than a solid block:", options:["Slower","At the same rate","Faster","Not at all"], correct:2}
+    ]
+  },
+  {
+    id:37, title:"Chemical Equilibrium",
+    instruction:"Write Kc expressions or apply Le Chatelier's principle.",
+    cols:["#","Question","Your Answer","Solution"],
+    rows:[
+      ["1","For aA + bB ⇌ cC + dD, Kc = ?","[C]^c[D]^d / [A]^a[B]^b"],
+      ["2","For N₂ + 3H₂ ⇌ 2NH₃, Kc = ?","[NH3]^2 / [N2][H2]^3"],
+      ["3","If Kc >> 1, equilibrium favors ___","products"],
+      ["4","If Kc << 1, equilibrium favors ___","reactants"],
+      ["5","Le Chatelier: adding more reactant shifts equilibrium ___","right / to the right / toward products"],
+      ["6","Le Chatelier: increasing temperature for an exothermic reaction shifts equilibrium ___","left / to the left / toward reactants"],
+      ["7","Are pure solids included in Kc expressions?","no"],
+      ["8","Are pure liquids included in Kc expressions?","no"]
+    ]
+  },
+  {
+    id:38, title:"Electrochemistry",
+    instruction:"Answer about galvanic/electrolytic cells and standard potentials.",
+    cols:["#","Question","Your Answer","Solution"],
+    rows:[
+      ["1","In a galvanic cell, the anode is the ___ electrode","negative / oxidation"],
+      ["2","In a galvanic cell, the cathode is the ___ electrode","positive / reduction"],
+      ["3","Oxidation occurs at the ___","anode"],
+      ["4","Reduction occurs at the ___","cathode"],
+      ["5","E°cell = E°cathode − E°___","anode"],
+      ["6","If E°cell > 0, the reaction is ___","spontaneous"],
+      ["7","A galvanic cell converts ___ energy to electrical energy","chemical"],
+      ["8","An electrolytic cell requires ___ to drive a non-spontaneous reaction","electricity / electrical energy / external energy"]
+    ]
+  },
+  {
+    id:39, title:"Nuclear Chemistry", type:"mc",
+    instruction:"Select the correct answer about nuclear reactions.",
+    questions:[
+      {q:"Alpha (α) particles are:", options:["Electrons","Helium-4 nuclei","Photons","Neutrons"], correct:1},
+      {q:"Beta (β⁻) decay emits:", options:["A proton","A helium nucleus","An electron","A photon"], correct:2},
+      {q:"Gamma (γ) rays are:", options:["Particles","High-energy photons","Electrons","Neutrons"], correct:1},
+      {q:"Half-life is:", options:["Time for all atoms to decay","Time for half the atoms to decay","Time for the reaction to stop","Always 1 year"], correct:1},
+      {q:"Nuclear fission is:", options:["Combining small nuclei","Splitting a heavy nucleus","Chemical combustion","Evaporation"], correct:1},
+      {q:"Nuclear fusion is:", options:["Splitting atoms","Combining light nuclei","A chemical reaction","Radioactive decay"], correct:1},
+      {q:"After 2 half-lives, what fraction remains?", options:["1/2","1/4","1/8","1/16"], correct:1}
+    ]
+  },
+  {
+    id:40, title:"Intermolecular Forces", type:"mc",
+    instruction:"Select the correct answer about intermolecular forces.",
+    questions:[
+      {q:"The weakest intermolecular force is:", options:["Hydrogen bonding","Dipole-dipole","London dispersion","Ion-dipole"], correct:2},
+      {q:"Hydrogen bonding occurs when H is bonded to:", options:["C or Si","Any metal","F, O, or N","Any nonmetal"], correct:2},
+      {q:"Which molecule has hydrogen bonding?", options:["CH₄","H₂O","CO₂","CCl₄"], correct:1},
+      {q:"London dispersion forces are present in:", options:["Only polar molecules","Only nonpolar molecules","All molecules","Only ionic compounds"], correct:2},
+      {q:"Ion-dipole forces are important in:", options:["Pure gases","Dissolving ionic compounds in water","Covalent bonding","Metallic bonding"], correct:1},
+      {q:"Higher boiling point usually means ___ intermolecular forces:", options:["Weaker","Stronger","No","Intramolecular"], correct:1},
+      {q:"Which has the highest boiling point?", options:["CH₄","C₂H₆","C₃H₈","C₄H₁₀"], correct:3}
+    ]
+  },
+  {
+    id:41, title:"Advanced Stoichiometry",
+    instruction:"Find limiting reagent, percent yield, or empirical formulas.",
+    cols:["#","Problem","Your Answer","Solution"],
+    rows:[
+      ["1","2H₂ + O₂ → 2H₂O. 2 mol H₂ + 2 mol O₂: limiting reagent?","H2 / H₂ / hydrogen"],
+      ["2","Theoretical yield = 10g, actual yield = 8g. Percent yield?","80 / 80%"],
+      ["3","Percent yield formula?","(actual/theoretical) x 100 / actual yield / theoretical yield x 100"],
+      ["4","A compound is 40% C, 6.7% H, 53.3% O. Empirical formula?","CH2O / CH₂O"],
+      ["5","Empirical formula CH₂O, molar mass = 180 g/mol. Molecular formula?","C6H12O6 / C₆H₁₂O₆"],
+      ["6","What is the limiting reagent?","the reactant that runs out first"],
+      ["7","Excess reagent is the one that ___","is left over / remains"],
+      ["8","If empirical formula mass = 30 and molecular mass = 60, the multiplier is?","2"]
+    ]
+  },
+  {
+    id:42, title:"Aromatic Compounds",
+    instruction:"Answer about benzene and aromatic naming.",
+    cols:["#","Question","Your Answer","Solution"],
+    rows:[
+      ["1","Molecular formula of benzene?","C6H6 / C₆H₆"],
+      ["2","How many carbon atoms in the benzene ring?","6"],
+      ["3","Benzene has ___ delocalized pi electrons","6"],
+      ["4","Methylbenzene is also called ___","toluene"],
+      ["5","A benzene ring with -OH is called ___","phenol"],
+      ["6","A benzene ring with -NH₂ is called ___","aniline"],
+      ["7","The benzene ring is described as ___","aromatic"],
+      ["8","Naphthalene has ___ fused benzene rings","2"]
+    ]
+  },
+  {
+    id:43, title:"Organic Reactions", type:"mc",
+    instruction:"Identify the type of organic reaction.",
+    questions:[
+      {q:"Adding HBr across a C=C double bond is a(n) ___ reaction:", options:["Elimination","Substitution","Addition","Condensation"], correct:2},
+      {q:"Removing H₂O to form a C=C double bond is a(n) ___ reaction:", options:["Addition","Elimination","Substitution","Combustion"], correct:1},
+      {q:"Replacing an H atom on benzene with Br is a(n) ___ reaction:", options:["Addition","Elimination","Substitution","Condensation"], correct:2},
+      {q:"Two molecules combining with loss of water is a(n) ___ reaction:", options:["Addition","Elimination","Substitution","Condensation"], correct:3},
+      {q:"Hydrogenation of an alkene (adding H₂) is:", options:["Elimination","Substitution","Addition","Condensation"], correct:2},
+      {q:"Esterification (acid + alcohol → ester + water) is:", options:["Addition","Elimination","Substitution","Condensation"], correct:3}
+    ]
+  },
+  {
+    id:44, title:"Polymers & Biochemistry", type:"mc",
+    instruction:"Select the correct answer about polymers and biological molecules.",
+    questions:[
+      {q:"A polymer is made of repeating units called:", options:["Isotopes","Monomers","Isomers","Ions"], correct:1},
+      {q:"Polyethylene is an example of a(n) ___ polymer:", options:["Condensation","Addition","Natural","Protein"], correct:1},
+      {q:"Proteins are polymers of:", options:["Nucleotides","Monosaccharides","Amino acids","Fatty acids"], correct:2},
+      {q:"DNA is a polymer of:", options:["Amino acids","Nucleotides","Glucose","Fatty acids"], correct:1},
+      {q:"Carbohydrates have the general formula:", options:["CₙH₂ₙO","Cₙ(H₂O)ₙ","CₙH₂ₙ₊₂","CₙHₙOₙ"], correct:1},
+      {q:"Lipids are ___ in water:", options:["Soluble","Insoluble","Reactive","Ionic"], correct:1},
+      {q:"Nylon is a ___ polymer:", options:["Addition","Condensation","Natural","Carbohydrate"], correct:1},
+      {q:"Starch and cellulose are both polymers of:", options:["Amino acids","Fructose","Glucose","Nucleotides"], correct:2}
+    ]
+  },
+  {
+    id:45, title:"Isomerism",
+    instruction:"Identify the type of isomerism or answer about isomers.",
+    cols:["#","Question","Your Answer","Solution"],
+    rows:[
+      ["1","Isomers have the same ___ formula but different structures","molecular"],
+      ["2","Butane and isobutane are ___ isomers","structural / constitutional"],
+      ["3","cis-2-butene and trans-2-butene are ___ isomers","geometric / cis-trans"],
+      ["4","Non-superimposable mirror images are called ___","enantiomers"],
+      ["5","A carbon with 4 different groups is called a ___ center","chiral / stereocenter / asymmetric"],
+      ["6","How many structural isomers does C₄H₁₀ have?","2"],
+      ["7","cis means substituents are on the ___ side","same"],
+      ["8","trans means substituents are on ___ sides","opposite"]
+    ]
+  },
+  {
+    id:46, title:"Coordination Compounds",
+    instruction:"Answer about coordination chemistry and complex ions.",
+    cols:["#","Question","Your Answer","Solution"],
+    rows:[
+      ["1","A molecule or ion that donates electrons to a metal is a ___","ligand"],
+      ["2","The number of bonds to the central metal is the ___ number","coordination"],
+      ["3","NH₃ as a ligand is called ___","ammine"],
+      ["4","Cl⁻ as a ligand is called ___","chlorido / chloro"],
+      ["5","H₂O as a ligand is called ___","aqua"],
+      ["6","CN⁻ as a ligand is called ___","cyanido / cyano"],
+      ["7","[Cu(NH₃)₄]²⁺: coordination number of Cu?","4"],
+      ["8","In naming, the ligands come ___ the metal name","before"]
+    ]
+  },
+  {
+    id:47, title:"Light, Wavelength & Photon Energy",
+    instruction:"Use c = λν and E = hν. c = 3.00×10⁸ m/s, h = 6.626×10⁻³⁴ J·s.",
+    cols:["#","Problem","Your Answer","Solution"],
+    rows:[
+      ["1","c = λν. If λ = 500 nm (5×10⁻⁷ m), ν = ?","6e14 / 6×10¹⁴ / 6.00e14 / 6.00×10¹⁴ Hz"],
+      ["2","E = hν. If ν = 6×10¹⁴ Hz, E = ? (in J, to 2 sig figs)","4.0e-19 / 3.98e-19 / 3.98×10⁻¹⁹ / 4.0×10⁻¹⁹ J"],
+      ["3","Higher frequency means ___ energy","higher / more / greater"],
+      ["4","Longer wavelength means ___ frequency","lower / less"],
+      ["5","The speed of light c = ___ m/s","3e8 / 3×10⁸ / 3.00×10⁸ / 3.00e8"],
+      ["6","Planck's constant h = ___ J·s","6.626e-34 / 6.626×10⁻³⁴"],
+      ["7","Visible light range is approximately ___ nm to ___ nm","400, 700 / 400-700 / 380, 750"],
+      ["8","E = hc/λ. If λ = 400 nm, E is ___ than at λ = 700 nm","greater / higher / more"]
+    ]
+  },
+  {
+    id:48, title:"Molecular Orbital Theory", type:"mc",
+    instruction:"Select the correct answer about molecular orbital theory.",
+    questions:[
+      {q:"Bond order = ?", options:["(bonding e⁻ + antibonding e⁻) / 2","(bonding e⁻ − antibonding e⁻) / 2","bonding e⁻ / antibonding e⁻","antibonding e⁻ − bonding e⁻"], correct:1},
+      {q:"If bond order = 0, the molecule:", options:["Is very stable","Does not exist","Has a triple bond","Is ionic"], correct:1},
+      {q:"O₂ is paramagnetic because:", options:["It has no bonds","It has 2 unpaired electrons in π* orbitals","It is ionic","It has a bond order of 0"], correct:1},
+      {q:"A σ bond is formed by ___ overlap:", options:["Side-to-side","End-to-end (head-on)","No overlap","Diagonal"], correct:1},
+      {q:"A π bond is formed by ___ overlap:", options:["Head-on","Side-to-side (lateral)","Ionic","Metallic"], correct:1},
+      {q:"Bond order of N₂ (10 bonding, 4 antibonding e⁻):", options:["1","2","3","4"], correct:2},
+      {q:"Which is more stable: bond order 2 or bond order 1?", options:["Bond order 1","Bond order 2","They are equal","Cannot determine"], correct:1},
+      {q:"Diamagnetic means:", options:["Has unpaired electrons","All electrons are paired","Is magnetic","Has no electrons"], correct:1}
+    ]
+  },
+  {
+    id:49, title:"Colligative Properties",
+    instruction:"Use ΔTb = iKbm, ΔTf = iKfm, π = iMRT. i = van't Hoff factor.",
+    cols:["#","Problem","Your Answer","Solution"],
+    rows:[
+      ["1","Colligative properties depend on the ___ of solute particles","number / amount / concentration"],
+      ["2","i (van't Hoff factor) for NaCl = ?","2"],
+      ["3","i for glucose (nonelectrolyte) = ?","1"],
+      ["4","i for CaCl₂ = ?","3"],
+      ["5","ΔTb = iKbm. If i=2, Kb=0.512°C/m, m=1. ΔTb = ?","1.024 / 1.024°C / 1.02"],
+      ["6","Boiling point of a solution is ___ than pure solvent","higher / greater"],
+      ["7","Freezing point of a solution is ___ than pure solvent","lower / less"],
+      ["8","Osmotic pressure formula: π = ___","iMRT"]
+    ]
+  },
+  {
+    id:50, title:"Phase Diagrams & Changes of State", type:"mc",
+    instruction:"Select the correct answer about phase diagrams and state changes.",
+    questions:[
+      {q:"The triple point is where:", options:["Only solid and liquid exist","All three phases coexist in equilibrium","Only gas exists","The substance decomposes"], correct:1},
+      {q:"Sublimation is the transition from:", options:["Solid to liquid","Liquid to gas","Solid to gas","Gas to liquid"], correct:2},
+      {q:"On a heating curve, a plateau (flat region) indicates:", options:["Temperature increase","A phase change occurring","Cooling","No energy input"], correct:1},
+      {q:"The critical point is above which:", options:["Only solid exists","Liquid and gas become indistinguishable","The substance freezes","Triple point disappears"], correct:1},
+      {q:"Deposition is the reverse of:", options:["Melting","Boiling","Sublimation","Condensation"], correct:2},
+      {q:"During melting, temperature ___ while heat is added:", options:["Increases","Decreases","Stays constant","Oscillates"], correct:2},
+      {q:"Vaporization requires ___ energy (endothermic):", options:["No","Release of","Input of","Negative"], correct:2}
+    ]
+  },
+  {
+    id:51, title:"Buffer Solutions",
+    instruction:"Use Henderson-Hasselbalch: pH = pKa + log([A⁻]/[HA]).",
+    cols:["#","Problem","Your Answer","Solution"],
+    rows:[
+      ["1","A buffer resists changes in ___","pH"],
+      ["2","A buffer contains a weak ___ and its conjugate ___","acid, base / acid and base"],
+      ["3","Henderson-Hasselbalch equation: pH = pKa + log(___/___)",  "[A-]/[HA] / A-/HA / [conjugate base]/[weak acid]"],
+      ["4","If [A⁻] = [HA], then pH = ___","pKa"],
+      ["5","If pKa = 4.74 and [A⁻]/[HA] = 10, pH = ?","5.74"],
+      ["6","Adding a small amount of strong acid to a buffer: the ___ reacts with it","conjugate base / A- / base"],
+      ["7","An example of a buffer pair: CH₃COOH and ___","CH3COONa / CH₃COONa / sodium acetate / CH3COO- / CH₃COO⁻"],
+      ["8","Buffer capacity is greatest when pH = ___","pKa"]
+    ]
+  },
+  {
+    id:52, title:"Titration Curves", type:"mc",
+    instruction:"Select the correct answer about titrations.",
+    questions:[
+      {q:"At the equivalence point of a strong acid-strong base titration, pH = ?", options:["0","7","14","Depends on concentration"], correct:1},
+      {q:"For weak acid titrated with strong base, equivalence point pH is:", options:["< 7","= 7","> 7","= 0"], correct:2},
+      {q:"Phenolphthalein changes color at pH ~:", options:["4","7","8-10","14"], correct:2},
+      {q:"At the half-equivalence point, pH = ___:", options:["7","14","pKa","0"], correct:2},
+      {q:"The indicator should change color near the:", options:["Start","Half-equivalence point","Equivalence point","End of titration"], correct:2},
+      {q:"Strong acid + strong base titration curve has a ___ jump at equivalence:", options:["Small","Large/steep","No","Gradual"], correct:1},
+      {q:"In a titration, the solution in the buret is called the:", options:["Analyte","Titrant","Buffer","Indicator"], correct:1},
+      {q:"Methyl orange is a good indicator for ___ titrations:", options:["Weak acid + weak base","Strong acid + strong base","Strong acid + weak base","None"], correct:1}
+    ]
+  },
+  {
+    id:53, title:"Solubility Equilibrium (Ksp)",
+    instruction:"Write Ksp expressions and calculate molar solubility.",
+    cols:["#","Problem","Your Answer","Solution"],
+    rows:[
+      ["1","For AgCl(s) ⇌ Ag⁺(aq) + Cl⁻(aq), Ksp = ?","[Ag+][Cl-] / [Ag⁺][Cl⁻]"],
+      ["2","For PbCl₂(s) ⇌ Pb²⁺ + 2Cl⁻, Ksp = ?","[Pb2+][Cl-]^2 / [Pb²⁺][Cl⁻]²"],
+      ["3","If Ksp of AgCl = 1.8×10⁻¹⁰, molar solubility s = ?","1.34e-5 / 1.3e-5 / 1.34×10⁻⁵"],
+      ["4","A smaller Ksp means ___ soluble","less"],
+      ["5","Pure solids are ___ included in Ksp expressions","not / never"],
+      ["6","The common ion effect ___ solubility","decreases / reduces / lowers"],
+      ["7","For Ca₃(PO₄)₂ ⇌ 3Ca²⁺ + 2PO₄³⁻, Ksp = ?","[Ca2+]^3[PO4 3-]^2 / [Ca²⁺]³[PO₄³⁻]²"],
+      ["8","If Q > Ksp, a precipitate will ___","form"]
+    ]
+  },
+  {
+    id:54, title:"Net Ionic Equations",
+    instruction:"Identify spectator ions and write net ionic equations.",
+    cols:["#","Problem","Your Answer","Solution"],
+    rows:[
+      ["1","Spectator ions are ions that ___ in a reaction","do not change / don't change / remain unchanged / don't participate"],
+      ["2","AgNO₃(aq) + NaCl(aq) → AgCl(s) + NaNO₃(aq). Net ionic equation?","Ag+ + Cl- -> AgCl / Ag⁺ + Cl⁻ → AgCl"],
+      ["3","In the above reaction, spectator ions are?","Na+ and NO3- / Na⁺, NO₃⁻"],
+      ["4","A driving force for a reaction can be: precipitate, gas, or ___","water / H2O"],
+      ["5","HCl(aq) + NaOH(aq) → NaCl(aq) + H₂O(l). Net ionic?","H+ + OH- -> H2O / H⁺ + OH⁻ → H₂O"],
+      ["6","Strong electrolytes are written as ___ in ionic equations","ions / dissociated ions"],
+      ["7","Weak electrolytes and precipitates are written as ___ formulas","molecular / complete / whole"],
+      ["8","BaCl₂ + Na₂SO₄ → BaSO₄(s) + 2NaCl. Net ionic?","Ba2+ + SO42- -> BaSO4 / Ba²⁺ + SO₄²⁻ → BaSO₄"]
+    ]
+  },
+  {
+    id:55, title:"Calorimetry",
+    instruction:"Use q = mcΔT and Hess's law. Specific heat of water = 4.18 J/(g·°C).",
+    cols:["#","Problem","Your Answer","Solution"],
+    rows:[
+      ["1","q = mcΔT. m=200g water, ΔT=25°C. q = ?","20900 / 20900 J / 20.9 kJ"],
+      ["2","50g water goes from 20°C to 45°C. q = ?","5225 / 5225 J / 5.225 kJ"],
+      ["3","If q is negative, the reaction is ___","exothermic"],
+      ["4","If q is positive, the reaction is ___","endothermic"],
+      ["5","Hess's law says total ΔH depends on ___ and ___ states","initial, final / initial and final"],
+      ["6","In a coffee-cup calorimeter, pressure is ___","constant"],
+      ["7","In a bomb calorimeter, volume is ___","constant"],
+      ["8","ΔH = -qsolution for an exothermic dissolution. True or false?","true"]
+    ]
+  },
+  {
+    id:56, title:"Main Group Descriptive Chemistry", type:"mc",
+    instruction:"Select the correct answer about main group element properties.",
+    questions:[
+      {q:"Alkali metals (Group 1) are:", options:["Very unreactive","Soft metals that react vigorously with water","Noble gases","Halogens"], correct:1},
+      {q:"Group 2 elements are called:", options:["Alkali metals","Alkaline earth metals","Halogens","Noble gases"], correct:1},
+      {q:"Halogens (Group 17) typically form ___ ions:", options:["+1","-1","+2","0"], correct:1},
+      {q:"Noble gases are unreactive because:", options:["They are metals","They have full valence shells","They have no electrons","They are radioactive"], correct:1},
+      {q:"The most reactive nonmetal is:", options:["Chlorine","Oxygen","Fluorine","Nitrogen"], correct:2},
+      {q:"The most reactive metal is:", options:["Sodium","Francium/Cesium","Iron","Gold"], correct:1},
+      {q:"Group 1 metals stored under oil to prevent reaction with:", options:["Nitrogen","Water and oxygen","Carbon dioxide","Helium"], correct:1},
+      {q:"Hydrogen is unique because it can act as:", options:["Only a metal","Only a nonmetal","Both a cation (+1) and anion (-1)","A noble gas"], correct:2}
+    ]
+  },
+  {
+    id:57, title:"Alcohols, Ethers & Phenols",
+    instruction:"Name the compound or answer about alcohol classification and reactions.",
+    cols:["#","Problem","Your Answer","Solution"],
+    rows:[
+      ["1","The functional group of alcohols is ___","-OH / hydroxyl"],
+      ["2","CH₃OH is called ___","methanol"],
+      ["3","C₂H₅OH is called ___","ethanol"],
+      ["4","A primary (1°) alcohol has the -OH on a carbon bonded to ___ other carbon(s)","1 / one"],
+      ["5","A secondary (2°) alcohol has -OH on a carbon bonded to ___ other carbons","2 / two"],
+      ["6","A tertiary (3°) alcohol has -OH on a carbon bonded to ___ other carbons","3 / three"],
+      ["7","Phenol is a benzene ring with a ___ group","-OH / hydroxyl / OH"],
+      ["8","The general formula R-O-R' describes an ___","ether"]
+    ]
+  },
+  {
+    id:58, title:"Aldehydes & Ketones",
+    instruction:"Name the compound or answer about carbonyl chemistry.",
+    cols:["#","Problem","Your Answer","Solution"],
+    rows:[
+      ["1","Aldehydes have the carbonyl (C=O) at the ___ of the chain","end / terminal position"],
+      ["2","Ketones have the carbonyl (C=O) in the ___ of the chain","middle / interior"],
+      ["3","HCHO (methanal) is commonly called ___","formaldehyde"],
+      ["4","CH₃CHO (ethanal) is commonly called ___","acetaldehyde"],
+      ["5","CH₃COCH₃ (propanone) is commonly called ___","acetone"],
+      ["6","IUPAC suffix for aldehydes is ___","-al"],
+      ["7","IUPAC suffix for ketones is ___","-one"],
+      ["8","Tollens' test (silver mirror) is positive for ___ but not ketones","aldehydes"]
+    ]
+  },
+  {
+    id:59, title:"Carboxylic Acids & Esters",
+    instruction:"Name the compound or answer about carboxylic acid and ester chemistry.",
+    cols:["#","Problem","Your Answer","Solution"],
+    rows:[
+      ["1","The functional group of carboxylic acids is ___","-COOH / carboxyl"],
+      ["2","HCOOH is called ___ (IUPAC: methanoic acid)","formic acid / methanoic acid"],
+      ["3","CH₃COOH is called ___ (IUPAC: ethanoic acid)","acetic acid / ethanoic acid"],
+      ["4","IUPAC suffix for carboxylic acids is ___","-oic acid"],
+      ["5","Ester = carboxylic acid + alcohol with loss of ___","water / H2O / H₂O"],
+      ["6","This reaction (acid + alcohol → ester + water) is called ___","esterification"],
+      ["7","The reverse reaction (ester + water → acid + alcohol) is called ___","hydrolysis"],
+      ["8","Saponification is the hydrolysis of an ester (fat) with a strong ___","base / NaOH / KOH"]
+    ]
+  },
+  {
+    id:60, title:"Amines & Amides", type:"mc",
+    instruction:"Select the correct answer about amines and amides.",
+    questions:[
+      {q:"Amines are derivatives of:", options:["Water","Ammonia (NH₃)","Methane","Benzene"], correct:1},
+      {q:"Amines are generally ___ (acidic/basic):", options:["Acidic","Neutral","Basic","Amphoteric"], correct:2},
+      {q:"A primary amine has the structure:", options:["R₃N","R₂NH","RNH₂","NH₃"], correct:2},
+      {q:"The peptide bond is a special type of ___ bond:", options:["Ester","Ether","Amide","Amine"], correct:2},
+      {q:"An amide is formed from a carboxylic acid and an ___:", options:["Alcohol","Aldehyde","Amine","Alkene"], correct:2},
+      {q:"The IUPAC suffix for amines is:", options:["-al","-amine","-one","-oic acid"], correct:1},
+      {q:"Compared to amines, amides are ___ basic:", options:["More","Equally","Less / weakly","Not at all"], correct:2},
+      {q:"Proteins are polymers linked by ___ bonds:", options:["Ester","Ether","Peptide (amide)","Glycosidic"], correct:2}
+    ]
+  },
+  {
+    id:61, title:"Stereochemistry",
+    instruction:"Determine R/S configuration, chirality, and stereoisomer relationships.",
+    cols:["#","Problem","Your Answer","Solution"],
+    rows:[
+      ["1","A chiral center has ___ different groups attached","4 / four"],
+      ["2","Non-superimposable mirror images are called ___","enantiomers"],
+      ["3","Stereoisomers with the same connectivity but different spatial arrangement that are NOT mirror images are called ___","diastereomers"],
+      ["4","A racemic mixture contains equal amounts of ___ enantiomers","both / two / R and S"],
+      ["5","In R/S naming, priorities are assigned by ___ number","atomic"],
+      ["6","R configuration means the priority order goes ___ (when lowest priority is away)","clockwise / right"],
+      ["7","S configuration means the priority order goes ___","counterclockwise / left"],
+      ["8","A molecule with n chiral centers has a maximum of ___ stereoisomers","2^n / 2n / 2 to the n"]
+    ]
+  },
+  {
+    id:62, title:"Reaction Mechanisms", type:"mc",
+    instruction:"Select the correct answer about SN1, SN2, E1, and E2 mechanisms.",
+    questions:[
+      {q:"SN2 reactions prefer ___ substrates:", options:["Tertiary","Secondary","Primary / methyl","Aromatic"], correct:2},
+      {q:"SN1 reactions prefer ___ substrates:", options:["Methyl","Primary","Tertiary","All equally"], correct:2},
+      {q:"SN2 is a ___ step mechanism:", options:["One","Two","Three","Multi"], correct:0},
+      {q:"SN1 is a ___ step mechanism:", options:["One","Two","Three","Multi"], correct:1},
+      {q:"E2 elimination requires a ___ base:", options:["Weak","Strong/bulky","No","Acidic"], correct:1},
+      {q:"SN2 results in ___ of configuration (Walden inversion):", options:["Retention","Inversion","Racemization","No change"], correct:1},
+      {q:"SN1 typically results in ___ (mixture of R and S):", options:["Inversion","Retention","Racemization","Elimination"], correct:2},
+      {q:"E1 and SN1 both form a ___ intermediate:", options:["Radical","Anion","Carbocation","Carbanion"], correct:2}
+    ]
+  },
+  {
+    id:63, title:"Carbohydrates",
+    instruction:"Answer about monosaccharides, disaccharides, and polysaccharides.",
+    cols:["#","Problem","Your Answer","Solution"],
+    rows:[
+      ["1","The general formula of carbohydrates is ___","Cn(H2O)n / Cₙ(H₂O)ₙ"],
+      ["2","Glucose has ___ carbon atoms","6 / six"],
+      ["3","Glucose and fructose are ___ (same formula, different structure)","isomers"],
+      ["4","Sucrose is made of glucose + ___","fructose"],
+      ["5","Lactose is made of glucose + ___","galactose"],
+      ["6","Maltose is made of glucose + ___","glucose"],
+      ["7","The bond between two monosaccharides is called a ___ bond","glycosidic"],
+      ["8","Starch and cellulose are both polymers of ___ but differ in the glycosidic linkage","glucose"]
+    ]
+  },
+  {
+    id:64, title:"Lipids & Proteins", type:"mc",
+    instruction:"Select the correct answer about lipids and proteins.",
+    questions:[
+      {q:"Lipids are ___ in water:", options:["Soluble","Insoluble (hydrophobic)","Reactive","Ionic"], correct:1},
+      {q:"Saturated fatty acids have ___ double bonds:", options:["One","Two","No","Many"], correct:2},
+      {q:"Unsaturated fatty acids have ___ C=C double bond(s):", options:["No","One or more","Only triple bonds","Ionic bonds"], correct:1},
+      {q:"Proteins are made of ___ linked by peptide bonds:", options:["Nucleotides","Fatty acids","Amino acids","Monosaccharides"], correct:2},
+      {q:"The primary structure of a protein is its:", options:["3D shape","Amino acid sequence","Alpha helix","Quaternary assembly"], correct:1},
+      {q:"Secondary structure includes alpha helix and:", options:["Amino acid sequence","Beta pleated sheet","Disulfide bonds","Subunit assembly"], correct:1},
+      {q:"Denaturation of a protein means:", options:["Breaking peptide bonds","Losing its 3D shape (unfolding)","Gaining new amino acids","Becoming a lipid"], correct:1},
+      {q:"An essential amino acid is one that:", options:["Is not needed","The body cannot synthesize (must eat)","Contains sulfur","Is aromatic"], correct:1}
+    ]
+  },
+  {
+    id:65, title:"Nucleic Acids & DNA/RNA",
+    instruction:"Answer about nucleotide structure, base pairing, and nucleic acid differences.",
+    cols:["#","Problem","Your Answer","Solution"],
+    rows:[
+      ["1","A nucleotide consists of a sugar, a phosphate group, and a ___","nitrogenous base / base / nitrogen base"],
+      ["2","DNA stands for ___","deoxyribonucleic acid"],
+      ["3","RNA stands for ___","ribonucleic acid"],
+      ["4","In DNA, adenine (A) pairs with ___","thymine / T"],
+      ["5","In DNA, cytosine (C) pairs with ___","guanine / G"],
+      ["6","In RNA, adenine (A) pairs with ___","uracil / U"],
+      ["7","The sugar in DNA is ___, in RNA it is ___","deoxyribose, ribose"],
+      ["8","DNA is ___ stranded, RNA is ___ stranded","double, single"]
+    ]
+  },
+  {
+    id:66, title:"Comprehensive Final Review", type:"mc",
+    instruction:"All topics mixed. Exam-level questions.",
+    questions:[
+      {q:"If [H⁺] = 10⁻⁵ M, the pH is:", options:["3","5","9","14"], correct:1},
+      {q:"Bond order of O₂ is:", options:["1","1.5","2","3"], correct:2},
+      {q:"Which is a buffer pair?", options:["HCl / NaCl","CH₃COOH / CH₃COONa","NaOH / NaCl","H₂O / NaCl"], correct:1},
+      {q:"In SN2, the rate depends on:", options:["Only substrate","Only nucleophile","Both substrate and nucleophile","Neither"], correct:2},
+      {q:"Glucose is a:", options:["Disaccharide","Monosaccharide","Polysaccharide","Lipid"], correct:1},
+      {q:"The peptide bond links:", options:["Sugars","Amino acids","Nucleotides","Fatty acids"], correct:1},
+      {q:"At the triple point:", options:["Only liquid exists","All three phases coexist","Only gas exists","The substance decomposes"], correct:1},
+      {q:"A racemic mixture rotates plane-polarized light:", options:["To the right","To the left","Not at all (net zero rotation)","Unpredictably"], correct:2}
+    ]
+  },
+  {
+    id:67, title:"Chemistry Fundamentals", type:"mc",
+    instruction:"Select the correct answer about sig figs, units, density.",
+    questions:[
+      {q:"How many significant figures in 0.00340?", options:["2","3","4","5"], correct:1},
+      {q:"What is 2500 in scientific notation?", options:["2.5 × 10²","2.5 × 10³","25 × 10²","0.25 × 10⁴"], correct:1},
+      {q:"Density = ?", options:["mass × volume","mass / volume","volume / mass","mass + volume"], correct:1},
+      {q:"Convert 25°C to Kelvin:", options:["248 K","298 K","25 K","273 K"], correct:1},
+      {q:"Which is an exact number?", options:["π","Mass of a penny","12 eggs in a dozen","Speed of light"], correct:2},
+      {q:"How many sig figs in 1.00 × 10³?", options:["1","2","3","4"], correct:2}
+    ]
+  },
+  {
+    id:68, title:"Matter Classification", type:"mc",
+    instruction:"Select the correct classification.",
+    questions:[
+      {q:"Salt water is a:", options:["Element","Compound","Homogeneous mixture","Heterogeneous mixture"], correct:2},
+      {q:"Which is a chemical change?", options:["Ice melting","Sugar dissolving","Iron rusting","Glass breaking"], correct:2},
+      {q:"Gold (Au) is a:", options:["Compound","Homogeneous mixture","Element","Heterogeneous mixture"], correct:2},
+      {q:"A pure substance with two or more elements:", options:["Element","Mixture","Compound","Solution"], correct:2},
+      {q:"Filtration separates based on:", options:["Boiling point","Particle size","Density","Solubility"], correct:1},
+      {q:"Which is an intensive property?", options:["Mass","Volume","Density","Length"], correct:2}
+    ]
+  },
+  {
+    id:69, title:"Historical Atomic Models", type:"mc",
+    instruction:"Select the correct answer about atomic theory history.",
+    questions:[
+      {q:"Who discovered the electron?", options:["Dalton","Thomson","Rutherford","Bohr"], correct:1},
+      {q:"The gold foil experiment proved:", options:["Atoms are indivisible","Electrons exist","The nucleus exists","Electrons have orbits"], correct:2},
+      {q:"Dalton's model described atoms as:", options:["Plum puddings","Solid indivisible spheres","Nuclear with shells","Electron clouds"], correct:1},
+      {q:"The law of definite proportions was proposed by:", options:["Dalton","Proust","Lavoisier","Thomson"], correct:1},
+      {q:"In Rutherford's experiment, most alpha particles:", options:["Bounced back","Were absorbed","Passed straight through","Curved around"], correct:2},
+      {q:"Bohr's model introduced:", options:["Plum pudding","Quantized energy levels","Uncertainty principle","Electron cloud"], correct:1}
+    ]
+  },
+  {
+    id:70, title:"Electronegativity & Bond Polarity", type:"mc",
+    instruction:"Select the correct answer about EN and bond types.",
+    questions:[
+      {q:"The most electronegative element is:", options:["O","N","F","Cl"], correct:2},
+      {q:"ΔEN = 1.5 indicates a ___ bond:", options:["Nonpolar covalent","Polar covalent","Ionic","Metallic"], correct:1},
+      {q:"EN increases going ___ across a period:", options:["Left","Right","Down","It doesn't change"], correct:1},
+      {q:"CO₂ is nonpolar because:", options:["C-O bonds are nonpolar","It is symmetric (linear)","It has no electrons","Carbon is not electronegative"], correct:1},
+      {q:"In H-F, the dipole points toward:", options:["H","F","Both equally","Neither"], correct:1},
+      {q:"ΔEN = 0 means:", options:["Ionic bond","Polar covalent","Nonpolar covalent","No bond"], correct:2}
+    ]
+  },
+  {
+    id:71, title:"Hybridization & Sigma/Pi Bonds", type:"mc",
+    instruction:"Select the correct answer about hybridization and bond types.",
+    questions:[
+      {q:"sp³ hybridization gives what geometry?", options:["Linear","Trigonal planar","Tetrahedral","Octahedral"], correct:2},
+      {q:"A double bond consists of:", options:["2 sigma bonds","2 pi bonds","1 sigma + 1 pi","1 sigma only"], correct:2},
+      {q:"The bond angle in sp² is:", options:["180°","120°","109.5°","90°"], correct:1},
+      {q:"How many pi bonds in a triple bond?", options:["0","1","2","3"], correct:2},
+      {q:"CH₄ has what hybridization?", options:["sp","sp²","sp³","sp³d"], correct:2},
+      {q:"Sigma bonds are formed by ___ overlap:", options:["Side-by-side","Head-on","Diagonal","No overlap"], correct:1}
+    ]
+  },
+  {
+    id:72, title:"Percent Composition & Empirical Formulas", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"% of O in H₂O (H=1, O=16):", options:["11.1%","88.9%","50%","16%"], correct:1},
+      {q:"Empirical formula of C₆H₁₂O₆:", options:["C₆H₁₂O₆","CH₂O","C₃H₆O₃","CHO"], correct:1},
+      {q:"To find empirical formula, first:", options:["Find molar mass","Assume 100 g sample","Balance equation","Find density"], correct:1},
+      {q:"If empirical = CH₂O and M = 60, molecular formula:", options:["CH₂O","C₂H₄O₂","C₃H₆O₃","C₄H₈O₄"], correct:1},
+      {q:"Mole ratio 1:2:1 for C:H:O gives:", options:["CHO","CH₂O","C₂HO","CO₂H"], correct:1},
+      {q:"Combustion analysis determines:", options:["Density","Melting point","C and H content","Crystal structure"], correct:2}
+    ]
+  },
+  {
+    id:73, title:"Gibbs Free Energy & Entropy", type:"mc",
+    instruction:"Select the correct answer about thermodynamics.",
+    questions:[
+      {q:"ΔG = ΔH − TΔS. If ΔG < 0:", options:["Non-spontaneous","At equilibrium","Spontaneous","Impossible"], correct:2},
+      {q:"ΔH negative, ΔS positive: spontaneous?", options:["Always","Never","At high T only","At low T only"], correct:0},
+      {q:"Entropy increases when:", options:["Gas → solid","Fewer moles produced","Solid → gas","Temperature decreases"], correct:2},
+      {q:"The second law states:", options:["Energy is conserved","Entropy of universe increases","Entropy is zero at 0K","ΔG = ΔH − TΔS"], correct:1},
+      {q:"At equilibrium, ΔG =", options:["ΔH","−TΔS","0","1"], correct:2},
+      {q:"Which has highest entropy?", options:["Ice","Liquid water","Steam","All equal"], correct:2}
+    ]
+  },
+  {
+    id:74, title:"Lattice Energy & Born-Haber Cycle", type:"mc",
+    instruction:"Select the correct answer about lattice energy.",
+    questions:[
+      {q:"Lattice energy increases with:", options:["Larger ions","Smaller ions and higher charges","Lower charges","More electrons"], correct:1},
+      {q:"Which has higher lattice energy: NaCl or MgO?", options:["NaCl","MgO","They are equal","Cannot determine"], correct:1},
+      {q:"Born-Haber cycle uses:", options:["Hess's law","Le Chatelier's principle","Boyle's law","Avogadro's law"], correct:0},
+      {q:"Lattice energy is always:", options:["Positive","Negative","Zero","Variable"], correct:0},
+      {q:"LE ∝ q₁q₂/r. This is based on:", options:["Hund's rule","Coulomb's law","Pauli exclusion","Aufbau principle"], correct:1},
+      {q:"Higher lattice energy means:", options:["Lower melting point","Higher solubility","Higher melting point","Weaker bonds"], correct:2}
+    ]
+  },
+  {
+    id:75, title:"Salt Hydrolysis: Acidic/Basic/Neutral", type:"mc",
+    instruction:"Select the correct answer about salt solutions.",
+    questions:[
+      {q:"NaCl solution is:", options:["Acidic","Basic","Neutral","Depends on concentration"], correct:2},
+      {q:"NH₄Cl solution is:", options:["Acidic","Basic","Neutral","Amphoteric"], correct:0},
+      {q:"CH₃COONa solution is:", options:["Acidic","Basic","Neutral","Depends on temperature"], correct:1},
+      {q:"Strong acid + strong base → ___ salt:", options:["Acidic","Basic","Neutral","Amphoteric"], correct:2},
+      {q:"Weak acid + strong base → ___ salt:", options:["Acidic","Basic","Neutral","Cannot determine"], correct:1},
+      {q:"In salt hydrolysis, the ___ reacts with water:", options:["Strong component","Weak component's conjugate","Both equally","Neither"], correct:1}
+    ]
+  },
+  {
+    id:76, title:"Paramagnetic & Diamagnetic", type:"mc",
+    instruction:"Select the correct answer about magnetic properties.",
+    questions:[
+      {q:"Paramagnetic substances have:", options:["All paired electrons","Unpaired electrons","No electrons","Extra protons"], correct:1},
+      {q:"O₂ is paramagnetic because:", options:["It has no bonds","MO theory shows 2 unpaired e⁻","It is diatomic","Oxygen is reactive"], correct:1},
+      {q:"Fe, Co, Ni are:", options:["Diamagnetic","Paramagnetic","Ferromagnetic","Non-magnetic"], correct:2},
+      {q:"Ne (1s²2s²2p⁶) is:", options:["Paramagnetic","Diamagnetic","Ferromagnetic","Cannot determine"], correct:1},
+      {q:"Hund's rule says:", options:["Fill lowest energy first","Pair before filling","Fill degenerate orbitals singly first","No two electrons same QN"], correct:2},
+      {q:"Which ion has more unpaired e⁻: Fe²⁺ or Fe³⁺?", options:["Fe²⁺ (4)","Fe³⁺ (5)","They are equal","Neither has unpaired"], correct:1}
+    ]
+  },
+  {
+    id:77, title:"Newman Projections & Conformations", type:"mc",
+    instruction:"Select the correct answer about conformational analysis.",
+    questions:[
+      {q:"The most stable conformation of ethane is:", options:["Eclipsed","Staggered","Gauche","Fully eclipsed"], correct:1},
+      {q:"In a Newman projection, the front carbon is shown as:", options:["A circle","A dot/point","A triangle","A square"], correct:1},
+      {q:"Anti conformation has a dihedral angle of:", options:["0°","60°","120°","180°"], correct:3},
+      {q:"Torsional strain results from:", options:["Large groups colliding","Eclipsing interactions","Ring strain","Angle strain"], correct:1},
+      {q:"Steric strain is caused by:", options:["Eclipsing bonds","Large groups too close together","Bent bonds","Missing hydrogens"], correct:1},
+      {q:"Most stable butane conformation:", options:["Fully eclipsed","Eclipsed","Gauche","Anti"], correct:3}
+    ]
+  },
+  {
+    id:78, title:"Chair Conformations", type:"mc",
+    instruction:"Select the correct answer about cyclohexane conformations.",
+    questions:[
+      {q:"Large groups prefer the ___ position:", options:["Axial","Equatorial","Either","Neither"], correct:1},
+      {q:"A ring flip converts all:", options:["Bonds to antibonds","Axial to equatorial","cis to trans","Chair to boat"], correct:1},
+      {q:"1,3-diaxial strain is similar to:", options:["Gauche interaction","Anti interaction","Eclipsed interaction","No interaction"], correct:0},
+      {q:"Cyclohexane chair has ___ staggered bonds:", options:["All","Some","No","Only axial"], correct:0},
+      {q:"A-value measures:", options:["Axial preference","Equatorial preference","Bond angle","Ring strain"], correct:1},
+      {q:"The boat conformation has:", options:["Less strain than chair","Flagpole interactions","All equatorial bonds","No strain"], correct:1}
+    ]
+  },
+  {
+    id:79, title:"Spectroscopy (IR & Mass Spec)", type:"mc",
+    instruction:"Select the correct answer about spectroscopy.",
+    questions:[
+      {q:"IR spectroscopy measures:", options:["Nuclear spin","Bond vibrations","Electron transitions","Mass-to-charge ratio"], correct:1},
+      {q:"C=O stretch appears around:", options:["3000 cm⁻¹","1700 cm⁻¹","1000 cm⁻¹","500 cm⁻¹"], correct:1},
+      {q:"In mass spec, the molecular ion peak gives:", options:["Number of atoms","Molecular weight","Boiling point","Structure"], correct:1},
+      {q:"Broad O-H stretch (alcohol) is at:", options:["1700 cm⁻¹","2200 cm⁻¹","3200-3550 cm⁻¹","500 cm⁻¹"], correct:2},
+      {q:"M-15 in mass spec means loss of:", options:["OH","CH₃","H₂O","CO"], correct:1},
+      {q:"The base peak in MS is:", options:["Molecular ion","Smallest fragment","Most abundant fragment","Always m/z = 1"], correct:2}
+    ]
+  },
+  {
+    id:80, title:"Conjugated Systems & Diels-Alder", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Diels-Alder is a ___ cycloaddition:", options:["[2+2]","[4+2]","[4+4]","[3+2]"], correct:1},
+      {q:"The diene must be in ___ conformation:", options:["s-trans","s-cis","anti","gauche"], correct:1},
+      {q:"1,4-addition is the ___ product:", options:["Kinetic","Thermodynamic","Neither","Both"], correct:1},
+      {q:"Conjugated dienes are ___ than isolated:", options:["Less stable","More stable","Equally stable","More reactive"], correct:1},
+      {q:"Dienophile typically has:", options:["Electron-donating groups","Electron-withdrawing groups","No substituents","Only hydrogens"], correct:1},
+      {q:"Diels-Alder is a ___ reaction:", options:["Radical","Ionic","Concerted (pericyclic)","Photochemical"], correct:2}
+    ]
+  },
+  {
+    id:81, title:"Free Radical Reactions", type:"mc",
+    instruction:"Select the correct answer about radical chemistry.",
+    questions:[
+      {q:"Initiation creates radicals by:", options:["Heterolytic cleavage","Homolytic cleavage","Proton transfer","Electron transfer"], correct:1},
+      {q:"Most stable carbon radical:", options:["Methyl","Primary","Secondary","Tertiary"], correct:3},
+      {q:"Br₂ is more ___ than Cl₂:", options:["Reactive","Selective","Abundant","Electronegative"], correct:1},
+      {q:"Anti-Markovnikov addition of HBr requires:", options:["Heat","Peroxide (ROOR)","UV light","Acid catalyst"], correct:1},
+      {q:"Propagation steps:", options:["Create new radicals","Continue the chain","Destroy radicals","Are endothermic"], correct:1},
+      {q:"Termination occurs when:", options:["Radicals form","Chain continues","Two radicals combine","Bonds break"], correct:2}
+    ]
+  },
+  {
+    id:82, title:"Alpha Carbon & Enolate Chemistry", type:"mc",
+    instruction:"Select the correct answer about carbonyl chemistry.",
+    questions:[
+      {q:"The alpha carbon is ___ to C=O:", options:["Two carbons away","Adjacent","On the oxygen","In the ring"], correct:1},
+      {q:"LDA is used to form:", options:["Grignard reagents","Enolates","Alcohols","Ethers"], correct:1},
+      {q:"Aldol product contains:", options:["Only C=O","Only OH","β-hydroxy carbonyl","Ester group"], correct:2},
+      {q:"Claisen condensation gives:", options:["β-hydroxy aldehyde","β-keto ester","Alcohol","Carboxylic acid"], correct:1},
+      {q:"In keto-enol tautomerism, usually favored:", options:["Enol form","Keto form","They are equal","Depends on solvent"], correct:1},
+      {q:"Haloform reaction converts methyl ketone to:", options:["Alcohol + CHX₃","Carboxylate + CHX₃","Aldehyde + HX","Ester + X₂"], correct:1}
+    ]
+  },
+  {
+    id:83, title:"Crystal Types & Solids", type:"mc",
+    instruction:"Select the correct answer about crystal types and solid properties.",
+    questions:[
+      {q:"Ionic solids have ___ melting points:", options:["Low","High","Variable","Depends on size"], correct:1},
+      {q:"Network covalent solid example:", options:["NaCl","Ice","Diamond","Iron"], correct:2},
+      {q:"Metallic solids conduct electricity because:", options:["Ionic bonds","Delocalized electrons","Hydrogen bonds","Covalent bonds"], correct:1},
+      {q:"Atoms per FCC unit cell:", options:["1","2","4","8"], correct:2},
+      {q:"Molecular solids are held by:", options:["Ionic bonds","Metallic bonds","IMFs","Covalent network"], correct:2},
+      {q:"Simple cubic packing efficiency:", options:["52%","68%","74%","90%"], correct:0}
+    ]
+  },
+  {
+    id:84, title:"Heating Curves & Calculations", type:"mc",
+    instruction:"Select the correct answer about heating curves.",
+    questions:[
+      {q:"During a phase change, temperature:", options:["Increases","Decreases","Remains constant","Fluctuates"], correct:2},
+      {q:"q = mcΔT is used during:", options:["Phase changes","Temperature changes","Both","Neither"], correct:1},
+      {q:"The plateau at 100°C (water) represents:", options:["Melting","Sublimation","Boiling","Freezing"], correct:2},
+      {q:"ΔHfus is the heat of:", options:["Vaporization","Fusion (melting)","Sublimation","Condensation"], correct:1},
+      {q:"Heating curve: steepest slope = ___ specific heat:", options:["Highest","Lowest","Equal","Zero"], correct:1},
+      {q:"Condensation is:", options:["Endothermic","Exothermic","Neither","Both"], correct:1}
+    ]
+  },
+  {
+    id:85, title:"Vapor Pressure & Clausius-Clapeyron", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Higher vapor pressure means:", options:["Higher boiling point","Lower boiling point","No relation","Higher viscosity"], correct:1},
+      {q:"Clausius-Clapeyron relates VP to:", options:["Pressure only","Temperature","Volume","Mass"], correct:1},
+      {q:"Raoult's law: P_solution =", options:["χ·P°","M·P°","m·P°","n·P°"], correct:0},
+      {q:"Adding nonvolatile solute ___ vapor pressure:", options:["Increases","Decreases","No change","Doubles"], correct:1},
+      {q:"At the boiling point, VP equals:", options:["Zero","Atmospheric pressure","Twice atmospheric","Half atmospheric"], correct:1},
+      {q:"Volatile liquids have ___ IMFs:", options:["Strong","Weak","No","Ionic"], correct:1}
+    ]
+  },
+  {
+    id:86, title:"Concentration Units (Advanced)", type:"mc",
+    instruction:"Select the correct answer about concentration units.",
+    questions:[
+      {q:"Molality uses ___ in denominator:", options:["Liters solution","kg solvent","moles solute","grams solution"], correct:1},
+      {q:"Mole fraction is always:", options:["Greater than 1","Between 0 and 1","Negative","In mol/L"], correct:1},
+      {q:"ppm means parts per:", options:["Hundred","Thousand","Million","Billion"], correct:2},
+      {q:"Molality is preferred over molarity when:", options:["Always","Temperature changes","Dilute solutions","Never"], correct:1},
+      {q:"Normality = Molarity ×:", options:["Volume","n-factor","Mass","Temperature"], correct:1},
+      {q:"Mass percent = (mass solute/mass solution) ×:", options:["10","100","1000","1"], correct:1}
+    ]
+  },
+  {
+    id:87, title:"Integrated Rate Laws", type:"mc",
+    instruction:"Select the correct answer about chemical kinetics.",
+    questions:[
+      {q:"First-order: plot ___ vs t is linear:", options:["[A]","ln[A]","1/[A]","[A]²"], correct:1},
+      {q:"Second-order half-life depends on:", options:["Nothing","[A]₀","Temperature only","Catalyst"], correct:1},
+      {q:"First-order half-life formula:", options:["[A]₀/2k","ln2/k","1/(k[A]₀)","k/[A]₀"], correct:1},
+      {q:"Arrhenius equation relates k to:", options:["Concentration","Temperature","Pressure","Volume"], correct:1},
+      {q:"Zero-order: [A] vs t plot is:", options:["Exponential","Linear","Logarithmic","Parabolic"], correct:1},
+      {q:"Units of k for 2nd order:", options:["s⁻¹","M⁻¹s⁻¹","M/s","M⁻²s⁻¹"], correct:1}
+    ]
+  },
+  {
+    id:88, title:"Reaction Mechanisms", type:"mc",
+    instruction:"Select the correct answer about reaction mechanisms.",
+    questions:[
+      {q:"Rate-determining step is the:", options:["Fastest","Slowest","First","Last"], correct:1},
+      {q:"Bimolecular means ___ reactant molecules:", options:["One","Two","Three","Any number"], correct:1},
+      {q:"A catalyst ___ activation energy:", options:["Increases","Decreases","Doesn't change","Doubles"], correct:1},
+      {q:"Intermediate appears in ___ but not ___:", options:["Mechanism; rate law","Rate law; mechanism","Products; reactants","Reactants; products"], correct:0},
+      {q:"Rate law is determined:", options:["From balanced equation","Experimentally","From mechanism always","From products"], correct:1},
+      {q:"Homogeneous catalyst is in ___ phase as reactants:", options:["Different","Same","Gas","Solid"], correct:1}
+    ]
+  },
+  {
+    id:89, title:"Polyprotic Acids & Complex Ions", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"For polyprotic acids: Ka1 ___ Ka2:", options:["<",">","=","Unrelated"], correct:1},
+      {q:"H₃PO₄ has ___ ionization steps:", options:["1","2","3","4"], correct:2},
+      {q:"Amphoteric species can act as:", options:["Only acid","Only base","Both acid and base","Neither"], correct:2},
+      {q:"Complex ion formation ___ solubility:", options:["Decreases","Increases","Doesn't affect","Eliminates"], correct:1},
+      {q:"Kf is the ___ constant:", options:["Dissociation","Formation","Equilibrium","Acid"], correct:1},
+      {q:"Al(OH)₃ is amphoteric because it dissolves in:", options:["Only acid","Only base","Both acid and base","Neither"], correct:2}
+    ]
+  },
+  {
+    id:90, title:"Electrochemistry (Advanced)", type:"mc",
+    instruction:"Select the correct answer about advanced electrochemistry.",
+    questions:[
+      {q:"Nernst equation corrects E° for:", options:["Temperature only","Non-standard concentrations","Pressure only","Mass"], correct:1},
+      {q:"In cell notation, || represents:", options:["Wire","Salt bridge","Electrode","Solution"], correct:1},
+      {q:"Faraday's constant F =", options:["96485 C/mol","8.314 J/molK","6.022×10²³","1.602×10⁻¹⁹"], correct:0},
+      {q:"Electrolysis requires:", options:["Spontaneous reaction","External power source","Salt bridge","Catalyst"], correct:1},
+      {q:"Anode in cell notation is on the:", options:["Right","Left","Top","Bottom"], correct:1},
+      {q:"Concentration cell: E° =", options:["Positive","Negative","Zero","Variable"], correct:2}
+    ]
+  },
+  {
+    id:91, title:"Nuclear Binding Energy & Dating", type:"mc",
+    instruction:"Select the correct answer about nuclear chemistry.",
+    questions:[
+      {q:"Mass defect is the difference between:", options:["Predicted and actual mass","Protons and neutrons","Fission and fusion","Alpha and beta"], correct:0},
+      {q:"Most stable nucleus has ___ binding energy per nucleon:", options:["Lowest","Highest","Zero","Negative"], correct:1},
+      {q:"C-14 half-life:", options:["5730 years","1600 years","4.5 billion years","12 years"], correct:0},
+      {q:"E = mc² relates mass to:", options:["Velocity","Energy","Momentum","Force"], correct:1},
+      {q:"Iron-56 is at the ___ of the BE/nucleon curve:", options:["Bottom","Middle","Peak","End"], correct:2},
+      {q:"After 3 half-lives, ___ of original remains:", options:["1/2","1/4","1/8","1/16"], correct:2}
+    ]
+  },
+  {
+    id:92, title:"Photoelectric Effect & de Broglie", type:"mc",
+    instruction:"Select the correct answer about quantum phenomena.",
+    questions:[
+      {q:"Photoelectric effect: increasing intensity increases:", options:["KE of electrons","Number of electrons","Frequency","Wavelength"], correct:1},
+      {q:"Work function (φ) is the ___ energy to eject e⁻:", options:["Maximum","Minimum","Average","Total"], correct:1},
+      {q:"de Broglie wavelength: λ = h/___:", options:["mc","mv","mf","mE"], correct:1},
+      {q:"Heisenberg: cannot know both ___ precisely:", options:["Mass and charge","Position and momentum","Energy and time only","Spin and orbit"], correct:1},
+      {q:"Below threshold frequency, ___ electrons ejected:", options:["Many","Few","No","Slow"], correct:2},
+      {q:"Matter waves are significant for:", options:["Baseballs","Cars","Electrons","Planets"], correct:2}
+    ]
+  },
+  {
+    id:93, title:"Resonance & Formal Charge", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Formal charge = V - N - B/2. V stands for:", options:["Volume","Valence electrons","Velocity","Voltage"], correct:1},
+      {q:"Best Lewis structure has formal charges closest to:", options:["Maximum","Zero","Negative","Positive"], correct:1},
+      {q:"BF₃ is an exception because B has:", options:["Expanded octet","Incomplete octet","Odd electrons","No bonds"], correct:1},
+      {q:"SF₆ has ___ electron pairs around S:", options:["4","5","6","3"], correct:2},
+      {q:"Resonance structures differ in:", options:["Atom positions","Electron positions","Number of atoms","Charge"], correct:1},
+      {q:"NO has ___ total electrons:", options:["10","11","12","14"], correct:1}
+    ]
+  },
+  {
+    id:94, title:"Solution Stoichiometry (Advanced)", type:"mc",
+    instruction:"Select the correct answer about solutions and reactions.",
+    questions:[
+      {q:"AgCl is:", options:["Soluble","Insoluble","Slightly soluble in hot water","Amphoteric"], correct:1},
+      {q:"Spectator ions appear:", options:["Only in products","Only in reactants","Unchanged on both sides","In precipitate"], correct:2},
+      {q:"Net ionic equation shows only:", options:["All ions","Species that change","Spectator ions","Molecular formula"], correct:1},
+      {q:"Activity series: Zn ___ Cu:", options:["Below","Above","Equal to","Not compared to"], correct:1},
+      {q:"BaSO₄ is:", options:["Soluble","Insoluble","Acidic","Basic"], correct:1},
+      {q:"All nitrates are:", options:["Insoluble","Soluble","Acidic","Basic"], correct:1}
+    ]
+  },
+  {
+    id:95, title:"Chemical Reaction Types", type:"mc",
+    instruction:"Identify the type of chemical reaction.",
+    questions:[
+      {q:"Which reaction type: 2Na + Cl₂ → 2NaCl?", options:["Synthesis","Decomposition","Single replacement","Combustion"], correct:0},
+      {q:"AB → A + B is a ___ reaction:", options:["Synthesis","Decomposition","Single replacement","Double replacement"], correct:1},
+      {q:"CxHy + O₂ → CO₂ + H₂O is:", options:["Synthesis","Decomposition","Single replacement","Combustion"], correct:3},
+      {q:"AB + CD → AD + CB is:", options:["Synthesis","Decomposition","Single replacement","Double replacement"], correct:3},
+      {q:"A + BC → AC + B is:", options:["Synthesis","Decomposition","Single replacement","Double replacement"], correct:2},
+      {q:"2H₂O → 2H₂ + O₂ is:", options:["Synthesis","Decomposition","Single replacement","Combustion"], correct:1}
+    ]
+  },
+  {
+    id:96, title:"Predicting Products", type:"mc",
+    instruction:"Select the correct answer about predicting reaction products.",
+    questions:[
+      {q:"In a single replacement reaction, what determines if the reaction occurs?", options:["Activity series","Solubility rules","pH scale","Electronegativity"], correct:0},
+      {q:"In double replacement, a reaction occurs if:", options:["A precipitate, gas, or water forms","The metals are active","Heat is applied","A catalyst is present"], correct:0},
+      {q:"Which metal can replace Cu²⁺ from solution?", options:["Au","Ag","Zn","Pt"], correct:2},
+      {q:"Combustion of a hydrocarbon always produces:", options:["CO₂ and H₂O","CO and H₂","CO₂ and H₂","O₂ and H₂O"], correct:0},
+      {q:"NaOH + HCl → ?", options:["NaCl + H₂O","NaH + ClOH","Na + HClO","NaClO + H₂"], correct:0},
+      {q:"AgNO₃ + NaCl → ?", options:["AgCl↓ + NaNO₃","AgNa + ClNO₃","No reaction","Ag + NaClNO₃"], correct:0}
+    ]
+  },
+  {
+    id:97, title:"Redox Reactions", type:"mc",
+    instruction:"Select the correct answer about oxidation-reduction.",
+    questions:[
+      {q:"In the reaction Zn + CuSO₄ → ZnSO₄ + Cu, which element is oxidized?", options:["Zn","Cu","S","O"], correct:0},
+      {q:"Oxidation is:", options:["Loss of electrons","Gain of electrons","Loss of protons","Gain of protons"], correct:0},
+      {q:"The reducing agent is the species that:", options:["Gets reduced","Gets oxidized","Gains electrons","Loses protons"], correct:1},
+      {q:"LEO GER stands for:", options:["Lose Electrons Oxidation, Gain Electrons Reduction","Light Energy Output, Gain Energy Return","Low Energy Orbit, Ground Energy Release","None of these"], correct:0},
+      {q:"In a redox reaction, the total electrons lost =", options:["Total electrons gained","Twice electrons gained","Half electrons gained","Zero"], correct:0},
+      {q:"Oxidation number of O in most compounds:", options:["+2","−1","−2","0"], correct:2}
+    ]
+  },
+  {
+    id:98, title:"Acid-Base Fundamentals", type:"mc",
+    instruction:"Select the correct answer about acids and bases.",
+    questions:[
+      {q:"According to Brønsted-Lowry theory, an acid is a:", options:["Proton donor","Proton acceptor","Electron donor","Electron acceptor"], correct:0},
+      {q:"An Arrhenius base produces ___ in water:", options:["H⁺","OH⁻","Cl⁻","Na⁺"], correct:1},
+      {q:"A Lewis acid is an:", options:["Proton donor","Proton acceptor","Electron pair acceptor","Electron pair donor"], correct:2},
+      {q:"Which is a strong acid?", options:["HF","HCl","CH₃COOH","H₂CO₃"], correct:1},
+      {q:"The conjugate base of H₂O is:", options:["H₃O⁺","OH⁻","O²⁻","H₂"], correct:1},
+      {q:"An amphoteric substance can act as:", options:["Only an acid","Only a base","Both acid and base","Neither"], correct:2}
+    ]
+  },
+  {
+    id:99, title:"pH and pOH Calculations", type:"mc",
+    instruction:"Select the correct answer about pH and pOH.",
+    questions:[
+      {q:"What is the pH of a 0.001 M HCl solution?", options:["3","4","11","1"], correct:0},
+      {q:"pH + pOH = ?", options:["7","10","14","1"], correct:2},
+      {q:"A solution with pH = 2 is:", options:["Strongly acidic","Weakly acidic","Neutral","Basic"], correct:0},
+      {q:"Kw at 25°C = ?", options:["1.0 × 10⁻⁷","1.0 × 10⁻¹⁴","1.0 × 10⁻¹","14"], correct:1},
+      {q:"If [OH⁻] = 10⁻³ M, pOH = ?", options:["3","11","7","−3"], correct:0},
+      {q:"pH = −log[?]", options:["OH⁻","H⁺","H₂O","Ka"], correct:1}
+    ]
+  },
+  {
+    id:100, title:"Neutralization & Titration", type:"mc",
+    instruction:"Select the correct answer about neutralization and titration.",
+    questions:[
+      {q:"At the equivalence point of a strong acid-strong base titration, the pH is:", options:["7","Less than 7","Greater than 7","14"], correct:0},
+      {q:"Acid + base → ?", options:["Salt + water","Gas + precipitate","Metal + acid","Oxide + hydrogen"], correct:0},
+      {q:"The formula MaVa = MbVb is used for:", options:["Dilution","Titration","Redox balancing","Gas laws"], correct:1},
+      {q:"Phenolphthalein turns pink in:", options:["Acidic solution","Neutral solution","Basic solution","Any solution"], correct:2},
+      {q:"At the half-equivalence point of a weak acid titration:", options:["pH = pKa","pH = 7","pH = 14","pH = 0"], correct:0},
+      {q:"A buffer resists changes in:", options:["Temperature","Pressure","pH","Volume"], correct:2}
+    ]
+  },
+  {
+    id:101, title:"Electron Configuration (Complete)", type:"mc",
+    instruction:"Select the correct answer about electron configurations.",
+    questions:[
+      {q:"What is the electron configuration of Fe (Z=26)?", options:["[Ar] 4s² 3d⁶","[Ar] 3d⁸","[Ar] 4s² 3d⁸","[Ar] 4s¹ 3d⁷"], correct:0},
+      {q:"Cr is an exception because its config is:", options:["[Ar] 4s² 3d⁴","[Ar] 4s¹ 3d⁵","[Ar] 4s⁰ 3d⁶","[Ar] 3d⁶"], correct:1},
+      {q:"Cu is an exception: its config is:", options:["[Ar] 4s² 3d⁹","[Ar] 4s¹ 3d¹⁰","[Ar] 4s⁰ 3d¹¹","[Ar] 3d¹⁰"], correct:1},
+      {q:"When forming Fe²⁺, electrons are removed from:", options:["3d first","4s first","3p first","4p first"], correct:1},
+      {q:"The Aufbau order after 3p is:", options:["3d","4s","4p","4d"], correct:1},
+      {q:"Max electrons in the 3d subshell:", options:["6","8","10","14"], correct:2}
+    ]
+  },
+  {
+    id:102, title:"Electronegativity & Bond Polarity", type:"mc",
+    instruction:"Select the correct answer about electronegativity and bonding.",
+    questions:[
+      {q:"Which element has the highest electronegativity?", options:["Fluorine","Oxygen","Chlorine","Nitrogen"], correct:0},
+      {q:"ΔEN = 0.3 indicates a ___ bond:", options:["Nonpolar covalent","Polar covalent","Ionic","Metallic"], correct:0},
+      {q:"ΔEN > 1.7 indicates a ___ bond:", options:["Nonpolar covalent","Polar covalent","Ionic","Metallic"], correct:2},
+      {q:"EN increases going ___ across a period:", options:["Left to right","Right to left","Top to bottom","Stays the same"], correct:0},
+      {q:"EN decreases going ___ down a group:", options:["Up","Down","Left","Right"], correct:1},
+      {q:"In H-Cl, the δ⁻ is on:", options:["H","Cl","Both equally","Neither"], correct:1}
+    ]
+  },
+  {
+    id:103, title:"Polar & Nonpolar Molecules", type:"mc",
+    instruction:"Determine molecular polarity based on geometry.",
+    questions:[
+      {q:"CO₂ is nonpolar because:", options:["Its linear shape causes dipoles to cancel","It has no polar bonds","Carbon is nonpolar","It is a gas"], correct:0},
+      {q:"H₂O is polar because:", options:["It is linear","Its bent shape means dipoles don't cancel","O is nonpolar","It has no lone pairs"], correct:1},
+      {q:"CH₄ is nonpolar because:", options:["C-H bonds are nonpolar","Tetrahedral symmetry cancels dipoles","It has no bonds","It is a gas"], correct:1},
+      {q:"Which molecule is polar?", options:["CO₂","CCl₄","NH₃","BF₃"], correct:2},
+      {q:"Symmetric molecules with identical bonds are:", options:["Always polar","Always nonpolar","Sometimes ionic","Always ionic"], correct:1},
+      {q:"SF₆ is nonpolar because:", options:["S-F bonds are nonpolar","Octahedral symmetry cancels dipoles","It has no lone pairs on S","It is a noble gas"], correct:1}
+    ]
+  },
+  {
+    id:104, title:"Matter Classification", type:"mc",
+    instruction:"Classify types of matter correctly.",
+    questions:[
+      {q:"Saltwater is classified as a:", options:["Homogeneous mixture","Heterogeneous mixture","Compound","Element"], correct:0},
+      {q:"Gold (Au) is a:", options:["Compound","Mixture","Element","Solution"], correct:2},
+      {q:"A compound can be separated by:", options:["Physical methods","Chemical methods","Filtration","Evaporation"], correct:1},
+      {q:"Salad is a ___ mixture:", options:["Homogeneous","Heterogeneous","Pure substance","Compound"], correct:1},
+      {q:"H₂O is a:", options:["Element","Homogeneous mixture","Compound","Heterogeneous mixture"], correct:2},
+      {q:"Which are the 7 diatomic elements?", options:["H₂, N₂, O₂, F₂, Cl₂, Br₂, I₂","H₂, He₂, N₂, O₂, F₂, Cl₂, Br₂","H₂, N₂, O₂, F₂, Cl₂, Ar₂, I₂","None of these"], correct:0}
+    ]
+  },
+  {
+    id:105, title:"Intermolecular Forces", type:"mc",
+    instruction:"Identify intermolecular forces and their properties.",
+    questions:[
+      {q:"Which intermolecular force requires H bonded to F, O, or N?", options:["Hydrogen bonding","Dipole-dipole","London dispersion","Ion-dipole"], correct:0},
+      {q:"London dispersion forces are present in:", options:["Only nonpolar molecules","Only polar molecules","All molecules","Only ionic compounds"], correct:2},
+      {q:"Which IMF is strongest?", options:["London dispersion","Dipole-dipole","Hydrogen bonding","Ion-dipole"], correct:3},
+      {q:"Larger molecules have stronger ___ forces:", options:["Hydrogen bonding","Dipole-dipole","London dispersion","Ionic"], correct:2},
+      {q:"IMF are forces between:", options:["Atoms in a molecule","Molecules","Protons and neutrons","Nucleus and electrons"], correct:1},
+      {q:"HF has a high boiling point due to:", options:["London dispersion","Metallic bonding","Hydrogen bonding","Ionic bonding"], correct:2}
+    ]
+  },
+  {
+    id:106, title:"IMF & Physical Properties", type:"mc",
+    instruction:"Connect intermolecular forces to physical properties.",
+    questions:[
+      {q:"A substance with strong IMF will have:", options:["High boiling point and low vapor pressure","Low boiling point and high vapor pressure","High boiling point and high vapor pressure","Low boiling point and low vapor pressure"], correct:0},
+      {q:"High vapor pressure means the substance is:", options:["Hard to evaporate","Easy to evaporate (volatile)","A solid at room temperature","Ionic"], correct:1},
+      {q:"Viscosity increases with:", options:["Weaker IMF","Stronger IMF","Higher temperature","Lower molecular mass"], correct:1},
+      {q:"Surface tension is caused by:", options:["Gravity","IMF at the liquid surface","Atmospheric pressure","Covalent bonds"], correct:1},
+      {q:"Water's high surface tension is due to:", options:["London dispersion","Dipole-dipole","Hydrogen bonding","Ion-dipole"], correct:2},
+      {q:"Which has the highest boiling point?", options:["CH₄","H₂O","CO₂","N₂"], correct:1}
+    ]
+  },
+  {
+    id:107, title:"Polyatomic Ions Deep Drill",
+    instruction:"Write the formula or name of each polyatomic ion.",
+    cols:["#","Name / Formula","Your Answer","Solution"],
+    rows:[
+      ["1","Hydroxide → formula?","OH- / OH⁻"],
+      ["2","Nitrate → formula?","NO3- / NO₃⁻"],
+      ["3","Ammonium → formula?","NH4+ / NH₄⁺"],
+      ["4","Carbonate → formula?","CO32- / CO₃²⁻"],
+      ["5","Sulfate → formula?","SO42- / SO₄²⁻"],
+      ["6","Phosphate → formula?","PO43- / PO₄³⁻"],
+      ["7","Bicarbonate → formula?","HCO3- / HCO₃⁻"],
+      ["8","Permanganate → formula?","MnO4- / MnO₄⁻"],
+      ["9","Chromate → formula?","CrO42- / CrO₄²⁻"],
+      ["10","Dichromate → formula?","Cr2O72- / Cr₂O₇²⁻"],
+      ["11","Cyanide → formula?","CN- / CN⁻"],
+      ["12","Acetate → formula?","CH3COO- / C₂H₃O₂⁻ / CH₃COO⁻"],
+      ["13","Chlorate → formula?","ClO3- / ClO₃⁻"],
+      ["14","Perchlorate → formula?","ClO4- / ClO₄⁻"],
+      ["15","Oxalate → formula?","C2O42- / C₂O₄²⁻"]
+    ]
+  },
+  {
+    id:108, title:"Interactive Periodic Table",
+    instruction:"Identify elements, groups, periods, and blocks.",
+    cols:["#","Question","Your Answer","Solution"],
+    rows:[
+      ["1","Symbol for Sodium?","Na"],
+      ["2","Symbol for Iron?","Fe"],
+      ["3","Symbol for Gold?","Au"],
+      ["4","Symbol for Silver?","Ag"],
+      ["5","Symbol for Potassium?","K"],
+      ["6","Symbol for Lead?","Pb"],
+      ["7","Symbol for Copper?","Cu"],
+      ["8","Symbol for Tin?","Sn"],
+      ["9","Group 1 elements are called ___","alkali metals"],
+      ["10","Group 17 elements are called ___","halogens"],
+      ["11","Group 18 elements are called ___","noble gases"],
+      ["12","Na is in block ___","s"],
+      ["13","Fe is in block ___","d"],
+      ["14","C is in block ___","p"],
+      ["15","Ce (Z=58) is in block ___","f"]
+    ]
+  },
+  {
+    id:109, title:"Periodic Table Theory & Trends", type:"mc",
+    instruction:"Select the correct answer about periodic trends.",
+    questions:[
+      {q:"Atomic radius increases:", options:["Left to right","Top to bottom","Toward upper right","Randomly"], correct:1},
+      {q:"Ionization energy generally increases:", options:["Down a group","Left to right across a period","Toward the lower left","Randomly"], correct:1},
+      {q:"Most electronegative element?", options:["Cs","He","F","O"], correct:2},
+      {q:"Largest atomic radius among: Li, Na, K, Rb?", options:["Li","Na","K","Rb"], correct:3},
+      {q:"Metallic character increases:", options:["Left to right","Top to bottom","Upper right","No trend"], correct:1},
+      {q:"Effective nuclear charge (Zeff) across a period:", options:["Decreases","Increases","Stays the same","Fluctuates"], correct:1},
+      {q:"Shielding effect increases:", options:["Across a period","Down a group","Toward halogens","For smaller atoms"], correct:1},
+      {q:"Which has higher IE: Na or Cl?", options:["Na","Cl","Equal","Cannot determine"], correct:1}
+    ]
+  },
+  {
+    id:110, title:"Chemical Reactions Master", type:"mc",
+    instruction:"Classify or predict the reaction.",
+    questions:[
+      {q:"2Na + Cl₂ → 2NaCl is:", options:["Decomposition","Single replacement","Synthesis","Combustion"], correct:2},
+      {q:"2H₂O → 2H₂ + O₂ is:", options:["Synthesis","Decomposition","Combustion","Double replacement"], correct:1},
+      {q:"Zn + CuSO₄ → ZnSO₄ + Cu is:", options:["Synthesis","Decomposition","Single replacement","Double replacement"], correct:2},
+      {q:"CH₄ + 2O₂ → CO₂ + 2H₂O is:", options:["Synthesis","Single replacement","Double replacement","Combustion"], correct:3},
+      {q:"AgNO₃ + NaCl → AgCl + NaNO₃ is:", options:["Synthesis","Decomposition","Single replacement","Double replacement"], correct:3},
+      {q:"In Zn + CuSO₄, which is oxidized?", options:["Cu","Zn","S","O"], correct:1},
+      {q:"Oxidation number of Mn in MnO₄⁻:", options:["+4","+5","+6","+7"], correct:3},
+      {q:"A combustion reaction always produces:", options:["H₂ and O₂","CO₂ and H₂O","Metal oxide","Salt and water"], correct:1}
+    ]
+  },
+  {
+    id:111, title:"Intramolecular vs Intermolecular Forces", type:"mc",
+    instruction:"Classify forces and predict properties.",
+    questions:[
+      {q:"A covalent bond is:", options:["Intermolecular","Intramolecular","Both","Neither"], correct:1},
+      {q:"Hydrogen bonding is:", options:["Intermolecular","Intramolecular","Both","Neither"], correct:0},
+      {q:"When water boils, which forces break?", options:["Covalent bonds","Ionic bonds","Intermolecular forces","Nuclear forces"], correct:2},
+      {q:"Which is stronger: a covalent bond or hydrogen bonding?", options:["Hydrogen bonding","Covalent bond","Equal","Depends on molecule"], correct:1},
+      {q:"London dispersion forces are present in:", options:["Only nonpolar molecules","Only polar molecules","All molecules","Only ionic compounds"], correct:2},
+      {q:"Decomposing water into H₂ and O₂ breaks:", options:["Intermolecular forces","Intramolecular bonds","Both","Neither"], correct:1},
+      {q:"Rank IMF weakest to strongest:", options:["HB < DD < LDF","LDF < DD < HB","DD < LDF < HB","HB < LDF < DD"], correct:1},
+      {q:"An ionic bond is classified as:", options:["Intermolecular","Intramolecular","IMF","Dispersion"], correct:1}
+    ]
+  },
+  {
+    id:112, title:"Acid-Base Comprehensive", type:"mc",
+    instruction:"Test your acid-base knowledge across all topics.",
+    questions:[
+      {q:"According to Brønsted-Lowry, an acid:", options:["Produces H⁺","Donates a proton","Accepts electrons","Produces OH⁻"], correct:1},
+      {q:"A Lewis base:", options:["Donates proton","Accepts proton","Donates electron pair","Accepts electron pair"], correct:2},
+      {q:"Conjugate base of H₂SO₄:", options:["SO₄²⁻","HSO₄⁻","H₂S","S²⁻"], correct:1},
+      {q:"pH of 0.001 M HCl:", options:["1","2","3","4"], correct:2},
+      {q:"Which is NOT a strong acid?", options:["HCl","HF","HBr","HI"], correct:1},
+      {q:"pH + pOH = ?", options:["7","10","14","1"], correct:2},
+      {q:"A buffer contains:", options:["Strong acid + strong base","Weak acid + conjugate base","Two strong acids","Salt + water"], correct:1},
+      {q:"Water is amphoteric because:", options:["It is neutral","It can be acid or base","It has pH 7","It dissolves everything"], correct:1}
+    ]
+  }
+];
+
+const SLUGS = [
+  "subatomic-particles","isotopes-nuclear-notation","ions-periodic-table",
+  "ionic-formulas-crisscross","polyatomic-ions","binary-nomenclature",
+  "transition-metal-nomenclature","polyatomic-nomenclature","mole-concept",
+  "molar-mass-calculations","stoichiometry-n-m-M","mixed-review",
+  "isotopic-abundance-calculations","isobars-radioisotopes-nuclides",
+  "binary-covalent-greek-prefixes","acid-naming",
+  "transition-metals-extended","formula-writing-intensive",
+  "naming-all-rules-combined","comprehensive-final-review",
+  "quantum-numbers-electron-config",
+  "periodic-trends",
+  "lewis-structures",
+  "vsepr-molecular-geometry",
+  "balancing-chemical-equations",
+  "types-of-chemical-reactions",
+  "solutions-concentration",
+  "gas-laws",
+  "acids-bases-ph",
+  "redox-reactions",
+  "intro-organic-chemistry",
+  "alkanes-naming",
+  "alkenes-alkynes",
+  "functional-groups",
+  "thermochemistry",
+  "chemical-kinetics",
+  "chemical-equilibrium",
+  "electrochemistry",
+  "nuclear-chemistry",
+  "intermolecular-forces",
+  "advanced-stoichiometry",
+  "aromatic-compounds",
+  "organic-reactions",
+  "polymers-biochemistry",
+  "isomerism",
+  "coordination-compounds",
+  "light-wavelength-photon-energy",
+  "molecular-orbital-theory",
+  "colligative-properties",
+  "phase-diagrams-changes-of-state",
+  "buffer-solutions",
+  "titration-curves",
+  "solubility-equilibrium-ksp",
+  "net-ionic-equations",
+  "calorimetry",
+  "descriptive-chemistry-main-group",
+  "alcohols-ethers-phenols",
+  "aldehydes-ketones",
+  "carboxylic-acids-esters",
+  "amines-amides",
+  "stereochemistry",
+  "reaction-mechanisms",
+  "carbohydrates",
+  "lipids-proteins",
+  "nucleic-acids-dna-rna",
+  "comprehensive-final-review",
+  "chemistry-fundamentals",
+  "matter-classification",
+  "historical-atomic-models",
+  "electronegativity-bond-polarity",
+  "hybridization-sigma-pi",
+  "percent-composition-empirical",
+  "gibbs-free-energy-entropy",
+  "lattice-energy-born-haber",
+  "salt-hydrolysis-acidic-basic",
+  "paramagnetic-diamagnetic",
+  "newman-projections-conformations",
+  "chair-conformations",
+  "spectroscopy-ir-ms",
+  "conjugated-systems-diels-alder",
+  "free-radical-reactions",
+  "alpha-carbon-enolate",
+  "liquids-solids-crystal-types",
+  "heating-curves-calculations",
+  "vapor-pressure-clausius-clapeyron",
+  "concentration-units-advanced",
+  "integrated-rate-laws",
+  "reaction-mechanisms-rate-laws",
+  "polyprotic-acids-complex-ions",
+  "electrochemistry-advanced",
+  "nuclear-binding-energy-dating",
+  "photoelectric-de-broglie",
+  "resonance-formal-charge",
+  "solution-stoichiometry-advanced",
+  "chemical-reactions-types",
+  "predicting-products",
+  "redox-reactions",
+  "acid-base-fundamentals",
+  "ph-poh-calculations",
+  "neutralization-titration",
+  "electron-configuration-complete",
+  "electronegativity-bond-polarity",
+  "polar-nonpolar-molecules",
+  "matter-classification",
+  "intermolecular-forces",
+  "imf-physical-properties",
+  "polyatomic-ions-memorization",
+  "periodic-table-interactive",
+  "periodic-table-theory",
+  "chemical-reactions-comprehensive",
+  "intra-vs-intermolecular",
+  "acid-base-comprehensive"
+];
+
+const THEORY = {
+  1: '<h3>Subatomic Particles</h3><table><tr><th>Particle</th><th>Charge</th><th>Location</th><th>Mass</th></tr><tr><td>Proton (p⁺)</td><td>+1</td><td>Nucleus</td><td>1 u</td></tr><tr><td>Neutron (n⁰)</td><td>0</td><td>Nucleus</td><td>1 u</td></tr><tr><td>Electron (e⁻)</td><td>−1</td><td>Shells</td><td>≈ 0</td></tr></table><p><span class="rule">Key:</span> The atomic number Z = number of protons = determines the element.</p>',
+  2: '<h3>Atomic & Mass Number</h3><p><span class="rule">Z (atomic number)</span> = number of protons</p><p><span class="rule">A (mass number)</span> = protons + neutrons</p><p><span class="rule">Neutrons</span> = A − Z</p><table><tr><th>Element</th><th>Z</th><th>A</th><th>N (neutrons)</th></tr><tr><td>Na</td><td>11</td><td>23</td><td>12</td></tr><tr><td>C</td><td>6</td><td>12</td><td>6</td></tr><tr><td>Fe</td><td>26</td><td>56</td><td>30</td></tr></table>',
+  3: '<h3>Isotopes</h3><p><span class="rule">Isotopes</span> are atoms of the same element (same Z) with a different number of neutrons (different A).</p><table><tr><th>Isotope</th><th>Z</th><th>A</th><th>Neutrons</th></tr><tr><td>¹²C</td><td>6</td><td>12</td><td>6</td></tr><tr><td>¹⁴C</td><td>6</td><td>14</td><td>8</td></tr></table><p><span class="rule">Average atomic weight:</span> Weighted average based on abundance.</p><p>Cl: 75% × 35 + 25% × 37 = 35.5</p>',
+  4: '<h3>Ions: Cations & Anions</h3><p><span class="rule">Cation (+):</span> Atom loses e⁻ (metals)</p><p><span class="rule">Anion (−):</span> Atom gains e⁻ (nonmetals)</p><table><tr><th>Group</th><th>Ion charge</th><th>Example</th></tr><tr><td>1</td><td>+1</td><td>Na⁺, K⁺</td></tr><tr><td>2</td><td>+2</td><td>Mg²⁺, Ca²⁺</td></tr><tr><td>13</td><td>+3</td><td>Al³⁺</td></tr><tr><td>15</td><td>−3</td><td>N³⁻</td></tr><tr><td>16</td><td>−2</td><td>O²⁻, S²⁻</td></tr><tr><td>17</td><td>−1</td><td>Cl⁻, F⁻</td></tr></table>',
+  5: '<h3>Valence Electrons</h3><p><span class="rule">Valence electrons</span> = electrons in the outermost shell.</p><table><tr><th>Group</th><th>Valence e⁻</th><th>Example</th></tr><tr><td>1</td><td>1</td><td>Na, K</td></tr><tr><td>2</td><td>2</td><td>Mg, Ca</td></tr><tr><td>13</td><td>3</td><td>Al</td></tr><tr><td>14</td><td>4</td><td>C, Si</td></tr><tr><td>15</td><td>5</td><td>N, P</td></tr><tr><td>16</td><td>6</td><td>O, S</td></tr><tr><td>17</td><td>7</td><td>Cl, F</td></tr><tr><td>18</td><td>8</td><td>Ar, Ne</td></tr></table><p><span class="rule">Rule:</span> Groups 1-2: group number. Groups 13-18: group − 10.</p>',
+  6: '<h3>Criss-Cross: Binary Compounds</h3><p><span class="rule">Criss-Cross Method:</span></p><ul><li>1. Write cation + anion with their charges</li><li>2. The charge of one becomes the subscript of the other</li><li>3. Simplify if possible</li></ul><p>Example: Ca²⁺ + Cl⁻ → CaCl₂</p><p>Example: Al³⁺ + O²⁻ → Al₂O₃</p>',
+  7: '<h3>The 7 Polyatomic Ions</h3><table><tr><th>Name</th><th>Formula</th><th>Charge</th></tr><tr><td>Hydroxide</td><td>OH⁻</td><td>−1</td></tr><tr><td>Nitrate</td><td>NO₃⁻</td><td>−1</td></tr><tr><td>Ammonium</td><td>NH₄⁺</td><td>+1</td></tr><tr><td>Carbonate</td><td>CO₃²⁻</td><td>−2</td></tr><tr><td>Sulfate</td><td>SO₄²⁻</td><td>−2</td></tr><tr><td>Phosphate</td><td>PO₄³⁻</td><td>−3</td></tr><tr><td>Bicarbonate</td><td>HCO₃⁻</td><td>−1</td></tr></table><p><span class="rule">Only positive:</span> NH₄⁺ (ammonium). All the rest are negative.</p>',
+  8: '<h3>Criss-Cross with Polyatomics</h3><p><span class="rule">Rule:</span> If a subscript > 1 is needed for a polyatomic ion, use parentheses.</p><ul><li>Ca²⁺ + OH⁻ → Ca(OH)₂ (need 2 OH, so parentheses)</li><li>Na⁺ + OH⁻ → NaOH (only 1, no parentheses)</li><li>Al³⁺ + SO₄²⁻ → Al₂(SO₄)₃</li></ul><p><span class="rule">Caution:</span> Never change the subscripts inside the polyatomic ion!</p>',
+  9: '<h3>Binary Compound Nomenclature</h3><p><span class="rule">Rule:</span> [metal name] + [nonmetal root + -ide]</p><table><tr><th>Nonmetal</th><th>Suffix</th></tr><tr><td>Cl (chlorine)</td><td>chlor-ide</td></tr><tr><td>O (oxygen)</td><td>ox-ide</td></tr><tr><td>S (sulfur)</td><td>sulf-ide</td></tr><tr><td>F (fluorine)</td><td>fluor-ide</td></tr><tr><td>P (phosphorus)</td><td>phosph-ide</td></tr></table><p>NaCl = sodium chloride, MgO = magnesium oxide</p>',
+  10: '<h3>Transition Metals: Roman Numerals</h3><p>Transition metals can form multiple ions, so a <span class="rule">Roman numeral</span> is needed in the name.</p><table><tr><th>Formula</th><th>Fe charge</th><th>Name</th></tr><tr><td>FeO</td><td>+2</td><td>Iron(II) oxide</td></tr><tr><td>Fe₂O₃</td><td>+3</td><td>Iron(III) oxide</td></tr><tr><td>CuCl</td><td>+1</td><td>Copper(I) chloride</td></tr><tr><td>CuCl₂</td><td>+2</td><td>Copper(II) chloride</td></tr></table><p><span class="rule">How to find the charge:</span> The compound is neutral, so metal charge = opposite of total nonmetal charge.</p>',
+  11: '<h3>Polyatomic Compound Nomenclature</h3><p><span class="rule">Rule:</span> [metal name] + [polyatomic ion name]</p><ul><li>NaOH = sodium hydroxide</li><li>Ca(OH)₂ = calcium hydroxide</li><li>KNO₃ = potassium nitrate</li><li>Na₂CO₃ = sodium carbonate</li><li>(NH₄)₂SO₄ = ammonium sulfate</li></ul><p><span class="rule">With transition metals:</span> Add Roman numeral, e.g. Fe₂(SO₄)₃ = iron(III) sulfate</p>',
+  12: '<h3>The Mole: n = m / M</h3><p><span class="rule">n</span> = number of moles</p><p><span class="rule">m</span> = mass in grams (g)</p><p><span class="rule">M</span> = molar mass (g/mol)</p><table><tr><th>Formula</th><th>Find</th></tr><tr><td>n = m / M</td><td>moles</td></tr><tr><td>m = n × M</td><td>mass (g)</td></tr><tr><td>M = m / n</td><td>molar mass</td></tr></table><p>Example: 36 g H₂O, M = 18 g/mol → n = 36/18 = 2 mol</p><p><span class="rule">1 mol</span> = 6.022 × 10²³ particles (Avogadro\'s number)</p>',
+  13: '<h3>Molar Mass Calculation (M)</h3><p><span class="rule">Steps:</span></p><ul><li>1. Write the formula</li><li>2. Count the atoms of each element</li><li>3. Multiply × atomic mass</li><li>4. Add them all</li></ul><p>Example: Ca(OH)₂</p><ul><li>Ca: 1 × 40 = 40</li><li>O: 2 × 16 = 32</li><li>H: 2 × 1 = 2</li><li>Total: 74 g/mol</li></ul><p><span class="rule">Watch the parentheses!</span> Ca(OH)₂ = 1 Ca + 2 O + 2 H</p>',
+  14: '<h3>Review of Key Concepts</h3><ul><li><span class="rule">Z:</span> Atomic number = protons = element identity</li><li><span class="rule">Isotopes:</span> Same Z, different A (neutrons)</li><li><span class="rule">Cation:</span> Loses e⁻ → positive (+)</li><li><span class="rule">Anion:</span> Gains e⁻ → negative (−)</li><li><span class="rule">Octet rule:</span> 8 e⁻ in the outer shell = stability</li><li><span class="rule">Criss-cross:</span> Charge of one → subscript of the other</li><li><span class="rule">1 mol:</span> 6.022 × 10²³ particles</li><li><span class="rule">n = m / M:</span> Basic mole formula</li></ul>',
+  15: '<h3>Mixed Challenge: Tips</h3><ul><li><span class="rule">Nomenclature:</span> First identify if it is a binary or polyatomic compound</li><li><span class="rule">Criss-cross:</span> Write charges → swap → simplify → parentheses if polyatomic</li><li><span class="rule">M:</span> Count ALL atoms (watch parentheses & subscripts)</li><li><span class="rule">n = m / M:</span> First find M, then n</li><li><span class="rule">Valence e⁻:</span> Check the group on the P.T.</li><li><span class="rule">Metal charge:</span> Compound is neutral → solve the charge equation</li></ul>',
+  16: '<h3>Isotopic Abundance & Atomic Weight</h3><p><span class="rule">Formula:</span> Atomic weight = sum(mass_i × fraction_i)</p><p><span class="rule">Steps:</span></p><ul><li>1. Convert % to decimal (÷100)</li><li>2. Multiply mass × fraction for each isotope</li><li>3. Add all products</li></ul><p>Example: Cl = 75.77% × 34.97 + 24.23% × 36.97 = 35.45 u</p><p><span class="rule">Key:</span> The result must fall BETWEEN the smallest and largest isotope mass.</p>',
+  17: '<h3>Isobars, Radioisotopes & Nuclides</h3><p><span class="rule">Isotopes:</span> Same Z, different A (same element)</p><p><span class="rule">Isobars:</span> Same A, different Z (DIFFERENT elements)</p><p><span class="rule">Nuclide:</span> A specific nuclear type (Z+N)</p><p><span class="rule">Radioisotopes:</span> Unstable nuclides → radioactive decay</p><table><tr><th>Example</th><th>Type</th></tr><tr><td>¹²C, ¹⁴C</td><td>Isotopes (Z=6)</td></tr><tr><td>¹⁴C, ¹⁴N</td><td>Isobars (A=14)</td></tr></table><p>Deuterium (²H/D): 1p+1n. Tritium (³H/T): 1p+2n (radioactive).</p>',
+  18: '<h3>Covalent Compounds: Greek Prefixes</h3><p><span class="rule">Rule:</span> Nonmetal + nonmetal → covalent → Greek prefixes</p><table><tr><th>Number</th><th>Prefix</th></tr><tr><td>1</td><td>mono-</td></tr><tr><td>2</td><td>di-</td></tr><tr><td>3</td><td>tri-</td></tr><tr><td>4</td><td>tetra-</td></tr><tr><td>5</td><td>penta-</td></tr><tr><td>6</td><td>hexa-</td></tr></table><p><span class="rule">Rule:</span> Omit "mono-" for the FIRST element.</p><p>CO₂ = carbon dioxide, N₂O₅ = dinitrogen pentoxide</p>',
+  19: '<h3>Acid Nomenclature</h3><table><tr><th>Anion ends in</th><th>Acid name</th><th>Example</th></tr><tr><td>-ide</td><td>hydro___ic acid</td><td>Cl⁻ → HCl = hydrochloric acid</td></tr><tr><td>-ate</td><td>___ic acid</td><td>SO₄²⁻ → H₂SO₄ = sulfuric acid</td></tr><tr><td>-ite</td><td>___ous acid</td><td>SO₃²⁻ → H₂SO₃ = sulfurous acid</td></tr></table><p><span class="rule">Mnemonic:</span> "-ate → -ic (I ate something ICky)", "-ite → -ous (not right for US)"</p>',
+  20: '<h3>Final Review: All Types</h3><ul><li><span class="rule">Z</span> = protons, <span class="rule">A</span> = protons + neutrons</li><li><span class="rule">Isotopes:</span> same Z, <span class="rule">Isobars:</span> same A</li><li><span class="rule">Atomic weight</span> = sum(mass × fraction)</li><li><span class="rule">Ionic:</span> metal + nonmetal → Rule A</li><li><span class="rule">Covalent:</span> nonmetal + nonmetal → Greek prefixes</li><li><span class="rule">Transition metals:</span> Roman numerals (Zn, Ag exceptions)</li><li><span class="rule">Acids:</span> -ide→hydro_ic, -ate→_ic, -ite→_ous</li><li><span class="rule">n = m / M</span>, 1 mol = 6.022 × 10²³</li></ul>',
+  21: '<h3>Quantum Numbers & Electron Configuration</h3><table><tr><th>Quantum #</th><th>Symbol</th><th>Values</th><th>Describes</th></tr><tr><td>Principal</td><td>n</td><td>1, 2, 3...</td><td>Shell / energy level</td></tr><tr><td>Angular</td><td>l</td><td>0 to n−1</td><td>Subshell shape (s,p,d,f)</td></tr><tr><td>Magnetic</td><td>ml</td><td>−l to +l</td><td>Orbital orientation</td></tr><tr><td>Spin</td><td>ms</td><td>+1/2, −1/2</td><td>Electron spin</td></tr></table><p><span class="rule">Max electrons per shell:</span> 2n²</p><p><span class="rule">Aufbau order:</span> 1s, 2s, 2p, 3s, 3p, 4s, 3d, 4p...</p>',
+  22: '<h3>Periodic Trends</h3><table><tr><th>Property</th><th>Across period (→)</th><th>Down group (↓)</th></tr><tr><td>Atomic radius</td><td>Decreases</td><td>Increases</td></tr><tr><td>Ionization energy</td><td>Increases</td><td>Decreases</td></tr><tr><td>Electronegativity</td><td>Increases</td><td>Decreases</td></tr><tr><td>Electron affinity</td><td>More negative (generally)</td><td>Less negative</td></tr><tr><td>Metallic character</td><td>Decreases</td><td>Increases</td></tr></table><p><span class="rule">Most electronegative:</span> F (3.98). <span class="rule">Largest atom:</span> Fr (bottom-left).</p>',
+  23: '<h3>Lewis Structures</h3><p><span class="rule">Steps:</span></p><ul><li>1. Count total valence electrons</li><li>2. Place central atom, connect outer atoms with single bonds</li><li>3. Complete octets on outer atoms</li><li>4. Place remaining electrons on central atom</li><li>5. Form double/triple bonds if central atom lacks an octet</li></ul><p><span class="rule">Valence e⁻:</span> Group 1=1, 2=2, 13=3, 14=4, 15=5, 16=6, 17=7, 18=8</p>',
+  24: '<h3>VSEPR & Molecular Geometry</h3><table><tr><th>Bonds</th><th>Lone pairs</th><th>Shape</th><th>Example</th></tr><tr><td>2</td><td>0</td><td>Linear</td><td>CO₂</td></tr><tr><td>3</td><td>0</td><td>Trigonal planar</td><td>BF₃</td></tr><tr><td>2</td><td>1</td><td>Bent</td><td>SO₂</td></tr><tr><td>4</td><td>0</td><td>Tetrahedral</td><td>CH₄</td></tr><tr><td>3</td><td>1</td><td>Trigonal pyramidal</td><td>NH₃</td></tr><tr><td>2</td><td>2</td><td>Bent</td><td>H₂O</td></tr><tr><td>5</td><td>0</td><td>Trigonal bipyramidal</td><td>PCl₅</td></tr><tr><td>6</td><td>0</td><td>Octahedral</td><td>SF₆</td></tr></table>',
+  25: '<h3>Balancing Chemical Equations</h3><p><span class="rule">Law of Conservation of Mass:</span> Atoms in = atoms out.</p><ul><li>1. Write the unbalanced equation</li><li>2. Count atoms of each element on both sides</li><li>3. Add coefficients to balance (start with the most complex molecule)</li><li>4. Check: all elements balanced, smallest whole-number coefficients</li></ul><p><span class="rule">Never change subscripts!</span> Only change coefficients.</p>',
+  26: '<h3>Types of Chemical Reactions</h3><table><tr><th>Type</th><th>Pattern</th><th>Example</th></tr><tr><td>Synthesis</td><td>A + B → AB</td><td>2Na + Cl₂ → 2NaCl</td></tr><tr><td>Decomposition</td><td>AB → A + B</td><td>2H₂O → 2H₂ + O₂</td></tr><tr><td>Single replacement</td><td>A + BC → AC + B</td><td>Zn + CuSO₄ → ZnSO₄ + Cu</td></tr><tr><td>Double replacement</td><td>AB + CD → AD + CB</td><td>AgNO₃ + NaCl → AgCl + NaNO₃</td></tr><tr><td>Combustion</td><td>CₓHᵧ + O₂ → CO₂ + H₂O</td><td>CH₄ + 2O₂ → CO₂ + 2H₂O</td></tr></table>',
+  27: '<h3>Solutions & Concentration</h3><p><span class="rule">Molarity (M)</span> = moles of solute / liters of solution = n / V</p><p><span class="rule">Dilution:</span> M₁V₁ = M₂V₂</p><ul><li>To find moles: n = M × V</li><li>To find mass: m = n × molar mass</li><li>Convert mL to L: divide by 1000</li></ul><p>Example: 2 mol NaCl in 0.5 L → M = 2/0.5 = 4 M</p>',
+  28: '<h3>Gas Laws</h3><table><tr><th>Law</th><th>Formula</th><th>Constant</th></tr><tr><td>Boyle</td><td>P₁V₁ = P₂V₂</td><td>T, n</td></tr><tr><td>Charles</td><td>V₁/T₁ = V₂/T₂</td><td>P, n</td></tr><tr><td>Combined</td><td>P₁V₁/T₁ = P₂V₂/T₂</td><td>n</td></tr><tr><td>Ideal Gas</td><td>PV = nRT</td><td>—</td></tr></table><p><span class="rule">R</span> = 0.0821 L·atm/(mol·K)</p><p><span class="rule">STP:</span> T = 273 K (0°C), P = 1 atm. Molar volume = 22.4 L/mol</p>',
+  29: '<h3>Acids, Bases & pH</h3><p><span class="rule">pH</span> = −log[H⁺], <span class="rule">pOH</span> = −log[OH⁻]</p><p><span class="rule">pH + pOH = 14</span> (at 25°C)</p><table><tr><th>pH</th><th>Type</th></tr><tr><td>&lt; 7</td><td>Acidic</td></tr><tr><td>= 7</td><td>Neutral</td></tr><tr><td>&gt; 7</td><td>Basic</td></tr></table><p><span class="rule">Strong acids:</span> HCl, HBr, HI, HNO₃, H₂SO₄, HClO₄ (ionize completely)</p><p><span class="rule">Strong bases:</span> NaOH, KOH, Ca(OH)₂</p>',
+  30: '<h3>Redox Reactions</h3><p><span class="rule">OIL RIG:</span> Oxidation Is Loss, Reduction Is Gain (of electrons)</p><ul><li><span class="rule">Oxidation:</span> Loss of electrons, increase in oxidation number</li><li><span class="rule">Reduction:</span> Gain of electrons, decrease in oxidation number</li><li><span class="rule">Oxidizing agent:</span> Gets reduced (takes electrons)</li><li><span class="rule">Reducing agent:</span> Gets oxidized (gives electrons)</li></ul><p><span class="rule">Rules:</span> Free element = 0, O = −2 (usually), H = +1 (usually), sum = charge of species</p>',
+  31: '<h3>Intro to Organic Chemistry</h3><p><span class="rule">Organic chemistry:</span> Study of carbon-containing compounds.</p><ul><li>Carbon forms 4 covalent bonds</li><li><span class="rule">sp³</span> = 4 single bonds (tetrahedral, 109.5°)</li><li><span class="rule">sp²</span> = 1 double + 2 single bonds (trigonal planar, 120°)</li><li><span class="rule">sp</span> = 1 triple + 1 single bond (linear, 180°)</li></ul><p><span class="rule">Hydrocarbons:</span> Compounds of C and H only (alkanes, alkenes, alkynes, aromatics)</p>',
+  32: '<h3>Alkane Naming (IUPAC)</h3><table><tr><th>C atoms</th><th>Prefix</th><th>Name</th><th>Formula</th></tr><tr><td>1</td><td>meth-</td><td>methane</td><td>CH₄</td></tr><tr><td>2</td><td>eth-</td><td>ethane</td><td>C₂H₆</td></tr><tr><td>3</td><td>prop-</td><td>propane</td><td>C₃H₈</td></tr><tr><td>4</td><td>but-</td><td>butane</td><td>C₄H₁₀</td></tr><tr><td>5</td><td>pent-</td><td>pentane</td><td>C₅H₁₂</td></tr><tr><td>6-10</td><td>hex/hept/oct/non/dec</td><td>—</td><td>—</td></tr></table><p><span class="rule">General formula:</span> CₙH₂ₙ₊₂. <span class="rule">Suffix:</span> -ane</p>',
+  33: '<h3>Alkenes & Alkynes</h3><table><tr><th>Type</th><th>Bond</th><th>Suffix</th><th>Formula</th></tr><tr><td>Alkene</td><td>C=C (double)</td><td>-ene</td><td>CₙH₂ₙ</td></tr><tr><td>Alkyne</td><td>C≡C (triple)</td><td>-yne</td><td>CₙH₂ₙ₋₂</td></tr></table><p><span class="rule">Geometric isomers:</span> cis (same side) vs trans (opposite sides) around a C=C double bond.</p><p>Examples: ethene (C₂H₄), propene (C₃H₆), ethyne (C₂H₂)</p>',
+  34: '<h3>Functional Groups</h3><table><tr><th>Group</th><th>Name</th><th>Suffix/Class</th></tr><tr><td>-OH</td><td>Hydroxyl</td><td>Alcohol (-ol)</td></tr><tr><td>-COOH</td><td>Carboxyl</td><td>Carboxylic acid (-oic acid)</td></tr><tr><td>-NH₂</td><td>Amino</td><td>Amine (-amine)</td></tr><tr><td>-CHO</td><td>Aldehyde</td><td>Aldehyde (-al)</td></tr><tr><td>C=O</td><td>Carbonyl</td><td>Ketone (-one)</td></tr><tr><td>-O-</td><td>Ether</td><td>Ether</td></tr><tr><td>-COO-</td><td>Ester</td><td>Ester (-oate)</td></tr></table>',
+  35: '<h3>Thermochemistry</h3><p><span class="rule">q = mcΔT</span> (q=heat, m=mass, c=specific heat, ΔT=temp change)</p><ul><li><span class="rule">Exothermic:</span> ΔH &lt; 0, releases heat</li><li><span class="rule">Endothermic:</span> ΔH &gt; 0, absorbs heat</li></ul><p><span class="rule">Hess\'s Law:</span> Total ΔH depends only on initial and final states, not the path.</p><p>Specific heat of water: c = 4.18 J/(g·°C)</p>',
+  36: '<h3>Chemical Kinetics</h3><ul><li><span class="rule">Rate:</span> Change in concentration over time</li><li><span class="rule">Rate law:</span> rate = k[A]ᵐ[B]ⁿ (determined experimentally)</li><li><span class="rule">Activation energy (Ea):</span> Minimum energy needed for reaction</li></ul><p><span class="rule">Factors affecting rate:</span></p><ul><li>Temperature (higher → faster)</li><li>Concentration (higher → faster)</li><li>Surface area (more → faster)</li><li>Catalyst (lowers Ea)</li></ul>',
+  37: '<h3>Chemical Equilibrium</h3><p><span class="rule">Kc expression:</span> For aA + bB ⇌ cC + dD: Kc = [C]ᶜ[D]ᵈ / [A]ᵃ[B]ᵇ</p><ul><li>Kc >> 1: products favored</li><li>Kc << 1: reactants favored</li><li>Pure solids and liquids NOT included in Kc</li></ul><p><span class="rule">Le Chatelier\'s Principle:</span> If a system at equilibrium is disturbed, it shifts to counteract the change.</p><ul><li>Add reactant → shifts right</li><li>Remove product → shifts right</li><li>Increase T (exothermic) → shifts left</li></ul>',
+  38: '<h3>Electrochemistry</h3><table><tr><th></th><th>Galvanic (Voltaic)</th><th>Electrolytic</th></tr><tr><td>Spontaneous?</td><td>Yes</td><td>No (needs electricity)</td></tr><tr><td>E°cell</td><td>&gt; 0</td><td>&lt; 0</td></tr><tr><td>Use</td><td>Battery</td><td>Electroplating</td></tr></table><p><span class="rule">Anode:</span> Oxidation occurs (−). <span class="rule">Cathode:</span> Reduction occurs (+).</p><p><span class="rule">E°cell</span> = E°cathode − E°anode</p>',
+  39: '<h3>Nuclear Chemistry</h3><table><tr><th>Radiation</th><th>Symbol</th><th>Charge</th><th>Mass</th><th>Penetration</th></tr><tr><td>Alpha</td><td>α / ⁴₂He</td><td>+2</td><td>4</td><td>Low (paper stops)</td></tr><tr><td>Beta</td><td>β⁻ / ⁰₋₁e</td><td>−1</td><td>≈0</td><td>Medium (foil stops)</td></tr><tr><td>Gamma</td><td>γ</td><td>0</td><td>0</td><td>High (lead/concrete)</td></tr></table><p><span class="rule">Half-life:</span> Time for half the radioactive atoms to decay.</p><p><span class="rule">Fission:</span> Heavy nucleus splits. <span class="rule">Fusion:</span> Light nuclei combine.</p>',
+  40: '<h3>Intermolecular Forces</h3><table><tr><th>Force</th><th>Strength</th><th>Occurs in</th></tr><tr><td>Ion-dipole</td><td>Strongest</td><td>Ions + polar molecules</td></tr><tr><td>Hydrogen bonding</td><td>Strong</td><td>H bonded to F, O, or N</td></tr><tr><td>Dipole-dipole</td><td>Moderate</td><td>Polar molecules</td></tr><tr><td>London dispersion</td><td>Weakest</td><td>All molecules</td></tr></table><p><span class="rule">Key:</span> Stronger IMFs → higher boiling point, higher viscosity, lower vapor pressure.</p>',
+  41: '<h3>Advanced Stoichiometry</h3><ul><li><span class="rule">Limiting reagent:</span> The reactant that runs out first and limits the product</li><li><span class="rule">Excess reagent:</span> The reactant left over</li><li><span class="rule">Percent yield</span> = (actual yield / theoretical yield) × 100</li></ul><p><span class="rule">Empirical formula:</span> Simplest whole-number ratio of atoms.</p><p><span class="rule">Molecular formula:</span> Actual number of atoms. Molecular = n × empirical (where n = molar mass / empirical mass).</p>',
+  42: '<h3>Aromatic Compounds</h3><p><span class="rule">Benzene (C₆H₆):</span> A 6-carbon ring with alternating double bonds (3 C=C), but actually has delocalized π electrons.</p><ul><li><span class="rule">Aromaticity:</span> Planar, cyclic, conjugated, 4n+2 π electrons (Huckel rule)</li><li>Benzene: 6 π electrons (n=1)</li></ul><table><tr><th>Substituent</th><th>Name</th></tr><tr><td>-CH₃</td><td>Toluene (methylbenzene)</td></tr><tr><td>-OH</td><td>Phenol</td></tr><tr><td>-NH₂</td><td>Aniline</td></tr></table>',
+  43: '<h3>Organic Reactions</h3><table><tr><th>Type</th><th>Description</th><th>Example</th></tr><tr><td>Addition</td><td>Atoms add across a double/triple bond</td><td>C₂H₄ + HBr → C₂H₅Br</td></tr><tr><td>Elimination</td><td>Atoms removed to form a double bond</td><td>C₂H₅OH → C₂H₄ + H₂O</td></tr><tr><td>Substitution</td><td>One atom/group replaces another</td><td>CH₄ + Cl₂ → CH₃Cl + HCl</td></tr><tr><td>Condensation</td><td>Two molecules join, losing H₂O</td><td>Acid + alcohol → ester + H₂O</td></tr></table>',
+  44: '<h3>Polymers & Biochemistry</h3><p><span class="rule">Polymer:</span> Large molecule made of repeating monomer units.</p><table><tr><th>Type</th><th>Mechanism</th><th>Example</th></tr><tr><td>Addition</td><td>Monomers add (no byproduct)</td><td>Polyethylene</td></tr><tr><td>Condensation</td><td>Monomers join, lose H₂O</td><td>Nylon, polyester</td></tr></table><p><span class="rule">Biomolecules:</span></p><ul><li>Proteins = amino acids</li><li>Carbohydrates = monosaccharides (glucose)</li><li>Lipids = glycerol + fatty acids</li><li>Nucleic acids = nucleotides</li></ul>',
+  45: '<h3>Isomerism</h3><table><tr><th>Type</th><th>Description</th><th>Example</th></tr><tr><td>Structural (constitutional)</td><td>Different connectivity</td><td>Butane vs isobutane</td></tr><tr><td>Geometric (cis/trans)</td><td>Same connectivity, different spatial arrangement around C=C</td><td>cis-2-butene vs trans-2-butene</td></tr><tr><td>Optical (enantiomers)</td><td>Non-superimposable mirror images</td><td>D-alanine vs L-alanine</td></tr></table><p><span class="rule">Chiral center:</span> Carbon with 4 different groups attached.</p>',
+  46: '<h3>Coordination Compounds</h3><p><span class="rule">Coordination compound:</span> Metal center bonded to ligands.</p><table><tr><th>Ligand</th><th>Name in complex</th><th>Type</th></tr><tr><td>NH₃</td><td>ammine</td><td>Neutral</td></tr><tr><td>H₂O</td><td>aqua</td><td>Neutral</td></tr><tr><td>Cl⁻</td><td>chlorido</td><td>Anionic</td></tr><tr><td>CN⁻</td><td>cyanido</td><td>Anionic</td></tr><tr><td>OH⁻</td><td>hydroxido</td><td>Anionic</td></tr></table><p><span class="rule">Naming:</span> Ligands (alphabetical) + metal + oxidation state (Roman numeral). Anionic complex ends in -ate.</p><p><span class="rule">Coordination number:</span> Number of bonds from ligands to metal.</p>',
+  47: '<h3>Light, Wavelength & Photon Energy</h3><p><span class="rule">c = λν</span> (speed of light = wavelength × frequency)</p><p><span class="rule">E = hν</span> (energy = Planck\'s constant × frequency)</p><p><span class="rule">E = hc/λ</span> (combining both equations)</p><table><tr><th>Constant</th><th>Value</th></tr><tr><td>c (speed of light)</td><td>3.00 × 10⁸ m/s</td></tr><tr><td>h (Planck\'s constant)</td><td>6.626 × 10⁻³⁴ J·s</td></tr></table><p><span class="rule">Key:</span> Higher frequency = shorter wavelength = higher energy. Visible light: ~400 nm (violet) to ~700 nm (red).</p>',
+  48: '<h3>Molecular Orbital Theory</h3><p><span class="rule">Bond order</span> = (bonding e⁻ − antibonding e⁻) / 2</p><ul><li>Bond order 0 → molecule doesn\'t exist</li><li>Higher bond order → stronger, shorter bond</li></ul><table><tr><th>Bond type</th><th>Overlap</th></tr><tr><td>σ (sigma)</td><td>Head-on (end-to-end)</td></tr><tr><td>π (pi)</td><td>Side-to-side (lateral)</td></tr></table><p><span class="rule">Paramagnetic:</span> Has unpaired electrons (attracted to magnet). <span class="rule">Diamagnetic:</span> All electrons paired.</p><p>O₂ is paramagnetic (2 unpaired e⁻ in π* orbitals).</p>',
+  49: '<h3>Colligative Properties</h3><p>Properties that depend on <span class="rule">number</span> of solute particles, not their identity.</p><table><tr><th>Property</th><th>Formula</th><th>Effect</th></tr><tr><td>Boiling point elevation</td><td>ΔTb = iKbm</td><td>BP increases</td></tr><tr><td>Freezing point depression</td><td>ΔTf = iKfm</td><td>FP decreases</td></tr><tr><td>Osmotic pressure</td><td>π = iMRT</td><td>—</td></tr></table><p><span class="rule">i (van\'t Hoff factor):</span> Number of particles per formula unit. NaCl → 2, CaCl₂ → 3, glucose → 1.</p>',
+  50: '<h3>Phase Diagrams & Changes of State</h3><table><tr><th>Transition</th><th>Name</th><th>Energy</th></tr><tr><td>Solid → Liquid</td><td>Melting (fusion)</td><td>Endothermic</td></tr><tr><td>Liquid → Gas</td><td>Vaporization (boiling)</td><td>Endothermic</td></tr><tr><td>Solid → Gas</td><td>Sublimation</td><td>Endothermic</td></tr><tr><td>Gas → Liquid</td><td>Condensation</td><td>Exothermic</td></tr><tr><td>Gas → Solid</td><td>Deposition</td><td>Exothermic</td></tr></table><p><span class="rule">Triple point:</span> All three phases coexist. <span class="rule">Critical point:</span> Above this, liquid and gas are indistinguishable (supercritical fluid).</p><p><span class="rule">Heating curve:</span> Plateaus = phase changes (temperature constant while heat is added).</p>',
+  51: '<h3>Buffer Solutions</h3><p><span class="rule">Buffer:</span> A solution that resists pH changes when small amounts of acid or base are added.</p><p><span class="rule">Components:</span> Weak acid + its conjugate base (e.g., CH₃COOH + CH₃COO⁻)</p><p><span class="rule">Henderson-Hasselbalch:</span> pH = pKa + log([A⁻]/[HA])</p><ul><li>When [A⁻] = [HA], pH = pKa (maximum buffer capacity)</li><li>Adding acid: the conjugate base (A⁻) reacts with it</li><li>Adding base: the weak acid (HA) reacts with it</li></ul>',
+  52: '<h3>Titration Curves</h3><table><tr><th>Titration type</th><th>Equivalence pH</th><th>Good indicator</th></tr><tr><td>Strong acid + strong base</td><td>7</td><td>Phenolphthalein or bromothymol blue</td></tr><tr><td>Weak acid + strong base</td><td>> 7</td><td>Phenolphthalein</td></tr><tr><td>Strong acid + weak base</td><td>< 7</td><td>Methyl orange</td></tr></table><p><span class="rule">Half-equivalence point:</span> pH = pKa (for weak acid titrations).</p><p><span class="rule">Titrant:</span> Solution in the buret. <span class="rule">Analyte:</span> Solution in the flask.</p>',
+  53: '<h3>Solubility Equilibrium (Ksp)</h3><p><span class="rule">Ksp</span> = solubility product constant for sparingly soluble salts.</p><p>For A<sub>x</sub>B<sub>y</sub>(s) ⇌ xA<sup>n+</sup>(aq) + yB<sup>m−</sup>(aq): Ksp = [A<sup>n+</sup>]<sup>x</sup>[B<sup>m−</sup>]<sup>y</sup></p><ul><li>Pure solids NOT included in Ksp</li><li>Smaller Ksp = less soluble</li><li><span class="rule">Common ion effect:</span> Adding a common ion decreases solubility</li><li>If Q > Ksp → precipitate forms</li><li>If Q < Ksp → more dissolves</li></ul>',
+  54: '<h3>Net Ionic Equations</h3><p><span class="rule">Steps:</span></p><ul><li>1. Write the balanced molecular equation</li><li>2. Split all strong electrolytes (soluble ionic compounds, strong acids/bases) into ions</li><li>3. Cancel spectator ions (appear unchanged on both sides)</li><li>4. What remains is the net ionic equation</li></ul><p><span class="rule">Driving forces:</span> Precipitate (solid), gas, or water formation.</p><p><span class="rule">Keep as molecules:</span> Weak electrolytes, precipitates, gases, water.</p>',
+  55: '<h3>Calorimetry</h3><p><span class="rule">q = mcΔT</span> (q = heat, m = mass, c = specific heat, ΔT = temperature change)</p><table><tr><th>Calorimeter</th><th>Measures at constant</th></tr><tr><td>Coffee-cup</td><td>Pressure (ΔH)</td></tr><tr><td>Bomb</td><td>Volume (ΔE)</td></tr></table><p><span class="rule">Hess\'s Law:</span> Total enthalpy change depends only on the initial and final states, not the path taken.</p><p>Specific heat of water: c = 4.18 J/(g·°C)</p>',
+  56: '<h3>Main Group Descriptive Chemistry</h3><table><tr><th>Group</th><th>Name</th><th>Properties</th></tr><tr><td>1</td><td>Alkali metals</td><td>Soft, reactive with H₂O, form +1 ions</td></tr><tr><td>2</td><td>Alkaline earth metals</td><td>Reactive (less than G1), form +2 ions</td></tr><tr><td>17</td><td>Halogens</td><td>Very reactive nonmetals, form −1 ions</td></tr><tr><td>18</td><td>Noble gases</td><td>Unreactive, full valence shells</td></tr></table><p><span class="rule">Most reactive metal:</span> Cs/Fr (bottom-left). <span class="rule">Most reactive nonmetal:</span> F (top-right of nonmetals).</p><p>Hydrogen can form H⁺ (like metals) or H⁻ (like nonmetals).</p>',
+  57: '<h3>Alcohols, Ethers & Phenols</h3><table><tr><th>Class</th><th>Structure</th><th>Suffix/Name</th></tr><tr><td>Alcohol</td><td>R-OH</td><td>-ol</td></tr><tr><td>Ether</td><td>R-O-R\'</td><td>ether</td></tr><tr><td>Phenol</td><td>Ar-OH (benzene-OH)</td><td>phenol</td></tr></table><p><span class="rule">Classification:</span></p><ul><li>1° alcohol: -OH on carbon bonded to 1 other C</li><li>2° alcohol: -OH on carbon bonded to 2 other C</li><li>3° alcohol: -OH on carbon bonded to 3 other C</li></ul><p>Methanol (CH₃OH), Ethanol (C₂H₅OH) are common alcohols.</p>',
+  58: '<h3>Aldehydes & Ketones</h3><p>Both contain the <span class="rule">carbonyl group (C=O)</span>.</p><table><tr><th>Type</th><th>Position of C=O</th><th>Suffix</th><th>Example</th></tr><tr><td>Aldehyde</td><td>End of chain (-CHO)</td><td>-al</td><td>Methanal (formaldehyde)</td></tr><tr><td>Ketone</td><td>Middle of chain</td><td>-one</td><td>Propanone (acetone)</td></tr></table><p><span class="rule">Tollens\' test:</span> Silver mirror test, positive for aldehydes only (Ag⁺ → Ag mirror). Ketones do NOT react.</p>',
+  59: '<h3>Carboxylic Acids & Esters</h3><p><span class="rule">Carboxylic acid:</span> R-COOH (suffix: -oic acid)</p><p><span class="rule">Ester:</span> R-COO-R\' (suffix: -oate)</p><table><tr><th>Reaction</th><th>Name</th></tr><tr><td>Acid + Alcohol → Ester + H₂O</td><td>Esterification</td></tr><tr><td>Ester + H₂O → Acid + Alcohol</td><td>Hydrolysis</td></tr><tr><td>Fat/Oil + Strong base → Soap + Glycerol</td><td>Saponification</td></tr></table><p>Common: formic acid (HCOOH), acetic acid (CH₃COOH).</p>',
+  60: '<h3>Amines & Amides</h3><table><tr><th>Class</th><th>Structure</th><th>Properties</th></tr><tr><td>1° amine</td><td>R-NH₂</td><td>Basic (lone pair on N)</td></tr><tr><td>2° amine</td><td>R₂NH</td><td>Basic</td></tr><tr><td>3° amine</td><td>R₃N</td><td>Basic</td></tr><tr><td>Amide</td><td>R-CO-NH₂</td><td>Weakly basic / neutral</td></tr></table><p><span class="rule">Peptide bond:</span> A special amide bond linking amino acids in proteins: -CO-NH-</p><p>Amines are derivatives of NH₃. IUPAC suffix: -amine.</p>',
+  61: '<h3>Stereochemistry</h3><p><span class="rule">Chiral center:</span> Carbon with 4 different groups → molecule is chiral (non-superimposable on mirror image).</p><table><tr><th>Term</th><th>Definition</th></tr><tr><td>Enantiomers</td><td>Non-superimposable mirror images</td></tr><tr><td>Diastereomers</td><td>Stereoisomers that are NOT mirror images</td></tr><tr><td>Racemic mixture</td><td>50:50 mix of both enantiomers (no net optical rotation)</td></tr></table><p><span class="rule">R/S naming (CIP rules):</span> Assign priority by atomic number → if clockwise = R, counterclockwise = S (with lowest priority pointing away).</p><p>Max stereoisomers = 2<sup>n</sup> (n = number of chiral centers).</p>',
+  62: '<h3>Reaction Mechanisms</h3><table><tr><th>Mechanism</th><th>Steps</th><th>Prefers</th><th>Stereochemistry</th></tr><tr><td>SN2</td><td>1 (concerted)</td><td>Primary / methyl</td><td>Inversion</td></tr><tr><td>SN1</td><td>2 (carbocation)</td><td>Tertiary</td><td>Racemization</td></tr><tr><td>E2</td><td>1 (concerted)</td><td>Strong base, 2°/3°</td><td>Anti-periplanar</td></tr><tr><td>E1</td><td>2 (carbocation)</td><td>Tertiary, weak base</td><td>—</td></tr></table><p><span class="rule">SN1/E1:</span> Both go through carbocation intermediate. <span class="rule">SN2:</span> Strong nucleophile, no rearrangement. <span class="rule">E2:</span> Strong, bulky base promotes elimination.</p>',
+  63: '<h3>Carbohydrates</h3><p><span class="rule">General formula:</span> Cₙ(H₂O)ₙ</p><table><tr><th>Type</th><th>Examples</th></tr><tr><td>Monosaccharides</td><td>Glucose, Fructose, Galactose</td></tr><tr><td>Disaccharides</td><td>Sucrose (Glu+Fru), Lactose (Glu+Gal), Maltose (Glu+Glu)</td></tr><tr><td>Polysaccharides</td><td>Starch, Cellulose, Glycogen (all from glucose)</td></tr></table><p><span class="rule">Glycosidic bond:</span> Links monosaccharides together (α or β linkage).</p><p>Glucose and fructose are isomers (same formula C₆H₁₂O₆, different structure).</p>',
+  64: '<h3>Lipids & Proteins</h3><p><span class="rule">Lipids:</span> Hydrophobic biomolecules (fats, oils, waxes, phospholipids).</p><ul><li>Saturated: no C=C double bonds (solid at room temp)</li><li>Unsaturated: one or more C=C double bonds (liquid at room temp)</li></ul><p><span class="rule">Protein structure levels:</span></p><table><tr><th>Level</th><th>Description</th></tr><tr><td>Primary</td><td>Amino acid sequence</td></tr><tr><td>Secondary</td><td>α-helix, β-pleated sheet (H-bonds)</td></tr><tr><td>Tertiary</td><td>3D folding (various interactions)</td></tr><tr><td>Quaternary</td><td>Multiple polypeptide subunits</td></tr></table><p><span class="rule">Denaturation:</span> Loss of 3D structure (by heat, pH, etc.).</p>',
+  65: '<h3>Nucleic Acids & DNA/RNA</h3><p><span class="rule">Nucleotide</span> = sugar + phosphate + nitrogenous base</p><table><tr><th></th><th>DNA</th><th>RNA</th></tr><tr><td>Sugar</td><td>Deoxyribose</td><td>Ribose</td></tr><tr><td>Strands</td><td>Double</td><td>Single</td></tr><tr><td>Bases</td><td>A, T, C, G</td><td>A, U, C, G</td></tr></table><p><span class="rule">Base pairing:</span> A=T (DNA) or A=U (RNA), C≡G (3 H-bonds). A-T has 2 H-bonds.</p><p><span class="rule">DNA:</span> Deoxyribonucleic acid (stores genetic info). <span class="rule">RNA:</span> Ribonucleic acid (protein synthesis).</p>',
+  66: '<h3>Comprehensive Final Review</h3><ul><li><span class="rule">pH:</span> −log[H⁺]. pH + pOH = 14.</li><li><span class="rule">Bond order:</span> (bonding − antibonding) / 2</li><li><span class="rule">Buffer:</span> Weak acid + conjugate base. pH = pKa + log([A⁻]/[HA])</li><li><span class="rule">SN2:</span> 1 step, primary, inversion. <span class="rule">SN1:</span> 2 steps, tertiary, racemization.</li><li><span class="rule">Glucose:</span> Monosaccharide, C₆H₁₂O₆</li><li><span class="rule">Peptide bond:</span> Amide bond linking amino acids</li><li><span class="rule">Triple point:</span> All 3 phases coexist</li><li><span class="rule">Racemic mixture:</span> Equal enantiomers, no net optical rotation</li></ul>',
+  67: '<h3>Chemistry Fundamentals</h3><p><span class="rule">Significant Figures Rules:</span></p><ul><li>Non-zero digits are always significant</li><li>Zeros between sig digits are significant (captured zeros)</li><li>Leading zeros are never significant</li><li>Trailing zeros with a decimal point are significant</li></ul><p><span class="rule">Scientific Notation:</span> N × 10ⁿ where 1 ≤ N &lt; 10</p><p><span class="rule">Density:</span> d = m/V (g/mL or g/cm³)</p><p><span class="rule">Temperature:</span> K = °C + 273.15, °F = (9/5)°C + 32</p>',
+  68: '<h3>Matter Classification</h3><p><span class="rule">Pure Substance:</span> Element (one type of atom) or Compound (chemically bonded)</p><p><span class="rule">Mixture:</span> Homogeneous (uniform) or Heterogeneous (not uniform)</p><p><span class="rule">Physical change:</span> No new substance formed (melting, boiling)</p><p><span class="rule">Chemical change:</span> New substance formed (rusting, burning)</p>',
+  69: '<h3>Historical Atomic Models</h3><ul><li><span class="rule">Dalton (1803):</span> Indivisible atoms, elements differ by mass</li><li><span class="rule">Thomson (1897):</span> Plum pudding model, discovered electron</li><li><span class="rule">Rutherford (1911):</span> Nuclear model, gold foil experiment</li><li><span class="rule">Bohr (1913):</span> Electrons in fixed orbits/energy levels</li><li><span class="rule">Quantum (1926):</span> Electron cloud, probability orbitals</li></ul><p><span class="rule">Laws:</span> Conservation of mass (Lavoisier), Definite proportions (Proust), Multiple proportions (Dalton)</p>',
+  70: '<h3>Electronegativity & Bond Polarity</h3><p><span class="rule">Electronegativity:</span> Ability to attract bonding electrons</p><p><span class="rule">Most EN:</span> F (4.0). Trend: increases across period, decreases down group.</p><table><tr><th>ΔEN</th><th>Bond Type</th></tr><tr><td>0-0.4</td><td>Nonpolar covalent</td></tr><tr><td>0.5-1.7</td><td>Polar covalent</td></tr><tr><td>≥1.8</td><td>Ionic</td></tr></table><p><span class="rule">Dipole moment:</span> Points from δ+ to δ−. Symmetric molecules can be nonpolar despite polar bonds.</p>',
+  71: '<h3>Hybridization & Sigma/Pi Bonds</h3><table><tr><th>Hybridization</th><th>Geometry</th><th>Bond Angle</th><th>Example</th></tr><tr><td>sp</td><td>Linear</td><td>180°</td><td>CO₂</td></tr><tr><td>sp²</td><td>Trigonal planar</td><td>120°</td><td>BF₃</td></tr><tr><td>sp³</td><td>Tetrahedral</td><td>109.5°</td><td>CH₄</td></tr><tr><td>sp³d</td><td>Trigonal bipyramidal</td><td>90°/120°</td><td>PCl₅</td></tr><tr><td>sp³d²</td><td>Octahedral</td><td>90°</td><td>SF₆</td></tr></table><p><span class="rule">Sigma (σ):</span> Head-on overlap, first bond. <span class="rule">Pi (π):</span> Side-by-side, second/third bond.</p>',
+  72: '<h3>Percent Composition & Empirical Formulas</h3><p><span class="rule">% composition:</span> (atoms × atomic mass / molar mass) × 100</p><p><span class="rule">Empirical formula steps:</span></p><ul><li>1. Assume 100 g → grams = percentages</li><li>2. Convert to moles (÷ atomic mass)</li><li>3. Divide all by smallest moles</li><li>4. Multiply to whole numbers if needed</li></ul><p><span class="rule">Molecular formula:</span> n = molar mass / empirical mass → molecular = n × empirical</p>',
+  73: '<h3>Gibbs Free Energy & Entropy</h3><p><span class="rule">ΔG = ΔH − TΔS</span></p><table><tr><th>ΔH</th><th>ΔS</th><th>Spontaneous?</th></tr><tr><td>−</td><td>+</td><td>Always</td></tr><tr><td>+</td><td>−</td><td>Never</td></tr><tr><td>−</td><td>−</td><td>Low T</td></tr><tr><td>+</td><td>+</td><td>High T</td></tr></table><p><span class="rule">Entropy:</span> Measure of disorder. S: gas > liquid > solid. More particles = more entropy.</p>',
+  74: '<h3>Lattice Energy & Born-Haber Cycle</h3><p><span class="rule">Lattice energy:</span> Energy to separate ionic solid into gaseous ions.</p><p><span class="rule">Trends:</span> Higher charge → higher LE. Smaller ions → higher LE. (Coulomb\'s law: E ∝ q₁q₂/r)</p><p><span class="rule">Born-Haber cycle:</span> Applies Hess\'s law to find lattice energy from sublimation, ionization, dissociation, electron affinity, and formation enthalpy.</p>',
+  75: '<h3>Salt Hydrolysis</h3><table><tr><th>Acid + Base</th><th>Salt Solution</th></tr><tr><td>Strong + Strong</td><td>Neutral (pH=7)</td></tr><tr><td>Strong + Weak</td><td>Acidic (pH&lt;7)</td></tr><tr><td>Weak + Strong</td><td>Basic (pH&gt;7)</td></tr><tr><td>Weak + Weak</td><td>Compare Ka vs Kb</td></tr></table><p><span class="rule">Hydrolysis:</span> Conjugate of weak component reacts with water to shift pH.</p>',
+  76: '<h3>Paramagnetic & Diamagnetic</h3><p><span class="rule">Paramagnetic:</span> Has unpaired electrons → attracted to magnet.</p><p><span class="rule">Diamagnetic:</span> All electrons paired → slightly repelled.</p><p><span class="rule">Ferromagnetic:</span> Fe, Co, Ni → strongly attracted, permanent magnetism.</p><p><span class="rule">To determine:</span> Write electron configuration → check for unpaired e⁻ (Hund\'s rule).</p>',
+  77: '<h3>Newman Projections</h3><p><span class="rule">Newman projection:</span> View along C-C bond axis. Front carbon = dot, back = circle.</p><p><span class="rule">Staggered:</span> 60° dihedral, lowest energy. <span class="rule">Eclipsed:</span> 0° dihedral, highest energy.</p><p><span class="rule">Butane:</span> Anti (180°) most stable > gauche (60°) > eclipsed (120°) > fully eclipsed (0°).</p>',
+  78: '<h3>Chair Conformations</h3><p><span class="rule">Cyclohexane chair:</span> Most stable, all bonds staggered.</p><p><span class="rule">Axial:</span> Up/down. <span class="rule">Equatorial:</span> Outward. Large groups prefer equatorial (less 1,3-diaxial strain).</p><p><span class="rule">Ring flip:</span> All axial ↔ equatorial. <span class="rule">A-value:</span> Measures equatorial preference.</p>',
+  79: '<h3>Spectroscopy (IR & MS)</h3><table><tr><th>Bond</th><th>IR (cm⁻¹)</th></tr><tr><td>O-H (alcohol)</td><td>3200-3550</td></tr><tr><td>O-H (acid)</td><td>2500-3300</td></tr><tr><td>N-H</td><td>3300-3500</td></tr><tr><td>C=O</td><td>1700-1750</td></tr><tr><td>C≡C</td><td>2100-2260</td></tr></table><p><span class="rule">MS:</span> M⁺ = molecular weight. Common losses: -15 (CH₃), -17 (OH), -18 (H₂O), -28 (CO).</p>',
+  80: '<h3>Conjugated Systems & Diels-Alder</h3><p><span class="rule">Conjugated diene:</span> Alternating single/double bonds, more stable than isolated.</p><p><span class="rule">1,2 vs 1,4 addition:</span> Kinetic (1,2) at low T, thermodynamic (1,4) at high T.</p><p><span class="rule">Diels-Alder:</span> [4+2] cycloaddition. Diene (s-cis, electron-rich) + dienophile (electron-poor) → 6-membered ring. Concerted, syn addition.</p>',
+  81: '<h3>Free Radical Reactions</h3><p><span class="rule">Three stages:</span> Initiation (radicals formed), Propagation (chain), Termination (radicals combine).</p><p><span class="rule">Radical stability:</span> 3° > 2° > 1° > methyl (allyl/benzyl stabilized by resonance).</p><p><span class="rule">Selectivity:</span> Br₂ more selective than Cl₂ (prefers 3°). Anti-Markovnikov with HBr + peroxide.</p>',
+  82: '<h3>Alpha Carbon & Enolate Chemistry</h3><p><span class="rule">Alpha carbon:</span> C adjacent to C=O. Alpha H is acidic (pKa ~20).</p><p><span class="rule">Enolate:</span> Resonance-stabilized conjugate base. Formed with strong base (LDA, NaOH).</p><p><span class="rule">Aldol:</span> β-hydroxy carbonyl → dehydration → α,β-unsaturated carbonyl.</p><p><span class="rule">Claisen:</span> Ester + ester → β-keto ester (with NaOEt).</p>',
+  83: '<h3>Crystal Types & Solids</h3><table><tr><th>Type</th><th>Particles</th><th>Forces</th><th>Properties</th></tr><tr><td>Ionic</td><td>Ions</td><td>Electrostatic</td><td>High MP, brittle, conduct dissolved</td></tr><tr><td>Molecular</td><td>Molecules</td><td>IMFs</td><td>Low MP, soft, nonconducting</td></tr><tr><td>Metallic</td><td>Metal atoms</td><td>Metallic bond</td><td>Variable MP, malleable, conduct</td></tr><tr><td>Network covalent</td><td>Atoms</td><td>Covalent bonds</td><td>Very high MP, very hard</td></tr></table><p><span class="rule">Unit cells:</span> SC = 1 atom (52%), BCC = 2 atoms (68%), FCC = 4 atoms (74%).</p>',
+  84: '<h3>Heating Curves</h3><p><span class="rule">Sloped regions:</span> Temperature changes, use q = mcΔT (specific heat).</p><p><span class="rule">Flat regions:</span> Phase changes, temperature constant, use q = nΔH.</p><p><span class="rule">Key values (water):</span> ΔHfus = 6.02 kJ/mol, ΔHvap = 40.7 kJ/mol.</p><p><span class="rule">Steeper slope = lower specific heat</span> (less energy to raise T).</p><p>Phases in order: solid → liquid → gas. Exothermic reverse: condensation, freezing.</p>',
+  85: '<h3>Vapor Pressure & Clausius-Clapeyron</h3><p><span class="rule">Vapor pressure (VP):</span> Pressure of vapor in equilibrium with liquid. Increases with T.</p><p><span class="rule">Clausius-Clapeyron:</span> ln(P₂/P₁) = −ΔHvap/R × (1/T₂ − 1/T₁)</p><p><span class="rule">Boiling point:</span> When VP = atmospheric pressure.</p><p><span class="rule">Raoult\'s law:</span> P_solution = χ_solvent × P°_solvent. Nonvolatile solute lowers VP.</p><p>Volatile liquids: weak IMFs → high VP → low boiling point.</p>',
+  86: '<h3>Concentration Units</h3><table><tr><th>Unit</th><th>Formula</th><th>Notes</th></tr><tr><td>Molarity (M)</td><td>mol solute / L solution</td><td>T-dependent</td></tr><tr><td>Molality (m)</td><td>mol solute / kg solvent</td><td>T-independent</td></tr><tr><td>Mole fraction (χ)</td><td>n_i / n_total</td><td>0 to 1, dimensionless</td></tr><tr><td>Mass %</td><td>(mass solute / mass soln) × 100</td><td>—</td></tr><tr><td>ppm</td><td>parts per million (mg/L)</td><td>Dilute solutions</td></tr><tr><td>Normality (N)</td><td>M × n-factor</td><td>Equiv/L</td></tr></table>',
+  87: '<h3>Integrated Rate Laws</h3><table><tr><th>Order</th><th>Rate Law</th><th>Linear Plot</th><th>t½</th><th>k units</th></tr><tr><td>0</td><td>rate = k</td><td>[A] vs t</td><td>[A]₀/2k</td><td>M/s</td></tr><tr><td>1</td><td>rate = k[A]</td><td>ln[A] vs t</td><td>ln2/k</td><td>s⁻¹</td></tr><tr><td>2</td><td>rate = k[A]²</td><td>1/[A] vs t</td><td>1/(k[A]₀)</td><td>M⁻¹s⁻¹</td></tr></table><p><span class="rule">Arrhenius:</span> k = Ae^(−Ea/RT). Higher T → larger k → faster reaction.</p>',
+  88: '<h3>Reaction Mechanisms</h3><p><span class="rule">Mechanism:</span> Series of elementary steps that sum to the overall reaction.</p><p><span class="rule">Rate-determining step (RDS):</span> Slowest step controls overall rate.</p><p><span class="rule">Intermediate:</span> Formed in one step, consumed in another (not in overall equation).</p><p><span class="rule">Catalyst:</span> Lowers Ea, not consumed. Homogeneous = same phase, heterogeneous = different phase.</p><p><span class="rule">Molecularity:</span> Unimolecular (1), bimolecular (2), termolecular (3, rare).</p>',
+  89: '<h3>Polyprotic Acids & Complex Ions</h3><p><span class="rule">Polyprotic acids:</span> Ka1 > Ka2 > Ka3 (each ionization harder).</p><p>H₃PO₄: 3 steps. H₂SO₄: 2 steps (strong for 1st only).</p><p><span class="rule">Amphoteric:</span> Can act as acid or base (e.g., H₂O, HCO₃⁻, Al(OH)₃).</p><p><span class="rule">Complex ions:</span> Metal + ligands. Kf (formation constant) large → stable complex → increases solubility of insoluble salts.</p>',
+  90: '<h3>Electrochemistry (Advanced)</h3><p><span class="rule">Nernst equation:</span> E = E° − (RT/nF)lnQ = E° − (0.0592/n)logQ at 25°C.</p><p><span class="rule">Cell notation:</span> Anode (left) || Cathode (right). || = salt bridge.</p><p><span class="rule">Faraday:</span> F = 96485 C/mol e⁻. ΔG° = −nFE°.</p><p><span class="rule">Electrolysis:</span> Non-spontaneous, requires external power. m = MIt/(nF).</p><p><span class="rule">Concentration cell:</span> E° = 0, driven by concentration difference.</p>',
+  91: '<h3>Nuclear Binding Energy & Dating</h3><p><span class="rule">Mass defect (Δm):</span> Predicted mass − actual mass. Converted to energy via E = Δmc².</p><p><span class="rule">Binding energy/nucleon:</span> Peak at Fe-56 (most stable). Fusion (light) and fission (heavy) both move toward Fe.</p><p><span class="rule">Radioactive dating:</span> C-14 t½ = 5730 years (organic). U-238 t½ = 4.5 billion years (rocks).</p><p><span class="rule">Decay:</span> After n half-lives, fraction remaining = (1/2)ⁿ.</p>',
+  92: '<h3>Photoelectric Effect & de Broglie</h3><p><span class="rule">Photoelectric:</span> E_photon = hν. KE_max = hν − φ (work function). Below threshold ν₀: no electrons.</p><p><span class="rule">Intensity:</span> More photons = more electrons (not more KE).</p><p><span class="rule">de Broglie:</span> λ = h/mv. Significant for small particles (electrons).</p><p><span class="rule">Heisenberg:</span> ΔxΔp ≥ h/(4π). Cannot know position and momentum simultaneously.</p>',
+  93: '<h3>Resonance & Formal Charge</h3><p><span class="rule">Formal charge:</span> FC = V − N − B/2 (V = valence, N = nonbonding, B = bonding e⁻).</p><p><span class="rule">Best structure:</span> FC closest to zero, negative FC on more electronegative atom.</p><p><span class="rule">Resonance:</span> Multiple valid Lewis structures differing only in electron positions. Real structure is hybrid.</p><p><span class="rule">Exceptions:</span> BF₃ (incomplete octet, 6e⁻), SF₆ (expanded octet, 12e⁻), NO (odd electron).</p>',
+  94: '<h3>Solution Stoichiometry</h3><p><span class="rule">Solubility rules:</span> All nitrates soluble. All Na⁺/K⁺/NH₄⁺ soluble. Most Cl⁻/Br⁻/I⁻ soluble (except Ag⁺, Pb²⁺, Hg₂²⁺). Most SO₄²⁻ soluble (except Ba²⁺, Pb²⁺).</p><p><span class="rule">Net ionic equation:</span> Remove spectator ions (unchanged on both sides).</p><p><span class="rule">Activity series:</span> More active metals displace less active ones. Zn above Cu → Zn replaces Cu²⁺.</p>',
+  95: '<h3>Chemical Reaction Types</h3><table><tr><th>Type</th><th>Pattern</th><th>Example</th></tr><tr><td>Synthesis</td><td>A + B → AB</td><td>2Na + Cl₂ → 2NaCl</td></tr><tr><td>Decomposition</td><td>AB → A + B</td><td>2H₂O → 2H₂ + O₂</td></tr><tr><td>Single Replacement</td><td>A + BC → AC + B</td><td>Zn + CuSO₄ → ZnSO₄ + Cu</td></tr><tr><td>Double Replacement</td><td>AB + CD → AD + CB</td><td>AgNO₃ + NaCl → AgCl + NaNO₃</td></tr><tr><td>Combustion</td><td>CₓHᵧ + O₂ → CO₂ + H₂O</td><td>CH₄ + 2O₂ → CO₂ + 2H₂O</td></tr></table><p><span class="rule">Key:</span> Identify by counting reactants/products and checking for O₂.</p>',
+  96: '<h3>Predicting Products</h3><p><span class="rule">Activity series (partial):</span> Li > K > Ca > Na > Mg > Al > Zn > Fe > Ni > Sn > Pb > H > Cu > Ag > Au</p><p>A metal higher on the series can replace a lower one from solution.</p><p><span class="rule">Solubility rules:</span></p><ul><li>All Na⁺, K⁺, NH₄⁺, NO₃⁻ salts are soluble</li><li>Most Cl⁻, Br⁻, I⁻ soluble (except Ag⁺, Pb²⁺, Hg₂²⁺)</li><li>Most SO₄²⁻ soluble (except Ba²⁺, Pb²⁺, Ca²⁺)</li><li>Most OH⁻, CO₃²⁻, PO₄³⁻, S²⁻ are insoluble</li></ul>',
+  97: '<h3>Redox Reactions</h3><p><span class="rule">Oxidation number rules:</span></p><ul><li>Free element = 0</li><li>Monatomic ion = charge</li><li>O = −2 (except peroxides −1)</li><li>H = +1 (except metal hydrides −1)</li><li>Sum = charge of species</li></ul><p><span class="rule">LEO GER:</span> Lose Electrons = Oxidation, Gain Electrons = Reduction</p><p><span class="rule">Oxidizing agent:</span> Gets reduced (gains e⁻). <span class="rule">Reducing agent:</span> Gets oxidized (loses e⁻).</p>',
+  98: '<h3>Acid-Base Theories</h3><table><tr><th>Theory</th><th>Acid</th><th>Base</th></tr><tr><td>Arrhenius</td><td>Produces H⁺ in water</td><td>Produces OH⁻ in water</td></tr><tr><td>Brønsted-Lowry</td><td>Proton (H⁺) donor</td><td>Proton (H⁺) acceptor</td></tr><tr><td>Lewis</td><td>Electron pair acceptor</td><td>Electron pair donor</td></tr></table><p><span class="rule">7 strong acids:</span> HCl, HBr, HI, HNO₃, H₂SO₄, HClO₃, HClO₄</p><p><span class="rule">Strong bases:</span> Group 1 hydroxides (NaOH, KOH) and Ca(OH)₂, Ba(OH)₂, Sr(OH)₂</p>',
+  99: '<h3>pH & pOH</h3><p><span class="rule">Key formulas:</span></p><ul><li>pH = −log[H⁺]</li><li>pOH = −log[OH⁻]</li><li>pH + pOH = 14 (at 25°C)</li><li>Kw = [H⁺][OH⁻] = 1.0 × 10⁻¹⁴</li></ul><table><tr><th>pH</th><th>Type</th></tr><tr><td>0–6</td><td>Acidic</td></tr><tr><td>7</td><td>Neutral</td></tr><tr><td>8–14</td><td>Basic</td></tr></table><p><span class="rule">Shortcut:</span> If [H⁺] = 10⁻ˣ, then pH = x.</p>',
+  100: '<h3>Neutralization & Titration</h3><p><span class="rule">Neutralization:</span> acid + base → salt + water</p><p>HCl + NaOH → NaCl + H₂O</p><p><span class="rule">Titration formula:</span> MₐVₐ = MᵦVᵦ (for monoprotic)</p><table><tr><th>Indicator</th><th>pH Range</th><th>Color Change</th></tr><tr><td>Methyl orange</td><td>3.1–4.4</td><td>Red → Yellow</td></tr><tr><td>Litmus</td><td>5–8</td><td>Red → Blue</td></tr><tr><td>Phenolphthalein</td><td>8.2–10</td><td>Colorless → Pink</td></tr></table><p><span class="rule">Equivalence point:</span> moles acid = moles base. pH = 7 for strong/strong.</p>',
+  101: '<h3>Electron Configuration (Complete)</h3><p><span class="rule">Aufbau order:</span> 1s 2s 2p 3s 3p 4s 3d 4p 5s 4d 5p 6s 4f 5d 6p 7s 5f 6d 7p</p><p><span class="rule">Exceptions (half/full d):</span></p><ul><li>Cr (Z=24): [Ar] 4s¹ 3d⁵ (not 4s² 3d⁴)</li><li>Cu (Z=29): [Ar] 4s¹ 3d¹⁰ (not 4s² 3d⁹)</li></ul><p><span class="rule">Ion configurations:</span> Remove electrons from the highest n first (4s before 3d).</p><p>Fe²⁺: [Ar] 3d⁶ (remove 2 from 4s). Fe³⁺: [Ar] 3d⁵ (remove 2 from 4s, 1 from 3d).</p>',
+  102: '<h3>Electronegativity & Bond Polarity</h3><p><span class="rule">EN trend:</span> Increases left → right across a period, decreases top → bottom in a group.</p><p>Most electronegative: F (4.0) > O (3.5) > N/Cl (3.0)</p><table><tr><th>ΔEN</th><th>Bond Type</th></tr><tr><td>0 – 0.4</td><td>Nonpolar covalent</td></tr><tr><td>0.5 – 1.7</td><td>Polar covalent</td></tr><tr><td>> 1.7</td><td>Ionic</td></tr></table><p><span class="rule">δ⁺/δ⁻:</span> In a polar bond, δ⁻ is on the more electronegative atom.</p>',
+  103: '<h3>Polar & Nonpolar Molecules</h3><p><span class="rule">Key principle:</span> Molecular geometry determines polarity, not just bond polarity.</p><p>Symmetric molecules with identical polar bonds → dipoles cancel → <span class="rule">nonpolar</span>.</p><table><tr><th>Molecule</th><th>Shape</th><th>Polar?</th></tr><tr><td>CO₂</td><td>Linear</td><td>No (cancels)</td></tr><tr><td>H₂O</td><td>Bent</td><td>Yes</td></tr><tr><td>NH₃</td><td>Trigonal pyramidal</td><td>Yes</td></tr><tr><td>CH₄</td><td>Tetrahedral</td><td>No (symmetric)</td></tr><tr><td>BF₃</td><td>Trigonal planar</td><td>No (symmetric)</td></tr><tr><td>SF₆</td><td>Octahedral</td><td>No (symmetric)</td></tr></table>',
+  104: '<h3>Matter Classification</h3><p><span class="rule">Flowchart:</span> Matter → Can it be separated physically? Yes → <span class="rule">Mixture</span> (homogeneous = uniform, heterogeneous = not uniform). No → <span class="rule">Pure Substance</span> (can it be decomposed chemically? Yes → compound, No → element).</p><p><span class="rule">7 diatomic elements:</span> H₂, N₂, O₂, F₂, Cl₂, Br₂, I₂ (HOFBrINCl)</p><table><tr><th>Type</th><th>Example</th></tr><tr><td>Element</td><td>Au, O₂, Fe</td></tr><tr><td>Compound</td><td>H₂O, NaCl, CO₂</td></tr><tr><td>Homogeneous mix</td><td>Saltwater, air, alloys</td></tr><tr><td>Heterogeneous mix</td><td>Salad, granite, blood</td></tr></table>',
+  105: '<h3>Intermolecular Forces (IMF)</h3><table><tr><th>Type</th><th>Requirement</th><th>Strength</th></tr><tr><td>London Dispersion (LDF)</td><td>All molecules</td><td>Weakest</td></tr><tr><td>Dipole-Dipole</td><td>Polar molecules</td><td>Moderate</td></tr><tr><td>Hydrogen Bonding</td><td>H bonded to F, O, or N</td><td>Strong</td></tr><tr><td>Ion-Dipole</td><td>Ion + polar molecule</td><td>Strongest</td></tr></table><p><span class="rule">LDF increases with:</span> More electrons, larger molar mass, greater surface area.</p><p><span class="rule">Key:</span> IMF are between molecules (inter), not within them (intra = covalent bonds).</p>',
+  106: '<h3>IMF & Physical Properties</h3><p><span class="rule">Stronger IMF →</span></p><ul><li>Higher boiling/melting point</li><li>Higher viscosity (resistance to flow)</li><li>Higher surface tension</li><li>Lower vapor pressure</li></ul><p><span class="rule">Volatile substances:</span> Weak IMF → evaporate easily → high vapor pressure.</p><table><tr><th>Substance</th><th>Dominant IMF</th><th>BP</th></tr><tr><td>CH₄</td><td>LDF only</td><td>−161°C</td></tr><tr><td>HCl</td><td>Dipole-dipole</td><td>−85°C</td></tr><tr><td>H₂O</td><td>H-bonding</td><td>100°C</td></tr><tr><td>NaCl (aq)</td><td>Ion-dipole</td><td>N/A (dissolved)</td></tr></table>',
+  107: '<h3>Polyatomic Ions — Complete Reference</h3><table><tr><th>Name</th><th>Formula</th><th>Charge</th></tr><tr><td>Ammonium</td><td>NH₄⁺</td><td>+1</td></tr><tr><td>Hydroxide</td><td>OH⁻</td><td>−1</td></tr><tr><td>Nitrate</td><td>NO₃⁻</td><td>−1</td></tr><tr><td>Nitrite</td><td>NO₂⁻</td><td>−1</td></tr><tr><td>Bicarbonate</td><td>HCO₃⁻</td><td>−1</td></tr><tr><td>Acetate</td><td>CH₃COO⁻</td><td>−1</td></tr><tr><td>Cyanide</td><td>CN⁻</td><td>−1</td></tr><tr><td>Permanganate</td><td>MnO₄⁻</td><td>−1</td></tr><tr><td>Hypochlorite</td><td>ClO⁻</td><td>−1</td></tr><tr><td>Chlorite</td><td>ClO₂⁻</td><td>−1</td></tr><tr><td>Chlorate</td><td>ClO₃⁻</td><td>−1</td></tr><tr><td>Perchlorate</td><td>ClO₄⁻</td><td>−1</td></tr><tr><td>Thiocyanate</td><td>SCN⁻</td><td>−1</td></tr><tr><td>Carbonate</td><td>CO₃²⁻</td><td>−2</td></tr><tr><td>Sulfate</td><td>SO₄²⁻</td><td>−2</td></tr><tr><td>Sulfite</td><td>SO₃²⁻</td><td>−2</td></tr><tr><td>Chromate</td><td>CrO₄²⁻</td><td>−2</td></tr><tr><td>Dichromate</td><td>Cr₂O₇²⁻</td><td>−2</td></tr><tr><td>Oxalate</td><td>C₂O₄²⁻</td><td>−2</td></tr><tr><td>Phosphate</td><td>PO₄³⁻</td><td>−3</td></tr></table><p><span class="rule">Naming pattern:</span> -ate (more O) → -ite (less O). per-...-ate (most O) → hypo-...-ite (least O).</p><p><span class="rule">Only positive ion:</span> NH₄⁺ (ammonium).</p>',
+  108: '<h3>Periodic Table — Elements Reference</h3><p><span class="rule">Groups (columns):</span> 1–18. <span class="rule">Periods (rows):</span> 1–7.</p><table><tr><th>Group</th><th>Name</th><th>Key elements</th></tr><tr><td>1</td><td>Alkali metals</td><td>Li, Na, K, Rb, Cs</td></tr><tr><td>2</td><td>Alkaline earth metals</td><td>Be, Mg, Ca, Sr, Ba</td></tr><tr><td>3–12</td><td>Transition metals</td><td>Fe, Cu, Zn, Ag, Au</td></tr><tr><td>17</td><td>Halogens</td><td>F, Cl, Br, I</td></tr><tr><td>18</td><td>Noble gases</td><td>He, Ne, Ar, Kr, Xe</td></tr></table><p><span class="rule">Blocks:</span> s-block (groups 1–2), p-block (groups 13–18), d-block (groups 3–12), f-block (lanthanides/actinides).</p><p><span class="rule">Metalloids:</span> B, Si, Ge, As, Sb, Te — staircase line between metals and nonmetals.</p><p><span class="rule">7 diatomic elements:</span> H₂, N₂, O₂, F₂, Cl₂, Br₂, I₂ (HOFBrINCl).</p>',
+  109: '<h3>Periodic Trends</h3><table><tr><th>Property</th><th>Across period (→)</th><th>Down group (↓)</th><th>Why</th></tr><tr><td>Atomic radius</td><td>Decreases</td><td>Increases</td><td>More protons pull e⁻ closer / more shells</td></tr><tr><td>Ionization energy</td><td>Increases</td><td>Decreases</td><td>Harder to remove e⁻ / farther from nucleus</td></tr><tr><td>Electronegativity</td><td>Increases</td><td>Decreases</td><td>Stronger pull on bonding e⁻</td></tr><tr><td>Electron affinity</td><td>More negative</td><td>Less negative</td><td>More tendency to gain e⁻</td></tr><tr><td>Metallic character</td><td>Decreases</td><td>Increases</td><td>Metals lose e⁻ easily</td></tr></table><p><span class="rule">Effective nuclear charge (Zeff):</span> Net positive charge felt by valence electrons. Increases across a period (more protons, similar shielding).</p><p><span class="rule">Shielding:</span> Inner electrons shield outer electrons from nuclear charge. More shells = more shielding = weaker hold.</p><p><span class="rule">Exceptions:</span> IE dips at B (2s→2p) and O (electron pairing in 2p).</p>',
+  110: '<h3>Chemical Reactions — All Types</h3><table><tr><th>Type</th><th>Pattern</th><th>Example</th></tr><tr><td>Synthesis</td><td>A + B → AB</td><td>2Na + Cl₂ → 2NaCl</td></tr><tr><td>Decomposition</td><td>AB → A + B</td><td>2H₂O → 2H₂ + O₂</td></tr><tr><td>Single replacement</td><td>A + BC → AC + B</td><td>Zn + CuSO₄ → ZnSO₄ + Cu</td></tr><tr><td>Double replacement</td><td>AB + CD → AD + CB</td><td>AgNO₃ + NaCl → AgCl↓ + NaNO₃</td></tr><tr><td>Combustion</td><td>CₓHᵧ + O₂ → CO₂ + H₂O</td><td>CH₄ + 2O₂ → CO₂ + 2H₂O</td></tr></table><p><span class="rule">Redox:</span> OIL RIG — Oxidation Is Loss, Reduction Is Gain (of electrons).</p><p><span class="rule">Oxidation number rules:</span> Free element = 0, O = −2, H = +1, monatomic ion = charge, sum = formula charge.</p><p><span class="rule">Activity series (partial):</span> Li > K > Ca > Na > Mg > Al > Zn > Fe > Ni > Sn > Pb > H > Cu > Ag > Au</p>',
+  111: '<h3>Intramolecular vs Intermolecular Forces</h3><table><tr><th>Type</th><th>Category</th><th>Strength</th></tr><tr><td>Ionic bond</td><td>Intramolecular</td><td>Very strong</td></tr><tr><td>Covalent bond</td><td>Intramolecular</td><td>Strong</td></tr><tr><td>Metallic bond</td><td>Intramolecular</td><td>Variable</td></tr><tr><td>Ion-dipole</td><td>Intermolecular</td><td>Strong (IMF)</td></tr><tr><td>Hydrogen bonding</td><td>Intermolecular</td><td>Moderate-strong</td></tr><tr><td>Dipole-dipole</td><td>Intermolecular</td><td>Moderate</td></tr><tr><td>London dispersion</td><td>Intermolecular</td><td>Weak</td></tr></table><p><span class="rule">Key distinction:</span> Intramolecular = within a molecule (bonds). Intermolecular = between molecules (attractions).</p><p><span class="rule">Boiling:</span> Breaks intermolecular forces only. <span class="rule">Decomposition:</span> Breaks intramolecular bonds.</p><p><span class="rule">Intramolecular forces are ALWAYS stronger</span> than intermolecular forces.</p>',
+  112: '<h3>Acid-Base Comprehensive</h3><table><tr><th>Theory</th><th>Acid</th><th>Base</th></tr><tr><td>Arrhenius</td><td>Produces H⁺ in water</td><td>Produces OH⁻ in water</td></tr><tr><td>Brønsted-Lowry</td><td>Proton donor</td><td>Proton acceptor</td></tr><tr><td>Lewis</td><td>Electron pair acceptor</td><td>Electron pair donor</td></tr></table><p><span class="rule">Strong acids (6):</span> HCl, HBr, HI, HNO₃, H₂SO₄, HClO₄</p><p><span class="rule">Strong bases:</span> NaOH, KOH, LiOH, Ca(OH)₂, Ba(OH)₂, Sr(OH)₂</p><p><span class="rule">pH formulas:</span> pH = −log[H⁺], pOH = −log[OH⁻], pH + pOH = 14, Kw = 10⁻¹⁴</p><p><span class="rule">Ka:</span> Larger Ka = stronger acid. pKa = −log(Ka).</p><p><span class="rule">Buffer:</span> Weak acid + conjugate base. Henderson-Hasselbalch: pH = pKa + log([A⁻]/[HA]).</p><p><span class="rule">Conjugate pairs:</span> Differ by one H⁺. Stronger acid → weaker conjugate base.</p>'
+};
+
+let score = 0;
+let total = 0;
+const totalInputs = countTotalInputs();
+
+function countTotalInputs() {
+  let c = 0;
+  for (const ex of EXERCISES) {
+    if (ex.type === 'mc') c += ex.questions.length;
+    else c += ex.rows.length;
+  }
+  return c;
+}
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  if (typeof saveProgress === 'function') saveProgress(true);
+}
+
+function normalize(s) {
+  return s.trim().toLowerCase().replace(/\s+/g,' ').replace(/[?.!,]+$/,'').replace(/[?.!,]+/g,function(m){return m;});
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+
+  const wasWrong = inputEl.classList.contains('wrong');
+  if (wasWrong) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+    if (revealEl) { revealEl.classList.remove('show'); revealEl.textContent = ''; }
+    const hintEl = inputEl.parentElement.querySelector('.hint-text');
+    if (hintEl) { hintEl.classList.remove('show'); hintEl.textContent = ''; delete hintEl.dataset.level; }
+  }
+
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const userNoPunct = userVal.replace(/[?.!,]/g,'').trim();
+    const ansNoPunct = ans.replace(/[?.!,]/g,'').trim();
+    if (userNoPunct === ansNoPunct) { matched = true; break; }
+  }
+
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark';
+    cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) {
+      revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim();
+      revealEl.classList.add('show');
+    }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(currentEl) {
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(currentEl);
+  for (let i = idx + 1; i < allInputs.length; i++) {
+    if (!allInputs[i].classList.contains('correct')) { ensureVisibleAndFocus(allInputs[i]); return; }
+  }
+}
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0; total = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark');
+    if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => {
+    el.checked = false; el.disabled = false;
+  });
+  document.querySelectorAll('.mc-option').forEach(el => {
+    el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered');
+  });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  localStorage.removeItem(STORAGE_KEY);
+  updateScore();
+  const first = document.querySelector('input[type="text"]');
+  if (first) first.focus();
+}
+
+const STORAGE_KEY = 'fye12_chemistry_exercises';
+
+function saveProgress(silent) {
+  const data = {score: score, inputs: [], radios: [], openExercises: []};
+
+  document.querySelectorAll('input[type="text"]').forEach((el, i) => {
+    data.inputs.push({
+      value: el.value,
+      correct: el.classList.contains('correct'),
+      wrong: el.classList.contains('wrong')
+    });
+  });
+
+  document.querySelectorAll('.mc-group').forEach((group, i) => {
+    const selected = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({
+      answered: group.classList.contains('answered'),
+      selected: selected ? parseInt(selected.value) : null
+    });
+  });
+
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+
+  const status = document.getElementById('saveStatus');
+  if (!silent) {
+    status.textContent = 'Saved!';
+    status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function applyProgress(data) {
+  if (!data || !data.inputs) { updateScore(); return; }
+  score = 0;
+
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true;
+      el.classList.add('answered','correct');
+      score++;
+      const cm = document.createElement('span');
+      cm.className = 'checkmark';
+      cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const revealEl = el.parentElement.querySelector('.answer-reveal');
+      if (revealEl) {
+        revealEl.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim();
+        revealEl.classList.add('show');
+      }
+    }
+  });
+
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => {
+      opt.classList.add('locked');
+      opt.querySelector('input').disabled = true;
+    });
+    if (saved.selected === correctIdx) {
+      options[saved.selected].classList.add('correct-choice');
+      score++;
+    } else {
+      options[saved.selected].classList.add('wrong-choice');
+      options[correctIdx].classList.add('reveal-correct');
+    }
+  });
+
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) {
+        body.classList.add('open');
+        if (arrow) arrow.classList.add('open');
+      } else {
+        body.classList.remove('open');
+        if (arrow) arrow.classList.remove('open');
+      }
+    });
+  }
+
+  updateScore();
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) { updateScore(); return; }
+  try { applyProgress(JSON.parse(raw)); } catch(e) { updateScore(); }
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function buildTableExercise(ex) {
+  const answerColIdx = ex.cols.indexOf("Your Answer");
+  const solutionColIdx = ex.cols.indexOf("Solution");
+
+  let visibleCols = [];
+  for (let i = 0; i < ex.cols.length; i++) {
+    if (i === solutionColIdx) continue;
+    visibleCols.push({colIdx: i, name: ex.cols[i]});
+  }
+
+  let html = '<table><thead><tr>';
+  for (const vc of visibleCols) html += '<th>' + vc.name + '</th>';
+  html += '</tr></thead><tbody>';
+
+  for (const row of ex.rows) {
+    html += '<tr>';
+    const answer = row[row.length - 1];
+    let dataIdx = 0;
+    for (const vc of visibleCols) {
+      if (vc.colIdx === answerColIdx) {
+        html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(answer) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td>';
+      } else if (vc.colIdx === 0) {
+        html += '<td class="num">' + row[0] + '</td>';
+        dataIdx++;
+      } else {
+        html += '<td>' + escHtml(row[dataIdx]) + '</td>';
+        dataIdx++;
+      }
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(ex) {
+  let html = '';
+  ex.questions.forEach((q, qi) => {
+    const name = 'mc_' + ex.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function showTheory(id) {
+  const overlay = document.getElementById('theoryOverlay');
+  const content = document.getElementById('theoryBody');
+  content.innerHTML = THEORY[id] || '<p>No theory available for this exercise.</p>';
+  overlay.classList.add('show');
+}
+
+function hideTheory() {
+  document.getElementById('theoryOverlay').classList.remove('show');
+}
+
+// Build all exercises
+const app = document.getElementById('app');
+for (const ex of EXERCISES) {
+  let bodyHtml = '';
+  if (ex.instruction) bodyHtml += '<p class="instruction">' + escHtml(ex.instruction) + '</p>';
+  if (ex.rule) bodyHtml += '<div class="rule-box">' + escHtml(ex.rule) + '</div>';
+
+  if (ex.type === 'mc') bodyHtml += buildMC(ex);
+  else bodyHtml += buildTableExercise(ex);
+
+  const paddedId = String(ex.id).padStart(2,'0');
+  const hasPractice = ex.id <= 112;
+  const slug = hasPractice ? SLUGS[ex.id - 1] : null;
+
+  let practiceHtml = '';
+  if (hasPractice) {
+    practiceHtml = '<a href="practice/practice-' + paddedId + '-' + slug + '.html" class="practice-link" onclick="event.stopPropagation()" title="Extra Practice">\u2192</a><span class="practice-badge" id="badge-' + ex.id + '"></span>';
+  }
+
+  app.innerHTML += '<div class="exercise">' +
+      '<div class="exercise-header" onclick="toggleExercise(' + ex.id + ')">' +
+        '<div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">' +
+          '<h2>Exercise ' + ex.id + ' - ' + escHtml(ex.title) + '</h2>' +
+          practiceHtml +
+          '<span class="info-icon" onclick="event.stopPropagation();showTheory(' + ex.id + ')" title="Theory">i</span>' +
+        '</div>' +
+        '<span class="arrow" id="arrow-' + ex.id + '">\u25B6</span>' +
+      '</div>' +
+      '<div class="exercise-body" id="body-' + ex.id + '">' +
+        bodyHtml +
+      '</div>' +
+    '</div>';
+}
+
+// Open first exercise by default
+toggleExercise(1);
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') {
+    e.preventDefault();
+    saveProgress();
+    return;
+  }
+
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer;
+    if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) {
+      hintEl = document.createElement('div');
+      hintEl.className = 'hint-text';
+      e.target.parentElement.appendChild(hintEl);
+    }
+    if (hintEl.dataset.level === '1') {
+      hintEl.textContent = '\u2192 ' + primary;
+      hintEl.dataset.level = '2';
+    } else {
+      const hintLen = Math.min(3, Math.ceil(primary.length * 0.3));
+      hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...';
+      hintEl.dataset.level = '1';
+    }
+    hintEl.classList.add('show');
+    return;
+  }
+
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+    e.preventDefault();
+    window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'});
+    return;
+  }
+
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target);
+    if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) {
+      e.preventDefault();
+      ensureVisibleAndFocus(allInputs[nextIdx]);
+    }
+    return;
+  }
+
+  if (!e.target.matches('input[type="text"]')) return;
+
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    checkAnswer(e.target);
+    return;
+  }
+
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target);
+  if (idx === -1) return;
+
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]);
+  } else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) {
+    e.preventDefault();
+    if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]);
+  } else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) {
+    e.preventDefault();
+    if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]);
+  }
+});
+
+// Event delegation for MC radio buttons
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+
+    total++;
+    options.forEach(opt => {
+      opt.classList.add('locked');
+      opt.querySelector('input').disabled = true;
+    });
+
+    if (selectedIdx === correctIdx) {
+      options[selectedIdx].classList.add('correct-choice');
+      score++;
+    } else {
+      options[selectedIdx].classList.add('wrong-choice');
+      options[correctIdx].classList.add('reveal-correct');
+    }
+    updateScore();
+  }
+});
+
+function loadPracticeBadges() {
+  for (let i = 1; i <= 112; i++) {
+    const key = 'fye12_practice_' + String(i).padStart(2,'0');
+    const raw = localStorage.getItem(key);
+    if (!raw) continue;
+    try {
+      const data = JSON.parse(raw);
+      if (typeof data.total !== 'number' || data.total === 0) continue;
+      const badge = document.getElementById('badge-' + i);
+      if (!badge) continue;
+      const s = data.score || 0;
+      badge.textContent = s + '/' + data.total;
+      badge.classList.add('has-progress');
+      if (s === data.total) badge.classList.add('complete');
+    } catch(e) {}
+  }
+}
+
+loadProgress();
+loadPracticeBadges();
+setTimeout(() => {
+  const first = document.querySelector('input[type="text"]:not(.correct)');
+  if (first) ensureVisibleAndFocus(first);
+}, 100);
+</script>
+
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+
+</body>
+</html>

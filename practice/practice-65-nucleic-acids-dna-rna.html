@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice 65 — Nucleic Acids, DNA &amp; RNA</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Practice 65 &mdash; Nucleic Acids, DNA &amp; RNA</h1>
+<p class="subtitle">Deep practice &mdash; nucleotides, base pairing, DNA structure, replication, transcription</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_65';
+const SECTIONS = [
+  {
+    id:1, title:"Nucleotide Structure & Components",
+    instruction:"Fill in the blank about nucleotide components.",
+    rows:[
+      ["1","A nucleotide has 3 parts: phosphate group, ___, and nitrogenous base","sugar / pentose sugar"],
+      ["2","The sugar in DNA is ___","deoxyribose"],
+      ["3","The sugar in RNA is ___","ribose"],
+      ["4","Deoxyribose lacks an ___ group at the 2\u2032 carbon compared to ribose","OH / hydroxyl"],
+      ["5","Nucleotides are linked together by ___ bonds","phosphodiester"],
+      ["6","A nucleoside is a base + sugar WITHOUT the ___ group","phosphate"],
+      ["7","ATP (adenosine triphosphate) is a nucleotide with ___ phosphate groups","3 / three"],
+      ["8","The backbone of DNA is made of alternating ___ and phosphate groups","sugar / deoxyribose"],
+      ["9","Adenosine (adenine + ribose) is a ___","nucleoside"],
+      ["10","Adenosine monophosphate (AMP) is a ___","nucleotide"],
+      ["11","GTP (guanosine triphosphate) is used as an energy source in ___ synthesis","protein"],
+      ["12","cAMP (cyclic AMP) is an important intracellular ___ molecule","signaling / messenger"],
+      ["13","NAD\u207A is a dinucleotide coenzyme derived from the vitamin ___","niacin / B3"],
+      ["14","The phosphodiester bond connects the ___ carbon of one sugar to the ___ carbon of the next","3', 5' / 3 prime, 5 prime"],
+      ["15","Nucleotides can also function as ___ carriers (like ATP)","energy"]
+    ]
+  },
+  {
+    id:2, title:"DNA Bases, Base Pairing & Chargaff's Rules",
+    instruction:"Fill in the blank about DNA bases and Chargaff's rules.",
+    rows:[
+      ["1","The 4 DNA bases are adenine, thymine, guanine, and ___","cytosine"],
+      ["2","Adenine pairs with ___ in DNA","thymine / T"],
+      ["3","Guanine pairs with ___ in DNA","cytosine / C"],
+      ["4","A-T base pair has ___ hydrogen bonds","2 / two"],
+      ["5","G-C base pair has ___ hydrogen bonds","3 / three"],
+      ["6","Purines (double ring) are ___ and ___","adenine and guanine / A and G"],
+      ["7","Pyrimidines (single ring) are ___ and ___ (in DNA)","cytosine and thymine / C and T"],
+      ["8","Chargaff\u2019s rule: %A = %___ and %G = %___","T, C / thymine, cytosine"],
+      ["9","If a DNA sample has 30% adenine, the percentage of thymine is ___%","30"],
+      ["10","If a DNA sample has 30% adenine, the percentage of guanine is ___%","20"],
+      ["11","If a DNA sample has 30% adenine, the percentage of cytosine is ___%","20"],
+      ["12","If %G = 22% in double-stranded DNA, then %A = ___%","28"],
+      ["13","If %C = 18%, then %G = ___% and %A = %T = ___%","18, 32"],
+      ["14","A purine always pairs with a ___ to maintain the constant width of the helix","pyrimidine"],
+      ["15","The G-C base pair is ___ (stronger/weaker) than A-T because it has more H-bonds","stronger"],
+      ["16","DNA with a high G-C content has a ___ (higher/lower) melting temperature","higher"],
+      ["17","Uracil is a pyrimidine found in ___ but not DNA","RNA"],
+      ["18","5-methylcytosine is an epigenetically modified base found in ___","DNA"]
+    ]
+  },
+  {
+    id:3, title:"DNA Structure & Properties",
+    instruction:"Fill in the blank about the structure of DNA.",
+    rows:[
+      ["1","DNA has a ___ helix structure","double"],
+      ["2","The two strands of DNA run in ___ directions","antiparallel / opposite"],
+      ["3","One strand runs 5\u2032\u21923\u2032 and the complementary strand runs ___","3' to 5' / 3'->5'"],
+      ["4","The double helix structure was discovered by ___ and Crick","Watson"],
+      ["5","The wider groove on the DNA helix is called the ___ groove","major"],
+      ["6","The narrower groove on the DNA helix is called the ___ groove","minor"],
+      ["7","X-ray diffraction data critical for the discovery was produced by Rosalind ___","Franklin"],
+      ["8","The distance between base pairs in DNA is approximately ___ nm","0.34"],
+      ["9","One full turn of the DNA helix spans approximately ___ base pairs","10"],
+      ["10","One full turn of the helix is approximately ___ nm long","3.4"],
+      ["11","The diameter of the DNA double helix is approximately ___ nm","2 / 2.0"],
+      ["12","DNA is a ___ charged molecule due to the phosphate groups","negatively"],
+      ["13","Histones are ___ charged proteins that DNA wraps around","positively"],
+      ["14","DNA wrapped around histones forms structures called ___","nucleosomes"],
+      ["15","The most compact form of DNA packaging is the ___","chromosome"],
+      ["16","If a DNA strand reads 5'-AATGCC-3', the complementary strand reads 3'-___-5'","TTACGG"],
+      ["17","If a DNA strand reads 5'-GCTAGC-3', the complementary strand reads 3'-___-5'","CGATCG"]
+    ]
+  },
+  {
+    id:4, title:"RNA Types & DNA vs RNA", type:"mc",
+    instruction:"Select the correct answer comparing RNA and DNA.",
+    questions:[
+      {q:"RNA is typically:", options:["Double-stranded","Single-stranded","Triple-stranded","Circular only"], correct:1},
+      {q:"The sugar in RNA is:", options:["Deoxyribose","Glucose","Ribose","Fructose"], correct:2},
+      {q:"RNA uses ___ instead of thymine:", options:["Adenine","Guanine","Cytosine","Uracil"], correct:3},
+      {q:"Which type of RNA carries genetic information from DNA to ribosomes?", options:["tRNA","rRNA","mRNA","snRNA"], correct:2},
+      {q:"Which type of RNA brings amino acids to the ribosome?", options:["mRNA","tRNA","rRNA","miRNA"], correct:1},
+      {q:"Ribosomal RNA (rRNA) is a structural component of:", options:["Nucleus","Cell membrane","Ribosomes","Mitochondria"], correct:2},
+      {q:"In RNA, adenine pairs with:", options:["Thymine","Cytosine","Guanine","Uracil"], correct:3},
+      {q:"Which is more chemically stable?", options:["RNA","DNA","They are equally stable","Neither is stable"], correct:1},
+      {q:"Why is DNA more stable than RNA?", options:["It has uracil","It lacks the 2'-OH group","It is single-stranded","It has more phosphate groups"], correct:1},
+      {q:"Small interfering RNA (siRNA) functions in:", options:["Translation","Gene silencing","DNA replication","Transcription initiation"], correct:1},
+      {q:"MicroRNA (miRNA) regulates gene expression by:", options:["Cutting DNA","Binding to mRNA and blocking translation","Activating ribosomes","Synthesizing proteins"], correct:1},
+      {q:"snRNA is involved in:", options:["DNA replication","RNA splicing","Translation","Cell division"], correct:1},
+      {q:"Which RNA type is the most abundant in cells by mass?", options:["mRNA","tRNA","rRNA","miRNA"], correct:2},
+      {q:"mRNA has the ___ lifespan of the three main RNA types:", options:["Longest","Shortest","Same as rRNA","Same as tRNA"], correct:1},
+      {q:"tRNA has a characteristic ___ shape:", options:["Linear","Circular","Cloverleaf (L-shaped)","Helical"], correct:2},
+      {q:"The 3' end of tRNA has the sequence ___ where the amino acid attaches:", options:["AUG","UAA","CCA","GGG"], correct:2}
+    ]
+  },
+  {
+    id:5, title:"DNA Replication & Enzymes",
+    instruction:"Fill in the blank about DNA replication.",
+    rows:[
+      ["1","DNA replication is ___ (each new DNA has one old and one new strand)","semiconservative"],
+      ["2","The enzyme that unwinds the double helix is ___","helicase"],
+      ["3","The enzyme that synthesizes new DNA strands is ___","DNA polymerase"],
+      ["4","DNA polymerase can only add nucleotides in the ___ direction","5' to 3' / 5'->3'"],
+      ["5","The strand synthesized continuously is called the ___ strand","leading"],
+      ["6","Short fragments on the lagging strand are called ___ fragments","Okazaki"],
+      ["7","The enzyme that joins Okazaki fragments is ___","DNA ligase / ligase"],
+      ["8","The short RNA sequence that primes DNA synthesis is called a ___","primer"],
+      ["9","The enzyme that makes the RNA primer is ___","primase"],
+      ["10","DNA polymerase ___ (I/III) is the main replicative enzyme in E. coli","III"],
+      ["11","DNA polymerase I removes RNA primers and replaces them with ___","DNA"],
+      ["12","Single-strand binding proteins (SSBs) prevent the separated strands from ___","reannealing / re-pairing / rejoining"],
+      ["13","Topoisomerase relieves ___ tension ahead of the replication fork","torsional / supercoiling"],
+      ["14","The point where DNA strands separate during replication is called the ___ fork","replication"],
+      ["15","Semiconservative replication was demonstrated by the ___ experiment","Meselson-Stahl"],
+      ["16","Telomerase is an enzyme that extends the ___ of chromosomes","telomeres / ends"],
+      ["17","Proofreading by DNA polymerase uses its ___ exonuclease activity","3' to 5' / 3'->5'"]
+    ]
+  },
+  {
+    id:6, title:"Transcription & Translation", type:"mc",
+    instruction:"Select the correct answer about gene expression.",
+    questions:[
+      {q:"Transcription produces ___ from a DNA template:", options:["Protein","DNA copy","mRNA","tRNA"], correct:2},
+      {q:"Translation occurs at the:", options:["Nucleus","Ribosome","Golgi apparatus","Mitochondria"], correct:1},
+      {q:"A codon is a sequence of ___ bases on mRNA:", options:["1","2","3","4"], correct:2},
+      {q:"The universal start codon is:", options:["UAA","UAG","UGA","AUG"], correct:3},
+      {q:"AUG codes for the amino acid:", options:["Alanine","Glycine","Methionine","Tryptophan"], correct:2},
+      {q:"UAA, UAG, and UGA are all:", options:["Start codons","Stop codons","Amino acid codons","Promoter sequences"], correct:1},
+      {q:"The central dogma of molecular biology is:", options:["Protein \u2192 RNA \u2192 DNA","RNA \u2192 DNA \u2192 Protein","DNA \u2192 RNA \u2192 Protein","DNA \u2192 Protein \u2192 RNA"], correct:2},
+      {q:"The enzyme that catalyzes transcription is:", options:["DNA polymerase","RNA polymerase","Helicase","Ligase"], correct:1},
+      {q:"The DNA strand used as a template for transcription is called the:", options:["Coding strand","Sense strand","Template (antisense) strand","Leading strand"], correct:2},
+      {q:"The mRNA sequence is identical to the ___ strand (except U replaces T):", options:["Template","Antisense","Coding (sense)","Lagging"], correct:2},
+      {q:"In eukaryotes, mRNA processing includes adding a 5' ___ and a 3' poly-A tail:", options:["Phosphate","Cap (7-methylguanosine)","Primer","Telomere"], correct:1},
+      {q:"Introns are ___ from the pre-mRNA during splicing:", options:["Added","Removed","Duplicated","Translated"], correct:1},
+      {q:"Exons are the sequences that are ___ in the final mRNA:", options:["Removed","Silenced","Expressed (kept)","Mutated"], correct:2},
+      {q:"The ribosome has two subunit sites for tRNA binding called ___ and ___ sites:", options:["A and B","P and Q","A (aminoacyl) and P (peptidyl)","X and Y"], correct:2},
+      {q:"The genetic code is described as degenerate because:", options:["It has errors","Multiple codons can code for the same amino acid","It only works in bacteria","Codons overlap"], correct:1},
+      {q:"How many amino acids does the genetic code specify?", options:["4","20","61","64"], correct:1}
+    ]
+  },
+  {
+    id:7, title:"Mutations & Biotechnology", type:"mc",
+    instruction:"Select the correct answer about mutations and molecular biology techniques.",
+    questions:[
+      {q:"A point mutation that changes one amino acid to another is called:", options:["Silent","Missense","Nonsense","Frameshift"], correct:1},
+      {q:"A point mutation that creates a premature stop codon is called:", options:["Silent","Missense","Nonsense","Frameshift"], correct:2},
+      {q:"A silent mutation does NOT change the:", options:["DNA sequence","mRNA sequence","Amino acid sequence","Codon"], correct:2},
+      {q:"Insertion or deletion of nucleotides (not in multiples of 3) causes a:", options:["Silent mutation","Missense mutation","Nonsense mutation","Frameshift mutation"], correct:3},
+      {q:"PCR (Polymerase Chain Reaction) is used to:", options:["Sequence DNA","Amplify (copy) specific DNA sequences","Translate mRNA","Transcribe DNA"], correct:1},
+      {q:"PCR requires a heat-stable DNA polymerase called:", options:["DNA pol III","RNA polymerase","Taq polymerase","Reverse transcriptase"], correct:2},
+      {q:"The three steps of each PCR cycle are:", options:["Ligation, extension, cooling","Denaturation, annealing, extension","Transcription, translation, folding","Replication, repair, recombination"], correct:1},
+      {q:"Gel electrophoresis separates DNA fragments by:", options:["Color","Size (length)","Base composition","Sugar type"], correct:1},
+      {q:"Smaller DNA fragments move ___ through the gel:", options:["Slower","Faster (farther)","Not at all","Backward"], correct:1},
+      {q:"Restriction enzymes cut DNA at specific:", options:["Random sites","Recognition (palindromic) sequences","Telomeres","Centromeres"], correct:1},
+      {q:"Sickle cell anemia is caused by a ___ mutation in the hemoglobin gene:", options:["Silent","Missense (GAG to GTG, Glu to Val)","Nonsense","Frameshift"], correct:1},
+      {q:"CRISPR-Cas9 is a tool for:", options:["PCR amplification","Gene editing","Gel electrophoresis","DNA sequencing"], correct:1}
+    ]
+  },
+  {
+    id:8, title:"Complementary Strands & Codon Practice",
+    instruction:"Fill in the blank with the correct sequence or term.",
+    rows:[
+      ["1","If a DNA strand reads 5\u2032-ATCG-3\u2032, the complementary strand reads 3\u2032-___-5\u2032","TAGC"],
+      ["2","If a DNA template reads 3\u2032-TACG-5\u2032, the mRNA reads 5\u2032-___-3\u2032","AUGC"],
+      ["3","The anticodon is found on ___ (mRNA/tRNA/rRNA)","tRNA"],
+      ["4","DNA contains the base thymine; RNA contains ___ instead","uracil / U"],
+      ["5","The total number of possible codons from 4 bases in triplets is ___","64"],
+      ["6","Reverse transcriptase makes ___ from an RNA template","DNA / cDNA"],
+      ["7","If mRNA codon is AUG, the tRNA anticodon is ___","UAC"],
+      ["8","If mRNA codon is GCU, the tRNA anticodon is ___","CGA"],
+      ["9","If mRNA codon is UUU, the amino acid coded is ___","phenylalanine / Phe"],
+      ["10","If a DNA coding strand reads 5'-ATGAAAGCC-3', the mRNA reads 5'-___-3'","AUGAAAGCC"],
+      ["11","If a DNA template strand reads 3'-TACCGG-5', the mRNA reads 5'-___-3'","AUGGCC"],
+      ["12","The stop codon UAA is also called ___","ochre"],
+      ["13","The stop codon UAG is also called ___","amber"],
+      ["14","The stop codon UGA is also called ___","opal / umber"],
+      ["15","Of the 64 codons, ___ code for amino acids and 3 are stop codons","61"],
+      ["16","If a DNA strand has 1000 base pairs with 400 adenines, it has ___ guanines","600 / 100"],
+      ["17","The codon UGG codes for the amino acid ___, and it is the only codon for this amino acid","tryptophan / Trp"]
+    ]
+  },
+  {
+    id:9, title:"Central Dogma & Molecular Biology", type:"arrange",
+    instruction:"Arrange the words in the correct order.",
+    sentences:[
+      {prompt:"Central dogma of molecular biology:", words:["DNA","is","transcribed","to","RNA","then","translated","to","protein"]},
+      {prompt:"DNA replication steps:", words:["Helicase","unwinds","polymerase","synthesizes","ligase","joins"]},
+      {prompt:"Order of RNA processing in eukaryotes:", words:["5'","cap","intron","splicing","poly-A","tail"]},
+      {prompt:"Translation sequence:", words:["mRNA","binds","ribosome","tRNA","delivers","amino","acids"]},
+      {prompt:"Three types of RNA:", words:["mRNA","carries","message","tRNA","transfers","amino","acids","rRNA","builds","ribosomes"]},
+      {prompt:"PCR cycle steps:", words:["Denature","anneal","primers","extend","with","polymerase"]},
+      {prompt:"Chargaff's rules:", words:["Adenine","equals","thymine","guanine","equals","cytosine"]},
+      {prompt:"Levels of DNA packaging:", words:["DNA","wraps","histones","forming","nucleosomes","then","chromatin","then","chromosomes"]},
+      {prompt:"Mutation types by effect:", words:["Silent","no","change","missense","different","amino","acid","nonsense","stop","codon"]},
+      {prompt:"Gene expression flow:", words:["Promoter","RNA","polymerase","binds","transcription","begins","mRNA","produced"]}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Nucleic Acids, DNA & RNA Reference</h3>' +
+'<p><span class="rule">Nucleotide Structure:</span> The monomer of nucleic acids. Each nucleotide = 3 parts:</p>' +
+'<p>1. Phosphate group (PO\u2084\u00B3\u207B) \u2014 gives the backbone its negative charge</p>' +
+'<p>2. Pentose sugar \u2014 deoxyribose (in DNA) or ribose (in RNA). Ribose has -OH on C2\u2019; deoxyribose has -H on C2\u2019</p>' +
+'<p>3. Nitrogenous base \u2014 attached to C1\u2019 of the sugar</p>' +
+'<table><tr><th>Feature</th><th>DNA</th><th>RNA</th></tr>' +
+'<tr><td><span class="rule">Full Name</span></td><td>Deoxyribonucleic Acid</td><td>Ribonucleic Acid</td></tr>' +
+'<tr><td><span class="rule">Sugar</span></td><td>Deoxyribose (no -OH on C2\u2019)</td><td>Ribose (has -OH on C2\u2019)</td></tr>' +
+'<tr><td><span class="rule">Bases</span></td><td>A, T, G, C</td><td>A, U, G, C (U replaces T)</td></tr>' +
+'<tr><td><span class="rule">Structure</span></td><td>Double-stranded helix (antiparallel)</td><td>Single-stranded (can fold on itself)</td></tr>' +
+'<tr><td><span class="rule">Location</span></td><td>Nucleus (mainly)</td><td>Nucleus + Cytoplasm + Ribosomes</td></tr>' +
+'<tr><td><span class="rule">Function</span></td><td>Long-term genetic information storage</td><td>Gene expression (mRNA, tRNA, rRNA)</td></tr>' +
+'<tr><td><span class="rule">Stability</span></td><td>Very stable (deoxyribose + double strand)</td><td>Less stable (ribose + single strand)</td></tr></table>' +
+'<p><span class="rule">Nitrogenous Bases:</span></p>' +
+'<table><tr><th>Type</th><th>Bases</th><th>Ring Structure</th><th>Mnemonic</th></tr>' +
+'<tr><td><span class="rule">Purines</span></td><td>Adenine (A), Guanine (G)</td><td>DOUBLE ring (fused 6+5)</td><td>PURe As Gold</td></tr>' +
+'<tr><td><span class="rule">Pyrimidines</span></td><td>Cytosine (C), Thymine (T), Uracil (U)</td><td>SINGLE ring (6-membered)</td><td>CUT the PY (pie)</td></tr></table>' +
+'<p>A purine always pairs with a pyrimidine (keeps the helix width constant).</p>' +
+'<p><span class="rule">Base Pairing Rules:</span></p>' +
+'<p>DNA: A=T (2 hydrogen bonds) and G\u2261C (3 hydrogen bonds). G-C pairs are STRONGER (3 H-bonds vs 2).</p>' +
+'<p>RNA: A=U and G\u2261C (same pairing logic, but U replaces T).</p>' +
+'<p>The two DNA strands run ANTIPARALLEL: one runs 5\u2019\u21923\u2019, the other runs 3\u2019\u21925\u2019.</p>' +
+'<p><span class="rule">Chargaff\u2019s Rules:</span> In any DNA molecule: %A = %T and %G = %C. Therefore %A + %G = %T + %C = 50%. If %A = 30%, then %T = 30%, %G = 20%, %C = 20%.</p>' +
+'<p><span class="rule">DNA Replication (Semiconservative):</span></p>' +
+'<p>Each new DNA molecule has one OLD strand and one NEW strand. Key enzymes:</p>' +
+'<table><tr><th>Enzyme</th><th>Function</th></tr>' +
+'<tr><td><span class="rule">Helicase</span></td><td>Unwinds/unzips the double helix (breaks H-bonds)</td></tr>' +
+'<tr><td><span class="rule">Primase</span></td><td>Lays down short RNA primer (DNA pol needs a 3\u2019-OH to start)</td></tr>' +
+'<tr><td><span class="rule">DNA Polymerase III</span></td><td>Synthesizes new DNA strand 5\u2019\u21923\u2019 (reads template 3\u2019\u21925\u2019)</td></tr>' +
+'<tr><td><span class="rule">DNA Polymerase I</span></td><td>Removes RNA primers and replaces with DNA</td></tr>' +
+'<tr><td><span class="rule">DNA Ligase</span></td><td>Joins Okazaki fragments on lagging strand</td></tr>' +
+'<tr><td><span class="rule">Topoisomerase</span></td><td>Relieves tension ahead of replication fork</td></tr></table>' +
+'<p>Leading strand: synthesized continuously 5\u2019\u21923\u2019. Lagging strand: synthesized in short Okazaki fragments (also 5\u2019\u21923\u2019), joined by ligase.</p>' +
+'<p><span class="rule">Central Dogma: DNA \u2192 RNA \u2192 Protein</span></p>' +
+'<p><span class="rule">Transcription (DNA \u2192 mRNA):</span> RNA polymerase reads DNA template strand 3\u2019\u21925\u2019 and builds mRNA 5\u2019\u21923\u2019. Occurs in the nucleus. mRNA carries the genetic code to the ribosome.</p>' +
+'<p><span class="rule">Translation (mRNA \u2192 Protein):</span> Ribosome reads mRNA codons (3 nucleotides each). tRNA brings matching amino acids (anticodon pairs with codon). Amino acids linked by peptide bonds. Occurs at ribosomes (cytoplasm or rough ER).</p>' +
+'<p><span class="rule">The Genetic Code:</span></p>' +
+'<p>64 total codons (4\u00B3 = 64 combinations of 3 bases). 61 code for amino acids + 3 STOP codons.</p>' +
+'<p>START codon: AUG (codes for Methionine, Met). STOP codons: UAA, UAG, UGA (do not code for any amino acid).</p>' +
+'<p>The code is degenerate (redundant): most amino acids are coded by more than one codon (e.g., Leu has 6 codons). The code is universal (nearly all organisms use the same code). The code is non-overlapping and read in one frame.</p>' +
+'<p><span class="rule">RNA Types:</span> mRNA (messenger, carries code), tRNA (transfer, brings amino acids, has anticodon), rRNA (ribosomal, structural component of ribosomes).</p>' +
+'<p><span class="rule">Mutations:</span></p>' +
+'<table><tr><th>Type</th><th>Change</th><th>Effect</th></tr>' +
+'<tr><td><span class="rule">Silent</span></td><td>Base change, same amino acid</td><td>No effect (due to code degeneracy)</td></tr>' +
+'<tr><td><span class="rule">Missense</span></td><td>Base change, different amino acid</td><td>May alter protein function (e.g., sickle cell: GAG\u2192GUG, Glu\u2192Val)</td></tr>' +
+'<tr><td><span class="rule">Nonsense</span></td><td>Base change creates STOP codon</td><td>Premature termination, truncated protein</td></tr>' +
+'<tr><td><span class="rule">Frameshift</span></td><td>Insertion or deletion of bases (not multiple of 3)</td><td>All codons downstream are shifted, usually catastrophic</td></tr></table>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 nucleotides, base pairing, DNA structure, replication, transcription \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

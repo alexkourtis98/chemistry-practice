@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Acid-Base Comprehensive</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Acid-Base Comprehensive</h1>
+<p class="subtitle">Deep practice &mdash; all theories, conjugate pairs, strong/weak, Ka, pH, buffers</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_112';
+
+const SECTIONS = [
+  {
+    id:1, title:"Acid-Base Definitions Comparison",
+    instruction:"Fill in the blank based on the three acid-base theories: Arrhenius, Br\u00F8nsted-Lowry, and Lewis.",
+    rows:[
+      ["1","According to Arrhenius, an acid produces ___ ions in water","H+ / H\u207A / hydrogen ions / hydronium"],
+      ["2","According to Arrhenius, a base produces ___ ions in water","OH- / OH\u207B / hydroxide ions"],
+      ["3","According to Br\u00F8nsted-Lowry, an acid is a ___ donor","proton / H+"],
+      ["4","According to Br\u00F8nsted-Lowry, a base is a ___ acceptor","proton / H+"],
+      ["5","According to Lewis, an acid is an electron pair ___","acceptor"],
+      ["6","According to Lewis, a base is an electron pair ___","donor"],
+      ["7","HCl is an acid under which theories?","all three / Arrhenius, Bronsted-Lowry, Lewis / all"],
+      ["8","NH\u2083 is a base under which theories?","Bronsted-Lowry and Lewis / Bronsted-Lowry, Lewis"],
+      ["9","BF\u2083 is an acid only under ___ theory","Lewis"],
+      ["10","NaOH is a base under ___ theory (primarily)","Arrhenius / all three / Arrhenius, Bronsted-Lowry, Lewis"],
+      ["11","In H\u2082O + HCl \u2192 H\u2083O\u207A + Cl\u207B, the Br\u00F8nsted-Lowry acid is ___","HCl"],
+      ["12","In H\u2082O + HCl \u2192 H\u2083O\u207A + Cl\u207B, the Br\u00F8nsted-Lowry base is ___","H2O / H\u2082O / water"],
+      ["13","In H\u2082O + NH\u2083 \u2192 NH\u2084\u207A + OH\u207B, the acid is ___","H2O / H\u2082O / water"],
+      ["14","In H\u2082O + NH\u2083 \u2192 NH\u2084\u207A + OH\u207B, the base is ___","NH3 / NH\u2083 / ammonia"],
+      ["15","A substance that can act as both acid and base is called ___","amphoteric / amphiprotic"]
+    ]
+  },
+  {
+    id:2, title:"Conjugate Acid-Base Pairs",
+    instruction:"Identify the conjugate acid or conjugate base as requested.",
+    rows:[
+      ["1","Conjugate base of HCl","Cl- / Cl\u207B"],
+      ["2","Conjugate base of H\u2082SO\u2084","HSO4- / HSO\u2084\u207B"],
+      ["3","Conjugate base of HSO\u2084\u207B","SO4 2- / SO\u2084\u00B2\u207B / SO42-"],
+      ["4","Conjugate acid of NH\u2083","NH4+ / NH\u2084\u207A"],
+      ["5","Conjugate acid of H\u2082O","H3O+ / H\u2083O\u207A / hydronium"],
+      ["6","Conjugate base of H\u2082O","OH- / OH\u207B / hydroxide"],
+      ["7","Conjugate base of HNO\u2083","NO3- / NO\u2083\u207B"],
+      ["8","Conjugate acid of H\u2082PO\u2084\u207B","H3PO4 / H\u2083PO\u2084"],
+      ["9","Conjugate base of H\u2082PO\u2084\u207B","HPO4 2- / HPO\u2084\u00B2\u207B / HPO42-"],
+      ["10","Conjugate base of HCO\u2083\u207B (acting as acid)","CO3 2- / CO\u2083\u00B2\u207B / CO32-"],
+      ["11","Conjugate acid of HCO\u2083\u207B (acting as base)","H2CO3 / H\u2082CO\u2083"],
+      ["12","Conjugate base of HF","F- / F\u207B / fluoride"],
+      ["13","Conjugate acid of PO\u2084\u00B3\u207B","HPO4 2- / HPO\u2084\u00B2\u207B / HPO42-"],
+      ["14","Conjugate acid of CO\u2083\u00B2\u207B","HCO3- / HCO\u2083\u207B"],
+      ["15","Conjugate base of CH\u2083COOH (acetic acid)","CH3COO- / CH\u2083COO\u207B / acetate / C2H3O2-"]
+    ]
+  },
+  {
+    id:3, title:"Strong vs Weak Classification",
+    instruction:"Classify each substance as 'strong acid', 'weak acid', 'strong base', or 'weak base'.",
+    rows:[
+      ["1","HCl","strong acid"],
+      ["2","HNO\u2083","strong acid"],
+      ["3","H\u2082SO\u2084","strong acid"],
+      ["4","HBr","strong acid"],
+      ["5","HI","strong acid"],
+      ["6","HClO\u2084","strong acid"],
+      ["7","CH\u2083COOH (acetic acid)","weak acid"],
+      ["8","HF","weak acid"],
+      ["9","H\u2082CO\u2083","weak acid"],
+      ["10","NaOH","strong base"],
+      ["11","KOH","strong base"],
+      ["12","Ca(OH)\u2082","strong base"],
+      ["13","Ba(OH)\u2082","strong base"],
+      ["14","NH\u2083 (ammonia)","weak base"],
+      ["15","CH\u2083NH\u2082 (methylamine)","weak base"]
+    ]
+  },
+  {
+    id:4, title:"pH Calculations",
+    instruction:"Calculate pH, pOH, or ion concentrations. Give numeric answers.",
+    rows:[
+      ["1","pH of 0.01 M HCl","2"],
+      ["2","pH of 0.1 M NaOH","13"],
+      ["3","pOH of a solution with pH = 3","11"],
+      ["4","[H\u207A] if pH = 4","10^-4 / 0.0001 / 1e-4 / 10\u207B\u2074"],
+      ["5","pH of 10\u207B\u2075 M HNO\u2083","5"],
+      ["6","pH of 0.001 M HBr","3"],
+      ["7","pOH of 0.01 M NaOH","2"],
+      ["8","pH of 0.01 M KOH","12"],
+      ["9","[OH\u207B] if pOH = 3","10^-3 / 0.001 / 1e-3 / 10\u207B\u00B3"],
+      ["10","pH of pure water at 25\u00B0C","7"],
+      ["11","[H\u207A] in pure water at 25\u00B0C","10^-7 / 1e-7 / 10\u207B\u2077"],
+      ["12","If [H\u207A] = 10\u207B\u2079, the solution is ___ (acidic/basic/neutral)","basic"]
+    ]
+  },
+  {
+    id:5, title:"Ka and Acid Strength",
+    instruction:"Answer questions about Ka (acid dissociation constant) and acid strength.",
+    rows:[
+      ["1","A larger Ka means a ___ acid","stronger / strong"],
+      ["2","A smaller Ka means a ___ acid","weaker / weak"],
+      ["3","Ka of a strong acid is ___","very large / >>1 / large"],
+      ["4","If Ka = 1.8 \u00D7 10\u207B\u2075, the acid is ___","weak"],
+      ["5","pKa = -log(Ka). A lower pKa means a ___ acid","stronger / strong"],
+      ["6","For a conjugate acid-base pair: Ka \u00D7 Kb = ___","Kw / 10^-14 / 1.0 x 10^-14 / 1e-14"],
+      ["7","If Ka is large, the equilibrium favors the ___ (products/reactants)","products"],
+      ["8","Acetic acid has Ka = 1.8 \u00D7 10\u207B\u2075. It ___ (fully/partially) dissociates","partially"],
+      ["9","HCl has Ka >> 1. It ___ (fully/partially) dissociates","fully / completely"],
+      ["10","The stronger the acid, the ___ (stronger/weaker) its conjugate base","weaker / weak"]
+    ]
+  },
+  {
+    id:6, title:"MC: Comprehensive Acid-Base", type:"mc",
+    instruction:"Select the best answer for each question.",
+    questions:[
+      {q:"A buffer solution contains:", options:["A strong acid and its salt","A weak acid and its conjugate base","Two strong acids","A strong base only"], correct:1},
+      {q:"What are the products of neutralization of HCl + NaOH?", options:["NaCl + H\u2082","NaCl + H\u2082O","NaH + ClOH","Na + HClO"], correct:1},
+      {q:"Which is a Lewis acid?", options:["NH\u2083","BF\u2083","NaOH","H\u2082O"], correct:1},
+      {q:"Which is a Lewis base?", options:["BF\u2083","AlCl\u2083","NH\u2083","H\u207A"], correct:2},
+      {q:"pH + pOH = ___ at 25\u00B0C", options:["7","10","14","1"], correct:2},
+      {q:"A solution with pH = 2 is:", options:["Strongly basic","Neutral","Weakly acidic","Strongly acidic"], correct:3},
+      {q:"Which acid is monoprotic?", options:["H\u2082SO\u2084","H\u2083PO\u2084","HCl","H\u2082CO\u2083"], correct:2},
+      {q:"Which acid is triprotic?", options:["HCl","H\u2082SO\u2084","H\u2083PO\u2084","CH\u2083COOH"], correct:2},
+      {q:"Kw = [H\u207A][OH\u207B] = ___ at 25\u00B0C", options:["1.0 \u00D7 10\u207B\u2077","1.0 \u00D7 10\u207B\u00B9\u2074","1.0 \u00D7 10\u207B\u00B9","7.0"], correct:1},
+      {q:"Adding a strong acid to a buffer will:", options:["Drastically lower pH","Slightly lower pH","Have no effect","Raise pH"], correct:1},
+      {q:"The Henderson-Hasselbalch equation is:", options:["pH = pKa + log([A\u207B]/[HA])","pH = Ka + [A\u207B]/[HA]","pH = -log[H\u207A]","pH = 14 - pOH"], correct:0},
+      {q:"In a titration of a weak acid with a strong base, the pH at equivalence point is:", options:["7","Less than 7","Greater than 7","Equal to pKa"], correct:2},
+      {q:"At the half-equivalence point of a weak acid titration, pH = ___", options:["7","pKa","14","0"], correct:1},
+      {q:"Which is NOT a strong acid?", options:["HCl","HNO\u2083","HF","HI"], correct:2},
+      {q:"The conjugate base of a strong acid is:", options:["A strong base","A weak base","Neutral","Another strong acid"], correct:1}
+    ]
+  },
+  {
+    id:7, title:"True or False",
+    instruction:"Type 'true' or 'false' for each statement.",
+    rows:[
+      ["1","All Arrhenius acids are also Br\u00F8nsted-Lowry acids.","true"],
+      ["2","All Br\u00F8nsted-Lowry acids are also Arrhenius acids.","false"],
+      ["3","A strong acid completely dissociates in water.","true"],
+      ["4","A weak acid does not dissociate at all in water.","false"],
+      ["5","pH = 7 always means neutral.","false"],
+      ["6","The conjugate base of a weak acid is a strong base.","false"],
+      ["7","Water can act as both an acid and a base.","true"],
+      ["8","pOH of a neutral solution at 25\u00B0C is 7.","true"],
+      ["9","A buffer resists changes in pH when small amounts of acid or base are added.","true"],
+      ["10","HF is a strong acid because fluorine is very electronegative.","false"],
+      ["11","Ka \u00D7 Kb = Kw for a conjugate acid-base pair.","true"],
+      ["12","A solution with [OH\u207B] > [H\u207A] is acidic.","false"]
+    ]
+  },
+  {
+    id:8, title:"Word Arrange: Acid-Base Concepts", type:"arrange",
+    instruction:"Arrange the words to form a correct statement about acid-base chemistry.",
+    sentences:[
+      {prompt:"Define a Br\u00F8nsted-Lowry acid:", words:["A","Bronsted-Lowry","acid","is","a","proton","donor"]},
+      {prompt:"State the relationship between pH and pOH:", words:["pH","plus","pOH","equals","14","at","25","degrees","Celsius"]},
+      {prompt:"Describe a buffer:", words:["A","buffer","contains","a","weak","acid","and","its","conjugate","base"]},
+      {prompt:"What is neutralization?", words:["An","acid","and","base","react","to","form","salt","and","water"]},
+      {prompt:"Henderson-Hasselbalch concept:", words:["pH","equals","pKa","plus","log","of","conjugate","base","over","acid"]},
+      {prompt:"Strong acid dissociation:", words:["A","strong","acid","completely","dissociates","into","ions","in","water"]},
+      {prompt:"Conjugate pair relationship:", words:["The","stronger","the","acid","the","weaker","its","conjugate","base"]},
+      {prompt:"Define Kw:", words:["Kw","is","the","product","of","hydrogen","and","hydroxide","ion","concentrations"]}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Three Acid-Base Theories Compared</h3>' +
+'<table><tr><th>Theory</th><th>Acid</th><th>Base</th><th>Scope</th></tr>' +
+'<tr><td><span class="rule">Arrhenius</span></td><td>Produces H\u207A in water</td><td>Produces OH\u207B in water</td><td>Aqueous solutions only</td></tr>' +
+'<tr><td><span class="rule">Br\u00F8nsted-Lowry</span></td><td>Proton (H\u207A) donor</td><td>Proton (H\u207A) acceptor</td><td>Any solvent</td></tr>' +
+'<tr><td><span class="rule">Lewis</span></td><td>Electron pair acceptor</td><td>Electron pair donor</td><td>Broadest definition</td></tr></table>' +
+'<h3>Strong Acids (memorize all 6)</h3>' +
+'<p><span class="rule">HCl, HBr, HI, HNO\u2083, H\u2082SO\u2084, HClO\u2084</span></p>' +
+'<h3>Strong Bases</h3>' +
+'<p><span class="rule">Group 1 hydroxides:</span> LiOH, NaOH, KOH, RbOH, CsOH</p>' +
+'<p><span class="rule">Heavy Group 2:</span> Ca(OH)\u2082, Sr(OH)\u2082, Ba(OH)\u2082</p>' +
+'<h3>Key Formulas</h3>' +
+'<p><span class="rule">pH = &minus;log[H\u207A]</span> &nbsp;&nbsp; <span class="rule">pOH = &minus;log[OH\u207B]</span></p>' +
+'<p><span class="rule">pH + pOH = 14</span> (at 25\u00B0C) &nbsp;&nbsp; <span class="rule">Kw = [H\u207A][OH\u207B] = 1.0 \u00D7 10\u207B\u00B9\u2074</span></p>' +
+'<p><span class="rule">Ka \u00D7 Kb = Kw</span> for conjugate acid-base pairs</p>' +
+'<h3>Henderson-Hasselbalch Equation</h3>' +
+'<p><span class="rule">pH = pKa + log([A\u207B]/[HA])</span></p>' +
+'<p>Used for buffer calculations. At half-equivalence point: [A\u207B] = [HA], so pH = pKa.</p>' +
+'<h3>Buffer Definition</h3>' +
+'<p>A buffer is a solution of a <span class="rule">weak acid + its conjugate base</span> (or weak base + its conjugate acid) that resists pH changes.</p>';
+
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 all theories, conjugate pairs, strong/weak, Ka, pH, buffers \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

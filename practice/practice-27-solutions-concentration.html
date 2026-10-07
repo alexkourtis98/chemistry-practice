@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice 27 — Solutions & Concentration</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Practice 27 &mdash; Solutions &amp; Concentration</h1>
+<p class="subtitle">Deep practice &mdash; molarity, dilution, mass percent, stoichiometry, solubility, colligative properties</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_27';
+const SECTIONS = [
+  {
+    id:1, title:"Molarity Basics",
+    instruction:"Fill in the blank. Press Enter to check.",
+    rows:[
+      ["1","Molarity (M) = moles of solute / ___ of solution","liters / L / volume in liters"],
+      ["2","0.5 mol NaCl in 1 L solution. M = ?","0.5"],
+      ["3","2 mol NaOH in 0.5 L. M = ?","4"],
+      ["4","0.1 mol HCl in 250 mL. M = ?","0.4"],
+      ["5","How many moles in 2 L of 0.5 M NaCl?","1"],
+      ["6","How many moles in 500 mL of 0.2 M HCl?","0.1"],
+      ["7","What volume (in L) of 2 M NaOH contains 0.5 mol?","0.25 / 250 mL / 0.25 L"],
+      ["8","3 mol KNO\u2083 in 1.5 L. M = ?","2"],
+      ["9","0.25 mol KCl in 2 L. M = ?","0.125"],
+      ["10","5 mol H\u2082SO\u2084 in 2.5 L. M = ?","2"],
+      ["11","How many moles in 100 mL of 3 M NaCl?","0.3"],
+      ["12","How many moles in 750 mL of 0.4 M KOH?","0.3"],
+      ["13","What volume (in mL) of 0.5 M HCl contains 0.25 mol?","500"],
+      ["14","What volume (in L) of 4 M NaOH contains 2 mol?","0.5"],
+      ["15","1.5 mol CaCl\u2082 in 3 L. M = ?","0.5"],
+      ["16","A 0.1 M solution means ___ mol per liter","0.1"],
+      ["17","0.02 mol NaOH in 100 mL. M = ?","0.2"],
+      ["18","How many grams of NaCl (MW=58.5) are in 500 mL of 1 M solution?","29.25"],
+      ["19","How many grams of NaOH (MW=40) are needed for 250 mL of 2 M solution?","20"],
+      ["20","How many grams of KOH (MW=56) in 1 L of 0.5 M solution?","28"]
+    ]
+  },
+  {
+    id:2, title:"Dilution (M\u2081V\u2081 = M\u2082V\u2082)",
+    instruction:"Fill in the blank. Press Enter to check.",
+    rows:[
+      ["1","Dilution formula: M\u2081V\u2081 = ___","M2V2 / M\u2082V\u2082"],
+      ["2","Dilute 100 mL of 6M HCl to 1M. Final volume = ?","600 mL / 0.6 L / 600"],
+      ["3","50 mL of 4M NaOH diluted to 200 mL. New M = ?","1"],
+      ["4","M\u2081=12, V\u2081=50 mL, V\u2082=300 mL. M\u2082 = ?","2"],
+      ["5","M\u2081=0.5, V\u2081=?, M\u2082=0.1, V\u2082=500 mL. V\u2081 = ?","100 / 100 mL"],
+      ["6","To make 1 L of 0.1M HCl from 1M HCl, you need ___ mL","100"],
+      ["7","200 mL of 3M diluted to 600 mL. M\u2082 = ?","1"],
+      ["8","When you dilute, the number of ___ stays the same","moles"],
+      ["9","25 mL of 8M H\u2082SO\u2084 diluted to 200 mL. M\u2082 = ?","1"],
+      ["10","M\u2081=6, V\u2081=10 mL, M\u2082=0.5. V\u2082 = ?","120 / 120 mL"],
+      ["11","100 mL of 0.2M NaCl diluted to 1 L. M\u2082 = ?","0.02"],
+      ["12","To prepare 500 mL of 0.5M NaOH from 5M NaOH, V\u2081 = ?","50 / 50 mL"],
+      ["13","M\u2081=10, V\u2081=?, M\u2082=2, V\u2082=250 mL. V\u2081 = ?","50 / 50 mL"],
+      ["14","75 mL of 2M KCl diluted to 300 mL. M\u2082 = ?","0.5"],
+      ["15","Serial dilution: 10 mL of 1M diluted to 100 mL, then 10 mL of that diluted to 100 mL. Final M = ?","0.01"],
+      ["16","Serial dilution: 5 mL of 2M to 50 mL, then 10 mL to 100 mL. Final M = ?","0.02"],
+      ["17","Diluting does NOT change the number of ___ of solute","moles"],
+      ["18","M\u2081=0.8, V\u2081=250 mL, V\u2082=1000 mL. M\u2082 = ?","0.2"]
+    ]
+  },
+  {
+    id:3, title:"Mass Percent, ppm & Mole Fraction",
+    instruction:"Fill in the blank. Press Enter to check.",
+    rows:[
+      ["1","Mass percent = (mass solute / mass solution) \u00D7 ___","100"],
+      ["2","10 g NaCl in 90 g water. Mass % = ?","10"],
+      ["3","5 g sugar in 200 g solution. Mass % = ?","2.5"],
+      ["4","ppm = parts per ___","million"],
+      ["5","mg/L is equivalent to ___","ppm"],
+      ["6","0.005 g solute in 1000 g solution = ___ ppm","5"],
+      ["7","25 g NaCl in 75 g water. Mass % NaCl = ?","25"],
+      ["8","A 15% (m/m) solution has ___ g solute per 100 g solution","15"],
+      ["9","How many g of solute in 500 g of 8% solution?","40"],
+      ["10","0.001 g solute in 1 kg solution = ___ ppm","1"],
+      ["11","50 ppm = ___ mg/L","50"],
+      ["12","Mole fraction (\u03C7) of a component = moles component / total ___","moles"],
+      ["13","2 mol ethanol + 8 mol water. Mole fraction of ethanol = ?","0.2"],
+      ["14","3 mol NaCl + 7 mol water. Mole fraction of NaCl = ?","0.3"],
+      ["15","Sum of all mole fractions in a solution = ___","1"],
+      ["16","Molality (m) = moles solute / ___ of solvent","kg / kilograms"],
+      ["17","0.5 mol NaCl in 500 g water. Molality = ?","1 / 1 m"],
+      ["18","2 mol glucose in 4 kg water. Molality = ?","0.5 / 0.5 m"],
+      ["19","Unlike molarity, molality does NOT depend on ___","temperature / volume"],
+      ["20","1 mol solute in 2 kg solvent. Molality = ?","0.5 / 0.5 m"]
+    ]
+  },
+  {
+    id:4, title:"Solution Stoichiometry",
+    instruction:"Fill in the blank. Press Enter to check.",
+    rows:[
+      ["1","How many mL of 0.5M NaOH needed to neutralize 25 mL of 0.5M HCl?","25"],
+      ["2","How many mL of 1M HCl to neutralize 50 mL of 0.5M NaOH?","25"],
+      ["3","2M H\u2082SO\u2084 + NaOH. mL of 1M NaOH for 25 mL acid? (H\u2082SO\u2084 is diprotic)","100"],
+      ["4","Moles of NaOH in 200 mL of 0.25M solution?","0.05"],
+      ["5","50 mL of 0.1M AgNO\u2083 + excess NaCl. Moles of AgCl formed?","0.005"],
+      ["6","At equivalence point, moles acid = moles ___ (for monoprotic)","base"],
+      ["7","How many mL of 2M NaOH to neutralize 100 mL of 1M HCl?","50"],
+      ["8","30 mL of 0.5M H\u2082SO\u2084. How many moles of H\u207A produced?","0.03"],
+      ["9","If 25 mL of 0.1M NaOH neutralizes 50 mL of HCl, M(HCl) = ?","0.05"],
+      ["10","100 mL of 0.2M BaCl\u2082 + excess Na\u2082SO\u2084. Moles of BaSO\u2084 precipitate?","0.02"],
+      ["11","How many mL of 0.25M KOH to neutralize 25 mL of 0.5M HNO\u2083?","50"],
+      ["12","40 mL of 0.1M Pb(NO\u2083)\u2082 + excess KI. Moles of PbI\u2082 formed?","0.004"],
+      ["13","Moles of HCl in 75 mL of 0.4M solution?","0.03"],
+      ["14","In a titration, 20 mL of 0.1M NaOH neutralizes 40 mL of acid. M(acid) = ?","0.05"],
+      ["15","Grams of NaCl formed from 100 mL of 1M HCl + excess NaOH? (NaCl MW=58.5)","5.85"]
+    ]
+  },
+  {
+    id:5, title:"Solution Preparation Steps", type:"arrange",
+    instruction:"Arrange the words in the correct order.",
+    sentences:[
+      {prompt:"Steps to prepare a solution from solid solute (first step):", words:["Calculate","the","mass","of","solute","needed"]},
+      {prompt:"After calculating mass, the next step is to:", words:["Weigh","the","solute","on","a","balance"]},
+      {prompt:"After weighing, you:", words:["Dissolve","the","solute","in","some","solvent"]},
+      {prompt:"The final step in preparation:", words:["Transfer","to","volumetric","flask","and","dilute","to","mark"]},
+      {prompt:"The dilution formula is:", words:["M\u2081","V\u2081","=","M\u2082","V\u2082"]},
+      {prompt:"Molarity is defined as:", words:["moles","of","solute","per","liter","of","solution"]},
+      {prompt:"Mass percent formula:", words:["mass","solute","divided","by","mass","solution","times","100"]},
+      {prompt:"When diluting acid, always:", words:["add","acid","to","water","never","water","to","acid"]}
+    ]
+  },
+  {
+    id:6, title:"Solubility Rules", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"All sodium (Na\u207A) compounds are:", options:["Insoluble","Soluble","Slightly soluble","It depends on the anion"], correct:1},
+      {q:"All ammonium (NH\u2084\u207A) compounds are:", options:["Insoluble","Slightly soluble","Soluble","Only soluble in hot water"], correct:2},
+      {q:"Most chlorides are soluble EXCEPT:", options:["NaCl, KCl","AgCl, PbCl\u2082, Hg\u2082Cl\u2082","FeCl\u2083, CuCl\u2082","CaCl\u2082, MgCl\u2082"], correct:1},
+      {q:"Most sulfates are soluble EXCEPT:", options:["Na\u2082SO\u2084, K\u2082SO\u2084","FeSO\u2084, CuSO\u2084","BaSO\u2084, PbSO\u2084, CaSO\u2084","All sulfates are soluble"], correct:2},
+      {q:"Most hydroxides are:", options:["Soluble","Insoluble (except Group 1, Ba, Ca, Sr)","Always soluble","Never soluble"], correct:1},
+      {q:"Most carbonates are:", options:["Soluble","Slightly soluble","Insoluble (except Group 1, NH\u2084\u207A)","Always insoluble"], correct:2},
+      {q:"Which of these is INSOLUBLE in water?", options:["NaNO\u2083","KCl","BaSO\u2084","NH\u2084Cl"], correct:2},
+      {q:"All nitrates (NO\u2083\u207B) are:", options:["Insoluble","Soluble","Only soluble with Group 1","Slightly soluble"], correct:1},
+      {q:"Is CaCO\u2083 soluble or insoluble?", options:["Soluble","Insoluble","Slightly soluble","Only in acid"], correct:1},
+      {q:"Which pair are BOTH soluble?", options:["AgCl and BaSO\u2084","NaCl and KNO\u2083","PbI\u2082 and CaCO\u2083","Fe(OH)\u2083 and CuS"], correct:1},
+      {q:"Is Fe(OH)\u2083 soluble?", options:["Yes","No, it is insoluble","Only in hot water","Only with excess NaOH"], correct:1},
+      {q:"Which sulfide IS soluble?", options:["CuS","FeS","Na\u2082S","PbS"], correct:2},
+      {q:"Is AgBr soluble?", options:["Yes","No","Slightly","Only in NH\u2083"], correct:1},
+      {q:"All ___ salts are soluble (no exceptions):", options:["Chloride","Sulfate","Nitrate","Carbonate"], correct:2},
+      {q:"Which precipitate forms when BaCl\u2082 mixes with Na\u2082SO\u2084?", options:["NaCl","BaSO\u2084","BaCl\u2082","Na\u2082SO\u2084"], correct:1}
+    ]
+  },
+  {
+    id:7, title:"Colligative Properties", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Boiling point ___ when a nonvolatile solute is added.", options:["Decreases","Stays the same","Increases","Becomes unpredictable"], correct:2},
+      {q:"Freezing point ___ when solute is added.", options:["Increases","Decreases","Stays the same","Doubles"], correct:1},
+      {q:"Which raises boiling point more: 1m NaCl or 1m glucose?", options:["Glucose (larger molecule)","NaCl (dissociates into more particles)","They raise it equally","Neither raises boiling point"], correct:1},
+      {q:"Colligative properties depend on:", options:["The identity of solute particles","The number of solute particles","The color of the solution","The mass of the solvent only"], correct:1},
+      {q:"Adding salt to icy roads works because:", options:["Salt is warm","Salt lowers the freezing point of water","Salt absorbs the ice","Salt raises the freezing point"], correct:1},
+      {q:"Osmotic pressure is a colligative property that depends on:", options:["Solute identity","Molarity of solute particles","Temperature only","Solvent boiling point"], correct:1},
+      {q:"The van 't Hoff factor (i) for NaCl is approximately:", options:["1","2","3","4"], correct:1},
+      {q:"The van 't Hoff factor (i) for CaCl\u2082 is approximately:", options:["1","2","3","4"], correct:2},
+      {q:"The van 't Hoff factor (i) for glucose (non-electrolyte) is:", options:["0","1","2","3"], correct:1},
+      {q:"Which solution has the highest boiling point?", options:["0.1m glucose","0.1m NaCl","0.1m CaCl\u2082","0.1m Al(NO\u2083)\u2083"], correct:3},
+      {q:"Which solution has the lowest freezing point?", options:["Pure water","0.5m NaCl","0.5m glucose","0.5m KBr"], correct:1},
+      {q:"Osmosis is the movement of ___ across a semipermeable membrane:", options:["Solute","Solvent","Ions","Gas"], correct:1},
+      {q:"Vapor pressure ___ when a nonvolatile solute is added:", options:["Increases","Decreases","Stays the same","Doubles"], correct:1},
+      {q:"Raoult's Law relates vapor pressure to:", options:["Temperature only","Mole fraction of solvent","Mass of solute","Volume of solution"], correct:1},
+      {q:"Antifreeze in car radiators works by:", options:["Raising freezing point","Lowering freezing point and raising boiling point","Only lowering boiling point","Adding heat"], correct:1}
+    ]
+  },
+  {
+    id:8, title:"Concentration Units Comparison", type:"mc",
+    instruction:"Select the correct answer about different concentration units.",
+    questions:[
+      {q:"Which concentration unit changes with temperature?", options:["Molality","Mole fraction","Molarity","Mass percent"], correct:2},
+      {q:"Molality uses ___ in the denominator:", options:["Liters of solution","Kilograms of solvent","Moles of solvent","Grams of solution"], correct:1},
+      {q:"Molarity uses ___ in the denominator:", options:["Kilograms of solvent","Liters of solution","Moles of solution","Grams of solvent"], correct:1},
+      {q:"For dilute aqueous solutions, molarity and molality are approximately:", options:["Always different","Equal","Molality is always larger","Molarity is always larger"], correct:1},
+      {q:"Mass percent is independent of:", options:["Mass","Temperature","Composition","Solute identity"], correct:1},
+      {q:"Which is dimensionless?", options:["Molarity","Molality","Mole fraction","Mass percent"], correct:2},
+      {q:"ppb stands for parts per:", options:["Billion","Barometric","Base","Both"], correct:0},
+      {q:"1% (m/v) means:", options:["1 g solute per 100 mL solution","1 mL solute per 100 g solution","1 mol per 100 L","1 g per 1 g"], correct:0},
+      {q:"To convert from mass % to molarity, you also need:", options:["Temperature","Density of solution and molar mass","Color of solution","pH"], correct:1},
+      {q:"A 0.01 M solution is also called:", options:["Millimolar","Centimolar","Decimolar","Micromolar"], correct:1}
+    ]
+  },
+  {
+    id:9, title:"Mixed Review", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"What is the molarity of a solution with 0.25 mol solute in 500 mL?", options:["0.125 M","0.25 M","0.5 M","1.0 M"], correct:2},
+      {q:"If you dilute 50 mL of 6M HCl to 300 mL, the new concentration is:", options:["0.5 M","1 M","2 M","3 M"], correct:1},
+      {q:"20 g of NaOH (MW=40) dissolved in enough water to make 500 mL. M = ?", options:["0.5 M","1.0 M","2.0 M","0.25 M"], correct:1},
+      {q:"Which is NOT a colligative property?", options:["Boiling point elevation","Freezing point depression","Color of solution","Osmotic pressure"], correct:2},
+      {q:"A 5% (m/m) NaCl solution means:", options:["5 g NaCl in 100 g solution","5 g NaCl in 100 g water","5 mol NaCl in 100 mol water","5 mL NaCl in 100 mL solution"], correct:0},
+      {q:"PbCl\u2082 is:", options:["Soluble","Insoluble","Slightly soluble in cold water, more in hot","Only soluble in acid"], correct:2},
+      {q:"When diluting a concentrated acid, you should:", options:["Add water to acid","Add acid to water","It doesn't matter","Heat the acid first"], correct:1},
+      {q:"1 ppm is equivalent to:", options:["1 g/L","1 mg/L","1 g/mL","1 kg/L"], correct:1},
+      {q:"58.5 g NaCl (MW=58.5) in 500 mL solution. M = ?", options:["0.5 M","1 M","2 M","4 M"], correct:2},
+      {q:"How many moles of H\u2082SO\u2084 in 250 mL of 0.4 M solution?", options:["0.01","0.04","0.1","0.4"], correct:2},
+      {q:"Mole fraction is always between:", options:["0 and 100","0 and 1","-1 and 1","1 and 10"], correct:1},
+      {q:"Which requires the most NaOH to neutralize: 1 mol HCl, 1 mol H\u2082SO\u2084, or 1 mol H\u2083PO\u2084?", options:["HCl (1 mol NaOH)","H\u2082SO\u2084 (2 mol NaOH)","H\u2083PO\u2084 (3 mol NaOH)","All need the same amount"], correct:2},
+      {q:"A saturated solution:", options:["Contains the maximum amount of dissolved solute","Is always concentrated","Has no dissolved solute","Is always at 100\u00B0C"], correct:0},
+      {q:"Supersaturated solutions are:", options:["Always stable","Unstable, contain more solute than normal saturation","Unsaturated","Always cold"], correct:1},
+      {q:"The process of dissolving is called:", options:["Precipitation","Dissolution / solvation","Filtration","Distillation"], correct:1}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Solutions & Concentration - Complete Reference</h3><p><span class="rule">Concentration Units:</span></p><table><tr><th>Unit</th><th>Formula</th><th>Notes</th></tr><tr><td><strong>Molarity (M)</strong></td><td>M = mol solute / L solution</td><td>Most common unit. Depends on temperature (volume changes).</td></tr><tr><td><strong>Molality (m)</strong></td><td>m = mol solute / kg solvent</td><td>Independent of temperature. Used for colligative properties.</td></tr><tr><td><strong>Mass Percent</strong></td><td>(mass solute / mass solution) \u00D7 100</td><td>mass solution = mass solute + mass solvent</td></tr><tr><td><strong>Mole Fraction (\u03C7)</strong></td><td>\u03C7 = mol component / total mol</td><td>Dimensionless. Sum of all \u03C7 = 1</td></tr><tr><td><strong>ppm</strong></td><td>mg/L (dilute aqueous) or mg/kg</td><td>parts per million. 1 ppm = 0.0001%</td></tr><tr><td><strong>ppb</strong></td><td>\u03BCg/L or \u03BCg/kg</td><td>parts per billion. 1 ppb = 0.001 ppm</td></tr></table><p><span class="rule">Dilution Formula:</span></p><p>M\u2081V\u2081 = M\u2082V\u2082</p><p>Moles of solute remain constant during dilution. Only the volume changes. V can be in any unit as long as both sides match.</p><p><span class="rule">Solution Preparation Steps (from solid):</span></p><p>1. Calculate mass of solute needed: mass = M \u00D7 V \u00D7 MW</p><p>2. Weigh the solute on a balance</p><p>3. Dissolve in some solvent (less than final volume)</p><p>4. Transfer to a volumetric flask</p><p>5. Add solvent to the calibration mark</p><p>6. Mix thoroughly</p><p><span class="rule">Safety:</span> When diluting acid, always ADD ACID TO WATER, never water to acid. (Think: "Do as you oughta, add acid to water.")</p><h3>Solubility Rules</h3><table><tr><th>Always Soluble</th><th>Exceptions</th></tr><tr><td>Group 1 ions (Li\u207A, Na\u207A, K\u207A, Rb\u207A, Cs\u207A)</td><td>None</td></tr><tr><td>NH\u2084\u207A (ammonium)</td><td>None</td></tr><tr><td>NO\u2083\u207B (nitrates)</td><td>None</td></tr><tr><td>CH\u2083COO\u207B (acetates)</td><td>None</td></tr><tr><td>Cl\u207B, Br\u207B, I\u207B (halides)</td><td>Ag\u207A, Pb\u00B2\u207A, Hg\u2082\u00B2\u207A</td></tr><tr><td>SO\u2084\u00B2\u207B (sulfates)</td><td>Ba\u00B2\u207A, Pb\u00B2\u207A, Ca\u00B2\u207A, Sr\u00B2\u207A</td></tr></table><table><tr><th>Usually Insoluble</th><th>Soluble Exceptions</th></tr><tr><td>OH\u207B (hydroxides)</td><td>Group 1, Ba\u00B2\u207A, Ca\u00B2\u207A, Sr\u00B2\u207A</td></tr><tr><td>CO\u2083\u00B2\u207B (carbonates)</td><td>Group 1, NH\u2084\u207A</td></tr><tr><td>PO\u2084\u00B3\u207B (phosphates)</td><td>Group 1, NH\u2084\u207A</td></tr><tr><td>S\u00B2\u207B (sulfides)</td><td>Group 1, Group 2, NH\u2084\u207A</td></tr><tr><td>CrO\u2084\u00B2\u207B (chromates)</td><td>Group 1, NH\u2084\u207A</td></tr></table><h3>Key Relationships</h3><p>Moles = mass / molar mass</p><p>Moles = M \u00D7 V(in L)</p><p>For dilute aqueous solutions: molarity \u2248 molality (since density \u2248 1 kg/L)</p><p>Converting mass % to molarity requires density of the solution.</p><h3>Solution Types</h3><table><tr><th>Type</th><th>Definition</th></tr><tr><td>Unsaturated</td><td>Can dissolve more solute</td></tr><tr><td>Saturated</td><td>Contains maximum dissolved solute at that T</td></tr><tr><td>Supersaturated</td><td>Contains more solute than normal saturation (unstable)</td></tr></table>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 molarity, dilution, mass percent, stoichiometry, solubility, colligative properties \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

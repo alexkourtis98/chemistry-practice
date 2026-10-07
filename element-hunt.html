@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Element Hunt - FYE12</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#fff;color:#3c3c3c;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;min-height:100vh}
+
+/* Back link */
+.back{display:inline-block;padding:12px 20px;color:#1CB0F6;text-decoration:none;font-weight:600;font-size:.95em}
+.back:hover{color:#0a8dcc}
+
+/* Screens */
+.screen{display:none;max-width:1100px;margin:0 auto;padding:0 16px 40px}
+.screen.active{display:block}
+
+/* Title screen */
+.game-title{text-align:center;padding:30px 0 10px}
+.game-title h1{font-size:2.2em;color:#3c3c3c;font-weight:800}
+.game-title p{color:#afafaf;font-size:1em;margin-top:4px}
+
+/* Level grid */
+.level-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;padding:20px 0}
+.level-card{background:#fff;border:2px solid #e5e5e5;border-radius:16px;padding:20px;cursor:pointer;transition:all .2s;text-align:center;position:relative}
+.level-card:hover{border-color:#1CB0F6;transform:translateY(-2px);box-shadow:0 4px 12px rgba(28,176,246,.15)}
+.level-card.locked{opacity:.45;cursor:not-allowed;pointer-events:none}
+.level-card .level-num{font-size:.8em;color:#afafaf;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+.level-card .level-name{font-size:1.1em;font-weight:700;color:#3c3c3c;margin:6px 0 4px}
+.level-card .level-desc{font-size:.82em;color:#afafaf;margin-bottom:10px}
+.level-card .stars{font-size:1.3em;letter-spacing:2px}
+.star-empty{color:#e5e5e5}
+.star-filled{color:#FF9600}
+.level-card .lock-icon{font-size:1.6em;color:#e5e5e5;margin-bottom:6px}
+
+/* XP bar top */
+.xp-bar-wrap{text-align:center;padding:10px 0 0}
+.xp-display{display:inline-flex;align-items:center;gap:8px;background:#FFF7E6;border:2px solid #FFD43B;border-radius:20px;padding:6px 18px;font-weight:700;color:#FF9600;font-size:1em}
+
+/* Game screen */
+.game-header{display:flex;justify-content:space-between;align-items:center;padding:12px 0;flex-wrap:wrap;gap:8px}
+.game-header .level-label{font-weight:700;color:#3c3c3c;font-size:1.1em}
+.game-header .round-info{color:#afafaf;font-size:.9em}
+.game-header .score-display{font-weight:700;color:#FF9600;font-size:1.1em}
+
+/* Prompt */
+.prompt-area{background:#1CB0F6;color:#fff;border-radius:16px;padding:18px 24px;text-align:center;margin:10px 0 16px;font-size:1.2em;font-weight:700;min-height:60px;display:flex;align-items:center;justify-content:center;position:relative}
+.prompt-area .prompt-text{flex:1}
+
+/* Timer bar */
+.timer-wrap{height:8px;background:#e5e5e5;border-radius:4px;margin-bottom:14px;overflow:hidden}
+.timer-bar{height:100%;background:#58CC02;border-radius:4px;transition:width .1s linear}
+.timer-bar.warning{background:#FF9600}
+.timer-bar.danger{background:#FF4B4B}
+
+/* Periodic table grid */
+.pt-grid{display:grid;grid-template-columns:repeat(18,1fr);grid-template-rows:repeat(9,1fr);gap:2px;max-width:100%;margin:0 auto}
+.el-cell{border-radius:6px;padding:3px 2px;text-align:center;cursor:pointer;transition:all .15s;border:2px solid transparent;user-select:none;position:relative;min-height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.el-cell:hover{transform:scale(1.12);z-index:10;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.el-cell .z-num{font-size:.55em;color:rgba(0,0,0,.5);line-height:1}
+.el-cell .sym{font-size:1em;font-weight:800;line-height:1.1}
+.el-cell .el-name{font-size:.45em;color:rgba(0,0,0,.45);line-height:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+
+/* Category colors */
+.cat-alkali{background:#ff6b6b}
+.cat-alkaline-earth{background:#ffa94d}
+.cat-transition{background:#ffd43b}
+.cat-post-transition{background:#69db7c}
+.cat-metalloid{background:#38d9a9}
+.cat-nonmetal{background:#74c0fc}
+.cat-halogen{background:#b197fc}
+.cat-noble-gas{background:#f783ac}
+.cat-actinide{background:#ced4da}
+.cat-lanthanide{background:#dee2e6}
+
+/* Feedback flashes */
+.el-cell.flash-correct{background:#58CC02!important;border-color:#46a302!important;color:#fff!important}
+.el-cell.flash-correct .z-num,.el-cell.flash-correct .el-name{color:rgba(255,255,255,.8)!important}
+.el-cell.flash-wrong{background:#FF4B4B!important;border-color:#cc3333!important;color:#fff!important}
+.el-cell.flash-wrong .z-num,.el-cell.flash-wrong .el-name{color:rgba(255,255,255,.8)!important}
+.el-cell.highlight-answer{border-color:#1CB0F6!important;box-shadow:0 0 12px rgba(28,176,246,.5);animation:pulse-highlight .6s ease infinite}
+.el-cell.highlight-target{border-color:#FF9600!important;box-shadow:0 0 8px rgba(255,150,0,.4)}
+.el-cell.dim{opacity:.3;pointer-events:none}
+
+@keyframes pulse-highlight{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+
+/* Results screen */
+.results-card{background:#fff;border:2px solid #e5e5e5;border-radius:20px;padding:40px;text-align:center;max-width:480px;margin:40px auto}
+.results-card h2{font-size:1.8em;color:#3c3c3c;margin-bottom:6px}
+.results-card .result-stars{font-size:3em;margin:16px 0}
+.results-card .result-score{font-size:1.2em;color:#afafaf;margin-bottom:20px}
+.results-card .result-stat{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:.95em}
+.results-card .result-stat:last-child{border:none}
+.results-card .result-stat .label{color:#afafaf}
+.results-card .result-stat .value{font-weight:700;color:#3c3c3c}
+
+/* Buttons */
+.btn{display:inline-block;padding:12px 28px;border-radius:12px;font-size:1em;font-weight:700;border:none;cursor:pointer;transition:all .15s;text-decoration:none}
+.btn-primary{background:#58CC02;color:#fff;border-bottom:4px solid #46a302}
+.btn-primary:hover{background:#4db800}
+.btn-primary:active{border-bottom-width:2px;transform:translateY(2px)}
+.btn-secondary{background:#e5e5e5;color:#3c3c3c;border-bottom:4px solid #ccc}
+.btn-secondary:hover{background:#ddd}
+.btn-secondary:active{border-bottom-width:2px;transform:translateY(2px)}
+.btn-group{display:flex;gap:12px;justify-content:center;margin-top:24px;flex-wrap:wrap}
+
+/* Responsive */
+@media(max-width:800px){
+  .pt-grid{gap:1px}
+  .el-cell{min-height:36px;padding:2px 1px;border-radius:4px}
+  .el-cell .sym{font-size:.7em}
+  .el-cell .z-num{font-size:.45em}
+  .el-cell .el-name{display:none}
+  .level-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+  .prompt-area{font-size:1em;padding:14px 16px}
+}
+@media(max-width:500px){
+  .el-cell{min-height:28px;padding:1px}
+  .el-cell .sym{font-size:.55em}
+  .el-cell .z-num{font-size:.4em}
+}
+
+/* Legend */
+.legend{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:12px 0 6px;font-size:.75em}
+.legend-item{display:flex;align-items:center;gap:4px}
+.legend-swatch{width:14px;height:14px;border-radius:3px}
+
+/* Multi-select mode info */
+.multi-info{text-align:center;color:#afafaf;font-size:.85em;margin-bottom:8px}
+.selected-count{background:#1CB0F6;color:#fff;border-radius:10px;padding:2px 10px;font-weight:700;font-size:.85em}
+.submit-multi{margin-top:10px}
+</style>
+</head>
+<body>
+
+<a href="index.html" class="back">&larr; Back to Exercises</a>
+
+<!-- SCREEN: Level Select -->
+<div id="screen-levels" class="screen active">
+  <div class="game-title">
+    <h1>Element Hunt</h1>
+    <p>Find elements on the periodic table, fast!</p>
+  </div>
+  <div class="xp-bar-wrap">
+    <div class="xp-display">&#9733; <span id="total-xp">0</span> XP</div>
+  </div>
+  <div class="level-grid" id="level-grid"></div>
+</div>
+
+<!-- SCREEN: Gameplay -->
+<div id="screen-game" class="screen">
+  <div class="game-header">
+    <span class="level-label" id="game-level-label"></span>
+    <span class="round-info" id="game-round-info"></span>
+    <span class="score-display" id="game-score-display">0 XP</span>
+  </div>
+  <div class="prompt-area">
+    <span class="prompt-text" id="prompt-text"></span>
+  </div>
+  <div class="timer-wrap"><div class="timer-bar" id="timer-bar"></div></div>
+  <div class="multi-info" id="multi-info" style="display:none">
+    Select all matching elements, then click Submit. <span class="selected-count" id="selected-count">0</span> selected
+  </div>
+  <div id="pt-container"></div>
+  <div style="text-align:center;margin-top:8px">
+    <button class="btn btn-primary submit-multi" id="btn-submit-multi" style="display:none" onclick="submitMultiSelect()">Submit Selection</button>
+  </div>
+  <div class="legend" id="legend"></div>
+</div>
+
+<!-- SCREEN: Results -->
+<div id="screen-results" class="screen">
+  <div class="results-card" id="results-card"></div>
+</div>
+
+<script>
+// ========== PERIODIC TABLE DATA ==========
+const PERIODIC_TABLE = [
+  {z:1,sym:"H",name:"Hydrogen",row:1,col:1,cat:"nonmetal",block:"s"},
+  {z:2,sym:"He",name:"Helium",row:1,col:18,cat:"noble-gas",block:"s"},
+  {z:3,sym:"Li",name:"Lithium",row:2,col:1,cat:"alkali",block:"s"},
+  {z:4,sym:"Be",name:"Beryllium",row:2,col:2,cat:"alkaline-earth",block:"s"},
+  {z:5,sym:"B",name:"Boron",row:2,col:13,cat:"metalloid",block:"p"},
+  {z:6,sym:"C",name:"Carbon",row:2,col:14,cat:"nonmetal",block:"p"},
+  {z:7,sym:"N",name:"Nitrogen",row:2,col:15,cat:"nonmetal",block:"p"},
+  {z:8,sym:"O",name:"Oxygen",row:2,col:16,cat:"nonmetal",block:"p"},
+  {z:9,sym:"F",name:"Fluorine",row:2,col:17,cat:"halogen",block:"p"},
+  {z:10,sym:"Ne",name:"Neon",row:2,col:18,cat:"noble-gas",block:"p"},
+  {z:11,sym:"Na",name:"Sodium",row:3,col:1,cat:"alkali",block:"s"},
+  {z:12,sym:"Mg",name:"Magnesium",row:3,col:2,cat:"alkaline-earth",block:"s"},
+  {z:13,sym:"Al",name:"Aluminium",row:3,col:13,cat:"post-transition",block:"p"},
+  {z:14,sym:"Si",name:"Silicon",row:3,col:14,cat:"metalloid",block:"p"},
+  {z:15,sym:"P",name:"Phosphorus",row:3,col:15,cat:"nonmetal",block:"p"},
+  {z:16,sym:"S",name:"Sulfur",row:3,col:16,cat:"nonmetal",block:"p"},
+  {z:17,sym:"Cl",name:"Chlorine",row:3,col:17,cat:"halogen",block:"p"},
+  {z:18,sym:"Ar",name:"Argon",row:3,col:18,cat:"noble-gas",block:"p"},
+  {z:19,sym:"K",name:"Potassium",row:4,col:1,cat:"alkali",block:"s"},
+  {z:20,sym:"Ca",name:"Calcium",row:4,col:2,cat:"alkaline-earth",block:"s"},
+  {z:21,sym:"Sc",name:"Scandium",row:4,col:3,cat:"transition",block:"d"},
+  {z:22,sym:"Ti",name:"Titanium",row:4,col:4,cat:"transition",block:"d"},
+  {z:23,sym:"V",name:"Vanadium",row:4,col:5,cat:"transition",block:"d"},
+  {z:24,sym:"Cr",name:"Chromium",row:4,col:6,cat:"transition",block:"d"},
+  {z:25,sym:"Mn",name:"Manganese",row:4,col:7,cat:"transition",block:"d"},
+  {z:26,sym:"Fe",name:"Iron",row:4,col:8,cat:"transition",block:"d"},
+  {z:27,sym:"Co",name:"Cobalt",row:4,col:9,cat:"transition",block:"d"},
+  {z:28,sym:"Ni",name:"Nickel",row:4,col:10,cat:"transition",block:"d"},
+  {z:29,sym:"Cu",name:"Copper",row:4,col:11,cat:"transition",block:"d"},
+  {z:30,sym:"Zn",name:"Zinc",row:4,col:12,cat:"transition",block:"d"},
+  {z:31,sym:"Ga",name:"Gallium",row:4,col:13,cat:"post-transition",block:"p"},
+  {z:32,sym:"Ge",name:"Germanium",row:4,col:14,cat:"metalloid",block:"p"},
+  {z:33,sym:"As",name:"Arsenic",row:4,col:15,cat:"metalloid",block:"p"},
+  {z:34,sym:"Se",name:"Selenium",row:4,col:16,cat:"nonmetal",block:"p"},
+  {z:35,sym:"Br",name:"Bromine",row:4,col:17,cat:"halogen",block:"p"},
+  {z:36,sym:"Kr",name:"Krypton",row:4,col:18,cat:"noble-gas",block:"p"},
+  {z:37,sym:"Rb",name:"Rubidium",row:5,col:1,cat:"alkali",block:"s"},
+  {z:38,sym:"Sr",name:"Strontium",row:5,col:2,cat:"alkaline-earth",block:"s"},
+  {z:39,sym:"Y",name:"Yttrium",row:5,col:3,cat:"transition",block:"d"},
+  {z:40,sym:"Zr",name:"Zirconium",row:5,col:4,cat:"transition",block:"d"},
+  {z:41,sym:"Nb",name:"Niobium",row:5,col:5,cat:"transition",block:"d"},
+  {z:42,sym:"Mo",name:"Molybdenum",row:5,col:6,cat:"transition",block:"d"},
+  {z:43,sym:"Tc",name:"Technetium",row:5,col:7,cat:"transition",block:"d"},
+  {z:44,sym:"Ru",name:"Ruthenium",row:5,col:8,cat:"transition",block:"d"},
+  {z:45,sym:"Rh",name:"Rhodium",row:5,col:9,cat:"transition",block:"d"},
+  {z:46,sym:"Pd",name:"Palladium",row:5,col:10,cat:"transition",block:"d"},
+  {z:47,sym:"Ag",name:"Silver",row:5,col:11,cat:"transition",block:"d"},
+  {z:48,sym:"Cd",name:"Cadmium",row:5,col:12,cat:"transition",block:"d"},
+  {z:49,sym:"In",name:"Indium",row:5,col:13,cat:"post-transition",block:"p"},
+  {z:50,sym:"Sn",name:"Tin",row:5,col:14,cat:"post-transition",block:"p"},
+  {z:51,sym:"Sb",name:"Antimony",row:5,col:15,cat:"metalloid",block:"p"},
+  {z:52,sym:"Te",name:"Tellurium",row:5,col:16,cat:"metalloid",block:"p"},
+  {z:53,sym:"I",name:"Iodine",row:5,col:17,cat:"halogen",block:"p"},
+  {z:54,sym:"Xe",name:"Xenon",row:5,col:18,cat:"noble-gas",block:"p"},
+  {z:55,sym:"Cs",name:"Caesium",row:6,col:1,cat:"alkali",block:"s"},
+  {z:56,sym:"Ba",name:"Barium",row:6,col:2,cat:"alkaline-earth",block:"s"},
+  {z:57,sym:"La",name:"Lanthanum",row:8,col:3,cat:"lanthanide",block:"f"},
+  {z:71,sym:"Lu",name:"Lutetium",row:6,col:3,cat:"lanthanide",block:"d"},
+  {z:72,sym:"Hf",name:"Hafnium",row:6,col:4,cat:"transition",block:"d"},
+  {z:73,sym:"Ta",name:"Tantalum",row:6,col:5,cat:"transition",block:"d"},
+  {z:74,sym:"W",name:"Tungsten",row:6,col:6,cat:"transition",block:"d"},
+  {z:75,sym:"Re",name:"Rhenium",row:6,col:7,cat:"transition",block:"d"},
+  {z:76,sym:"Os",name:"Osmium",row:6,col:8,cat:"transition",block:"d"},
+  {z:77,sym:"Ir",name:"Iridium",row:6,col:9,cat:"transition",block:"d"},
+  {z:78,sym:"Pt",name:"Platinum",row:6,col:10,cat:"transition",block:"d"},
+  {z:79,sym:"Au",name:"Gold",row:6,col:11,cat:"transition",block:"d"},
+  {z:80,sym:"Hg",name:"Mercury",row:6,col:12,cat:"transition",block:"d"},
+  {z:81,sym:"Tl",name:"Thallium",row:6,col:13,cat:"post-transition",block:"p"},
+  {z:82,sym:"Pb",name:"Lead",row:6,col:14,cat:"post-transition",block:"p"},
+  {z:83,sym:"Bi",name:"Bismuth",row:6,col:15,cat:"post-transition",block:"p"},
+  {z:84,sym:"Po",name:"Polonium",row:6,col:16,cat:"metalloid",block:"p"},
+  {z:85,sym:"At",name:"Astatine",row:6,col:17,cat:"halogen",block:"p"},
+  {z:86,sym:"Rn",name:"Radon",row:6,col:18,cat:"noble-gas",block:"p"},
+  {z:87,sym:"Fr",name:"Francium",row:7,col:1,cat:"alkali",block:"s"},
+  {z:88,sym:"Ra",name:"Radium",row:7,col:2,cat:"alkaline-earth",block:"s"},
+  {z:92,sym:"U",name:"Uranium",row:9,col:6,cat:"actinide",block:"f"}
+];
+
+// Element lookup by Z
+const elByZ = {};
+PERIODIC_TABLE.forEach(e => elByZ[e.z] = e);
+
+// Category display
+const CAT_LABELS = {
+  "alkali":"Alkali Metal","alkaline-earth":"Alkaline Earth","transition":"Transition Metal",
+  "post-transition":"Post-Transition","metalloid":"Metalloid","nonmetal":"Nonmetal",
+  "halogen":"Halogen","noble-gas":"Noble Gas","actinide":"Actinide","lanthanide":"Lanthanide"
+};
+const CAT_COLORS = {
+  "alkali":"#ff6b6b","alkaline-earth":"#ffa94d","transition":"#ffd43b",
+  "post-transition":"#69db7c","metalloid":"#38d9a9","nonmetal":"#74c0fc",
+  "halogen":"#b197fc","noble-gas":"#f783ac","actinide":"#ced4da","lanthanide":"#dee2e6"
+};
+
+// ========== ELECTRONEGATIVITY & PROPERTIES DATA ==========
+const EN_DATA = {1:2.20,3:0.98,4:1.57,5:2.04,6:2.55,7:3.04,8:3.44,9:3.98,11:0.93,12:1.31,13:1.61,14:1.90,15:2.19,16:2.58,17:3.16,19:0.82,20:1.00,21:1.36,22:1.54,23:1.63,24:1.66,25:1.55,26:1.83,27:1.88,28:1.91,29:1.90,30:1.65,31:1.81,32:2.01,33:2.18,34:2.55,35:2.96,37:0.82,38:0.95,47:1.93,50:1.96,53:2.66,55:0.79,56:0.89,74:2.36,78:2.28,79:2.54,80:2.00,82:2.33};
+const IE_DATA = {1:1312,2:2372,3:520,4:900,5:801,6:1086,7:1402,8:1314,9:1681,10:2081,11:496,12:738,13:578,14:786,15:1012,16:1000,17:1251,18:1521,19:419,20:590,21:633,22:659,23:651,24:653,25:717,26:762,27:760,28:737,29:745,30:906,31:579,32:762,33:947,34:941,35:1140,36:1351,37:403,38:549,53:1008,55:376,56:503};
+const RADIUS_DATA = {1:53,2:31,3:167,4:112,5:87,6:77,7:75,8:73,9:71,10:69,11:190,12:145,13:118,14:111,15:98,16:88,17:79,18:71,19:243,20:194,21:184,22:176,23:171,24:166,25:161,26:156,27:152,28:149,29:145,30:142,31:136,32:125,33:114,34:103,35:94,36:88,37:265,38:219,53:115,55:298,56:253};
+
+// Electron configs (shortened for game)
+const ECONFIG = {
+  1:"1s1",2:"1s2",3:"[He] 2s1",4:"[He] 2s2",5:"[He] 2s2 2p1",6:"[He] 2s2 2p2",
+  7:"[He] 2s2 2p3",8:"[He] 2s2 2p4",9:"[He] 2s2 2p5",10:"[He] 2s2 2p6",
+  11:"[Ne] 3s1",12:"[Ne] 3s2",13:"[Ne] 3s2 3p1",14:"[Ne] 3s2 3p2",
+  15:"[Ne] 3s2 3p3",16:"[Ne] 3s2 3p4",17:"[Ne] 3s2 3p5",18:"[Ne] 3s2 3p6",
+  19:"[Ar] 4s1",20:"[Ar] 4s2",21:"[Ar] 3d1 4s2",22:"[Ar] 3d2 4s2",
+  23:"[Ar] 3d3 4s2",24:"[Ar] 3d5 4s1",25:"[Ar] 3d5 4s2",26:"[Ar] 3d6 4s2",
+  27:"[Ar] 3d7 4s2",28:"[Ar] 3d8 4s2",29:"[Ar] 3d10 4s1",30:"[Ar] 3d10 4s2",
+  31:"[Ar] 3d10 4s2 4p1",32:"[Ar] 3d10 4s2 4p2",33:"[Ar] 3d10 4s2 4p3",
+  34:"[Ar] 3d10 4s2 4p4",35:"[Ar] 3d10 4s2 4p5",36:"[Ar] 3d10 4s2 4p6"
+};
+
+// Ion charges by group
+const ION_CHARGES = {
+  "+1":[1,3,11,19,37,55,87,29,47,79],
+  "+2":[4,12,20,38,56,88,26,27,28,29,30,80],
+  "+3":[5,13,26,27],
+  "-1":[9,17,35,53,85],
+  "-2":[8,16,34],
+  "-3":[7,15,33]
+};
+
+// Metal/nonmetal/metalloid classification
+function getMetalType(el) {
+  if (["alkali","alkaline-earth","transition","post-transition","lanthanide","actinide"].includes(el.cat)) return "metal";
+  if (el.cat === "metalloid") return "metalloid";
+  return "nonmetal";
+}
+
+// ========== SOUND ==========
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playTone(freq, dur, type) {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type || "sine";
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + dur);
+}
+
+function playCorrect() {
+  playTone(523, 0.1, "sine");
+  setTimeout(() => playTone(659, 0.1, "sine"), 80);
+  setTimeout(() => playTone(784, 0.15, "sine"), 160);
+}
+
+function playWrong() {
+  playTone(200, 0.15, "sawtooth");
+  setTimeout(() => playTone(180, 0.2, "sawtooth"), 100);
+}
+
+function playLevelUp() {
+  [523,659,784,1047].forEach((f,i) => setTimeout(() => playTone(f, 0.15, "sine"), i*100));
+}
+
+function playTimeout() {
+  playTone(330, 0.3, "triangle");
+}
+
+// ========== LEVELS ==========
+const HUNT_LEVELS = [
+  {
+    name:"Find by Name",
+    desc:"Click the element by its name",
+    rounds:15, timePerRound:8,
+    mode:"single",
+    generate() {
+      const el = pick(PERIODIC_TABLE);
+      return { prompt: "Click: " + el.name, answers: [el.z] };
+    }
+  },
+  {
+    name:"Find by Atomic Number",
+    desc:"Click the element with this Z",
+    rounds:15, timePerRound:10,
+    mode:"single",
+    generate() {
+      const el = pick(PERIODIC_TABLE);
+      return { prompt: "Click the element with Z = " + el.z, answers: [el.z] };
+    }
+  },
+  {
+    name:"Click All in Group",
+    desc:"Click all elements of a category",
+    rounds:6, timePerRound:20,
+    mode:"multi",
+    generate() {
+      const cats = ["alkali","alkaline-earth","halogen","noble-gas","transition","nonmetal","metalloid"];
+      const cat = pick(cats);
+      const matches = PERIODIC_TABLE.filter(e => e.cat === cat).map(e => e.z);
+      return { prompt: "Click ALL " + CAT_LABELS[cat] + " elements", answers: matches };
+    }
+  },
+  {
+    name:"Most/Least Property",
+    desc:"Which has the highest/lowest EN, radius, or IE?",
+    rounds:12, timePerRound:10,
+    mode:"single",
+    generate() {
+      const props = [
+        {name:"electronegativity",data:EN_DATA,abbr:"EN"},
+        {name:"ionization energy",data:IE_DATA,abbr:"IE"},
+        {name:"atomic radius",data:RADIUS_DATA,abbr:"radius"}
+      ];
+      const prop = pick(props);
+      const dir = Math.random() < 0.5 ? "highest" : "lowest";
+      const available = PERIODIC_TABLE.filter(e => prop.data[e.z] !== undefined);
+      const subset = shuffle(available).slice(0,4);
+      subset.sort((a,b) => dir === "highest" ? prop.data[b.z] - prop.data[a.z] : prop.data[a.z] - prop.data[b.z]);
+      const answer = subset[0];
+      // Highlight the subset
+      return {
+        prompt: "Which has the " + dir + " " + prop.name + "? (" + subset.map(e=>e.sym).join(", ") + ")",
+        answers: [answer.z],
+        highlight: subset.map(e=>e.z)
+      };
+    }
+  },
+  {
+    name:"By Electron Config",
+    desc:"Which element has this configuration?",
+    rounds:12, timePerRound:12,
+    mode:"single",
+    generate() {
+      const available = PERIODIC_TABLE.filter(e => ECONFIG[e.z]);
+      const el = pick(available);
+      return { prompt: "Which element: " + ECONFIG[el.z] + " ?", answers: [el.z] };
+    }
+  },
+  {
+    name:"Ion Charge",
+    desc:"Click an element that forms this ion",
+    rounds:12, timePerRound:8,
+    mode:"single",
+    generate() {
+      const charges = Object.keys(ION_CHARGES);
+      const charge = pick(charges);
+      const validZs = ION_CHARGES[charge].filter(z => elByZ[z]);
+      return { prompt: "Click an element that commonly forms a " + charge + " ion", answers: validZs };
+    }
+  },
+  {
+    name:"Block ID",
+    desc:"Click an element in the s, p, or d block",
+    rounds:10, timePerRound:8,
+    mode:"single",
+    generate() {
+      const blocks = ["s","p","d"];
+      const block = pick(blocks);
+      const matches = PERIODIC_TABLE.filter(e => e.block === block).map(e => e.z);
+      return { prompt: "Click any element in the " + block + "-block", answers: matches };
+    }
+  },
+  {
+    name:"Metal, Nonmetal, or Metalloid",
+    desc:"Click an example of the requested type",
+    rounds:12, timePerRound:8,
+    mode:"single",
+    generate() {
+      const types = ["metal","nonmetal","metalloid"];
+      const type = pick(types);
+      const matches = PERIODIC_TABLE.filter(e => getMetalType(e) === type).map(e => e.z);
+      return { prompt: "Click a " + type, answers: matches };
+    }
+  },
+  {
+    name:"Property Trends",
+    desc:"Between two elements, which has greater EN/IE/radius?",
+    rounds:12, timePerRound:8,
+    mode:"single",
+    generate() {
+      const props = [
+        {name:"electronegativity",data:EN_DATA},
+        {name:"ionization energy",data:IE_DATA},
+        {name:"atomic radius",data:RADIUS_DATA}
+      ];
+      const prop = pick(props);
+      const available = PERIODIC_TABLE.filter(e => prop.data[e.z] !== undefined);
+      let a, b;
+      do {
+        a = pick(available);
+        b = pick(available);
+      } while (a.z === b.z || prop.data[a.z] === prop.data[b.z]);
+      const winner = prop.data[a.z] > prop.data[b.z] ? a : b;
+      return {
+        prompt: "Greater " + prop.name + ": " + a.sym + " or " + b.sym + "?",
+        answers: [winner.z],
+        highlight: [a.z, b.z]
+      };
+    }
+  },
+  {
+    name:"Mixed Challenge",
+    desc:"Random mix of all question types",
+    rounds:20, timePerRound:8,
+    mode:"dynamic",
+    generate() {
+      const lvl = pick(HUNT_LEVELS.slice(0, 9));
+      const q = lvl.generate();
+      q.mode = lvl.mode || "single";
+      return q;
+    }
+  }
+];
+
+// ========== UTILITIES ==========
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function shuffle(arr) { const a = [...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]} return a; }
+
+// ========== STATE ==========
+let progress = { levels: [], totalXP: 0 };
+let currentLevel = -1;
+let currentRound = 0;
+let currentQuestion = null;
+let roundScore = 0;
+let roundCorrectFirst = 0;
+let roundTotal = 0;
+let timerInterval = null;
+let timerRemaining = 0;
+let timerTotal = 0;
+let roundActive = false;
+let multiSelected = new Set();
+let usedQuestions = [];
+
+// ========== SAVE/LOAD ==========
+function loadProgress() {
+  try {
+    const raw = localStorage.getItem("fye12_element_hunt");
+    if (raw) progress = JSON.parse(raw);
+  } catch(e) {}
+  if (!progress.levels) progress.levels = [];
+  while (progress.levels.length < HUNT_LEVELS.length) progress.levels.push({ stars: 0, bestPct: 0, unlocked: false });
+  progress.levels[0].unlocked = true;
+}
+
+function saveProgress() {
+  localStorage.setItem("fye12_element_hunt", JSON.stringify(progress));
+  // Attempt API save (fire and forget)
+  try {
+    fetch("/api/elementhunt-progress", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(progress)
+    }).catch(() => {});
+  } catch(e) {}
+}
+
+// ========== SCREENS ==========
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById("screen-" + id).classList.add("active");
+}
+
+// ========== LEVEL SELECT ==========
+function renderLevelGrid() {
+  const grid = document.getElementById("level-grid");
+  grid.innerHTML = "";
+  document.getElementById("total-xp").textContent = progress.totalXP || 0;
+
+  HUNT_LEVELS.forEach((lvl, i) => {
+    const lp = progress.levels[i];
+    const card = document.createElement("div");
+    card.className = "level-card" + (lp.unlocked ? "" : " locked");
+
+    let starsHtml = "";
+    for (let s = 1; s <= 3; s++) {
+      starsHtml += '<span class="' + (s <= lp.stars ? "star-filled" : "star-empty") + '">&#9733;</span>';
+    }
+
+    if (lp.unlocked) {
+      card.innerHTML =
+        '<div class="level-num">Level ' + (i+1) + '</div>' +
+        '<div class="level-name">' + lvl.name + '</div>' +
+        '<div class="level-desc">' + lvl.desc + '</div>' +
+        '<div class="stars">' + starsHtml + '</div>';
+      card.onclick = function() { startLevel(i); };
+    } else {
+      card.innerHTML =
+        '<div class="lock-icon">&#128274;</div>' +
+        '<div class="level-num">Level ' + (i+1) + '</div>' +
+        '<div class="level-name">' + lvl.name + '</div>' +
+        '<div class="level-desc">' + lvl.desc + '</div>' +
+        '<div class="stars">' + starsHtml + '</div>';
+    }
+
+    grid.appendChild(card);
+  });
+}
+
+// ========== PERIODIC TABLE RENDERING ==========
+function renderPeriodicTable() {
+  const container = document.getElementById("pt-container");
+  container.innerHTML = "";
+  const grid = document.createElement("div");
+  grid.className = "pt-grid";
+  grid.id = "pt-grid";
+
+  PERIODIC_TABLE.forEach(el => {
+    const cell = document.createElement("div");
+    cell.className = "el-cell cat-" + el.cat;
+    cell.id = "el-" + el.z;
+    cell.style.gridColumn = el.col;
+    cell.style.gridRow = el.row;
+    cell.innerHTML =
+      '<span class="z-num">' + el.z + '</span>' +
+      '<span class="sym">' + el.sym + '</span>' +
+      '<span class="el-name">' + el.name + '</span>';
+    cell.onclick = function() { onElementClick(el.z); };
+    grid.appendChild(cell);
+  });
+
+  container.appendChild(grid);
+
+  // Legend
+  const legend = document.getElementById("legend");
+  legend.innerHTML = "";
+  const cats = [...new Set(PERIODIC_TABLE.map(e => e.cat))];
+  cats.forEach(cat => {
+    const item = document.createElement("span");
+    item.className = "legend-item";
+    item.innerHTML = '<span class="legend-swatch" style="background:' + CAT_COLORS[cat] + '"></span>' + CAT_LABELS[cat];
+    legend.appendChild(item);
+  });
+}
+
+// ========== GAME FLOW ==========
+function startLevel(idx) {
+  currentLevel = idx;
+  currentRound = 0;
+  roundScore = 0;
+  roundCorrectFirst = 0;
+  roundTotal = HUNT_LEVELS[idx].rounds;
+  usedQuestions = [];
+
+  showScreen("game");
+  renderPeriodicTable();
+
+  document.getElementById("game-level-label").textContent = "Level " + (idx+1) + ": " + HUNT_LEVELS[idx].name;
+  updateRoundInfo();
+
+  // Resume AudioContext on user interaction
+  if (audioCtx.state === "suspended") audioCtx.resume();
+
+  nextRound();
+}
+
+function updateRoundInfo() {
+  document.getElementById("game-round-info").textContent = "Round " + (currentRound+1) + " / " + roundTotal;
+  document.getElementById("game-score-display").textContent = roundScore + " XP";
+}
+
+function nextRound() {
+  if (currentRound >= roundTotal) {
+    endLevel();
+    return;
+  }
+
+  clearHighlights();
+  multiSelected.clear();
+  roundActive = true;
+
+  const lvl = HUNT_LEVELS[currentLevel];
+  currentQuestion = lvl.generate();
+
+  // For mixed challenge, inherit mode
+  const mode = currentQuestion.mode || lvl.mode || "single";
+  currentQuestion._mode = mode;
+
+  document.getElementById("prompt-text").textContent = currentQuestion.prompt;
+  updateRoundInfo();
+
+  // Multi-select UI
+  const isMulti = mode === "multi";
+  document.getElementById("multi-info").style.display = isMulti ? "block" : "none";
+  document.getElementById("btn-submit-multi").style.display = isMulti ? "inline-block" : "none";
+  document.getElementById("selected-count").textContent = "0";
+
+  // Highlight specific elements if needed
+  if (currentQuestion.highlight) {
+    PERIODIC_TABLE.forEach(el => {
+      const cell = document.getElementById("el-" + el.z);
+      if (!currentQuestion.highlight.includes(el.z)) {
+        cell.classList.add("dim");
+      } else {
+        cell.classList.add("highlight-target");
+      }
+    });
+  }
+
+  // Start timer
+  startTimer(lvl.timePerRound);
+}
+
+function startTimer(seconds) {
+  timerTotal = seconds;
+  timerRemaining = seconds;
+  const bar = document.getElementById("timer-bar");
+  bar.style.width = "100%";
+  bar.className = "timer-bar";
+
+  clearInterval(timerInterval);
+  const startTime = Date.now();
+  timerInterval = setInterval(() => {
+    const elapsed = (Date.now() - startTime) / 1000;
+    timerRemaining = Math.max(0, seconds - elapsed);
+    const pct = (timerRemaining / timerTotal) * 100;
+    bar.style.width = pct + "%";
+
+    if (pct < 25) bar.className = "timer-bar danger";
+    else if (pct < 50) bar.className = "timer-bar warning";
+    else bar.className = "timer-bar";
+
+    if (timerRemaining <= 0) {
+      clearInterval(timerInterval);
+      onTimeout();
+    }
+  }, 50);
+}
+
+function onTimeout() {
+  roundActive = false;
+  playTimeout();
+
+  // Highlight correct answers
+  if (currentQuestion && currentQuestion.answers) {
+    currentQuestion.answers.forEach(z => {
+      const cell = document.getElementById("el-" + z);
+      if (cell) cell.classList.add("highlight-answer");
+    });
+  }
+
+  setTimeout(() => {
+    currentRound++;
+    nextRound();
+  }, 1500);
+}
+
+function onElementClick(z) {
+  if (!roundActive) return;
+
+  const mode = currentQuestion._mode;
+
+  if (mode === "multi") {
+    const cell = document.getElementById("el-" + z);
+    if (multiSelected.has(z)) {
+      multiSelected.delete(z);
+      cell.style.outline = "none";
+    } else {
+      multiSelected.add(z);
+      cell.style.outline = "3px solid #1CB0F6";
+    }
+    document.getElementById("selected-count").textContent = multiSelected.size;
+    return;
+  }
+
+  // Single-click mode
+  if (currentQuestion.answers.includes(z)) {
+    // Correct
+    const cell = document.getElementById("el-" + z);
+    cell.classList.add("flash-correct");
+    playCorrect();
+    roundScore += 10;
+    roundCorrectFirst++;
+    clearInterval(timerInterval);
+    roundActive = false;
+
+    setTimeout(() => {
+      currentRound++;
+      nextRound();
+    }, 600);
+  } else {
+    // Wrong
+    const cell = document.getElementById("el-" + z);
+    cell.classList.add("flash-wrong");
+    playWrong();
+    roundScore = Math.max(0, roundScore - 3);
+    updateRoundInfo();
+
+    setTimeout(() => {
+      cell.classList.remove("flash-wrong");
+    }, 400);
+  }
+}
+
+function submitMultiSelect() {
+  if (!roundActive) return;
+  roundActive = false;
+  clearInterval(timerInterval);
+
+  const correct = new Set(currentQuestion.answers);
+  let hits = 0;
+  let misses = 0;
+
+  multiSelected.forEach(z => {
+    const cell = document.getElementById("el-" + z);
+    if (correct.has(z)) {
+      cell.classList.add("flash-correct");
+      hits++;
+    } else {
+      cell.classList.add("flash-wrong");
+      misses++;
+    }
+  });
+
+  // Highlight missed ones
+  correct.forEach(z => {
+    if (!multiSelected.has(z)) {
+      const cell = document.getElementById("el-" + z);
+      if (cell) cell.classList.add("highlight-answer");
+    }
+  });
+
+  const missed = correct.size - hits;
+  const pct = correct.size > 0 ? hits / correct.size : 0;
+
+  if (pct >= 0.8 && misses === 0) {
+    playCorrect();
+    roundScore += 15;
+    roundCorrectFirst++;
+  } else if (pct >= 0.5) {
+    playTone(440, 0.15, "sine");
+    roundScore += 5;
+  } else {
+    playWrong();
+  }
+
+  updateRoundInfo();
+
+  setTimeout(() => {
+    currentRound++;
+    nextRound();
+  }, 1500);
+}
+
+function clearHighlights() {
+  document.querySelectorAll(".el-cell").forEach(cell => {
+    cell.classList.remove("flash-correct","flash-wrong","highlight-answer","highlight-target","dim");
+    cell.style.outline = "none";
+  });
+}
+
+function endLevel() {
+  clearInterval(timerInterval);
+  roundActive = false;
+
+  const pct = roundTotal > 0 ? Math.round((roundCorrectFirst / roundTotal) * 100) : 0;
+  let stars = 0;
+  if (pct > 0) stars = 1;
+  if (pct >= 80) stars = 2;
+  if (pct >= 95) stars = 3;
+
+  // XP bonus for stars
+  const bonus = stars * 5;
+  roundScore += bonus;
+
+  // Update progress
+  const lp = progress.levels[currentLevel];
+  if (stars > lp.stars) lp.stars = stars;
+  if (pct > lp.bestPct) lp.bestPct = pct;
+  progress.totalXP = (progress.totalXP || 0) + roundScore;
+
+  // Unlock next level
+  if (currentLevel + 1 < HUNT_LEVELS.length) {
+    progress.levels[currentLevel + 1].unlocked = true;
+  }
+
+  saveProgress();
+
+  if (stars >= 2) playLevelUp();
+
+  // Show results
+  showScreen("results");
+  let starsHtml = "";
+  for (let s = 1; s <= 3; s++) {
+    starsHtml += '<span class="' + (s <= stars ? "star-filled" : "star-empty") + '">&#9733;</span>';
+  }
+
+  document.getElementById("results-card").innerHTML =
+    '<h2>Level ' + (currentLevel+1) + ' Complete!</h2>' +
+    '<div class="result-stars">' + starsHtml + '</div>' +
+    '<div class="result-score">+' + roundScore + ' XP</div>' +
+    '<div class="result-stat"><span class="label">Correct (first try)</span><span class="value">' + roundCorrectFirst + ' / ' + roundTotal + '</span></div>' +
+    '<div class="result-stat"><span class="label">Accuracy</span><span class="value">' + pct + '%</span></div>' +
+    '<div class="result-stat"><span class="label">Stars</span><span class="value">' + stars + ' / 3</span></div>' +
+    '<div class="btn-group">' +
+      '<button class="btn btn-secondary" onclick="showScreen(\'levels\');renderLevelGrid()">Levels</button>' +
+      '<button class="btn btn-primary" onclick="startLevel(' + currentLevel + ')">Retry</button>' +
+      (currentLevel + 1 < HUNT_LEVELS.length ? '<button class="btn btn-primary" onclick="startLevel(' + (currentLevel+1) + ')">Next Level</button>' : '') +
+    '</div>';
+}
+
+// ========== INIT ==========
+loadProgress();
+renderLevelGrid();
+</script>
+</body>
+</html>

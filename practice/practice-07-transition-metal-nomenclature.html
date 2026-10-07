@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Transition Metal Nomenclature</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the answer...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Transition Metal Nomenclature</h1>
+<p class="subtitle">Deep practice &mdash; 50 questions</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_07';
+const SECTIONS = [
+  {
+    id:1, title:"Formula \u2192 Name (Fe & Cu)",
+    instruction:"Write the full name with Roman numeral.",
+    rows:[
+      ["1","FeO","iron(II) oxide / iron (II) oxide"],
+      ["2","Fe\u2082O\u2083","iron(III) oxide / iron (III) oxide"],
+      ["3","FeCl\u2082","iron(II) chloride / iron (II) chloride"],
+      ["4","FeCl\u2083","iron(III) chloride / iron (III) chloride"],
+      ["5","CuCl","copper(I) chloride / copper (I) chloride"],
+      ["6","CuCl\u2082","copper(II) chloride / copper (II) chloride"],
+      ["7","CuO","copper(II) oxide / copper (II) oxide"],
+      ["8","Cu\u2082O","copper(I) oxide / copper (I) oxide"],
+      ["9","FeS","iron(II) sulfide / iron (II) sulfide"],
+      ["10","Fe\u2082S\u2083","iron(III) sulfide / iron (III) sulfide"],
+      ["11","CuBr","copper(I) bromide / copper (I) bromide"],
+      ["12","CuBr\u2082","copper(II) bromide / copper (II) bromide"],
+      ["13","FeF\u2082","iron(II) fluoride / iron (II) fluoride"],
+      ["14","FeF\u2083","iron(III) fluoride / iron (III) fluoride"],
+      ["15","CuI","copper(I) iodide / copper (I) iodide"]
+    ]
+  },
+  {
+    id:2, title:"Formula \u2192 Name (Pb, Sn, Mn, Co, Cr)",
+    instruction:"Write the full name with Roman numeral.",
+    rows:[
+      ["1","PbO","lead(II) oxide / lead (II) oxide"],
+      ["2","PbO\u2082","lead(IV) oxide / lead (IV) oxide"],
+      ["3","PbCl\u2082","lead(II) chloride / lead (II) chloride"],
+      ["4","PbCl\u2084","lead(IV) chloride / lead (IV) chloride"],
+      ["5","SnCl\u2082","tin(II) chloride / tin (II) chloride"],
+      ["6","SnCl\u2084","tin(IV) chloride / tin (IV) chloride"],
+      ["7","SnO","tin(II) oxide / tin (II) oxide"],
+      ["8","SnO\u2082","tin(IV) oxide / tin (IV) oxide"],
+      ["9","MnO","manganese(II) oxide / manganese (II) oxide"],
+      ["10","MnO\u2082","manganese(IV) oxide / manganese (IV) oxide"],
+      ["11","MnCl\u2082","manganese(II) chloride / manganese (II) chloride"],
+      ["12","CoCl\u2082","cobalt(II) chloride / cobalt (II) chloride"],
+      ["13","CoCl\u2083","cobalt(III) chloride / cobalt (III) chloride"],
+      ["14","CrCl\u2082","chromium(II) chloride / chromium (II) chloride"],
+      ["15","CrCl\u2083","chromium(III) chloride / chromium (III) chloride"],
+      ["16","Cr\u2082O\u2083","chromium(III) oxide / chromium (III) oxide"],
+      ["17","CrO\u2083","chromium(VI) oxide / chromium (VI) oxide"],
+      ["18","Co\u2082O\u2083","cobalt(III) oxide / cobalt (III) oxide"]
+    ]
+  },
+  {
+    id:3, title:"Find the Metal Charge",
+    instruction:"Write the charge of the metal (e.g. +2, +3).",
+    rows:[
+      ["1","FeO: Fe charge?","+2"],
+      ["2","Fe\u2082O\u2083: Fe charge?","+3"],
+      ["3","CuCl: Cu charge?","+1"],
+      ["4","CuCl\u2082: Cu charge?","+2"],
+      ["5","FeCl\u2083: Fe charge?","+3"],
+      ["6","PbO\u2082: Pb charge?","+4"],
+      ["7","SnO: Sn charge?","+2"],
+      ["8","Cu\u2082O: Cu charge?","+1"],
+      ["9","MnO\u2082: Mn charge?","+4"],
+      ["10","CoCl\u2083: Co charge?","+3"],
+      ["11","CrCl\u2083: Cr charge?","+3"],
+      ["12","PbCl\u2084: Pb charge?","+4"],
+      ["13","SnCl\u2084: Sn charge?","+4"],
+      ["14","CrO\u2083: Cr charge?","+6"],
+      ["15","Fe\u2082S\u2083: Fe charge?","+3"],
+      ["16","CoCl\u2082: Co charge?","+2"],
+      ["17","MnCl\u2082: Mn charge?","+2"],
+      ["18","Co\u2082O\u2083: Co charge?","+3"]
+    ]
+  },
+  {
+    id:4, title:"Name \u2192 Formula",
+    instruction:"Write the chemical formula.",
+    rows:[
+      ["1","Iron(II) oxide","FeO"],
+      ["2","Iron(III) oxide","Fe2O3 / Fe\u2082O\u2083"],
+      ["3","Iron(III) chloride","FeCl3 / FeCl\u2083"],
+      ["4","Copper(I) chloride","CuCl"],
+      ["5","Copper(II) chloride","CuCl2 / CuCl\u2082"],
+      ["6","Copper(I) oxide","Cu2O / Cu\u2082O"],
+      ["7","Lead(II) oxide","PbO"],
+      ["8","Tin(II) chloride","SnCl2 / SnCl\u2082"],
+      ["9","Lead(IV) oxide","PbO2 / PbO\u2082"],
+      ["10","Tin(IV) chloride","SnCl4 / SnCl\u2084"],
+      ["11","Manganese(IV) oxide","MnO2 / MnO\u2082"],
+      ["12","Cobalt(II) chloride","CoCl2 / CoCl\u2082"],
+      ["13","Cobalt(III) chloride","CoCl3 / CoCl\u2083"],
+      ["14","Chromium(III) oxide","Cr2O3 / Cr\u2082O\u2083"],
+      ["15","Chromium(III) chloride","CrCl3 / CrCl\u2083"],
+      ["16","Iron(II) sulfide","FeS"],
+      ["17","Iron(III) sulfide","Fe2S3 / Fe\u2082S\u2083"],
+      ["18","Manganese(II) chloride","MnCl2 / MnCl\u2082"],
+      ["19","Chromium(VI) oxide","CrO3 / CrO\u2083"],
+      ["20","Cobalt(III) oxide","Co2O3 / Co\u2082O\u2083"]
+    ]
+  },
+  {
+    id:5, title:"MC: Roman Numerals", type:"mc",
+    instruction:"Choose the correct answer.",
+    questions:[
+      {q:"Why do we use Roman numerals?", options:["To count atoms","Because the metal has multiple possible charges","To show the number of bonds","Because it looks formal"], correct:1},
+      {q:"Does NaCl need a Roman numeral?", options:["Yes, Na(I)","No, Na always has +1","Yes, because it's ionic","Only in Greek naming"], correct:1},
+      {q:"FeCl\u2083: what does III mean?", options:["3 Cl atoms","Fe charge is +3","3 bonds","Molecular weight"], correct:1},
+      {q:"Which metals DON'T need Roman numerals?", options:["Fe, Cu, Pb, Sn","Na, K, Mg, Ca, Al","All metals need them","Only noble gases"], correct:1},
+      {q:"Cu\u2082O: charge of Cu?", options:["+2","+1","+3","\u22121"], correct:1},
+      {q:"FeO vs Fe\u2082O\u2083: what's different?", options:["Number of atoms only","Fe charge (II vs III)","O charge changes","Nothing, same compound"], correct:1}
+    ]
+  },
+  {
+    id:6, title:"MC: Determine the Metal Charge", type:"mc",
+    instruction:"What is the charge of the metal in each compound?",
+    questions:[
+      {q:"MnO\u2082: Mn charge?", options:["+2","+3","+4","+7"], correct:2},
+      {q:"CoCl\u2083: Co charge?", options:["+1","+2","+3","+4"], correct:2},
+      {q:"CrCl\u2082: Cr charge?", options:["+2","+3","+4","+6"], correct:0},
+      {q:"PbCl\u2084: Pb charge?", options:["+1","+2","+3","+4"], correct:3},
+      {q:"Fe\u2082S\u2083: Fe charge?", options:["+2","+3","+4","+1"], correct:1},
+      {q:"SnO\u2082: Sn charge?", options:["+2","+3","+4","+1"], correct:2},
+      {q:"CrO\u2083: Cr charge?", options:["+2","+3","+4","+6"], correct:3},
+      {q:"Co\u2082O\u2083: Co charge?", options:["+2","+3","+4","+1"], correct:1},
+      {q:"Cu\u2082S: Cu charge?", options:["+2","+1","+3","\u22121"], correct:1},
+      {q:"MnCl\u2082: Mn charge?", options:["+2","+4","+7","+3"], correct:0}
+    ]
+  },
+  {
+    id:7, title:"MC: Fixed vs Variable Charge", type:"mc",
+    instruction:"Choose the correct answer.",
+    questions:[
+      {q:"Which metal ALWAYS has +2 charge?", options:["Fe","Cu","Zn","Pb"], correct:2},
+      {q:"Which metal ALWAYS has +1 charge?", options:["Cu","Ag","Fe","Co"], correct:1},
+      {q:"Zn²\u207A: does zinc need a Roman numeral?", options:["Yes, Zn has variable charges","No, Zn always has +2","Yes, all transition metals need one","Only when combined with Cl"], correct:1},
+      {q:"Ag\u207A: does silver need a Roman numeral?", options:["Yes, Ag has variable charges","No, Ag always has +1","Yes, for all compounds","Only with polyatomic ions"], correct:1},
+      {q:"Which list contains ONLY variable-charge metals?", options:["Na, K, Ca","Fe, Cu, Pb, Sn","Zn, Ag, Al","Mg, Ba, Sr"], correct:1},
+      {q:"ZnCl\u2082 is named:", options:["Zinc(II) chloride","Zinc chloride","Zinc dichloride","Zinc(I) chloride"], correct:1},
+      {q:"AgCl is named:", options:["Silver(I) chloride","Silver chloride","Argentum chloride","Silver monochloride"], correct:1},
+      {q:"Which metal can have charges +2, +4, AND +7?", options:["Fe","Cu","Mn","Pb"], correct:2}
+    ]
+  },
+  {
+    id:8, title:"Needs Roman Numeral? (yes/no)",
+    instruction:"Write 'yes' or 'no'.",
+    rows:[
+      ["1","NaCl","no"],
+      ["2","FeO","yes"],
+      ["3","MgO","no"],
+      ["4","CuCl\u2082","yes"],
+      ["5","Al\u2082O\u2083","no"],
+      ["6","PbO","yes"],
+      ["7","CaCl\u2082","no"],
+      ["8","SnCl\u2082","yes"],
+      ["9","ZnCl\u2082","no"],
+      ["10","AgCl","no"],
+      ["11","MnO\u2082","yes"],
+      ["12","CoCl\u2083","yes"],
+      ["13","CrCl\u2083","yes"],
+      ["14","KBr","no"],
+      ["15","BaS","no"]
+    ]
+  },
+  {
+    id:9, title:"Error Correction",
+    instruction:"Write the correct name.",
+    rows:[
+      ["1","iron oxide (for FeO)","iron(II) oxide / iron (II) oxide"],
+      ["2","iron(II) oxide (for Fe\u2082O\u2083)","iron(III) oxide / iron (III) oxide"],
+      ["3","copper(II) chloride (for CuCl)","copper(I) chloride / copper (I) chloride"],
+      ["4","sodium(I) oxide (for Na\u2082O)","sodium oxide"],
+      ["5","iron(II) chloride (for FeCl\u2083)","iron(III) chloride / iron (III) chloride"],
+      ["6","aluminum(III) oxide (for Al\u2082O\u2083)","aluminum oxide / aluminium oxide"],
+      ["7","zinc(II) chloride (for ZnCl\u2082)","zinc chloride"],
+      ["8","silver(I) chloride (for AgCl)","silver chloride"],
+      ["9","lead oxide (for PbO)","lead(II) oxide / lead (II) oxide"],
+      ["10","manganese oxide (for MnO\u2082)","manganese(IV) oxide / manganese (IV) oxide"],
+      ["11","cobalt chloride (for CoCl\u2083)","cobalt(III) chloride / cobalt (III) chloride"],
+      ["12","chromium oxide (for Cr\u2082O\u2083)","chromium(III) oxide / chromium (III) oxide"]
+    ]
+  },
+  {
+    id:10, title:"Transition Metal + Polyatomic Ion",
+    instruction:"Write the full name (with Roman numeral if needed).",
+    rows:[
+      ["1","Fe(OH)\u2082","iron(II) hydroxide / iron (II) hydroxide"],
+      ["2","Fe(OH)\u2083","iron(III) hydroxide / iron (III) hydroxide"],
+      ["3","Fe\u2082(SO\u2084)\u2083","iron(III) sulfate / iron (III) sulfate"],
+      ["4","FeSO\u2084","iron(II) sulfate / iron (II) sulfate"],
+      ["5","Cu(NO\u2083)\u2082","copper(II) nitrate / copper (II) nitrate"],
+      ["6","CuSO\u2084","copper(II) sulfate / copper (II) sulfate"],
+      ["7","Pb(NO\u2083)\u2082","lead(II) nitrate / lead (II) nitrate"],
+      ["8","CoCO\u2083","cobalt(II) carbonate / cobalt (II) carbonate"],
+      ["9","Cr\u2082(SO\u2084)\u2083","chromium(III) sulfate / chromium (III) sulfate"],
+      ["10","Mn(OH)\u2082","manganese(II) hydroxide / manganese (II) hydroxide"]
+    ]
+  },
+  {
+    id:11, title:"Calculate Metal Charge with Polyatomic Ions",
+    instruction:"Write the charge of the metal (e.g. +2, +3).",
+    rows:[
+      ["1","FeSO\u2084: Fe charge? (SO\u2084 is \u22122)","+2"],
+      ["2","Fe\u2082(SO\u2084)\u2083: Fe charge?","+3"],
+      ["3","Cu(NO\u2083)\u2082: Cu charge? (NO\u2083 is \u22121)","+2"],
+      ["4","Pb(NO\u2083)\u2082: Pb charge?","+2"],
+      ["5","CoCO\u2083: Co charge? (CO\u2083 is \u22122)","+2"],
+      ["6","Cr\u2082(SO\u2084)\u2083: Cr charge?","+3"],
+      ["7","Mn(OH)\u2082: Mn charge? (OH is \u22121)","+2"],
+      ["8","Fe(OH)\u2083: Fe charge?","+3"]
+    ]
+  },
+  {
+    id:12, title:"Word Arrange: Name Compounds", type:"arrange",
+    instruction:"Arrange the words in the correct order to name the compound.",
+    sentences:[
+      {prompt:"FeO = ?", words:["iron(II)","oxide"]},
+      {prompt:"FeCl\u2083 = ?", words:["iron(III)","chloride"]},
+      {prompt:"CuCl = ?", words:["copper(I)","chloride"]},
+      {prompt:"Cu\u2082O = ?", words:["copper(I)","oxide"]},
+      {prompt:"PbO\u2082 = ?", words:["lead(IV)","oxide"]},
+      {prompt:"MnO\u2082 = ?", words:["manganese(IV)","oxide"]},
+      {prompt:"CoCl\u2083 = ?", words:["cobalt(III)","chloride"]},
+      {prompt:"Cr\u2082O\u2083 = ?", words:["chromium(III)","oxide"]},
+      {prompt:"SnCl\u2084 = ?", words:["tin(IV)","chloride"]},
+      {prompt:"Fe\u2082(SO\u2084)\u2083 = ?", words:["iron(III)","sulfate"]}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' ✓';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '→ ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check ↵</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '→ ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Transition Metal Nomenclature \u2014 Complete Reference</h3>' +
+'<h3>When to Use Roman Numerals</h3>' +
+'<p><span class="rule">Rule:</span> Use Roman numerals ONLY when the metal has <span class="rule">more than one possible charge</span>.</p>' +
+'<p>The Roman numeral indicates the <span class="rule">charge of the metal cation</span>, NOT the number of atoms.</p>' +
+'<h3>Variable-Charge Transition Metals</h3>' +
+'<table><tr><th>Metal</th><th>Symbol</th><th>Possible charges</th><th>Example compounds</th></tr>' +
+'<tr><td>Iron</td><td>Fe</td><td><span class="rule">+2, +3</span></td><td>FeCl\u2082 = iron(II) chloride, FeCl\u2083 = iron(III) chloride</td></tr>' +
+'<tr><td>Copper</td><td>Cu</td><td><span class="rule">+1, +2</span></td><td>Cu\u2082O = copper(I) oxide, CuO = copper(II) oxide</td></tr>' +
+'<tr><td>Lead</td><td>Pb</td><td><span class="rule">+2, +4</span></td><td>PbO = lead(II) oxide, PbO\u2082 = lead(IV) oxide</td></tr>' +
+'<tr><td>Tin</td><td>Sn</td><td><span class="rule">+2, +4</span></td><td>SnCl\u2082 = tin(II) chloride, SnCl\u2084 = tin(IV) chloride</td></tr>' +
+'<tr><td>Manganese</td><td>Mn</td><td><span class="rule">+2, +4, +7</span></td><td>MnO = manganese(II) oxide, MnO\u2082 = manganese(IV) oxide</td></tr>' +
+'<tr><td>Cobalt</td><td>Co</td><td><span class="rule">+2, +3</span></td><td>CoCl\u2082 = cobalt(II) chloride</td></tr>' +
+'<tr><td>Chromium</td><td>Cr</td><td><span class="rule">+2, +3, +6</span></td><td>Cr\u2082O\u2083 = chromium(III) oxide</td></tr>' +
+'<tr><td>Nickel</td><td>Ni</td><td><span class="rule">+2, +3</span></td><td>NiO = nickel(II) oxide</td></tr></table>' +
+'<h3>Fixed-Charge Metals (NO Roman Numeral)</h3>' +
+'<table><tr><th>Metal</th><th>Always this charge</th><th>Why no Roman numeral?</th></tr>' +
+'<tr><td>Na, K, Li, Rb, Cs</td><td>+1</td><td>Group 1, only one charge</td></tr>' +
+'<tr><td>Mg, Ca, Ba, Sr</td><td>+2</td><td>Group 2, only one charge</td></tr>' +
+'<tr><td>Al</td><td>+3</td><td>Group 13, only one charge</td></tr>' +
+'<tr><td><span class="rule">Zn</span></td><td><span class="rule">+2</span></td><td>Transition metal but always +2</td></tr>' +
+'<tr><td><span class="rule">Ag</span></td><td><span class="rule">+1</span></td><td>Transition metal but always +1</td></tr></table>' +
+'<h3>How to Determine Metal Charge from Formula</h3>' +
+'<ol>' +
+'<li>Look at the anion and its known charge</li>' +
+'<li>Total charge must = 0</li>' +
+'<li>Calculate: metal charge = (total anion charge) / (number of metal atoms)</li>' +
+'</ol>' +
+'<p>Example: Fe\u2082O\u2083 \u2192 O is \u22122, 3 oxygens = \u22126, so 2 Fe = +6, each Fe = <span class="rule">+3</span></p>' +
+'<p>Name: <span class="rule">iron(III) oxide</span></p>' +
+'<h3>Worked Examples</h3>' +
+'<table><tr><th>Formula</th><th>Find metal charge</th><th>Name</th></tr>' +
+'<tr><td>FeCl\u2082</td><td>2 Cl\u207B = \u22122, so Fe = +2</td><td>iron(II) chloride</td></tr>' +
+'<tr><td>FeCl\u2083</td><td>3 Cl\u207B = \u22123, so Fe = +3</td><td>iron(III) chloride</td></tr>' +
+'<tr><td>Cu\u2082O</td><td>1 O\u00B2\u207B = \u22122, 2 Cu = +2, each = +1</td><td>copper(I) oxide</td></tr>' +
+'<tr><td>PbO\u2082</td><td>2 O\u00B2\u207B = \u22124, so Pb = +4</td><td>lead(IV) oxide</td></tr>' +
+'<tr><td>ZnO</td><td>Zn always +2</td><td>zinc oxide (no Roman numeral!)</td></tr>' +
+'<tr><td>AgCl</td><td>Ag always +1</td><td>silver chloride (no Roman numeral!)</td></tr></table>' +
+'<h3>Common Mistakes</h3>' +
+'<ul>' +
+'<li>Using Roman numerals for main group metals: "sodium(I) chloride" \u2717</li>' +
+'<li>Using Roman numerals for Zn and Ag: "zinc(II) oxide" \u2717</li>' +
+'<li>Confusing the Roman numeral with subscript: Iron(III) means Fe\u00B3\u207A, NOT 3 iron atoms</li>' +
+'<li>Forgetting to use Roman numerals for Fe, Cu, Pb, Sn: "iron chloride" is ambiguous \u2717</li>' +
+'</ul>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">▶</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' ✓';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '→ ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '→ ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '→ ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice — ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fill the Diagram - Chemistry FYE12</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;min-height:100vh;overflow-x:hidden;-webkit-user-select:none;user-select:none}
+
+/* ---- BACK LINK ---- */
+a.back{color:#c85028;text-decoration:none;font-weight:700;padding:16px 20px;display:inline-block;font-size:.95em}
+a.back:hover{text-decoration:underline}
+
+/* ---- SCREEN MANAGEMENT ---- */
+.screen{display:none}
+.screen.active{display:block}
+
+/* ============ LEVEL SELECT ============ */
+#levelSelect{max-width:640px;margin:0 auto;padding:0 20px 40px}
+#levelSelect h1{text-align:center;font-size:1.6em;color:#f5f5f5;font-weight:800;padding:20px 0 4px;letter-spacing:-.5px}
+.ls-subtitle{text-align:center;color:#888;font-size:.9em;margin-bottom:20px;font-weight:600}
+.level-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.level-card{
+  background:#16213e;
+  border:2px solid #2a3a5c;
+  border-bottom:4px solid #2a3a5c;
+  border-radius:16px;
+  padding:20px 16px;
+  cursor:pointer;
+  transition:all .15s;
+  text-align:center;
+  position:relative;
+}
+.level-card:hover{background:#1c2d52;border-color:#3a4f7a;border-bottom-color:#3a4f7a}
+.level-card:active{transform:translateY(2px);border-bottom-width:2px;margin-top:2px}
+.level-card.completed{border-color:#2ecc71;border-bottom-color:#27ae60}
+.level-card.completed:hover{border-color:#2ecc71;border-bottom-color:#27ae60;background:#162e25}
+.level-card h3{color:#f5f5f5;font-size:1.05em;font-weight:800;margin-bottom:2px}
+.level-card .level-info{color:#888;font-size:.8em;font-weight:600}
+.level-card .level-stars{font-size:1.5em;margin-top:8px;line-height:1}
+.level-card .level-best{color:#2ecc71;font-size:.78em;font-weight:700;margin-top:4px}
+.level-card.locked{opacity:.4;cursor:not-allowed;pointer-events:none}
+.lock-icon{font-size:1.6em;margin-top:8px;color:#555}
+.star-gold{color:#FFC800}
+.star-empty{color:#3a3a5a}
+
+.reset-all-btn{display:block;margin:24px auto 0;background:none;border:2px solid #2a3a5c;color:#888;padding:10px 24px;border-radius:12px;cursor:pointer;font-size:.85em;font-weight:700;transition:all .15s}
+.reset-all-btn:hover{border-color:#e74c3c;color:#e74c3c}
+
+/* ============ GAMEPLAY SCREEN ============ */
+#gameArea{max-width:800px;margin:0 auto;padding:0 16px 40px}
+
+.top-bar{display:flex;align-items:center;gap:12px;padding:12px 0 8px}
+.top-bar .close-btn{background:none;border:none;cursor:pointer;font-size:1.4em;color:#888;padding:4px;line-height:1;font-weight:700;transition:color .15s}
+.top-bar .close-btn:hover{color:#e74c3c}
+.progress-wrap{flex:1;height:14px;background:#2a3a5c;border-radius:10px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#c85028,#e06838);border-radius:10px;transition:width .4s;width:0}
+.top-bar .wrong-count{font-size:.9em;font-weight:700;color:#e74c3c;min-width:40px;text-align:right}
+.top-bar .wrong-count.clean{color:#2ecc71}
+
+.diagram-title{text-align:center;font-size:1.3em;font-weight:700;color:#f5f5f5;margin:8px 0 4px}
+.diagram-hint{text-align:center;font-size:.85em;color:#888;margin-bottom:12px}
+
+/* ---- DIAGRAM CONTAINER ---- */
+.diagram-container{
+  position:relative;
+  background:#0d1527;
+  border:2px solid #2a3a5c;
+  border-radius:16px;
+  padding:20px;
+  margin-bottom:16px;
+  min-height:300px;
+  overflow:visible;
+}
+
+/* ---- DROP ZONES ---- */
+.drop-zone{
+  position:absolute;
+  min-width:90px;
+  min-height:32px;
+  border:2px dashed #4a5a8a;
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:.8em;
+  color:#5a6a9a;
+  transition:all .2s;
+  padding:4px 8px;
+  text-align:center;
+  z-index:10;
+}
+.drop-zone.drag-hover{
+  border-color:#c85028;
+  background:rgba(200,80,40,.15);
+  box-shadow:0 0 12px rgba(200,80,40,.3);
+}
+.drop-zone.filled{
+  border-style:solid;
+  border-color:#2ecc71;
+  background:rgba(46,204,113,.12);
+  color:#2ecc71;
+  font-weight:700;
+  cursor:default;
+}
+.drop-zone.wrong-flash{
+  animation:wrongFlash .4s ease;
+}
+@keyframes wrongFlash{
+  0%,100%{border-color:#4a5a8a;background:transparent}
+  50%{border-color:#e74c3c;background:rgba(231,76,60,.2)}
+}
+
+/* ---- LABEL BANK ---- */
+.label-bank{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  justify-content:center;
+  padding:12px;
+  background:#16213e;
+  border-radius:12px;
+  border:1px solid #2a3a5c;
+  min-height:50px;
+}
+.label-pill{
+  display:inline-flex;
+  align-items:center;
+  padding:8px 16px;
+  background:#1a1a2e;
+  border:2px solid #c85028;
+  border-radius:20px;
+  color:#e0e0e0;
+  font-size:.85em;
+  font-weight:600;
+  cursor:grab;
+  transition:all .15s;
+  touch-action:none;
+  white-space:nowrap;
+}
+.label-pill:hover{background:#2a2a4e;transform:translateY(-1px)}
+.label-pill:active{cursor:grabbing}
+.label-pill.dragging{
+  opacity:.5;
+  transform:scale(.95);
+}
+.label-pill.selected{
+  border-color:#FFC800;
+  background:#2a2a3e;
+  box-shadow:0 0 8px rgba(255,200,0,.3);
+}
+.label-pill.placed{
+  opacity:.3;
+  pointer-events:none;
+  border-color:#555;
+}
+.label-pill.distractor-revealed{
+  border-color:#e74c3c;
+  opacity:.4;
+  text-decoration:line-through;
+  pointer-events:none;
+}
+
+/* ---- DRAG GHOST ---- */
+.drag-ghost{
+  position:fixed;
+  padding:8px 16px;
+  background:#c85028;
+  border:2px solid #e06838;
+  border-radius:20px;
+  color:#fff;
+  font-size:.85em;
+  font-weight:700;
+  pointer-events:none;
+  z-index:1000;
+  transform:translate(-50%,-50%);
+  box-shadow:0 4px 16px rgba(0,0,0,.4);
+  white-space:nowrap;
+}
+
+/* ============ DIAGRAM-SPECIFIC STYLES ============ */
+
+/* Shared axis styles */
+.axis-label{position:absolute;color:#888;font-size:.75em;font-weight:600}
+.axis-line{position:absolute;background:#4a5a8a}
+.diagram-region{position:absolute;border-radius:6px;display:flex;align-items:center;justify-content:center}
+.diagram-line{position:absolute;background:#4a5a8a}
+.diagram-text{position:absolute;color:#6a7aaa;font-size:.7em;font-weight:600;white-space:nowrap}
+.diagram-arrow{position:absolute;color:#6a7aaa;font-size:.8em}
+
+/* Phase diagram */
+.phase-region{position:absolute;border:1px solid #3a4a6a;border-radius:8px;background:rgba(40,50,80,.3)}
+
+/* Electrochemical cell */
+.beaker{position:absolute;border:2px solid #4a6a9a;border-top:none;border-radius:0 0 12px 12px;background:rgba(40,80,140,.1)}
+.electrode{position:absolute;width:8px;background:#8a9aba;border-radius:3px}
+.wire{position:absolute;height:3px;background:#8a9aba}
+.salt-bridge{position:absolute;background:rgba(100,120,160,.2);border:1px dashed #5a7aaa;border-radius:6px}
+.voltmeter{position:absolute;width:40px;height:40px;border:2px solid #c85028;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65em;color:#c85028;font-weight:700}
+
+/* Periodic table */
+.pt-cell{position:absolute;border:1px solid #3a4a6a;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:.55em;color:#6a7aaa}
+.pt-block{position:absolute;border:2px solid;border-radius:6px;opacity:.15}
+
+/* Born-Haber */
+.energy-level{position:absolute;height:3px;background:#5a7aaa;border-radius:2px}
+.energy-arrow{position:absolute;width:2px;background:#c85028}
+.energy-arrow::after{content:'';position:absolute;top:0;left:-4px;border:5px solid transparent;border-bottom:6px solid #c85028}
+.energy-arrow.down::after{top:auto;bottom:0;border:5px solid transparent;border-top:6px solid #c85028}
+
+/* MO diagram */
+.orbital-line{position:absolute;height:2px;background:#5a7aaa;border-radius:1px}
+.orbital-electron{position:absolute;width:10px;height:10px;background:#c85028;border-radius:50%}
+.orbital-bracket{position:absolute;border:2px solid #3a4a6a;border-right:none;border-radius:4px 0 0 4px}
+
+/* Heating curve */
+.curve-segment{position:absolute;height:3px;border-radius:2px}
+.curve-segment.rising{transform-origin:left center}
+.curve-dot{position:absolute;width:6px;height:6px;background:#c85028;border-radius:50%}
+
+/* ============ RESULTS OVERLAY ============ */
+.results-overlay{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(10,10,20,.85);
+  z-index:200;
+  display:none;
+  align-items:center;justify-content:center;
+  padding:20px;
+}
+.results-overlay.active{display:flex}
+.results-card{
+  background:#16213e;
+  border:2px solid #2a3a5c;
+  border-radius:20px;
+  padding:30px;
+  text-align:center;
+  max-width:380px;
+  width:100%;
+}
+.results-card h2{color:#f5f5f5;font-size:1.4em;margin-bottom:4px}
+.results-stars{font-size:2.5em;margin:12px 0}
+.results-stats{color:#888;font-size:.9em;margin:8px 0 16px}
+.results-stats span{color:#f5f5f5;font-weight:700}
+.results-btn{
+  display:inline-block;
+  padding:12px 28px;
+  border-radius:12px;
+  font-size:.95em;
+  font-weight:700;
+  cursor:pointer;
+  border:none;
+  margin:4px;
+  transition:all .15s;
+}
+.results-btn.primary{background:#c85028;color:#fff}
+.results-btn.primary:hover{background:#e06030}
+.results-btn.secondary{background:transparent;border:2px solid #2a3a5c;color:#888}
+.results-btn.secondary:hover{border-color:#c85028;color:#c85028}
+
+/* ============ RESPONSIVE ============ */
+@media(max-width:600px){
+  #levelSelect h1{font-size:1.3em}
+  .level-grid{grid-template-columns:1fr}
+  .diagram-container{padding:12px;min-height:250px}
+  .label-pill{font-size:.78em;padding:6px 12px}
+  .drop-zone{font-size:.7em;min-width:70px;min-height:28px}
+  .diagram-title{font-size:1.1em}
+}
+</style>
+</head>
+<body>
+
+<a href="index.html" class="back">&larr; Back to Exercises</a>
+
+<!-- ============ LEVEL SELECT SCREEN ============ -->
+<div id="levelSelect" class="screen active">
+  <h1>Fill the Diagram</h1>
+  <p class="ls-subtitle">Drag labels onto the correct positions</p>
+  <div class="level-grid" id="levelGrid"></div>
+  <button class="reset-all-btn" onclick="resetAll()">Reset All Progress</button>
+</div>
+
+<!-- ============ GAMEPLAY SCREEN ============ -->
+<div id="gameScreen" class="screen">
+  <div id="gameArea">
+    <div class="top-bar">
+      <button class="close-btn" onclick="backToLevels()">&times;</button>
+      <div class="progress-wrap"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="wrong-count clean" id="wrongCount">0 wrong</div>
+    </div>
+    <div class="diagram-title" id="diagramTitle"></div>
+    <div class="diagram-hint" id="diagramHint"></div>
+    <div class="diagram-container" id="diagramContainer"></div>
+    <div class="label-bank" id="labelBank"></div>
+  </div>
+</div>
+
+<!-- ============ RESULTS OVERLAY ============ -->
+<div class="results-overlay" id="resultsOverlay">
+  <div class="results-card">
+    <h2 id="resultsTitle">Level Complete!</h2>
+    <div class="results-stars" id="resultsStars"></div>
+    <div class="results-stats" id="resultsStats"></div>
+    <div>
+      <button class="results-btn primary" id="resultsNext" onclick="nextLevel()">Next Level</button>
+      <button class="results-btn secondary" onclick="retryLevel()">Retry</button>
+      <button class="results-btn secondary" onclick="backToLevels()">Levels</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============ AUDIO ============
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let actx = null;
+function getAudioCtx(){ if(!actx) actx = new AudioCtx(); return actx; }
+
+function playTone(freq, dur, type='sine', vol=0.12){
+  try{
+    const a = getAudioCtx(), o = a.createOscillator(), g = a.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol, a.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + dur);
+    o.connect(g); g.connect(a.destination);
+    o.start(); o.stop(a.currentTime + dur);
+  } catch(e){}
+}
+
+function playCorrect(){
+  playTone(523, 0.1, 'sine', 0.15);
+  setTimeout(() => playTone(659, 0.1, 'sine', 0.15), 80);
+  setTimeout(() => playTone(784, 0.15, 'sine', 0.12), 160);
+}
+
+function playWrong(){
+  playTone(200, 0.15, 'sawtooth', 0.1);
+  setTimeout(() => playTone(160, 0.2, 'sawtooth', 0.08), 100);
+}
+
+function playComplete(){
+  [523,659,784,1047].forEach((f,i) => setTimeout(() => playTone(f, 0.2, 'sine', 0.12), i*120));
+}
+
+function playSelect(){
+  playTone(440, 0.06, 'sine', 0.08);
+}
+
+// ============ LEVEL DATA ============
+const LEVELS = [
+  {
+    id: 'phase-diagram',
+    title: 'Phase Diagram',
+    info: '8 zones, 3 distractors',
+    hint: 'Label the regions, curves, and special points of a typical phase diagram',
+    zones: [
+      { id:'z1', answer:'Solid', x:'12%', y:'25%', w:'70px', h:'30px', placeholder:'Region' },
+      { id:'z2', answer:'Liquid', x:'38%', y:'22%', w:'70px', h:'30px', placeholder:'Region' },
+      { id:'z3', answer:'Gas', x:'55%', y:'65%', w:'70px', h:'30px', placeholder:'Region' },
+      { id:'z4', answer:'Triple point', x:'24%', y:'52%', w:'95px', h:'30px', placeholder:'Point' },
+      { id:'z5', answer:'Critical point', x:'62%', y:'18%', w:'100px', h:'30px', placeholder:'Point' },
+      { id:'z6', answer:'Melting curve', x:'22%', y:'8%', w:'100px', h:'30px', placeholder:'Curve' },
+      { id:'z7', answer:'Boiling curve', x:'50%', y:'40%', w:'100px', h:'30px', placeholder:'Curve' },
+      { id:'z8', answer:'Sublimation curve', x:'8%', y:'68%', w:'120px', h:'30px', placeholder:'Curve' },
+    ],
+    labels: ['Solid','Liquid','Gas','Triple point','Critical point','Melting curve','Boiling curve','Sublimation curve','Eutectic point','Azeotrope','Plasma'],
+    buildDiagram: function(container){
+      container.style.height = '380px';
+      container.innerHTML = `
+        <div class="axis-line" style="left:40px;bottom:40px;right:20px;height:2px"></div>
+        <div class="axis-line" style="left:40px;bottom:40px;top:20px;width:2px"></div>
+        <div class="axis-label" style="bottom:10px;left:50%;transform:translateX(-50%)">Temperature &rarr;</div>
+        <div class="axis-label" style="left:6px;top:50%;transform:rotate(-90deg) translateX(-50%);transform-origin:left">Pressure &uarr;</div>
+        <!-- Phase regions - decorative background -->
+        <div class="phase-region" style="left:50px;top:30px;width:120px;height:150px;background:rgba(70,130,200,.08);border-color:rgba(70,130,200,.2)"></div>
+        <div class="phase-region" style="left:170px;top:30px;width:140px;height:140px;background:rgba(46,204,113,.06);border-color:rgba(46,204,113,.15)"></div>
+        <div class="phase-region" style="left:170px;top:190px;width:300px;height:140px;background:rgba(200,80,40,.06);border-color:rgba(200,80,40,.15)"></div>
+        <!-- Curves drawn as rotated lines -->
+        <div style="position:absolute;left:150px;top:30px;width:2px;height:200px;background:linear-gradient(to bottom,#5a7aaa,#5a7aaa);transform:rotate(-10deg);transform-origin:bottom center;opacity:.5"></div>
+        <div style="position:absolute;left:155px;top:185px;width:200px;height:2px;background:linear-gradient(to right,#5a7aaa,transparent);transform:rotate(-25deg);transform-origin:left center;opacity:.5"></div>
+        <div style="position:absolute;left:60px;top:310px;width:100px;height:2px;background:linear-gradient(to right,#5a7aaa,#5a7aaa);transform:rotate(-55deg);transform-origin:right center;opacity:.5"></div>
+        <!-- Triple point dot -->
+        <div style="position:absolute;left:147px;top:192px;width:8px;height:8px;background:#c85028;border-radius:50%;box-shadow:0 0 6px rgba(200,80,40,.5)"></div>
+        <!-- Critical point dot -->
+        <div style="position:absolute;left:330px;top:80px;width:8px;height:8px;background:#c85028;border-radius:50%;box-shadow:0 0 6px rgba(200,80,40,.5)"></div>
+      `;
+    }
+  },
+  {
+    id: 'electrochemical-cell',
+    title: 'Electrochemical Cell',
+    info: '8 zones, 3 distractors',
+    hint: 'Label the parts of a Zn/Cu galvanic cell',
+    zones: [
+      { id:'z1', answer:'Anode', x:'12%', y:'72%', w:'70px', h:'30px', placeholder:'Electrode' },
+      { id:'z2', answer:'Cathode', x:'68%', y:'72%', w:'70px', h:'30px', placeholder:'Electrode' },
+      { id:'z3', answer:'Oxidation', x:'8%', y:'86%', w:'80px', h:'28px', placeholder:'Reaction' },
+      { id:'z4', answer:'Reduction', x:'66%', y:'86%', w:'80px', h:'28px', placeholder:'Reaction' },
+      { id:'z5', answer:'Salt bridge', x:'38%', y:'42%', w:'85px', h:'28px', placeholder:'Component' },
+      { id:'z6', answer:'Zn electrode', x:'18%', y:'38%', w:'90px', h:'28px', placeholder:'Metal' },
+      { id:'z7', answer:'Cu electrode', x:'65%', y:'38%', w:'90px', h:'28px', placeholder:'Metal' },
+      { id:'z8', answer:'e\u207B flow \u2192', x:'36%', y:'8%', w:'90px', h:'28px', placeholder:'Flow' },
+    ],
+    labels: ['Anode','Cathode','Oxidation','Reduction','Salt bridge','Zn electrode','Cu electrode','e\u207B flow \u2192','Electrolysis','Battery acid','Membrane'],
+    buildDiagram: function(container){
+      container.style.height = '380px';
+      container.innerHTML = `
+        <!-- Left beaker -->
+        <div class="beaker" style="left:40px;top:140px;width:160px;height:140px">
+          <div style="position:absolute;bottom:0;left:0;right:0;height:100px;background:rgba(70,130,200,.1);border-radius:0 0 10px 10px"></div>
+        </div>
+        <div class="diagram-text" style="left:70px;top:270px;color:#6a9aca">ZnSO\u2084(aq)</div>
+        <!-- Left electrode -->
+        <div class="electrode" style="left:110px;top:110px;height:100px;background:#8a9aba"></div>
+        <!-- Right beaker -->
+        <div class="beaker" style="right:40px;top:140px;width:160px;height:140px">
+          <div style="position:absolute;bottom:0;left:0;right:0;height:100px;background:rgba(200,120,60,.1);border-radius:0 0 10px 10px"></div>
+        </div>
+        <div class="diagram-text" style="right:60px;top:270px;color:#ca8a5a">CuSO\u2084(aq)</div>
+        <!-- Right electrode -->
+        <div class="electrode" style="right:120px;top:110px;height:100px;background:#ca8a5a"></div>
+        <!-- Wire across top -->
+        <div class="wire" style="left:112px;top:110px;width:calc(100% - 248px)"></div>
+        <!-- Voltmeter -->
+        <div class="voltmeter" style="left:50%;top:88px;transform:translateX(-50%)">V</div>
+        <!-- Salt bridge -->
+        <div class="salt-bridge" style="left:50%;top:150px;transform:translateX(-50%);width:20px;height:110px"></div>
+        <!-- Arrow on wire showing electron flow -->
+        <div style="position:absolute;left:45%;top:102px;color:#c85028;font-size:1.2em">&rarr;</div>
+        <!-- Reaction text -->
+        <div class="diagram-text" style="left:50px;top:310px;font-size:.6em">Zn &rarr; Zn&sup2;+ + 2e&minus;</div>
+        <div class="diagram-text" style="right:30px;top:310px;font-size:.6em">Cu&sup2;+ + 2e&minus; &rarr; Cu</div>
+      `;
+    }
+  },
+  {
+    id: 'periodic-table',
+    title: 'Periodic Table Regions',
+    info: '8 zones, 3 distractors',
+    hint: 'Label the blocks and important groups of the periodic table',
+    zones: [
+      { id:'z1', answer:'s-block', x:'3%', y:'5%', w:'70px', h:'28px', placeholder:'Block' },
+      { id:'z2', answer:'p-block', x:'72%', y:'5%', w:'70px', h:'28px', placeholder:'Block' },
+      { id:'z3', answer:'d-block', x:'35%', y:'30%', w:'70px', h:'28px', placeholder:'Block' },
+      { id:'z4', answer:'f-block', x:'35%', y:'78%', w:'70px', h:'28px', placeholder:'Block' },
+      { id:'z5', answer:'Alkali metals', x:'1%', y:'42%', w:'95px', h:'28px', placeholder:'Group' },
+      { id:'z6', answer:'Halogens', x:'76%', y:'42%', w:'75px', h:'28px', placeholder:'Group' },
+      { id:'z7', answer:'Noble gases', x:'85%', y:'5%', w:'85px', h:'28px', placeholder:'Group' },
+      { id:'z8', answer:'Transition metals', x:'30%', y:'55%', w:'120px', h:'28px', placeholder:'Category' },
+    ],
+    labels: ['s-block','p-block','d-block','f-block','Alkali metals','Halogens','Noble gases','Transition metals','g-block','Superheavy zone','Alloy region'],
+    buildDiagram: function(container){
+      container.style.height = '380px';
+      // Build a simplified periodic table
+      const colors = {
+        s: 'rgba(200,80,40,.15)',
+        p: 'rgba(70,180,70,.12)',
+        d: 'rgba(70,130,200,.12)',
+        f: 'rgba(180,100,200,.1)'
+      };
+      // s-block highlight
+      let html = `<div class="pt-block" style="left:8px;top:35px;width:70px;height:180px;border-color:#c85028;background:${colors.s}"></div>`;
+      // d-block highlight
+      html += `<div class="pt-block" style="left:90px;top:105px;width:300px;height:110px;border-color:#4a8aca;background:${colors.d}"></div>`;
+      // p-block highlight
+      html += `<div class="pt-block" style="right:8px;top:35px;width:180px;height:180px;border-color:#3aba3a;background:${colors.p}"></div>`;
+      // f-block highlight
+      html += `<div class="pt-block" style="left:90px;top:260px;width:400px;height:60px;border-color:#a06ac0;background:${colors.f}"></div>`;
+
+      // Draw simplified grid cells
+      const rows = 7, mainCols = 18;
+      const cw = 30, ch = 22, startX = 10, startY = 38;
+      // Period 1: cols 1, 18
+      const layout = [
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1],
+        [1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      ];
+      for(let r=0;r<rows;r++){
+        for(let c=0;c<mainCols;c++){
+          if(!layout[r][c]) continue;
+          const x = startX + c * (cw+2);
+          const y = startY + r * (ch+2);
+          let bg = '#1a2640';
+          if(c < 2) bg = 'rgba(200,80,40,.12)';
+          else if(c >= 12 || (r < 2 && c >= 12)) bg = 'rgba(70,180,70,.08)';
+          else if(c >= 2 && c < 12 && r >= 3) bg = 'rgba(70,130,200,.08)';
+          html += `<div class="pt-cell" style="left:${x}px;top:${y}px;width:${cw}px;height:${ch}px;background:${bg}"></div>`;
+        }
+      }
+      // f-block rows (lanthanides/actinides)
+      for(let r=0;r<2;r++){
+        for(let c=0;c<14;c++){
+          const x = startX + 60 + c * (cw+2);
+          const y = 268 + r * (ch+2);
+          html += `<div class="pt-cell" style="left:${x}px;top:${y}px;width:${cw}px;height:${ch}px;background:rgba(180,100,200,.08)"></div>`;
+        }
+      }
+      // Group labels
+      html += `<div class="diagram-text" style="left:16px;top:22px;font-size:.55em">1</div>`;
+      html += `<div class="diagram-text" style="left:48px;top:22px;font-size:.55em">2</div>`;
+      html += `<div class="diagram-text" style="right:10px;top:22px;font-size:.55em">18</div>`;
+      html += `<div class="diagram-text" style="right:44px;top:22px;font-size:.55em">17</div>`;
+      container.innerHTML = html;
+    }
+  },
+  {
+    id: 'born-haber',
+    title: 'Born-Haber Cycle',
+    info: '7 zones, 3 distractors',
+    hint: 'Label each energy step in the Born-Haber cycle for NaCl',
+    zones: [
+      { id:'z1', answer:'Na(s) + \u00bdCl\u2082(g)', x:'2%', y:'55%', w:'115px', h:'28px', placeholder:'Start' },
+      { id:'z2', answer:'Sublimation', x:'8%', y:'38%', w:'90px', h:'28px', placeholder:'Step' },
+      { id:'z3', answer:'Ionization energy', x:'25%', y:'18%', w:'115px', h:'28px', placeholder:'Step' },
+      { id:'z4', answer:'Bond dissociation', x:'45%', y:'38%', w:'115px', h:'28px', placeholder:'Step' },
+      { id:'z5', answer:'Electron affinity', x:'62%', y:'55%', w:'110px', h:'28px', placeholder:'Step' },
+      { id:'z6', answer:'Lattice energy', x:'72%', y:'75%', w:'100px', h:'28px', placeholder:'Step' },
+      { id:'z7', answer:'NaCl(s)', x:'60%', y:'88%', w:'80px', h:'28px', placeholder:'End' },
+    ],
+    labels: ['Na(s) + \u00bdCl\u2082(g)','Sublimation','Ionization energy','Bond dissociation','Electron affinity','Lattice energy','NaCl(s)','Hess\'s law','Activation energy','Entropy'],
+    buildDiagram: function(container){
+      container.style.height = '380px';
+      container.innerHTML = `
+        <!-- Energy levels as horizontal lines -->
+        <div class="energy-level" style="left:30px;top:210px;width:100px"></div>
+        <div class="diagram-text" style="left:20px;top:218px;font-size:.55em">\u0394H\u00b0f</div>
+
+        <div class="energy-level" style="left:80px;top:155px;width:80px"></div>
+        <div class="diagram-text" style="left:85px;top:163px;font-size:.55em">Na(g)</div>
+
+        <div class="energy-level" style="left:150px;top:75px;width:120px"></div>
+        <div class="diagram-text" style="left:165px;top:83px;font-size:.55em">Na\u207A(g) + Cl(g)</div>
+
+        <div class="energy-level" style="left:260px;top:140px;width:80px"></div>
+        <div class="diagram-text" style="left:262px;top:148px;font-size:.55em">\u00bdCl\u2082 &rarr; Cl</div>
+
+        <div class="energy-level" style="left:340px;top:200px;width:80px"></div>
+        <div class="diagram-text" style="left:342px;top:208px;font-size:.55em">Cl\u207B(g)</div>
+
+        <div class="energy-level" style="left:350px;top:330px;width:100px"></div>
+
+        <!-- Vertical arrows connecting levels -->
+        <div style="position:absolute;left:110px;top:158px;width:2px;height:52px;background:#c85028;opacity:.4"></div>
+        <div style="position:absolute;left:108px;top:157px;border:5px solid transparent;border-bottom:6px solid #c85028;opacity:.4"></div>
+
+        <div style="position:absolute;left:180px;top:78px;width:2px;height:77px;background:#c85028;opacity:.4"></div>
+        <div style="position:absolute;left:178px;top:77px;border:5px solid transparent;border-bottom:6px solid #c85028;opacity:.4"></div>
+
+        <div style="position:absolute;left:285px;top:80px;width:2px;height:60px;background:#5a7aaa;opacity:.4"></div>
+
+        <div style="position:absolute;left:370px;top:143px;width:2px;height:57px;background:#5a7aaa;opacity:.4"></div>
+
+        <div style="position:absolute;left:400px;top:203px;width:2px;height:127px;background:#2ecc71;opacity:.4"></div>
+        <div style="position:absolute;left:398px;top:324px;border:5px solid transparent;border-top:6px solid #2ecc71;opacity:.4"></div>
+
+        <!-- Y-axis -->
+        <div class="axis-line" style="left:15px;top:40px;width:2px;bottom:40px"></div>
+        <div class="axis-label" style="left:2px;top:30px;font-size:.65em">Energy</div>
+        <div style="position:absolute;left:11px;top:38px;border:5px solid transparent;border-bottom:6px solid #4a5a8a"></div>
+      `;
+    }
+  },
+  {
+    id: 'mo-diagram',
+    title: 'MO Diagram (O\u2082)',
+    info: '8 zones, 3 distractors',
+    hint: 'Label the molecular orbitals in the MO energy level diagram for O\u2082',
+    zones: [
+      { id:'z1', answer:'\u03c32s', x:'38%', y:'78%', w:'60px', h:'26px', placeholder:'MO' },
+      { id:'z2', answer:'\u03c3*2s', x:'38%', y:'65%', w:'60px', h:'26px', placeholder:'MO' },
+      { id:'z3', answer:'\u03c32p', x:'38%', y:'38%', w:'60px', h:'26px', placeholder:'MO' },
+      { id:'z4', answer:'\u03c0*2p', x:'38%', y:'25%', w:'60px', h:'26px', placeholder:'MO' },
+      { id:'z5', answer:'\u03c02p', x:'38%', y:'50%', w:'60px', h:'26px', placeholder:'MO' },
+      { id:'z6', answer:'\u03c3*2p', x:'38%', y:'10%', w:'60px', h:'26px', placeholder:'MO' },
+      { id:'z7', answer:'Bonding', x:'5%', y:'88%', w:'70px', h:'26px', placeholder:'Type' },
+      { id:'z8', answer:'Antibonding', x:'5%', y:'10%', w:'90px', h:'26px', placeholder:'Type' },
+    ],
+    labels: ['\u03c32s','\u03c3*2s','\u03c32p','\u03c02p','\u03c0*2p','\u03c3*2p','Bonding','Antibonding','\u03b4 bond','Hybridized','Non-bonding'],
+    buildDiagram: function(container){
+      container.style.height = '400px';
+      container.innerHTML = `
+        <!-- Left AO label -->
+        <div class="diagram-text" style="left:20px;top:15px;font-size:.75em;color:#888">O atom</div>
+        <!-- Right AO label -->
+        <div class="diagram-text" style="right:20px;top:15px;font-size:.75em;color:#888">O atom</div>
+        <!-- Center MO label -->
+        <div class="diagram-text" style="left:50%;transform:translateX(-50%);top:15px;font-size:.75em;color:#c85028">MO</div>
+
+        <!-- Left atomic orbital lines (2s, 2p) -->
+        <div class="orbital-line" style="left:20px;top:310px;width:60px;background:#5a7aaa"></div>
+        <div class="diagram-text" style="left:35px;top:316px;font-size:.55em">2s</div>
+        <div class="orbital-line" style="left:20px;top:170px;width:60px;background:#5a7aaa"></div>
+        <div class="diagram-text" style="left:35px;top:176px;font-size:.55em">2p</div>
+
+        <!-- Right atomic orbital lines -->
+        <div class="orbital-line" style="right:20px;top:310px;width:60px;background:#5a7aaa"></div>
+        <div class="diagram-text" style="right:28px;top:316px;font-size:.55em">2s</div>
+        <div class="orbital-line" style="right:20px;top:170px;width:60px;background:#5a7aaa"></div>
+        <div class="diagram-text" style="right:28px;top:176px;font-size:.55em">2p</div>
+
+        <!-- MO lines in center (from bottom to top) -->
+        <!-- sigma 2s bonding -->
+        <div class="orbital-line" style="left:50%;transform:translateX(-50%);top:330px;width:70px;background:#2ecc71"></div>
+        <!-- sigma* 2s antibonding -->
+        <div class="orbital-line" style="left:50%;transform:translateX(-50%);top:280px;width:70px;background:#e74c3c"></div>
+        <!-- sigma 2p bonding -->
+        <div class="orbital-line" style="left:50%;transform:translateX(-50%);top:175px;width:70px;background:#2ecc71"></div>
+        <!-- pi 2p bonding (two degenerate) -->
+        <div class="orbital-line" style="left:38%;transform:translateX(-50%);top:215px;width:55px;background:#2ecc71"></div>
+        <div class="orbital-line" style="left:62%;transform:translateX(-50%);top:215px;width:55px;background:#2ecc71"></div>
+        <!-- pi* 2p antibonding (two degenerate) -->
+        <div class="orbital-line" style="left:38%;transform:translateX(-50%);top:125px;width:55px;background:#e74c3c"></div>
+        <div class="orbital-line" style="left:62%;transform:translateX(-50%);top:125px;width:55px;background:#e74c3c"></div>
+        <!-- sigma* 2p antibonding -->
+        <div class="orbital-line" style="left:50%;transform:translateX(-50%);top:65px;width:70px;background:#e74c3c"></div>
+
+        <!-- Electrons on pi* (O2 has 2 unpaired electrons in pi*) -->
+        <div class="orbital-electron" style="left:35%;top:118px;transform:translateX(-50%);width:8px;height:8px"></div>
+        <div class="orbital-electron" style="left:65%;top:118px;transform:translateX(-50%);width:8px;height:8px"></div>
+
+        <!-- Dashed lines connecting AO to MO -->
+        <div style="position:absolute;left:80px;top:310px;width:calc(50% - 115px);height:1px;border-top:1px dashed #3a4a6a"></div>
+        <div style="position:absolute;right:80px;top:310px;width:calc(50% - 115px);height:1px;border-top:1px dashed #3a4a6a"></div>
+        <div style="position:absolute;left:80px;top:170px;width:calc(50% - 115px);height:1px;border-top:1px dashed #3a4a6a"></div>
+        <div style="position:absolute;right:80px;top:170px;width:calc(50% - 115px);height:1px;border-top:1px dashed #3a4a6a"></div>
+
+        <!-- Energy axis -->
+        <div class="axis-line" style="left:8px;top:50px;width:2px;bottom:20px"></div>
+        <div style="position:absolute;left:4px;top:48px;border:4px solid transparent;border-bottom:5px solid #4a5a8a"></div>
+        <div class="axis-label" style="left:0;top:36px;font-size:.6em">E</div>
+
+        <!-- Bonding/antibonding region indicator -->
+        <div style="position:absolute;left:4px;top:240px;bottom:60px;width:2px;background:rgba(46,204,113,.15)"></div>
+        <div style="position:absolute;left:4px;top:50px;height:190px;width:2px;background:rgba(231,76,60,.15)"></div>
+      `;
+    }
+  },
+  {
+    id: 'heating-curve',
+    title: 'Heating Curve',
+    info: '8 zones, 3 distractors',
+    hint: 'Label each segment of the heating curve and the associated equations',
+    zones: [
+      { id:'z1', answer:'Solid heating', x:'6%', y:'72%', w:'95px', h:'28px', placeholder:'Segment' },
+      { id:'z2', answer:'Melting (fusion)', x:'20%', y:'50%', w:'105px', h:'28px', placeholder:'Phase change' },
+      { id:'z3', answer:'Liquid heating', x:'38%', y:'35%', w:'100px', h:'28px', placeholder:'Segment' },
+      { id:'z4', answer:'Vaporization (boiling)', x:'55%', y:'18%', w:'140px', h:'28px', placeholder:'Phase change' },
+      { id:'z5', answer:'Gas heating', x:'78%', y:'5%', w:'85px', h:'28px', placeholder:'Segment' },
+      { id:'z6', answer:'q=mc\u0394T', x:'6%', y:'88%', w:'75px', h:'28px', placeholder:'Equation' },
+      { id:'z7', answer:'q=m\u0394Hfus', x:'22%', y:'88%', w:'82px', h:'28px', placeholder:'Equation' },
+      { id:'z8', answer:'q=m\u0394Hvap', x:'55%', y:'88%', w:'82px', h:'28px', placeholder:'Equation' },
+    ],
+    labels: ['Solid heating','Melting (fusion)','Liquid heating','Vaporization (boiling)','Gas heating','q=mc\u0394T','q=m\u0394Hfus','q=m\u0394Hvap','Sublimation','Ionization','Decomposition'],
+    buildDiagram: function(container){
+      container.style.height = '380px';
+      container.innerHTML = `
+        <!-- Axes -->
+        <div class="axis-line" style="left:50px;bottom:50px;right:20px;height:2px"></div>
+        <div class="axis-line" style="left:50px;bottom:50px;top:20px;width:2px"></div>
+        <div class="axis-label" style="bottom:18px;left:50%;transform:translateX(-50%)">Heat Added (q) &rarr;</div>
+        <div class="axis-label" style="left:8px;top:50%;transform:rotate(-90deg) translateX(-50%);transform-origin:left">Temperature &uarr;</div>
+
+        <!-- The heating curve drawn with segments -->
+        <!-- Segment 1: solid heating (rising) -->
+        <div style="position:absolute;left:60px;bottom:60px;width:80px;height:3px;background:#4a8aca;transform:rotate(-30deg);transform-origin:left bottom;border-radius:2px"></div>
+
+        <!-- Segment 2: melting plateau (flat) -->
+        <div style="position:absolute;left:128px;bottom:100px;width:80px;height:3px;background:#2ecc71;border-radius:2px"></div>
+        <div class="diagram-text" style="left:130px;bottom:78px;font-size:.55em;color:#555">Melting point</div>
+
+        <!-- Segment 3: liquid heating (rising) -->
+        <div style="position:absolute;left:208px;bottom:100px;width:100px;height:3px;background:#4a8aca;transform:rotate(-30deg);transform-origin:left bottom;border-radius:2px"></div>
+
+        <!-- Segment 4: boiling plateau (flat) -->
+        <div style="position:absolute;left:293px;bottom:150px;width:100px;height:3px;background:#c85028;border-radius:2px"></div>
+        <div class="diagram-text" style="left:300px;bottom:128px;font-size:.55em;color:#555">Boiling point</div>
+
+        <!-- Segment 5: gas heating (rising) -->
+        <div style="position:absolute;left:393px;bottom:150px;width:80px;height:3px;background:#4a8aca;transform:rotate(-30deg);transform-origin:left bottom;border-radius:2px"></div>
+
+        <!-- Dots at transition points -->
+        <div class="curve-dot" style="left:126px;bottom:98px"></div>
+        <div class="curve-dot" style="left:206px;bottom:98px"></div>
+        <div class="curve-dot" style="left:291px;bottom:148px"></div>
+        <div class="curve-dot" style="left:391px;bottom:148px"></div>
+
+        <!-- Dashed temperature lines -->
+        <div style="position:absolute;left:52px;bottom:100px;right:20px;height:1px;border-top:1px dashed #2a3a4c"></div>
+        <div style="position:absolute;left:52px;bottom:150px;right:20px;height:1px;border-top:1px dashed #2a3a4c"></div>
+
+        <!-- Temperature labels -->
+        <div class="diagram-text" style="left:22px;bottom:94px;font-size:.55em">T\u2081</div>
+        <div class="diagram-text" style="left:22px;bottom:144px;font-size:.55em">T\u2082</div>
+      `;
+    }
+  }
+];
+
+// ============ STATE ============
+const STORAGE_KEY = 'fye12_fill_diagram';
+let state = loadState();
+let currentLevel = 0;
+let wrongCount = 0;
+let filledCount = 0;
+let totalZones = 0;
+let selectedLabel = null;
+let dragData = null;
+let ghostEl = null;
+
+function loadState(){
+  try {
+    const s = localStorage.getItem(STORAGE_KEY);
+    if(s) return JSON.parse(s);
+  } catch(e){}
+  return { levels: {} };
+}
+
+function saveState(){
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch(e){}
+  // Fire and forget API save
+  try {
+    fetch('/api/diagram-progress', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(state)
+    }).catch(()=>{});
+  } catch(e){}
+}
+
+function resetAll(){
+  if(!confirm('Reset all progress?')) return;
+  state = { levels: {} };
+  saveState();
+  renderLevelSelect();
+}
+
+// ============ LEVEL SELECT ============
+function renderLevelSelect(){
+  const grid = document.getElementById('levelGrid');
+  grid.innerHTML = '';
+  LEVELS.forEach((lvl, i) => {
+    const saved = state.levels[lvl.id];
+    const unlocked = i === 0 || state.levels[LEVELS[i-1].id];
+    const card = document.createElement('div');
+    card.className = 'level-card' + (saved ? ' completed' : '') + (!unlocked ? ' locked' : '');
+    const stars = saved ? getStarHTML(saved.stars) : (unlocked ? '<span class="star-empty">\u2606\u2606\u2606</span>' : '<div class="lock-icon">\uD83D\uDD12</div>');
+    card.innerHTML = `
+      <h3>${lvl.title}</h3>
+      <div class="level-info">${lvl.info}</div>
+      <div class="level-stars">${stars}</div>
+      ${saved ? `<div class="level-best">${saved.wrong} wrong</div>` : ''}
+    `;
+    if(unlocked){
+      card.onclick = () => startLevel(i);
+    }
+    grid.appendChild(card);
+  });
+}
+
+function getStarHTML(count){
+  let html = '';
+  for(let i=0;i<3;i++){
+    html += i < count ? '<span class="star-gold">\u2605</span>' : '<span class="star-empty">\u2606</span>';
+  }
+  return html;
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function backToLevels(){
+  document.getElementById('resultsOverlay').classList.remove('active');
+  showScreen('levelSelect');
+  renderLevelSelect();
+  cleanup();
+}
+
+// ============ START LEVEL ============
+function startLevel(index){
+  currentLevel = index;
+  wrongCount = 0;
+  filledCount = 0;
+  selectedLabel = null;
+  cleanup();
+
+  const lvl = LEVELS[index];
+  totalZones = lvl.zones.length;
+
+  document.getElementById('diagramTitle').textContent = lvl.title;
+  document.getElementById('diagramHint').textContent = lvl.hint;
+  document.getElementById('wrongCount').textContent = '0 wrong';
+  document.getElementById('wrongCount').className = 'wrong-count clean';
+  document.getElementById('progressFill').style.width = '0%';
+
+  const container = document.getElementById('diagramContainer');
+  container.innerHTML = '';
+  lvl.buildDiagram(container);
+
+  // Add drop zones
+  lvl.zones.forEach(z => {
+    const zone = document.createElement('div');
+    zone.className = 'drop-zone';
+    zone.dataset.answer = z.answer;
+    zone.dataset.id = z.id;
+    zone.textContent = z.placeholder || '?';
+    zone.style.left = z.x;
+    zone.style.top = z.y;
+    if(z.w) zone.style.minWidth = z.w;
+    if(z.h) zone.style.minHeight = z.h;
+    container.appendChild(zone);
+  });
+
+  // Build label bank
+  const bank = document.getElementById('labelBank');
+  bank.innerHTML = '';
+  const shuffled = shuffle([...lvl.labels]);
+  shuffled.forEach(label => {
+    const pill = document.createElement('div');
+    pill.className = 'label-pill';
+    pill.textContent = label;
+    pill.dataset.label = label;
+    pill.setAttribute('draggable', 'false'); // We handle our own drag
+
+    // Pointer-based drag for mouse + touch
+    pill.addEventListener('pointerdown', onPillPointerDown);
+    // Also click/tap to select for mobile
+    pill.addEventListener('click', onPillClick);
+
+    bank.appendChild(pill);
+  });
+
+  // Drop zone click handler for mobile tap-to-place
+  container.querySelectorAll('.drop-zone').forEach(zone => {
+    zone.addEventListener('click', onZoneClick);
+  });
+
+  showScreen('gameScreen');
+}
+
+// ============ DRAG & DROP ============
+function onPillPointerDown(e){
+  if(e.target.classList.contains('placed') || e.target.classList.contains('distractor-revealed')) return;
+  e.preventDefault();
+
+  const pill = e.target.closest('.label-pill');
+  if(!pill) return;
+
+  dragData = {
+    label: pill.dataset.label,
+    pill: pill,
+    startX: e.clientX,
+    startY: e.clientY,
+    dragging: false
+  };
+
+  document.addEventListener('pointermove', onPointerMove);
+  document.addEventListener('pointerup', onPointerUp);
+}
+
+function onPointerMove(e){
+  if(!dragData) return;
+
+  // Start drag after small movement threshold
+  const dx = e.clientX - dragData.startX;
+  const dy = e.clientY - dragData.startY;
+  if(!dragData.dragging && (Math.abs(dx) > 5 || Math.abs(dy) > 5)){
+    dragData.dragging = true;
+    dragData.pill.classList.add('dragging');
+
+    // Create ghost
+    ghostEl = document.createElement('div');
+    ghostEl.className = 'drag-ghost';
+    ghostEl.textContent = dragData.label;
+    document.body.appendChild(ghostEl);
+
+    // Deselect any selected pill
+    deselectAll();
+  }
+
+  if(dragData.dragging && ghostEl){
+    ghostEl.style.left = e.clientX + 'px';
+    ghostEl.style.top = e.clientY + 'px';
+
+    // Check hover over drop zones
+    const zones = document.querySelectorAll('.drop-zone:not(.filled)');
+    zones.forEach(zone => {
+      const rect = zone.getBoundingClientRect();
+      const inZone = e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom;
+      zone.classList.toggle('drag-hover', inZone);
+    });
+  }
+}
+
+function onPointerUp(e){
+  document.removeEventListener('pointermove', onPointerMove);
+  document.removeEventListener('pointerup', onPointerUp);
+
+  if(!dragData) return;
+
+  if(dragData.dragging){
+    dragData.pill.classList.remove('dragging');
+
+    // Find which zone we dropped on
+    const zones = document.querySelectorAll('.drop-zone:not(.filled)');
+    let dropped = false;
+    zones.forEach(zone => {
+      if(zone.classList.contains('drag-hover')){
+        zone.classList.remove('drag-hover');
+        tryDrop(dragData.label, dragData.pill, zone);
+        dropped = true;
+      }
+    });
+
+    // Clean up hover states
+    zones.forEach(z => z.classList.remove('drag-hover'));
+  }
+
+  // Remove ghost
+  if(ghostEl){
+    ghostEl.remove();
+    ghostEl = null;
+  }
+
+  dragData = null;
+}
+
+// ============ TAP TO SELECT/PLACE (MOBILE) ============
+function onPillClick(e){
+  if(dragData && dragData.dragging) return; // Was a drag, not a click
+  const pill = e.target.closest('.label-pill');
+  if(!pill || pill.classList.contains('placed') || pill.classList.contains('distractor-revealed')) return;
+
+  if(pill.classList.contains('selected')){
+    pill.classList.remove('selected');
+    selectedLabel = null;
+    return;
+  }
+
+  deselectAll();
+  pill.classList.add('selected');
+  selectedLabel = { label: pill.dataset.label, pill: pill };
+  playSelect();
+}
+
+function onZoneClick(e){
+  const zone = e.target.closest('.drop-zone');
+  if(!zone || zone.classList.contains('filled')) return;
+  if(!selectedLabel) return;
+
+  tryDrop(selectedLabel.label, selectedLabel.pill, zone);
+  selectedLabel = null;
+}
+
+function deselectAll(){
+  document.querySelectorAll('.label-pill.selected').forEach(p => p.classList.remove('selected'));
+  selectedLabel = null;
+}
+
+// ============ DROP LOGIC ============
+function tryDrop(label, pill, zone){
+  const answer = zone.dataset.answer;
+
+  if(label === answer){
+    // Correct
+    zone.classList.add('filled');
+    zone.textContent = label;
+    pill.classList.add('placed');
+    deselectAll();
+    filledCount++;
+    playCorrect();
+
+    // Update progress bar
+    const pct = (filledCount / totalZones) * 100;
+    document.getElementById('progressFill').style.width = pct + '%';
+
+    // Check completion
+    if(filledCount >= totalZones){
+      setTimeout(levelComplete, 400);
+    }
+  } else {
+    // Wrong
+    wrongCount++;
+    document.getElementById('wrongCount').textContent = wrongCount + ' wrong';
+    document.getElementById('wrongCount').className = 'wrong-count';
+    zone.classList.add('wrong-flash');
+    setTimeout(() => zone.classList.remove('wrong-flash'), 400);
+    playWrong();
+    deselectAll();
+  }
+}
+
+// ============ LEVEL COMPLETE ============
+function levelComplete(){
+  playComplete();
+
+  const stars = wrongCount === 0 ? 3 : wrongCount <= 3 ? 2 : 1;
+  const lvl = LEVELS[currentLevel];
+
+  // Save if better
+  const prev = state.levels[lvl.id];
+  if(!prev || stars > prev.stars || (stars === prev.stars && wrongCount < prev.wrong)){
+    state.levels[lvl.id] = { stars, wrong: wrongCount };
+    saveState();
+  }
+
+  // Show results
+  document.getElementById('resultsTitle').textContent = 'Level Complete!';
+  document.getElementById('resultsStars').innerHTML = getStarHTML(stars);
+  document.getElementById('resultsStats').innerHTML = `
+    <span>${lvl.title}</span><br>
+    Wrong drops: <span>${wrongCount}</span><br>
+    ${stars === 3 ? 'Perfect! No mistakes!' : stars === 2 ? 'Great job, only a few mistakes.' : 'Completed! Try again for fewer mistakes.'}
+  `;
+
+  // Show/hide next button
+  const nextBtn = document.getElementById('resultsNext');
+  if(currentLevel < LEVELS.length - 1){
+    nextBtn.style.display = 'inline-block';
+  } else {
+    nextBtn.style.display = 'none';
+  }
+
+  // Mark distractors
+  const bank = document.getElementById('labelBank');
+  const answers = new Set(LEVELS[currentLevel].zones.map(z => z.answer));
+  bank.querySelectorAll('.label-pill:not(.placed)').forEach(pill => {
+    if(!answers.has(pill.dataset.label)){
+      pill.classList.add('distractor-revealed');
+    }
+  });
+
+  document.getElementById('resultsOverlay').classList.add('active');
+}
+
+function nextLevel(){
+  document.getElementById('resultsOverlay').classList.remove('active');
+  if(currentLevel < LEVELS.length - 1){
+    startLevel(currentLevel + 1);
+  } else {
+    backToLevels();
+  }
+}
+
+function retryLevel(){
+  document.getElementById('resultsOverlay').classList.remove('active');
+  startLevel(currentLevel);
+}
+
+// ============ UTILS ============
+function shuffle(arr){
+  for(let i = arr.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function cleanup(){
+  document.removeEventListener('pointermove', onPointerMove);
+  document.removeEventListener('pointerup', onPointerUp);
+  if(ghostEl){ ghostEl.remove(); ghostEl = null; }
+  dragData = null;
+  selectedLabel = null;
+}
+
+// ============ INIT ============
+renderLevelSelect();
+</script>
+</body>
+</html>

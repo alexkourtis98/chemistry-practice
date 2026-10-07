@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chem Fall - Chemistry FYE12</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#fff;color:#3c3c3c;font-family:'DIN Round Pro','Nunito','Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;min-height:100vh;overflow-x:hidden}
+
+/* ---- BACK LINK ---- */
+a.back{color:#1CB0F6;text-decoration:none;font-weight:700;padding:16px 20px;display:inline-block;font-size:.95em}
+a.back:hover{text-decoration:underline}
+
+/* ---- SCREEN MANAGEMENT ---- */
+.screen{display:none}
+.screen.active{display:block}
+
+/* ============ LEVEL SELECT ============ */
+#levelSelect{max-width:640px;margin:0 auto;padding:0 20px 40px}
+#levelSelect h1{text-align:center;font-size:1.6em;color:#3c3c3c;font-weight:800;padding:0 0 4px;letter-spacing:-.5px}
+.ls-subtitle{text-align:center;color:#afafaf;font-size:.9em;margin-bottom:12px;font-weight:600}
+
+/* ---- HINT TOGGLE ---- */
+.hint-toggle-wrap{text-align:center;margin-bottom:20px}
+.hint-toggle-label{display:inline-flex;align-items:center;gap:10px;cursor:pointer;font-size:.9em;font-weight:700;color:#afafaf;user-select:none}
+.hint-toggle-label span.ht-text{transition:color .2s}
+.hint-toggle-track{position:relative;width:48px;height:26px;background:#e5e5e5;border-radius:13px;transition:background .2s;flex-shrink:0}
+.hint-toggle-track::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.hint-toggle-wrap input{display:none}
+.hint-toggle-wrap input:checked+.hint-toggle-label .hint-toggle-track{background:#58CC02}
+.hint-toggle-wrap input:checked+.hint-toggle-label .hint-toggle-track::after{transform:translateX(22px)}
+.hint-toggle-wrap input:checked+.hint-toggle-label .ht-text{color:#58CC02}
+.hint-xp-note{text-align:center;font-size:.75em;color:#FF9600;font-weight:600;margin-top:4px;height:16px}
+.level-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.level-card{
+  background:#fff;
+  border:2px solid #e5e5e5;
+  border-bottom:4px solid #e5e5e5;
+  border-radius:16px;
+  padding:20px 16px;
+  cursor:pointer;
+  transition:all .15s;
+  text-align:center;
+  position:relative;
+}
+.level-card:hover{background:#f7f7f7;border-color:#ddd;border-bottom-color:#ddd}
+.level-card:active{transform:translateY(2px);border-bottom-width:2px;margin-top:2px}
+.level-card.completed{border-color:#58CC02;border-bottom-color:#46a302}
+.level-card.completed:hover{border-color:#58CC02;border-bottom-color:#46a302;background:#f0fce4}
+.level-card h3{color:#3c3c3c;font-size:1.05em;font-weight:800;margin-bottom:2px}
+.level-card .level-info{color:#afafaf;font-size:.8em;font-weight:600}
+.level-card .level-stars{font-size:1.5em;margin-top:8px;line-height:1}
+.level-card .level-best{color:#58CC02;font-size:.78em;font-weight:700;margin-top:4px}
+.level-card.locked{opacity:.45;cursor:not-allowed}
+.level-card.locked:hover{background:#fff;border-color:#e5e5e5;border-bottom-color:#e5e5e5;transform:none}
+.lock-icon{font-size:1.6em;margin-top:8px;color:#ccc}
+
+.star-gold{color:#FFC800}
+.star-empty{color:#e5e5e5}
+
+.reset-all-btn{display:block;margin:24px auto 0;background:none;border:2px solid #e5e5e5;color:#afafaf;padding:10px 24px;border-radius:12px;cursor:pointer;font-size:.85em;font-weight:700;transition:all .15s}
+.reset-all-btn:hover{border-color:#FF4B4B;color:#FF4B4B}
+
+/* ============ STATS BAR ============ */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px;padding:16px;background:#f7f7f7;border-radius:14px;border:2px solid #e5e5e5}
+.stat-box{text-align:center}
+.stat-box .stat-value{font-size:1.2em;font-weight:800;color:#3c3c3c}
+.stat-box .stat-label{font-size:.72em;font-weight:700;color:#afafaf;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+
+/* ============ GET READY COUNTDOWN ============ */
+#getReady{position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:100;flex-direction:column;align-items:center;justify-content:center}
+#getReady.active{display:flex}
+#getReady .countdown-number{font-size:120px;font-weight:800;color:#1CB0F6;animation:countPop .4s ease}
+#getReady .countdown-label{font-size:1.1em;color:#afafaf;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-top:8px}
+@keyframes countPop{0%{transform:scale(.5);opacity:0}60%{transform:scale(1.3)}100%{transform:scale(1);opacity:1}}
+
+/* ============ GAMEPLAY ============ */
+#gameArea{max-width:640px;margin:0 auto;padding:0 16px 20px;position:relative}
+
+/* Top bar */
+.top-bar{display:flex;align-items:center;gap:12px;padding:12px 0 8px}
+.top-bar .close-btn{
+  background:none;border:none;cursor:pointer;font-size:1.4em;color:#afafaf;
+  padding:4px;line-height:1;font-weight:700;transition:color .15s;
+}
+.top-bar .close-btn:hover{color:#FF4B4B}
+.progress-wrap{flex:1;height:16px;background:#e5e5e5;border-radius:10px;overflow:hidden;position:relative}
+.progress-fill{height:100%;background:linear-gradient(90deg,#58CC02,#69e30b);border-radius:10px;transition:width .3s;width:0;position:relative}
+.progress-fill.pulse{animation:progPulse .3s ease}
+@keyframes progPulse{0%{transform:scaleY(1)}50%{transform:scaleY(1.3)}100%{transform:scaleY(1)}}
+
+/* Game info bar */
+.game-info-bar{display:flex;justify-content:space-between;align-items:center;padding:0 2px 6px}
+.lives-display{font-size:1.4em;letter-spacing:2px}
+.lives-display .heart{transition:all .2s}
+.lives-display .heart.lost{opacity:.2;transform:scale(.8)}
+.score-display{font-size:1em;font-weight:800;color:#FF9600}
+.streak-display{font-size:.9em;font-weight:800;color:#FF9600;min-height:22px}
+.streak-display.glowing{animation:streakGlow .8s infinite alternate,streakBounce .4s ease;color:#58CC02}
+@keyframes streakGlow{from{text-shadow:0 0 4px rgba(88,204,2,.3)}to{text-shadow:0 0 12px rgba(88,204,2,.6)}}
+@keyframes streakBounce{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1)}}
+
+/* Fall zone */
+.fall-zone{
+  position:relative;
+  width:100%;
+  height:420px;
+  border:2px solid #e5e5e5;
+  border-radius:16px;
+  overflow:hidden;
+  background:#fafafa;
+  margin-bottom:12px;
+}
+.fall-zone .danger-line{
+  position:absolute;
+  bottom:0;left:0;right:0;
+  height:3px;
+  background:linear-gradient(90deg,transparent,#FF4B4B,transparent);
+  opacity:.5;
+}
+
+/* Falling pill */
+.falling-pill{
+  position:absolute;
+  background:#fff;
+  border:2px solid #e5e5e5;
+  border-bottom:4px solid #e5e5e5;
+  border-radius:24px;
+  padding:10px 20px;
+  font-size:1em;
+  font-weight:700;
+  color:#3c3c3c;
+  text-align:center;
+  white-space:nowrap;
+  pointer-events:none;
+  transition:none;
+  z-index:10;
+  min-width:60px;
+}
+.falling-pill.correct-flash{
+  border-color:#58CC02;
+  border-bottom-color:#46a302;
+  background:#d7ffb8;
+  color:#58CC02;
+  animation:pillCorrect .4s ease forwards;
+}
+.falling-pill.wrong-flash{
+  border-color:#FF4B4B;
+  border-bottom-color:#e63e3e;
+  background:#ffdfe0;
+  color:#FF4B4B;
+}
+.falling-pill.missed{
+  border-color:#FF4B4B;
+  border-bottom-color:#e63e3e;
+  background:#ffdfe0;
+  color:#FF4B4B;
+  font-size:.85em;
+}
+@keyframes pillCorrect{
+  0%{transform:scale(1);opacity:1}
+  50%{transform:scale(1.3);opacity:.8}
+  100%{transform:scale(0);opacity:0}
+}
+
+/* Answer display on missed pill */
+.pill-answer{
+  font-size:.75em;
+  color:#FF4B4B;
+  font-weight:600;
+  display:block;
+  margin-top:2px;
+}
+
+/* Hint text on pill */
+.pill-hint{
+  font-size:.7em;
+  color:#afafaf;
+  font-style:italic;
+  display:block;
+  margin-top:2px;
+  opacity:0;
+  transition:opacity .3s;
+}
+.pill-hint.visible{opacity:1}
+
+/* Hint indicator in game bar */
+.hint-indicator{font-size:.78em;font-weight:700;color:#58CC02;margin-left:6px}
+
+/* Input area */
+.input-area{
+  display:flex;
+  gap:8px;
+}
+.input-area input{
+  flex:1;
+  background:#fff;
+  border:2px solid #e5e5e5;
+  border-bottom:4px solid #e5e5e5;
+  border-radius:14px;
+  padding:14px 18px;
+  font-size:1.1em;
+  font-weight:700;
+  color:#3c3c3c;
+  outline:none;
+  transition:border-color .15s,background .15s;
+}
+.input-area input:focus{
+  border-color:#1CB0F6;
+  border-bottom-color:#1899d6;
+}
+.input-area input.input-correct{
+  border-color:#58CC02;
+  border-bottom-color:#46a302;
+  background:#f0fce4;
+}
+.input-area input.input-wrong{
+  border-color:#FF4B4B;
+  border-bottom-color:#e63e3e;
+  background:#fff0f0;
+  animation:inputShake .4s ease;
+}
+@keyframes inputShake{
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-5px)}
+  40%{transform:translateX(5px)}
+  60%{transform:translateX(-3px)}
+  80%{transform:translateX(3px)}
+}
+
+/* Floating XP popup */
+.xp-float{
+  position:fixed;
+  font-size:.85em;
+  font-weight:800;
+  color:#FF9600;
+  pointer-events:none;
+  z-index:200;
+  animation:xpFloat .7s ease forwards;
+}
+@keyframes xpFloat{
+  0%{opacity:1;transform:translateY(0) scale(1)}
+  60%{opacity:1;transform:translateY(-30px) scale(1.1)}
+  100%{opacity:0;transform:translateY(-50px) scale(.9)}
+}
+
+/* ============ LEVEL COMPLETE ============ */
+#levelComplete{max-width:420px;margin:40px auto;text-align:center;padding:20px}
+#levelComplete h2{font-size:1.7em;color:#3c3c3c;font-weight:800}
+.lc-stars{font-size:3em;margin:20px 0;line-height:1}
+.lc-stars .star{display:inline-block;opacity:0;transform:scale(0) rotate(-30deg);transition:all .4s cubic-bezier(.34,1.56,.64,1)}
+.lc-stars .star.reveal{opacity:1;transform:scale(1) rotate(0)}
+.lc-xp{font-size:1.8em;font-weight:800;color:#FF9600;margin:8px 0}
+.lc-stat{color:#afafaf;font-size:.95em;font-weight:600;margin:4px 0}
+.lc-stat span{color:#3c3c3c;font-weight:800}
+.lc-xp,.lc-stat{animation:slideUp .4s ease both}
+.lc-xp{animation-delay:.6s}
+.lc-stat:nth-of-type(1){animation-delay:.8s}
+.lc-stat:nth-of-type(2){animation-delay:.9s}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* ============ GAME OVER ============ */
+#gameOver{max-width:420px;margin:60px auto;text-align:center;padding:20px}
+#gameOver h2{font-size:1.7em;color:#FF4B4B;font-weight:800;margin-bottom:12px}
+.go-stat{color:#afafaf;font-size:.95em;font-weight:600;margin:4px 0}
+.go-stat span{color:#3c3c3c;font-weight:800}
+
+/* ============ BUTTONS ============ */
+.btn{
+  display:inline-block;
+  background:#58CC02;
+  color:#fff;
+  border:none;
+  border-bottom:4px solid #46a302;
+  padding:13px 32px;
+  border-radius:14px;
+  cursor:pointer;
+  font-size:1em;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.5px;
+  transition:all .1s;
+  margin:8px;
+}
+.btn:hover{background:#61d800}
+.btn:active{transform:translateY(2px);border-bottom-width:1px}
+.btn.secondary{
+  background:#fff;
+  color:#afafaf;
+  border:2px solid #e5e5e5;
+  border-bottom:4px solid #e5e5e5;
+}
+.btn.secondary:hover{background:#f7f7f7;color:#777}
+.btn-wrap{margin-top:24px}
+
+/* ============ CONFETTI ============ */
+#confettiCanvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:300}
+
+/* ============ RESPONSIVE ============ */
+@media(max-width:500px){
+  .fall-zone{height:340px}
+  .falling-pill{font-size:.88em;padding:8px 14px}
+  .input-area input{font-size:1em;padding:12px 14px}
+  #levelSelect h1{font-size:1.3em}
+  .level-grid{gap:10px}
+  .level-card{padding:16px 12px}
+  #getReady .countdown-number{font-size:80px}
+  .lc-stars{font-size:2.4em}
+}
+</style>
+</head>
+<body>
+
+<a href="index.html" class="back">&larr; Back to Exercises</a>
+
+<!-- SCREEN 1: Level Select -->
+<div id="levelSelect" class="screen active">
+  <h1>Chem Fall</h1>
+  <p class="ls-subtitle">12 levels &mdash; Type the answer before it hits the bottom!</p>
+  <div class="hint-toggle-wrap">
+    <input type="checkbox" id="hintToggle" onchange="toggleHintMode(this.checked)">
+    <label class="hint-toggle-label" for="hintToggle">
+      <span class="ht-text">Hint Mode</span>
+      <span class="hint-toggle-track"></span>
+    </label>
+    <div class="hint-xp-note" id="hintXPNote"></div>
+  </div>
+  <div class="level-grid" id="levelGrid"></div>
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-box"><div class="stat-value" id="statXP">0</div><div class="stat-label">Total XP</div></div>
+    <div class="stat-box"><div class="stat-value" id="statGames">0</div><div class="stat-label">Games</div></div>
+    <div class="stat-box"><div class="stat-value" id="statStreak">0</div><div class="stat-label">Best Streak</div></div>
+    <div class="stat-box"><div class="stat-value" id="statItems">0</div><div class="stat-label">Mastered</div></div>
+  </div>
+  <button class="reset-all-btn" onclick="resetAllProgress()">Reset All Progress</button>
+</div>
+
+<!-- SCREEN 2: Get Ready Countdown -->
+<div id="getReady" class="screen">
+  <div class="countdown-number" id="countdownNum">3</div>
+  <div class="countdown-label">Get Ready</div>
+</div>
+
+<!-- SCREEN 3: Gameplay -->
+<div id="gameArea" class="screen">
+  <div class="top-bar">
+    <button class="close-btn" onclick="confirmQuit()" title="Quit">&times;</button>
+    <div class="progress-wrap"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+  <div class="game-info-bar">
+    <div class="lives-display" id="livesDisplay"></div>
+    <div class="streak-display" id="streakDisplay"></div>
+    <div class="score-display" id="scoreDisplay">0 XP</div><span class="hint-indicator" id="hintIndicator" style="display:none">HINT</span>
+  </div>
+  <div class="fall-zone" id="fallZone">
+    <div class="danger-line"></div>
+  </div>
+  <div class="input-area">
+    <input type="text" id="answerInput" placeholder="Type your answer..." autocomplete="off" autocapitalize="off" spellcheck="false">
+  </div>
+</div>
+
+<!-- SCREEN 4: Level Complete -->
+<div id="levelComplete" class="screen">
+  <h2>Level Complete!</h2>
+  <div class="lc-stars" id="lcStars"></div>
+  <div class="lc-xp" id="lcXP">+0 XP</div>
+  <div class="lc-stat">Correct: <span id="lcCorrect">0</span></div>
+  <div class="lc-stat">Missed: <span id="lcMissed">0</span></div>
+  <div class="btn-wrap">
+    <button class="btn" onclick="backToLevels()">CONTINUE</button>
+  </div>
+</div>
+
+<!-- SCREEN 5: Game Over -->
+<div id="gameOver" class="screen">
+  <h2>Game Over!</h2>
+  <div class="go-stat">Score: <span id="goXP">0</span> XP</div>
+  <div class="go-stat">Correct: <span id="goCorrect">0</span></div>
+  <div class="go-stat">Lives lost to missed items</div>
+  <div class="btn-wrap">
+    <button class="btn" onclick="retryLevel()">TRY AGAIN</button>
+    <br>
+    <button class="btn secondary" onclick="backToLevels()">BACK TO LEVELS</button>
+  </div>
+</div>
+
+<!-- Confetti canvas -->
+<canvas id="confettiCanvas"></canvas>
+
+<script>
+// ============ SOUND SYSTEM (Web Audio API) ============
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+function playTone(freq, duration, type, gain) {
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.value = freq;
+    g.gain.value = gain || 0.15;
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.connect(g);
+    g.connect(ctx.destination);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + duration);
+  } catch(e) {}
+}
+function playCorrect() {
+  playTone(523, 0.12, 'sine', 0.12);
+  setTimeout(() => playTone(659, 0.15, 'sine', 0.12), 80);
+}
+function playWrong() {
+  playTone(150, 0.2, 'sawtooth', 0.08);
+}
+function playStreak() {
+  playTone(523, 0.1, 'sine', 0.1);
+  setTimeout(() => playTone(659, 0.1, 'sine', 0.1), 70);
+  setTimeout(() => playTone(784, 0.18, 'sine', 0.12), 140);
+}
+function playTick() {
+  playTone(800, 0.05, 'sine', 0.08);
+}
+function playLevelWin() {
+  const notes = [523, 587, 659, 784, 880, 1047];
+  notes.forEach((f, i) => setTimeout(() => playTone(f, 0.2, 'sine', 0.1), i * 130));
+}
+function playLifeLost() {
+  playTone(300, 0.15, 'sawtooth', 0.1);
+  setTimeout(() => playTone(200, 0.25, 'sawtooth', 0.08), 120);
+}
+function playGameOver() {
+  const notes = [400, 350, 300, 200];
+  notes.forEach((f, i) => setTimeout(() => playTone(f, 0.25, 'sawtooth', 0.08), i * 150));
+}
+
+// ============ CHEMISTRY FORMATTING ============
+function chemFormat(s) {
+  s = s.replace(/\u2080/g,'0').replace(/\u2081/g,'1').replace(/\u2082/g,'2').replace(/\u2083/g,'3')
+       .replace(/\u2084/g,'4').replace(/\u2085/g,'5').replace(/\u2086/g,'6').replace(/\u2087/g,'7')
+       .replace(/\u2088/g,'8').replace(/\u2089/g,'9');
+  s = s.replace(/\u207A/g,'+').replace(/\u207B/g,'-').replace(/\u00B2/g,'2').replace(/\u00B3/g,'3');
+  s = s.replace(/([A-Za-z\)])(\d+)/g, '$1<sub>$2</sub>');
+  s = s.replace(/(\d*)([\+\-])$/g, '<sup>$1$2</sup>');
+  return s;
+}
+
+// ============ ANSWER NORMALIZATION ============
+function normalizeForCompare(s) {
+  return s.toLowerCase().trim()
+    .replace(/\s+/g, ' ')
+    .replace(/[\u2080-\u2089]/g, m => String.fromCharCode(m.charCodeAt(0) - 0x2080 + 48))
+    .replace(/\u207A/g, '+').replace(/\u207B/g, '-')
+    .replace(/\u00B2/g, '2').replace(/\u00B3/g, '3')
+    .replace(/\u00B9/g, '1')
+    .replace(/[()[\]]/g, '')
+    .replace(/\s/g, '');
+}
+
+function checkAnswer(input, acceptedAnswers) {
+  const norm = normalizeForCompare(input);
+  if (!norm) return false;
+  const answers = acceptedAnswers.split('/');
+  return answers.some(a => {
+    const na = normalizeForCompare(a);
+    return norm === na;
+  });
+}
+
+// ============ LEVEL DATA ============
+const FALL_LEVELS = [
+  {
+    name: "Element Symbols",
+    desc: "Name the element from its symbol",
+    items: [
+      {prompt:"H", answer:"hydrogen"}, {prompt:"He", answer:"helium"}, {prompt:"Li", answer:"lithium"},
+      {prompt:"Be", answer:"beryllium"}, {prompt:"B", answer:"boron"}, {prompt:"C", answer:"carbon"},
+      {prompt:"N", answer:"nitrogen"}, {prompt:"O", answer:"oxygen"}, {prompt:"F", answer:"fluorine"},
+      {prompt:"Ne", answer:"neon"}, {prompt:"Na", answer:"sodium"}, {prompt:"Mg", answer:"magnesium"},
+      {prompt:"Al", answer:"aluminium/aluminum"}, {prompt:"Si", answer:"silicon"}, {prompt:"P", answer:"phosphorus"},
+      {prompt:"S", answer:"sulfur"}, {prompt:"Cl", answer:"chlorine"}, {prompt:"Ar", answer:"argon"},
+      {prompt:"K", answer:"potassium"}, {prompt:"Ca", answer:"calcium"}, {prompt:"Fe", answer:"iron"},
+      {prompt:"Cu", answer:"copper"}, {prompt:"Zn", answer:"zinc"}, {prompt:"Br", answer:"bromine"},
+      {prompt:"Ag", answer:"silver"}, {prompt:"Au", answer:"gold"}, {prompt:"Pb", answer:"lead"},
+      {prompt:"I", answer:"iodine"}, {prompt:"Sn", answer:"tin"}, {prompt:"Hg", answer:"mercury"}
+    ]
+  },
+  {
+    name: "Ion Charges",
+    desc: "What ion does this element form?",
+    items: [
+      {prompt:"Na ion?", answer:"Na+/Na\u207A"}, {prompt:"K ion?", answer:"K+/K\u207A"},
+      {prompt:"Mg ion?", answer:"Mg2+/Mg\u00B2\u207A"}, {prompt:"Ca ion?", answer:"Ca2+/Ca\u00B2\u207A"},
+      {prompt:"Al ion?", answer:"Al3+/Al\u00B3\u207A"}, {prompt:"O ion?", answer:"O2-/O\u00B2\u207B"},
+      {prompt:"Cl ion?", answer:"Cl-/Cl\u207B"}, {prompt:"F ion?", answer:"F-/F\u207B"},
+      {prompt:"S ion?", answer:"S2-/S\u00B2\u207B"}, {prompt:"N ion?", answer:"N3-/N\u00B3\u207B"},
+      {prompt:"Br ion?", answer:"Br-/Br\u207B"}, {prompt:"Li ion?", answer:"Li+/Li\u207A"},
+      {prompt:"Ba ion?", answer:"Ba2+/Ba\u00B2\u207A"}, {prompt:"Ag ion?", answer:"Ag+/Ag\u207A"},
+      {prompt:"Zn ion?", answer:"Zn2+/Zn\u00B2\u207A"}, {prompt:"Fe\u00B2\u207A name?", answer:"iron(II)/iron (II)"},
+      {prompt:"Fe\u00B3\u207A name?", answer:"iron(III)/iron (III)"}, {prompt:"Cu\u207A name?", answer:"copper(I)/copper (I)"},
+      {prompt:"Cu\u00B2\u207A name?", answer:"copper(II)/copper (II)"}, {prompt:"P ion?", answer:"P3-/P\u00B3\u207B"}
+    ]
+  },
+  {
+    name: "Polyatomic Ion Formulas",
+    desc: "Write the formula of the polyatomic ion",
+    items: [
+      {prompt:"Hydroxide", answer:"OH-/OH\u207B"}, {prompt:"Nitrate", answer:"NO3-/NO\u2083\u207B"},
+      {prompt:"Ammonium", answer:"NH4+/NH\u2084\u207A"}, {prompt:"Carbonate", answer:"CO32-/CO\u2083\u00B2\u207B"},
+      {prompt:"Sulfate", answer:"SO42-/SO\u2084\u00B2\u207B"}, {prompt:"Phosphate", answer:"PO43-/PO\u2084\u00B3\u207B"},
+      {prompt:"Bicarbonate", answer:"HCO3-/HCO\u2083\u207B"}, {prompt:"Nitrite", answer:"NO2-/NO\u2082\u207B"},
+      {prompt:"Sulfite", answer:"SO32-/SO\u2083\u00B2\u207B"}, {prompt:"Chlorate", answer:"ClO3-/ClO\u2083\u207B"},
+      {prompt:"Permanganate", answer:"MnO4-/MnO\u2084\u207B"}, {prompt:"Chromate", answer:"CrO42-/CrO\u2084\u00B2\u207B"},
+      {prompt:"Dichromate", answer:"Cr2O72-/Cr\u2082O\u2087\u00B2\u207B"}, {prompt:"Acetate", answer:"C2H3O2-/CH\u2083COO\u207B/CH3COO-"},
+      {prompt:"Cyanide", answer:"CN-/CN\u207B"}, {prompt:"Peroxide", answer:"O22-/O\u2082\u00B2\u207B"}
+    ]
+  },
+  {
+    name: "Binary Compound Naming",
+    desc: "Name the compound",
+    items: [
+      {prompt:"NaCl", answer:"sodium chloride"}, {prompt:"MgO", answer:"magnesium oxide"},
+      {prompt:"CaCl\u2082", answer:"calcium chloride"}, {prompt:"Al\u2082O\u2083", answer:"aluminum oxide/aluminium oxide"},
+      {prompt:"K\u2082S", answer:"potassium sulfide"}, {prompt:"Na\u2082O", answer:"sodium oxide"},
+      {prompt:"CaF\u2082", answer:"calcium fluoride"}, {prompt:"MgCl\u2082", answer:"magnesium chloride"},
+      {prompt:"KBr", answer:"potassium bromide"}, {prompt:"LiCl", answer:"lithium chloride"},
+      {prompt:"BaO", answer:"barium oxide"}, {prompt:"SrCl\u2082", answer:"strontium chloride"},
+      {prompt:"Na\u2083P", answer:"sodium phosphide"}, {prompt:"Mg\u2083N\u2082", answer:"magnesium nitride"},
+      {prompt:"AlCl\u2083", answer:"aluminium chloride/aluminum chloride"}, {prompt:"CaS", answer:"calcium sulfide"}
+    ]
+  },
+  {
+    name: "Greek Prefixes",
+    desc: "What number does this prefix mean?",
+    items: [
+      {prompt:"mono-", answer:"1"}, {prompt:"di-", answer:"2"}, {prompt:"tri-", answer:"3"},
+      {prompt:"tetra-", answer:"4"}, {prompt:"penta-", answer:"5"}, {prompt:"hexa-", answer:"6"},
+      {prompt:"hepta-", answer:"7"}, {prompt:"octa-", answer:"8"}, {prompt:"nona-", answer:"9"},
+      {prompt:"deca-", answer:"10"}, {prompt:"CO\u2082 name?", answer:"carbon dioxide"},
+      {prompt:"N\u2082O\u2085 name?", answer:"dinitrogen pentoxide"}, {prompt:"SO\u2083 name?", answer:"sulfur trioxide"},
+      {prompt:"PCl\u2085 name?", answer:"phosphorus pentachloride"}, {prompt:"CO name?", answer:"carbon monoxide"},
+      {prompt:"CCl\u2084 name?", answer:"carbon tetrachloride"}, {prompt:"SF\u2086 name?", answer:"sulfur hexafluoride"},
+      {prompt:"NO\u2082 name?", answer:"nitrogen dioxide"}
+    ]
+  },
+  {
+    name: "Acid Naming",
+    desc: "Name the acid",
+    items: [
+      {prompt:"HCl", answer:"hydrochloric acid"}, {prompt:"HBr", answer:"hydrobromic acid"},
+      {prompt:"HF", answer:"hydrofluoric acid"}, {prompt:"HI", answer:"hydroiodic acid"},
+      {prompt:"H\u2082SO\u2084", answer:"sulfuric acid"}, {prompt:"HNO\u2083", answer:"nitric acid"},
+      {prompt:"H\u2083PO\u2084", answer:"phosphoric acid"}, {prompt:"H\u2082CO\u2083", answer:"carbonic acid"},
+      {prompt:"H\u2082SO\u2083", answer:"sulfurous acid"}, {prompt:"HNO\u2082", answer:"nitrous acid"},
+      {prompt:"HClO\u2083", answer:"chloric acid"}, {prompt:"HClO\u2084", answer:"perchloric acid"},
+      {prompt:"H\u2082S", answer:"hydrosulfuric acid"}, {prompt:"HC\u2082H\u2083O\u2082", answer:"acetic acid"},
+      {prompt:"HClO", answer:"hypochlorous acid"}, {prompt:"HClO\u2082", answer:"chlorous acid"}
+    ]
+  },
+  {
+    name: "Molar Mass Quick-calc",
+    desc: "Calculate the molar mass",
+    items: [
+      {prompt:"M of H\u2082O?", answer:"18/18 g/mol"}, {prompt:"M of NaCl?", answer:"58.5/58.5 g/mol"},
+      {prompt:"M of CO\u2082?", answer:"44/44 g/mol"}, {prompt:"M of H\u2082SO\u2084?", answer:"98/98 g/mol"},
+      {prompt:"M of CaCl\u2082?", answer:"111/111 g/mol"}, {prompt:"M of Ca(OH)\u2082?", answer:"74/74 g/mol"},
+      {prompt:"M of Fe\u2082O\u2083?", answer:"160/160 g/mol"}, {prompt:"M of Al\u2082O\u2083?", answer:"102/102 g/mol"},
+      {prompt:"M of NaOH?", answer:"40/40 g/mol"}, {prompt:"M of KOH?", answer:"56/56 g/mol"},
+      {prompt:"M of NH\u2083?", answer:"17/17 g/mol"}, {prompt:"M of CH\u2084?", answer:"16/16 g/mol"},
+      {prompt:"M of C\u2082H\u2086?", answer:"30/30 g/mol"}, {prompt:"M of HCl?", answer:"36.5/36.5 g/mol"},
+      {prompt:"M of MgO?", answer:"40/40 g/mol"}, {prompt:"M of KCl?", answer:"74.5/74.5 g/mol"}
+    ]
+  },
+  {
+    name: "Sig Figs",
+    desc: "How many significant figures?",
+    items: [
+      {prompt:"Sig figs: 100", answer:"1"}, {prompt:"Sig figs: 100.", answer:"3"},
+      {prompt:"Sig figs: 100.0", answer:"4"}, {prompt:"Sig figs: 0.0025", answer:"2"},
+      {prompt:"Sig figs: 1.00", answer:"3"}, {prompt:"Sig figs: 0.340", answer:"3"},
+      {prompt:"Sig figs: 3.0\u00D710\u2074", answer:"2"}, {prompt:"Sig figs: 500", answer:"1"},
+      {prompt:"Sig figs: 2050", answer:"3"}, {prompt:"Sig figs: 0.00100", answer:"3"},
+      {prompt:"Sig figs: 1200", answer:"2"}, {prompt:"Sig figs: 40.0", answer:"3"},
+      {prompt:"Sig figs: 10.30", answer:"4"}, {prompt:"Sig figs: 0.0056", answer:"2"},
+      {prompt:"Sig figs: 8.060", answer:"4"}, {prompt:"Sig figs: 90.10", answer:"4"}
+    ]
+  },
+  {
+    name: "Electron Config",
+    desc: "Write the electron configuration",
+    items: [
+      {prompt:"H (Z=1)", answer:"1s1/1s\u00B9"}, {prompt:"He (Z=2)", answer:"1s2/1s\u00B2"},
+      {prompt:"Li (Z=3)", answer:"1s2 2s1/1s\u00B22s\u00B9"}, {prompt:"C (Z=6)", answer:"1s2 2s2 2p2/1s\u00B22s\u00B22p\u00B2"},
+      {prompt:"N (Z=7)", answer:"1s2 2s2 2p3/1s\u00B22s\u00B22p\u00B3"}, {prompt:"O (Z=8)", answer:"1s2 2s2 2p4/1s\u00B22s\u00B22p\u2074"},
+      {prompt:"Na (Z=11)", answer:"[Ne]3s1/[Ne]3s\u00B9"}, {prompt:"Mg (Z=12)", answer:"[Ne]3s2/[Ne]3s\u00B2"},
+      {prompt:"Cl (Z=17)", answer:"[Ne]3s2 3p5/[Ne]3s\u00B23p\u2075"}, {prompt:"Ar (Z=18)", answer:"[Ne]3s2 3p6/[Ne]3s\u00B23p\u2076"},
+      {prompt:"K (Z=19)", answer:"[Ar]4s1/[Ar]4s\u00B9"}, {prompt:"Ca (Z=20)", answer:"[Ar]4s2/[Ar]4s\u00B2"},
+      {prompt:"Fe (Z=26)", answer:"[Ar]3d6 4s2/[Ar]4s\u00B23d\u2076"}, {prompt:"Cu (Z=29)", answer:"[Ar]3d10 4s1/[Ar]4s\u00B93d\u00B9\u2070"},
+      {prompt:"Cr (Z=24)", answer:"[Ar]3d5 4s1/[Ar]4s\u00B93d\u2075"}, {prompt:"Ne (Z=10)", answer:"1s2 2s2 2p6/1s\u00B22s\u00B22p\u2076"}
+    ]
+  },
+  {
+    name: "Periodic Trends",
+    desc: "Which element has the greater property?",
+    items: [
+      {prompt:"Larger: Na or Cl?", answer:"Na"}, {prompt:"Larger: Li or Cs?", answer:"Cs"},
+      {prompt:"Higher IE: F or I?", answer:"F"}, {prompt:"Higher EN: O or S?", answer:"O"},
+      {prompt:"More metallic: Na or Al?", answer:"Na"}, {prompt:"Larger: O or S?", answer:"S"},
+      {prompt:"Higher IE: Na or Mg?", answer:"Mg"}, {prompt:"Higher EN: N or C?", answer:"N"},
+      {prompt:"Smaller: F or Br?", answer:"F"}, {prompt:"Most EN element?", answer:"F/fluorine"},
+      {prompt:"Largest: Li, Na, K?", answer:"K"}, {prompt:"Highest IE: He, Ne, Ar?", answer:"He"},
+      {prompt:"EN trend across \u2192?", answer:"increases"}, {prompt:"Radius trend down \u2193?", answer:"increases"},
+      {prompt:"IE trend down \u2193?", answer:"decreases"}, {prompt:"Most metallic corner?", answer:"bottom-left"}
+    ]
+  },
+  {
+    name: "Functional Groups",
+    desc: "Identify the functional group",
+    items: [
+      {prompt:"-OH group?", answer:"hydroxyl/alcohol"}, {prompt:"-COOH group?", answer:"carboxyl/carboxylic acid"},
+      {prompt:"-NH\u2082 group?", answer:"amino/amine"}, {prompt:"-CHO group?", answer:"aldehyde"},
+      {prompt:"C=O (middle)?", answer:"carbonyl/ketone"}, {prompt:"-O- group?", answer:"ether"},
+      {prompt:"-COO- group?", answer:"ester"}, {prompt:"-CONH\u2082 group?", answer:"amide"},
+      {prompt:"C=C group?", answer:"alkene"}, {prompt:"C\u2261C group?", answer:"alkyne"},
+      {prompt:"Benzene ring?", answer:"aromatic/arene"}, {prompt:"-SH group?", answer:"thiol"},
+      {prompt:"Alcohol suffix?", answer:"-ol"}, {prompt:"Aldehyde suffix?", answer:"-al"},
+      {prompt:"Ketone suffix?", answer:"-one"}, {prompt:"Carboxylic acid suffix?", answer:"-oic acid"}
+    ]
+  },
+  {
+    name: "Mixed All",
+    desc: "Everything combined!",
+    items: [
+      {prompt:"NaCl name?", answer:"sodium chloride"}, {prompt:"M of H\u2082O?", answer:"18"},
+      {prompt:"Fe\u00B2\u207A name?", answer:"iron(II)/iron (II)"}, {prompt:"OH\u207B name?", answer:"hydroxide"},
+      {prompt:"Sig figs: 0.050", answer:"2"}, {prompt:"HCl acid name?", answer:"hydrochloric acid"},
+      {prompt:"CO\u2082 name?", answer:"carbon dioxide"}, {prompt:"pH < 7 is?", answer:"acidic"},
+      {prompt:"Cl ion?", answer:"Cl-/Cl\u207B"}, {prompt:"penta- = ?", answer:"5"},
+      {prompt:"Most EN?", answer:"F/fluorine"}, {prompt:"Config: Na?", answer:"[Ne]3s1/[Ne]3s\u00B9"},
+      {prompt:"-OH group?", answer:"hydroxyl/alcohol"}, {prompt:"Z of Fe?", answer:"26"},
+      {prompt:"A \u2212 Z = ?", answer:"neutrons"}, {prompt:"Avogadro #?", answer:"6.022 \u00D7 10\u00B2\u00B3/6.022e23"},
+      {prompt:"n = m/M: 36g H\u2082O?", answer:"2/2 mol"}, {prompt:"CaCl\u2082 name?", answer:"calcium chloride"},
+      {prompt:"Sulfate formula?", answer:"SO42-/SO\u2084\u00B2\u207B"}, {prompt:"K ion?", answer:"K+/K\u207A"}
+    ]
+  }
+];
+
+// ============ GAME CONSTANTS ============
+const STORAGE_KEY = 'fye12_chem_fall';
+const BASE_FALL_DURATION = 7000; // ms for item to fall from top to bottom
+const SPEED_INCREASE = 0.06; // 6% faster every 5 correct
+const MAX_SIMULTANEOUS = 4;
+const ITEMS_PER_NEW_SLOT = 8; // add simultaneous item every 8 correct
+const SPAWN_INTERVAL_BASE = 3500; // ms between spawns initially
+const MAX_LIVES = 3;
+
+// ============ GAME STATE ============
+let currentLevel = 0;
+let lives = MAX_LIVES;
+let score = 0;
+let correctCount = 0;
+let missedCount = 0;
+let streak = 0;
+let bestStreak = 0;
+let gameRunning = false;
+let animFrameId = null;
+let spawnTimerId = null;
+let fallingItems = []; // {el, prompt, answer, y, speed, x, id, startTime}
+let itemQueue = [];
+let itemIdCounter = 0;
+let totalItemsInLevel = 0;
+let maxSimultaneous = 1;
+let currentFallDuration = BASE_FALL_DURATION;
+let currentSpawnInterval = SPAWN_INTERVAL_BASE;
+let fallZoneHeight = 0;
+let fallZoneWidth = 0;
+let hintMode = false;
+
+// ============ HINT MODE ============
+function toggleHintMode(on) {
+  hintMode = on;
+  const note = document.getElementById('hintXPNote');
+  note.textContent = on ? '(Hint Mode - 50% XP)' : '';
+  // Save to localStorage with progress
+  const prog = getProgress();
+  prog.hintMode = on;
+  saveProgress(prog);
+}
+
+function loadHintMode() {
+  const prog = getProgress();
+  hintMode = !!prog.hintMode;
+  const toggle = document.getElementById('hintToggle');
+  if (toggle) toggle.checked = hintMode;
+  const note = document.getElementById('hintXPNote');
+  if (note) note.textContent = hintMode ? '(Hint Mode - 50% XP)' : '';
+}
+
+function getHintText(answer) {
+  const first = answer.split('/')[0];
+  // Numeric answers
+  if (/^\d+(\.\d+)?$/.test(first.trim())) {
+    return 'starts with ' + first.trim()[0];
+  }
+  // Chemical formulas (starts with uppercase, has numbers/symbols)
+  if (/^[A-Z][a-z]?\d/.test(first) || /^[A-Z]{1,2}[\d\+\-]/.test(first) || /[\u2080-\u2089\u207A\u207B\u00B2\u00B3]/.test(first)) {
+    return first.slice(0, 3).replace(/[\u2080-\u2089]/g, m => String.fromCharCode(m.charCodeAt(0) - 0x2080 + 48));
+  }
+  // Regular text
+  return first[0];
+}
+
+// ============ PROGRESS / localStorage ============
+const DEFAULT_STATS = {totalXP:0,totalGames:0,bestStreak:0,itemsMastered:0};
+
+function getProgress() {
+  try {
+    const d = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    if (!d.levels) d.levels = {};
+    if (!d.stats) d.stats = {...DEFAULT_STATS};
+    return d;
+  } catch(e) { return { levels: {}, stats: {...DEFAULT_STATS} }; }
+}
+
+function saveProgress(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  fetch('/api/chemfall-progress', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(data)
+  }).catch(() => {});
+}
+
+function saveLevelResult(level, stars, xp) {
+  const prog = getProgress();
+  const prev = prog.levels[level];
+  if (!prev || prev.stars < stars) {
+    prog.levels[level] = { stars, xp };
+  }
+  const s = prog.stats;
+  s.totalGames++;
+  s.totalXP += xp;
+  if (bestStreak > s.bestStreak) s.bestStreak = bestStreak;
+  // Count levels with at least 1 star
+  let mastered = 0;
+  for (const key of Object.keys(prog.levels)) {
+    if (prog.levels[key].stars >= 1) mastered++;
+  }
+  s.itemsMastered = mastered;
+  saveProgress(prog);
+}
+
+function resetAllProgress() {
+  if (!confirm('Reset all Chem Fall progress?')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  fetch('/api/chemfall-progress', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({})
+  }).catch(() => {});
+  renderLevels();
+}
+
+function renderStats() {
+  const prog = getProgress();
+  const s = prog.stats || DEFAULT_STATS;
+  document.getElementById('statXP').textContent = s.totalXP;
+  document.getElementById('statGames').textContent = s.totalGames;
+  document.getElementById('statStreak').textContent = s.bestStreak;
+  document.getElementById('statItems').textContent = s.itemsMastered;
+}
+
+// ============ SCREEN MANAGEMENT ============
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ============ LEVEL SELECT ============
+function renderLevels() {
+  showScreen('levelSelect');
+  const grid = document.getElementById('levelGrid');
+  const prog = getProgress();
+  grid.innerHTML = '';
+  FALL_LEVELS.forEach((level, i) => {
+    const data = prog.levels[i];
+    const unlocked = i === 0 || prog.levels[i - 1];
+    const card = document.createElement('div');
+    card.className = 'level-card' + (data && data.stars >= 3 ? ' completed' : '') + (!unlocked ? ' locked' : '');
+
+    let starsHTML;
+    if (!unlocked) {
+      starsHTML = '<div class="lock-icon">&#x1F512;</div>';
+    } else if (data && data.stars > 0) {
+      starsHTML = '<div class="level-stars">'
+        + '<span class="star-gold">&#9733;</span>'.repeat(data.stars)
+        + '<span class="star-empty">&#9733;</span>'.repeat(3 - data.stars)
+        + '</div>';
+    } else {
+      starsHTML = '<div class="level-stars">'
+        + '<span class="star-empty">&#9733;</span>'.repeat(3)
+        + '</div>';
+    }
+
+    card.innerHTML = `
+      <h3>Level ${i + 1}</h3>
+      <div class="level-info">${level.name}</div>
+      <div class="level-info">${level.desc}</div>
+      ${starsHTML}
+      ${data ? '<div class="level-best">' + data.xp + ' XP</div>' : ''}
+    `;
+    if (unlocked) card.onclick = () => startLevel(i);
+    grid.appendChild(card);
+  });
+  renderStats();
+}
+
+// ============ GET READY COUNTDOWN ============
+function showCountdown(callback) {
+  showScreen('getReady');
+  const numEl = document.getElementById('countdownNum');
+  let count = 3;
+  numEl.textContent = count;
+  numEl.style.animation = 'none';
+  void numEl.offsetWidth;
+  numEl.style.animation = 'countPop .4s ease';
+  playTick();
+
+  const iv = setInterval(() => {
+    count--;
+    if (count <= 0) {
+      clearInterval(iv);
+      callback();
+      return;
+    }
+    numEl.textContent = count;
+    numEl.style.animation = 'none';
+    void numEl.offsetWidth;
+    numEl.style.animation = 'countPop .4s ease';
+    playTick();
+  }, 600);
+}
+
+// ============ START LEVEL ============
+function startLevel(level) {
+  currentLevel = level;
+  lives = MAX_LIVES;
+  score = 0;
+  correctCount = 0;
+  missedCount = 0;
+  streak = 0;
+  bestStreak = 0;
+  maxSimultaneous = 1;
+  currentFallDuration = BASE_FALL_DURATION;
+  currentSpawnInterval = SPAWN_INTERVAL_BASE;
+  fallingItems = [];
+  itemIdCounter = 0;
+
+  // Shuffle items for this level
+  const levelData = FALL_LEVELS[level];
+  itemQueue = shuffle([...levelData.items]);
+  totalItemsInLevel = itemQueue.length;
+
+  showCountdown(() => {
+    showScreen('gameArea');
+    initGame();
+  });
+}
+
+function retryLevel() {
+  startLevel(currentLevel);
+}
+
+// ============ INIT GAME ============
+function initGame() {
+  const fallZone = document.getElementById('fallZone');
+  // Clear existing pills
+  fallZone.querySelectorAll('.falling-pill').forEach(el => el.remove());
+
+  const rect = fallZone.getBoundingClientRect();
+  fallZoneHeight = rect.height;
+  fallZoneWidth = rect.width;
+
+  gameRunning = true;
+  updateLivesDisplay();
+  updateScoreDisplay();
+  updateStreakDisplay();
+  updateProgressBar();
+  document.getElementById('hintIndicator').style.display = hintMode ? 'inline' : 'none';
+
+  const input = document.getElementById('answerInput');
+  input.value = '';
+  input.focus();
+  input.classList.remove('input-correct', 'input-wrong');
+
+  // Start spawning
+  scheduleNextSpawn();
+  // Start animation loop
+  animFrameId = requestAnimationFrame(gameLoop);
+}
+
+// ============ SPAWN ITEMS ============
+function scheduleNextSpawn() {
+  if (!gameRunning) return;
+  if (itemQueue.length === 0 && fallingItems.length === 0) {
+    // Level complete
+    endLevel(true);
+    return;
+  }
+  if (itemQueue.length === 0) return; // wait for remaining items to clear
+
+  spawnItem();
+
+  // Check if we need more simultaneous items
+  const activeCount = fallingItems.length;
+  if (activeCount < maxSimultaneous && itemQueue.length > 0) {
+    // Spawn additional items with slight delay
+    const extras = Math.min(maxSimultaneous - activeCount, itemQueue.length);
+    for (let i = 1; i < extras; i++) {
+      setTimeout(() => {
+        if (gameRunning && itemQueue.length > 0) spawnItem();
+      }, 300 * i);
+    }
+  }
+
+  if (itemQueue.length > 0) {
+    spawnTimerId = setTimeout(scheduleNextSpawn, currentSpawnInterval);
+  }
+}
+
+function spawnItem() {
+  if (!gameRunning || itemQueue.length === 0) return;
+
+  const itemData = itemQueue.shift();
+  const id = itemIdCounter++;
+
+  const el = document.createElement('div');
+  el.className = 'falling-pill';
+  let pillHTML = chemFormat(escHtml(itemData.prompt));
+  if (hintMode) {
+    const hintText = getHintText(itemData.answer);
+    pillHTML += '<span class="pill-hint" id="hint-' + id + '">' + escHtml(hintText) + '</span>';
+  }
+  el.innerHTML = pillHTML;
+  el.id = 'pill-' + id;
+
+  // Measure the pill width to position it
+  document.getElementById('fallZone').appendChild(el);
+  const pillWidth = el.offsetWidth;
+  const maxX = Math.max(0, fallZoneWidth - pillWidth - 20);
+  const x = 10 + Math.random() * maxX;
+  el.style.left = x + 'px';
+  el.style.top = '-50px';
+
+  const item = {
+    el,
+    prompt: itemData.prompt,
+    answer: itemData.answer,
+    id,
+    x,
+    y: -50,
+    startTime: performance.now(),
+    speed: fallZoneHeight / currentFallDuration, // px per ms... no, let's use fraction
+    removed: false
+  };
+
+  fallingItems.push(item);
+}
+
+// ============ GAME LOOP ============
+function gameLoop(timestamp) {
+  if (!gameRunning) return;
+
+  const fallZone = document.getElementById('fallZone');
+  const toRemove = [];
+
+  for (const item of fallingItems) {
+    if (item.removed) continue;
+
+    const elapsed = timestamp - item.startTime;
+    const progress = elapsed / currentFallDuration; // 0 to 1
+    const y = -50 + (fallZoneHeight + 50) * progress;
+    item.y = y;
+    item.el.style.top = y + 'px';
+
+    // Show hint after 30% fall
+    if (hintMode && progress >= 0.3) {
+      const hintEl = document.getElementById('hint-' + item.id);
+      if (hintEl && !hintEl.classList.contains('visible')) {
+        hintEl.classList.add('visible');
+      }
+    }
+
+    // Check if item hit the bottom
+    if (y >= fallZoneHeight - 10) {
+      handleMissedItem(item);
+      toRemove.push(item.id);
+    }
+  }
+
+  // Remove items that hit bottom
+  if (toRemove.length > 0) {
+    fallingItems = fallingItems.filter(it => !toRemove.includes(it.id));
+  }
+
+  // Check if level is done
+  if (itemQueue.length === 0 && fallingItems.length === 0) {
+    endLevel(true);
+    return;
+  }
+
+  // Check if we need to spawn more (if timer ran out and items remain)
+  if (!spawnTimerId && itemQueue.length > 0) {
+    scheduleNextSpawn();
+  }
+
+  if (gameRunning) {
+    animFrameId = requestAnimationFrame(gameLoop);
+  }
+}
+
+// ============ HANDLE MISSED ITEM ============
+function handleMissedItem(item) {
+  if (item.removed) return;
+  item.removed = true;
+
+  lives--;
+  missedCount++;
+  streak = 0;
+  updateLivesDisplay();
+  updateStreakDisplay();
+  playLifeLost();
+
+  // Show correct answer briefly
+  const firstAnswer = item.answer.split('/')[0];
+  item.el.classList.add('missed');
+  item.el.innerHTML = chemFormat(escHtml(item.prompt)) + '<span class="pill-answer">' + escHtml(firstAnswer) + '</span>';
+
+  setTimeout(() => {
+    if (item.el.parentNode) item.el.remove();
+  }, 1200);
+
+  if (lives <= 0) {
+    endLevel(false);
+  }
+}
+
+// ============ HANDLE INPUT ============
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('answerInput');
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSubmit();
+    }
+  });
+
+  // Keep input focused during game
+  document.addEventListener('click', () => {
+    if (gameRunning) {
+      input.focus();
+    }
+  });
+});
+
+function handleSubmit() {
+  if (!gameRunning) return;
+  const input = document.getElementById('answerInput');
+  const val = input.value.trim();
+  if (!val) return;
+
+  // Check against all falling items
+  let matchedItem = null;
+  for (const item of fallingItems) {
+    if (item.removed) continue;
+    if (checkAnswer(val, item.answer)) {
+      matchedItem = item;
+      break;
+    }
+  }
+
+  if (matchedItem) {
+    handleCorrectAnswer(matchedItem);
+    input.value = '';
+    input.classList.remove('input-wrong');
+    input.classList.add('input-correct');
+    setTimeout(() => input.classList.remove('input-correct'), 300);
+  } else {
+    // Wrong answer
+    input.classList.remove('input-correct');
+    input.classList.add('input-wrong');
+    setTimeout(() => input.classList.remove('input-wrong'), 400);
+    playWrong();
+  }
+}
+
+function handleCorrectAnswer(item) {
+  item.removed = true;
+  correctCount++;
+  streak++;
+  if (streak > bestStreak) bestStreak = streak;
+
+  // XP calculation
+  let xp = 10;
+  // Position bonus: more XP if caught near bottom
+  const positionRatio = Math.max(0, item.y) / fallZoneHeight;
+  if (positionRatio > 0.7) xp += 5; // close call bonus
+  // Streak bonus
+  if (streak > 2) xp += (streak - 2) * 2;
+  // Hint mode penalty
+  if (hintMode) xp = Math.round(xp * 0.5);
+  score += xp;
+
+  updateScoreDisplay();
+  updateStreakDisplay();
+  updateProgressBar();
+
+  if (streak >= 3) playStreak();
+  else playCorrect();
+
+  // Show floating XP
+  const rect = item.el.getBoundingClientRect();
+  showFloatingXP(rect, '+' + xp + ' XP');
+
+  // Flash green and remove
+  item.el.classList.add('correct-flash');
+  setTimeout(() => {
+    if (item.el.parentNode) item.el.remove();
+  }, 400);
+
+  // Remove from falling items
+  fallingItems = fallingItems.filter(it => it.id !== item.id);
+
+  // Speed increase every 5 correct
+  if (correctCount % 5 === 0) {
+    currentFallDuration = Math.max(2500, currentFallDuration * (1 - SPEED_INCREASE));
+    currentSpawnInterval = Math.max(1200, currentSpawnInterval * (1 - SPEED_INCREASE * 0.5));
+  }
+
+  // Add simultaneous item every 8 correct
+  if (correctCount % ITEMS_PER_NEW_SLOT === 0 && maxSimultaneous < MAX_SIMULTANEOUS) {
+    maxSimultaneous++;
+  }
+
+  // If no more items falling and queue has items, trigger spawn
+  if (fallingItems.length === 0 && itemQueue.length > 0 && !spawnTimerId) {
+    scheduleNextSpawn();
+  }
+}
+
+// ============ END LEVEL ============
+function endLevel(completed) {
+  gameRunning = false;
+  clearTimeout(spawnTimerId);
+  spawnTimerId = null;
+  cancelAnimationFrame(animFrameId);
+
+  // Clean up remaining pills
+  document.getElementById('fallZone').querySelectorAll('.falling-pill').forEach(el => el.remove());
+  fallingItems = [];
+
+  if (completed || lives > 0) {
+    // Calculate stars
+    const total = totalItemsInLevel;
+    let stars = 0;
+    if (correctCount >= 10) stars = 1;
+    if (correctCount >= 20 && lives > 0) stars = 2;
+    if (correctCount >= total && lives >= 2) stars = 3;
+
+    // For shorter levels, adjust thresholds
+    if (total < 20) {
+      stars = 0;
+      if (correctCount >= Math.min(10, total)) stars = 1;
+      if (correctCount >= Math.floor(total * 0.8) && lives > 0) stars = 2;
+      if (correctCount >= total && lives >= 2) stars = 3;
+    }
+
+    saveLevelResult(currentLevel, stars, score);
+
+    if (stars >= 2) playLevelWin();
+    else playCorrect();
+
+    showScreen('levelComplete');
+    document.getElementById('lcXP').textContent = '+' + score + ' XP';
+    document.getElementById('lcCorrect').textContent = correctCount;
+    document.getElementById('lcMissed').textContent = missedCount;
+
+    // Animated stars
+    const starsEl = document.getElementById('lcStars');
+    starsEl.innerHTML = '';
+    for (let i = 0; i < 3; i++) {
+      const span = document.createElement('span');
+      span.className = 'star';
+      span.innerHTML = '&#9733;';
+      span.style.color = i < stars ? '#FFC800' : '#e5e5e5';
+      starsEl.appendChild(span);
+      setTimeout(() => span.classList.add('reveal'), 300 + i * 300);
+    }
+
+    if (stars >= 2) {
+      setTimeout(launchConfetti, 200);
+    }
+  } else {
+    // Game over
+    playGameOver();
+    showScreen('gameOver');
+    document.getElementById('goXP').textContent = score;
+    document.getElementById('goCorrect').textContent = correctCount;
+  }
+}
+
+// ============ UI UPDATES ============
+function updateLivesDisplay() {
+  const el = document.getElementById('livesDisplay');
+  let html = '';
+  for (let i = 0; i < MAX_LIVES; i++) {
+    html += '<span class="heart' + (i >= lives ? ' lost' : '') + '">\u2764\uFE0F</span>';
+  }
+  el.innerHTML = html;
+}
+
+function updateScoreDisplay() {
+  const text = hintMode ? score + ' XP (Hint Mode - 50% XP)' : score + ' XP';
+  document.getElementById('scoreDisplay').textContent = text;
+}
+
+function updateStreakDisplay() {
+  const sd = document.getElementById('streakDisplay');
+  if (streak >= 3) {
+    sd.textContent = streak + ' streak!';
+    sd.classList.add('glowing');
+  } else if (streak >= 2) {
+    sd.textContent = streak + ' in a row';
+    sd.classList.remove('glowing');
+  } else {
+    sd.textContent = '';
+    sd.classList.remove('glowing');
+  }
+}
+
+function updateProgressBar() {
+  const pf = document.getElementById('progressFill');
+  const total = totalItemsInLevel;
+  pf.style.width = (correctCount / total * 100) + '%';
+  pf.classList.remove('pulse');
+  void pf.offsetWidth;
+  pf.classList.add('pulse');
+}
+
+// ============ FLOATING XP ============
+function showFloatingXP(rect, text) {
+  const el = document.createElement('div');
+  el.className = 'xp-float';
+  el.textContent = text;
+  el.style.left = (rect.left + rect.width / 2 - 20) + 'px';
+  el.style.top = (rect.top - 5) + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 750);
+}
+
+// ============ NAVIGATION ============
+function confirmQuit() {
+  if (confirm('Quit this level? Progress will be lost.')) {
+    gameRunning = false;
+    clearTimeout(spawnTimerId);
+    spawnTimerId = null;
+    cancelAnimationFrame(animFrameId);
+    backToLevels();
+  }
+}
+
+function backToLevels() {
+  gameRunning = false;
+  clearTimeout(spawnTimerId);
+  spawnTimerId = null;
+  cancelAnimationFrame(animFrameId);
+  document.getElementById('fallZone').querySelectorAll('.falling-pill').forEach(el => el.remove());
+  fallingItems = [];
+  renderLevels();
+}
+
+// ============ CONFETTI ============
+function launchConfetti() {
+  const canvas = document.getElementById('confettiCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const colors = ['#58CC02','#1CB0F6','#FF9600','#FFC800','#FF4B4B','#CE82FF'];
+  const pieces = [];
+
+  for (let i = 0; i < 70; i++) {
+    pieces.push({
+      x: Math.random() * canvas.width,
+      y: -10 - Math.random() * 200,
+      w: 6 + Math.random() * 6,
+      h: 10 + Math.random() * 8,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      vy: 2 + Math.random() * 3,
+      vx: (Math.random() - 0.5) * 2,
+      rot: Math.random() * 360,
+      vr: (Math.random() - 0.5) * 8,
+      opacity: 1
+    });
+  }
+
+  let frame = 0;
+  const maxFrames = 180;
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    frame++;
+
+    if (frame > maxFrames * 0.6) {
+      pieces.forEach(p => p.opacity = Math.max(0, p.opacity - 0.02));
+    }
+
+    let alive = false;
+    pieces.forEach(p => {
+      if (p.opacity <= 0) return;
+      alive = true;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.05;
+      p.rot += p.vr;
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot * Math.PI / 180);
+      ctx.globalAlpha = p.opacity;
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    });
+
+    if (alive && frame < maxFrames) {
+      requestAnimationFrame(draw);
+    } else {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+
+  requestAnimationFrame(draw);
+}
+
+// ============ UTILS ============
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// ============ INIT ============
+(function init() {
+  renderLevels();
+  loadHintMode();
+})();
+</script>
+</body>
+</html>

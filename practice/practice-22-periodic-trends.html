@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice 22 — Periodic Trends</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Practice 22 &mdash; Periodic Trends</h1>
+<p class="subtitle">Deep practice &mdash; atomic radius, ionization energy, electronegativity, electron affinity, ionic radius</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_22';
+const SECTIONS = [
+  {
+    id:1, title:"Atomic Radius Trends",
+    instruction:"Fill in the blank with the correct trend or element.",
+    rows:[
+      ["1","Atomic radius increases going ___ a group","down"],
+      ["2","Atomic radius decreases going ___ a period","across / right / left to right"],
+      ["3","Which is larger: Na or Cl?","Na"],
+      ["4","Which is larger: Li or K?","K"],
+      ["5","Arrange in order of increasing radius: Na, K, Rb","Na, K, Rb / Na < K < Rb"],
+      ["6","Which is larger: O or S?","S"],
+      ["7","Which is smallest: F, Cl, Br?","F"],
+      ["8","Why does atomic radius decrease across a period?","increasing nuclear charge / more protons / greater nuclear charge"],
+      ["9","Which is larger: Ca or Ba?","Ba"],
+      ["10","Which is smaller: Si or Ge?","Si"],
+      ["11","Which is larger: P or As?","As"],
+      ["12","Arrange in order of decreasing radius: Li, Na, K, Rb, Cs","Cs, Rb, K, Na, Li / Cs > Rb > K > Na > Li"],
+      ["13","Which has a larger radius: C or Si?","Si"],
+      ["14","In period 3, which element has the largest atomic radius?","Na / sodium"],
+      ["15","In period 3, which element has the smallest atomic radius?","Cl / chlorine"],
+      ["16","Atomic radius increases down a group because electrons are in ___ shells","higher / larger / farther"],
+      ["17","Which is larger: Al or B?","Al"],
+      ["18","Arrange from smallest to largest: Be, Mg, Ca, Sr","Be, Mg, Ca, Sr / Be < Mg < Ca < Sr"]
+    ]
+  },
+  {
+    id:2, title:"Ionization Energy Trends",
+    instruction:"Fill in the blank with the correct trend, element, or explanation.",
+    rows:[
+      ["1","Ionization energy increases going ___ a period","across / right / left to right"],
+      ["2","Ionization energy decreases going ___ a group","down"],
+      ["3","Which has higher IE: Na or Mg?","Mg"],
+      ["4","Which has lower IE: Li or Cs?","Cs"],
+      ["5","Element with highest IE in period 2?","Ne"],
+      ["6","Why does IE decrease down a group?","electrons farther from nucleus / larger atomic radius / more shielding"],
+      ["7","Which has higher IE: N or O?","N"],
+      ["8","First IE removes an electron from the ___ shell","outermost / valence"],
+      ["9","Which has higher IE: He or Ne?","He"],
+      ["10","Which has higher IE: F or Cl?","F"],
+      ["11","Which has the lowest IE in period 3?","Na / sodium"],
+      ["12","Which has higher IE: Be or B?","Be"],
+      ["13","Why does Be have higher IE than B?","2s electron more tightly held than 2p / removing from filled 2s is harder / 2s closer to nucleus"],
+      ["14","Arrange by increasing IE: Na, Mg, Al, Si, P","Na, Al, Mg, Si, P / Na < Al < Mg < Si < P"],
+      ["15","The second IE is always ___ than the first IE for the same element.","higher / larger / greater"],
+      ["16","Which has the highest IE: Li, Na, K, Rb?","Li"],
+      ["17","Noble gases have ___ ionization energies.","high / very high"],
+      ["18","Arrange by decreasing IE: C, N, O, F, Ne","Ne, F, N, C, O / Ne > F > N > C > O"]
+    ]
+  },
+  {
+    id:3, title:"Electronegativity Trends",
+    instruction:"Fill in the blank with the correct trend, element, or value.",
+    rows:[
+      ["1","Most electronegative element?","F / fluorine"],
+      ["2","Electronegativity increases going ___ a period","across / right / left to right"],
+      ["3","Electronegativity decreases going ___ a group","down"],
+      ["4","Which is more electronegative: C or O?","O"],
+      ["5","Noble gases have ___ electronegativity","no / undefined / no defined / none"],
+      ["6","On the Pauling scale, F = ___","4.0 / 4"],
+      ["7","Which is more electronegative: N or P?","N"],
+      ["8","Electronegativity measures the ability to ___","attract bonding electrons / attract shared electrons / attract electrons in a bond"],
+      ["9","Which is more electronegative: S or O?","O"],
+      ["10","Which is more electronegative: Cl or Br?","Cl"],
+      ["11","Second most electronegative element?","O / oxygen"],
+      ["12","On the Pauling scale, O = ___","3.5 / 3.44"],
+      ["13","Which is more electronegative: C or N?","N"],
+      ["14","Which is more electronegative: Si or C?","C"],
+      ["15","Metals generally have ___ electronegativity.","low"],
+      ["16","The electronegativity difference in a bond determines its ___","polarity / type / character"],
+      ["17","Which is more electronegative: H or F?","F"],
+      ["18","Arrange from most to least electronegative: C, N, O, F","F, O, N, C / F > O > N > C"]
+    ]
+  },
+  {
+    id:4, title:"Electron Affinity",
+    instruction:"Fill in the blank about electron affinity trends.",
+    rows:[
+      ["1","Electron affinity is the energy change when an atom ___","gains an electron / accepts an electron"],
+      ["2","EA generally becomes more negative going ___ a period","across / right / left to right"],
+      ["3","Halogens have ___ electron affinities","very negative / high / large negative"],
+      ["4","Noble gases have ___ electron affinity","positive / near zero / low / zero"],
+      ["5","Which has more negative EA: Cl or Br?","Cl"],
+      ["6","EA becomes less negative going ___ a group","down"],
+      ["7","Which group has the most negative electron affinities?","17 / halogens / VIIA / 7A"],
+      ["8","Why does Cl have a more negative EA than F?","F is small, high electron repulsion / electron-electron repulsion in small F atom"],
+      ["9","Which has more negative EA: O or S?","S"],
+      ["10","Alkaline earth metals (Group 2) have ___ electron affinities.","positive / near zero / low"],
+      ["11","A negative EA value means energy is ___ when the electron is added.","released"],
+      ["12","A positive EA value means energy must be ___ to add the electron.","added / supplied / input"],
+      ["13","Which has more negative EA: Na or Cl?","Cl"],
+      ["14","Nitrogen has a ___ EA because its 2p subshell is half-filled.","low / near zero / less negative"],
+      ["15","Which has more negative EA: F or Ne?","F"]
+    ]
+  },
+  {
+    id:5, title:"Ionic Radius",
+    instruction:"Fill in the blank about ionic radius comparisons.",
+    rows:[
+      ["1","Cations are ___ than their parent atoms","smaller"],
+      ["2","Anions are ___ than their parent atoms","larger"],
+      ["3","Which is larger: Na+ or Na?","Na"],
+      ["4","Which is larger: Cl- or Cl?","Cl- / Cl\u207B"],
+      ["5","In an isoelectronic series, more protons means ___","smaller radius / smaller / smaller ionic radius"],
+      ["6","Arrange from smallest to largest: Na+, Mg2+, Al3+","Al3+, Mg2+, Na+ / Al3+ < Mg2+ < Na+ / Al3+ Mg2+ Na+"],
+      ["7","Which is larger: Li+ or Na+?","Na+"],
+      ["8","Which is larger: F- or Cl-?","Cl- / Cl\u207B"],
+      ["9","Which is larger: K+ or Ca2+?","K+"],
+      ["10","Which is larger: O2- or F-?","O2- / O\u00B2\u207B"],
+      ["11","Ca2+ has ___ electrons than Ca.","fewer / less / 2 fewer"],
+      ["12","S2- has ___ electrons than S.","more / 2 more"],
+      ["13","Arrange the isoelectronic series: N3-, O2-, F-, Na+, Mg2+ from largest to smallest","N3-, O2-, F-, Na+, Mg2+"],
+      ["14","Which is larger: Fe2+ or Fe3+?","Fe2+"],
+      ["15","Why is Fe3+ smaller than Fe2+?","more protons per electron / fewer electrons / greater effective nuclear charge / higher Zeff"]
+    ]
+  },
+  {
+    id:6, title:"Rank Sets of Elements by Property", type:"mc",
+    instruction:"Select the correct ranking.",
+    questions:[
+      {q:"Rank by INCREASING atomic radius: C, Si, Ge, Sn", options:["C < Si < Ge < Sn","Sn < Ge < Si < C","Ge < Si < C < Sn","Si < C < Ge < Sn"], correct:0},
+      {q:"Rank by DECREASING ionization energy: Na, Mg, Al, Si", options:["Na > Mg > Al > Si","Si > Mg > Al > Na","Si > Al > Mg > Na","Mg > Si > Al > Na"], correct:1},
+      {q:"Rank by INCREASING electronegativity: Na, Al, P, Cl", options:["Cl < P < Al < Na","Na < Al < P < Cl","Al < Na < Cl < P","P < Cl < Na < Al"], correct:1},
+      {q:"Rank by INCREASING ionic radius: Al3+, Mg2+, Na+, F-, O2-", options:["Al3+ < Mg2+ < Na+ < F- < O2-","O2- < F- < Na+ < Mg2+ < Al3+","Na+ < Mg2+ < Al3+ < F- < O2-","F- < O2- < Na+ < Mg2+ < Al3+"], correct:0},
+      {q:"Rank by DECREASING atomic radius: F, Cl, Br, I", options:["F > Cl > Br > I","I > Br > Cl > F","Br > I > Cl > F","Cl > F > Br > I"], correct:1},
+      {q:"Rank by INCREASING IE: Cs, K, Na, Li", options:["Li < Na < K < Cs","Cs < K < Na < Li","Na < Li < K < Cs","K < Cs < Li < Na"], correct:1},
+      {q:"Rank by DECREASING electronegativity: Li, Be, B, C", options:["Li > Be > B > C","C > B > Be > Li","B > C > Li > Be","Be > Li > C > B"], correct:1},
+      {q:"Rank by INCREASING atomic radius: N, O, F, Ne", options:["Ne < F < O < N","N < O < F < Ne","F < Ne < N < O","O < N < Ne < F"], correct:0},
+      {q:"Which has the largest atomic radius: Li, B, N, F?", options:["Li","B","N","F"], correct:0},
+      {q:"Which has the highest IE: C, N, O, F?", options:["C","N","O","F"], correct:1}
+    ]
+  },
+  {
+    id:7, title:"Why Do Trends Occur? (MC)", type:"mc",
+    instruction:"Select the correct explanation.",
+    questions:[
+      {q:"Atomic radius decreases across a period because:", options:["More electron shells are added","Increasing nuclear charge (Zeff) pulls electrons closer","Electrons repel each other more","The nucleus gets smaller"], correct:1},
+      {q:"Atomic radius increases down a group because:", options:["Nuclear charge decreases","New electron shells are added, farther from nucleus","Fewer protons are present","Electrons lose energy"], correct:1},
+      {q:"IE increases across a period because:", options:["Atoms get larger","Electrons are easier to remove","Higher Zeff holds electrons more tightly","Shielding increases"], correct:2},
+      {q:"IE decreases down a group because:", options:["Nuclear charge decreases","Valence electrons are farther from the nucleus and more shielded","There are fewer electrons","Protons decrease"], correct:1},
+      {q:"Electronegativity increases across a period because:", options:["Atoms get larger","Higher Zeff attracts bonding electrons more strongly","Atoms have fewer electrons","Shielding increases"], correct:1},
+      {q:"Cations are smaller than their parent atoms because:", options:["Protons are removed","Electron-electron repulsion decreases with fewer electrons","The nucleus shrinks","More electrons are added"], correct:1},
+      {q:"Anions are larger than their parent atoms because:", options:["Protons are added","The nucleus expands","Added electrons increase electron-electron repulsion","Nuclear charge increases"], correct:2},
+      {q:"Shielding (screening) refers to:", options:["Inner electrons blocking nuclear attraction from outer electrons","The nucleus blocking electrons","Electrons blocking each other from bonding","The effect of lone pairs"], correct:0},
+      {q:"Effective nuclear charge (Zeff) is:", options:["Total protons minus core electrons","Total electrons","Total protons plus neutrons","Number of valence electrons"], correct:0},
+      {q:"As Zeff increases across a period, which trend is observed?", options:["Larger atoms, lower IE","Smaller atoms, higher IE","Larger atoms, higher IE","No change"], correct:1}
+    ]
+  },
+  {
+    id:8, title:"Word Arrange: Elements by Property", type:"arrange",
+    instruction:"Arrange the elements in the correct order as described.",
+    sentences:[
+      {prompt:"Increasing atomic radius: F, Cl, Br, I", words:["F","Cl","Br","I"]},
+      {prompt:"Decreasing ionization energy: He, Ne, Ar, Kr", words:["He","Ne","Ar","Kr"]},
+      {prompt:"Increasing electronegativity: Na, Si, P, Cl", words:["Na","Si","P","Cl"]},
+      {prompt:"Decreasing atomic radius across period 3: Na, Mg, Al, Si, P, S, Cl", words:["Na","Mg","Al","Si","P","S","Cl"]},
+      {prompt:"Increasing ionic radius: Al3+, Mg2+, Na+, F-, O2-", words:["Al3+","Mg2+","Na+","F-","O2-"]},
+      {prompt:"Decreasing electronegativity: F, O, N, C, B", words:["F","O","N","C","B"]},
+      {prompt:"Increasing IE: Cs, Rb, K, Na, Li", words:["Cs","Rb","K","Na","Li"]},
+      {prompt:"Increasing atomic radius down Group 1: Li, Na, K, Rb, Cs", words:["Li","Na","K","Rb","Cs"]}
+    ]
+  },
+  {
+    id:9, title:"Comparing Elements (MC)", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Which has the largest atomic radius?", options:["Li","Na","K","Rb"], correct:3},
+      {q:"Which has the highest ionization energy?", options:["Na","Mg","Al","Si"], correct:1},
+      {q:"Which has the highest electronegativity?", options:["N","O","F","Ne"], correct:2},
+      {q:"Which has the smallest ionic radius?", options:["Na+","Mg2+","Al3+","K+"], correct:2},
+      {q:"Which pair correctly shows increasing atomic radius?", options:["Cl < S < P < Si","Si < P < S < Cl","Cl < P < Si < S","S < Cl < P < Si"], correct:0},
+      {q:"Why does N have a higher IE than O?", options:["N has more protons","N has a stable half-filled 2p subshell","N is smaller than O","O has more electrons"], correct:1},
+      {q:"Which element has the most negative electron affinity?", options:["F","Cl","Br","I"], correct:1},
+      {q:"In the isoelectronic series O2-, F-, Ne, Na+, Mg2+, which is largest?", options:["Ne","Na+","F-","O2-"], correct:3},
+      {q:"Which has a larger radius: Ca or Kr?", options:["Ca","Kr"], correct:0},
+      {q:"Which has higher IE: Ar or K?", options:["Ar","K"], correct:0},
+      {q:"Which is more electronegative: S or Se?", options:["S","Se"], correct:0},
+      {q:"Which has a smaller radius: Br- or Kr?", options:["Br-","Kr"], correct:1},
+      {q:"Which has lower IE: Sr or Ba?", options:["Sr","Ba"], correct:1},
+      {q:"Which is larger: K+ or Cl-?", options:["K+","Cl-"], correct:1},
+      {q:"Which has higher EA magnitude: S or Cl?", options:["S","Cl"], correct:1}
+    ]
+  },
+  {
+    id:10, title:"Mixed Trends Review", type:"mc",
+    instruction:"Select the correct answer for each mixed-topic question.",
+    questions:[
+      {q:"Moving left to right across a period, which property INCREASES?", options:["Atomic radius","Ionization energy","Metallic character","Ionic radius of cations"], correct:1},
+      {q:"Moving down a group, which property INCREASES?", options:["Ionization energy","Electronegativity","Atomic radius","Electron affinity (magnitude)"], correct:2},
+      {q:"Which element would you expect to have the lowest ionization energy?", options:["He","F","Cs","Ne"], correct:2},
+      {q:"An atom with a large atomic radius will generally have:", options:["High IE and high EN","Low IE and low EN","High IE and low EN","Low IE and high EN"], correct:1},
+      {q:"Which of these is an exception to the general IE trend across period 2?", options:["Be > B","Li > Be","C > N","N > O"], correct:3},
+      {q:"Cl has a more negative electron affinity than F because:", options:["Cl is larger so less electron-electron repulsion","Cl has more protons","F is more electronegative","Cl is in a higher period"], correct:0},
+      {q:"Which ion is larger than its parent atom?", options:["Na+","Ca2+","Fe3+","S2-"], correct:3},
+      {q:"Arrange these by increasing IE: K, Ca, Ga, Ge", options:["K < Ca < Ga < Ge","Ge < Ga < Ca < K","K < Ga < Ca < Ge","Ca < K < Ge < Ga"], correct:0},
+      {q:"Which property generally increases both across a period AND up a group?", options:["Atomic radius","Metallic character","Ionization energy","None of these"], correct:2},
+      {q:"Metals are found on the ___ side of the periodic table.", options:["Right","Left","Top","Bottom"], correct:1},
+      {q:"Nonmetals generally have ___ IE and ___ EN.", options:["Low, low","High, high","Low, high","High, low"], correct:1},
+      {q:"Which of these elements is a metalloid?", options:["Na","Cl","Si","Ar"], correct:2},
+      {q:"Across period 2, which element has the anomalously low IE? (exception at Be/B)", options:["Li","Be","B","C"], correct:2},
+      {q:"Across period 2, which element has an anomalously lower IE than expected? (exception at N/O)", options:["C","N","O","F"], correct:2},
+      {q:"Which property of noble gases makes them unreactive?", options:["Large atomic radius","High ionization energy and filled valence shell","Low electronegativity","High electron affinity"], correct:1}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Periodic Trends - Complete Reference</h3><p><span class="rule">TREND ARROWS DIAGRAM</span></p><table><tr><th></th><th colspan="2">Across Period (Left \u2192 Right)</th></tr><tr><td><strong>Atomic radius</strong></td><td colspan="2">\u2193 DECREASES (more protons pull e\u207B closer, same shell)</td></tr><tr><td><strong>Ionization energy</strong></td><td colspan="2">\u2191 INCREASES (smaller atom, harder to remove e\u207B)</td></tr><tr><td><strong>Electronegativity</strong></td><td colspan="2">\u2191 INCREASES (stronger pull on bonding e\u207B)</td></tr><tr><td><strong>Electron affinity</strong></td><td colspan="2">\u2191 INCREASES in magnitude (more eager to gain e\u207B)</td></tr></table><table><tr><th></th><th colspan="2">Down a Group (Top \u2192 Bottom)</th></tr><tr><td><strong>Atomic radius</strong></td><td colspan="2">\u2191 INCREASES (more shells = bigger atom)</td></tr><tr><td><strong>Ionization energy</strong></td><td colspan="2">\u2193 DECREASES (outer e\u207B farther from nucleus, easier to remove)</td></tr><tr><td><strong>Electronegativity</strong></td><td colspan="2">\u2193 DECREASES (weaker pull on bonding e\u207B)</td></tr><tr><td><strong>Electron affinity</strong></td><td colspan="2">\u2193 DECREASES in magnitude (less eager to gain e\u207B)</td></tr></table><p style="margin-top:10px"><span class="rule">DEFINITIONS</span></p><table><tr><th>Property</th><th>Definition</th><th>Highest</th></tr><tr><td>Atomic radius</td><td>Half the distance between two bonded nuclei of the same element</td><td>Fr (bottom-left)</td></tr><tr><td>Ionization energy (IE)</td><td>Energy to remove the outermost electron from a gaseous atom</td><td>He (top-right)</td></tr><tr><td>Electronegativity (EN)</td><td>Ability of an atom to attract bonding electrons in a covalent bond</td><td>F = 4.0 (highest)</td></tr><tr><td>Electron affinity (EA)</td><td>Energy change when a gaseous atom gains an electron</td><td>Cl (halogens highest)</td></tr><tr><td>Ionic radius</td><td>Radius of an ion compared to neutral atom</td><td>See below</td></tr></table><p style="margin-top:10px"><span class="rule">WHY DO TRENDS HAPPEN?</span></p><p><strong>Across a period (left \u2192 right):</strong></p><p>\u2022 Protons increase \u2192 stronger nuclear pull on SAME shell of electrons</p><p>\u2022 More protons = smaller radius = harder to remove electrons = higher IE</p><p>\u2022 More protons = stronger attraction to bonding electrons = higher EN</p><p><strong>Down a group (top \u2192 bottom):</strong></p><p>\u2022 More electron shells \u2192 outer e\u207B farther from nucleus</p><p>\u2022 More shielding by inner electrons \u2192 nucleus pull on outer e\u207B is weaker</p><p>\u2022 Larger atom = easier to remove outer e\u207B = lower IE</p><p style="margin-top:10px"><span class="rule">EFFECTIVE NUCLEAR CHARGE (Z\u2091ff)</span></p><p>Z\u2091ff = Z \u2212 shielding (S)</p><p>Z = total protons, S = number of inner (core) electrons that shield the outer electrons from the nucleus.</p><p>Across a period: Z increases but S stays ~same \u2192 Z\u2091ff increases \u2192 atoms shrink</p><p>Down a group: both Z and S increase, but new shells dominate \u2192 atoms get bigger</p><p style="margin-top:10px"><span class="rule">IONIC RADIUS</span></p><table><tr><th>Ion Type</th><th>Compared to Atom</th><th>Why</th></tr><tr><td><strong>Cations</strong> (+ ions)</td><td>SMALLER than parent atom</td><td>Lost electrons \u2192 fewer e\u207B, same protons \u2192 protons pull remaining e\u207B tighter. Often lose entire outer shell.</td></tr><tr><td><strong>Anions</strong> (\u2212 ions)</td><td>LARGER than parent atom</td><td>Gained electrons \u2192 more e\u207B repulsion, same protons \u2192 electron cloud expands.</td></tr></table><p>Rule: <strong>cations &lt; neutral atoms &lt; anions</strong></p><p>Higher charge magnitude = more extreme: Na\u207A &gt; Mg\u00B2\u207A &gt; Al\u00B3\u207A (all losing from same shell, more protons = smaller)</p><p style="margin-top:10px"><span class="rule">ISOELECTRONIC SERIES</span></p><p>Ions/atoms with the <strong>same number of electrons</strong>. More protons = smaller radius.</p><p>Example (all 10 e\u207B): O\u00B2\u207B(8p) &gt; F\u207B(9p) &gt; Ne(10p) &gt; Na\u207A(11p) &gt; Mg\u00B2\u207A(12p) &gt; Al\u00B3\u207A(13p)</p><p>More protons pulling same # electrons = tighter = smaller radius</p><p style="margin-top:10px"><span class="rule">KEY EXCEPTIONS TO MEMORIZE</span></p><p>\u2022 <strong>IE: N &gt; O</strong> \u2014 N has half-filled 2p\u00B3 (extra stable), O must break a paired electron</p><p>\u2022 <strong>IE: Be &gt; B</strong> \u2014 Be loses from 2s (higher energy needed), B loses from 2p (easier)</p><p>\u2022 <strong>EA: Cl &gt; F</strong> \u2014 F is so small that adding an e\u207B causes extreme repulsion</p><p>\u2022 <strong>EA: Noble gases</strong> \u2014 essentially zero (full outer shell, no desire for more e\u207B)</p><p>\u2022 <strong>EN: Noble gases</strong> \u2014 generally not assigned (don\'t form bonds)</p><p style="margin-top:10px"><span class="rule">ELECTRONEGATIVITY VALUES (key elements)</span></p><p>F=4.0, O=3.5, N/Cl=3.0, Br=2.8, C/S=2.5, H=2.1, metals &lt; 2.0</p><p>EN difference determines bond type: &lt;0.4 = nonpolar covalent, 0.4-1.7 = polar covalent, &gt;1.7 = ionic</p>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 atomic radius, ionization energy, electronegativity, electron affinity, ionic radius \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

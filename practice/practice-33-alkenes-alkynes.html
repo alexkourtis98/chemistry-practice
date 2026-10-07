@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice 33 — Alkenes & Alkynes</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Practice 33 &mdash; Alkenes &amp; Alkynes</h1>
+<p class="subtitle">Deep practice &mdash; naming, geometric isomers, reactions</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_33';
+const SECTIONS = [
+  {
+    id:1, title:"Naming Alkenes",
+    instruction:"Write the IUPAC name for each alkene.",
+    rows:[
+      ["1","C\u2082H\u2084 (2 carbons, 1 double bond)","ethene / ethylene"],
+      ["2","C\u2083H\u2086 (3 carbons, 1 double bond)","propene / propylene"],
+      ["3","CH\u2082=CH\u2013CH\u2082\u2013CH\u2083","1-butene / but-1-ene"],
+      ["4","CH\u2083\u2013CH=CH\u2013CH\u2083","2-butene / but-2-ene"],
+      ["5","CH\u2082=CH\u2013CH\u2082\u2013CH\u2082\u2013CH\u2083","1-pentene / pent-1-ene"],
+      ["6","CH\u2083\u2013CH=CH\u2013CH\u2082\u2013CH\u2083","2-pentene / pent-2-ene"],
+      ["7","2-methylpropene: molecular formula?","C4H8 / C\u2084H\u2088"],
+      ["8","Alkene suffix is ___","-ene / ene"],
+      ["9","CH\u2082=CH\u2013CH\u2082\u2013CH\u2082\u2013CH\u2082\u2013CH\u2083","1-hexene / hex-1-ene"],
+      ["10","CH\u2083\u2013CH=CH\u2013CH\u2082\u2013CH\u2082\u2013CH\u2083","2-hexene / hex-2-ene"],
+      ["11","CH\u2083\u2013CH\u2082\u2013CH=CH\u2013CH\u2082\u2013CH\u2083","3-hexene / hex-3-ene"],
+      ["12","CH\u2082=C(CH\u2083)\u2013CH\u2083 is called ___","2-methylpropene / 2-methyl-1-propene"],
+      ["13","CH\u2083\u2013CH=CH\u2013CH(CH\u2083)\u2013CH\u2083 (double bond at C2, methyl at C4)","4-methyl-2-pentene / 4-methylpent-2-ene"],
+      ["14","Cyclopentene has ___ carbons","5 / five"],
+      ["15","Cyclohexene: molecular formula?","C6H10 / C\u2086H\u2081\u2080"],
+      ["16","Number the chain from the end ___ to the double bond","nearest / closer / closest"],
+      ["17","CH\u2082=CH\u2013CH=CH\u2082 (two double bonds) is called ___","1,3-butadiene / buta-1,3-diene"]
+    ]
+  },
+  {
+    id:2, title:"Naming Alkynes",
+    instruction:"Write the IUPAC name for each alkyne.",
+    rows:[
+      ["1","C\u2082H\u2082 (2 carbons, 1 triple bond)","ethyne / acetylene"],
+      ["2","C\u2083H\u2084 (3 carbons, 1 triple bond)","propyne"],
+      ["3","CH\u2261C\u2013CH\u2082\u2013CH\u2083","1-butyne / but-1-yne"],
+      ["4","CH\u2083\u2013C\u2261C\u2013CH\u2083","2-butyne / but-2-yne"],
+      ["5","Alkyne suffix is ___","-yne / yne"],
+      ["6","CH\u2261C\u2013CH\u2082\u2013CH\u2082\u2013CH\u2083","1-pentyne / pent-1-yne"],
+      ["7","CH\u2083\u2013C\u2261C\u2013CH\u2082\u2013CH\u2083","2-pentyne / pent-2-yne"],
+      ["8","Alkynes have a ___ bond between two carbons","triple"],
+      ["9","CH\u2261C\u2013CH\u2082\u2013CH\u2082\u2013CH\u2082\u2013CH\u2083","1-hexyne / hex-1-yne"],
+      ["10","CH\u2083\u2013C\u2261C\u2013CH\u2082\u2013CH\u2082\u2013CH\u2083","2-hexyne / hex-2-yne"],
+      ["11","CH\u2083\u2013CH\u2082\u2013C\u2261C\u2013CH\u2082\u2013CH\u2083","3-hexyne / hex-3-yne"],
+      ["12","A terminal alkyne has the triple bond at position ___","1"],
+      ["13","An internal alkyne has the triple bond ___ in the chain","inside / not at position 1 / not terminal"],
+      ["14","3-methyl-1-butyne: how many carbons total?","5 / five"],
+      ["15","The triple bond in alkynes consists of ___ sigma and ___ pi bonds","1, 2 / 1 sigma and 2 pi / one sigma two pi"]
+    ]
+  },
+  {
+    id:3, title:"Geometric Isomers (cis/trans)",
+    instruction:"Fill in the blank about cis/trans isomerism.",
+    rows:[
+      ["1","cis means substituents on the ___ side","same"],
+      ["2","trans means substituents on ___ sides","opposite"],
+      ["3","Geometric isomerism requires a ___ bond","double"],
+      ["4","Can ethene have cis/trans isomers?","no"],
+      ["5","Can 2-butene have cis/trans isomers?","yes"],
+      ["6","In cis-2-butene, both CH\u2083 groups are on the ___ side","same"],
+      ["7","Can propene have cis/trans isomers?","no"],
+      ["8","Geometric isomers have ___ properties","different"],
+      ["9","For cis/trans isomers, each doubly-bonded carbon must have ___ different groups","two / 2"],
+      ["10","trans-2-butene has a ___ boiling point than cis-2-butene (higher/lower)","lower"],
+      ["11","cis-2-butene has a ___ dipole moment than trans (larger/smaller)","larger / greater"],
+      ["12","Can 1-butene show cis/trans isomerism?","no"],
+      ["13","Can 2-pentene have cis/trans isomers?","yes"],
+      ["14","In E/Z nomenclature, E corresponds to ___","trans"],
+      ["15","In E/Z nomenclature, Z corresponds to ___","cis"],
+      ["16","E/Z uses ___ priority rules to assign groups","Cahn-Ingold-Prelog / CIP"],
+      ["17","Higher atomic number = ___ priority in CIP rules","higher"]
+    ]
+  },
+  {
+    id:4, title:"Reactions of Alkenes", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Addition of H\u2082 to an alkene is called:", options:["Hydrolysis","Hydrogenation","Dehydration","Combustion"], correct:1},
+      {q:"CH\u2082=CH\u2082 + H\u2082 \u2192 ?", options:["CH\u2082=CH\u2082 (no reaction)","CH\u2083\u2013CH\u2083 (ethane)","CH\u2084 (methane)","C\u2082H\u2082 (ethyne)"], correct:1},
+      {q:"CH\u2082=CH\u2082 + HBr \u2192 ?", options:["CH\u2082Br\u2013CH\u2082Br","CH\u2083\u2013CH\u2082Br","CH\u2083\u2013CHBr\u2082","CH\u2082=CHBr"], correct:1},
+      {q:"Addition of H\u2082O to an alkene is called:", options:["Hydrogenation","Halogenation","Hydration","Polymerization"], correct:2},
+      {q:"Markovnikov's rule: H adds to the carbon with:", options:["Fewer hydrogens","More hydrogens","More substituents","No hydrogens"], correct:1},
+      {q:"CH\u2082=CH\u2082 + Br\u2082 \u2192 ?", options:["CH\u2083\u2013CH\u2082Br","CH\u2082Br\u2013CH\u2082Br (1,2-dibromoethane)","CHBr=CHBr","CH\u2082=CHBr + HBr"], correct:1},
+      {q:"CH\u2083\u2013CH=CH\u2082 + HBr \u2192 ? (Markovnikov)", options:["CH\u2083\u2013CHBr\u2013CH\u2083 (2-bromopropane)","CH\u2083\u2013CH\u2082\u2013CH\u2082Br (1-bromopropane)","CH\u2083\u2013CHBr\u2013CH\u2082Br","CH\u2082Br\u2013CH=CH\u2082"], correct:0},
+      {q:"CH\u2083\u2013CH=CH\u2082 + H\u2082O \u2192 ? (Markovnikov)", options:["1-propanol","2-propanol","propanone","propanal"], correct:1},
+      {q:"Polymerization of ethene produces:", options:["Polypropylene","Polyethylene (polyethene)","Polystyrene","PVC"], correct:1},
+      {q:"n CH\u2082=CH\u2082 \u2192 [\u2013CH\u2082\u2013CH\u2082\u2013]\u2099 is called ___ polymerization.", options:["Condensation","Addition","Substitution","Elimination"], correct:1},
+      {q:"CH\u2082=CH\u2082 + Cl\u2082 \u2192 ?", options:["CH\u2083CH\u2082Cl","ClCH\u2082\u2013CH\u2082Cl (1,2-dichloroethane)","CHCl=CHCl","CH\u2082=CHCl + HCl"], correct:1},
+      {q:"Hydrogenation of propene gives:", options:["Propyne","Propane","Propanal","Propanol"], correct:1},
+      {q:"Which catalyst is used for hydrogenation?", options:["H\u2082SO\u2084","NaOH","Ni or Pt","KMnO\u2084"], correct:2},
+      {q:"What is the test reagent that alkenes decolorize?", options:["Litmus paper","Bromine water","pH indicator","Silver nitrate"], correct:1},
+      {q:"CH\u2082=CHCH\u2083 + HCl \u2192 major product by Markovnikov:", options:["1-chloropropane","2-chloropropane","1,2-dichloropropane","3-chloropropane"], correct:1},
+      {q:"Anti-Markovnikov addition uses ___ as catalyst:", options:["H\u2082SO\u2084","Peroxides (ROOR)","Ni/Pt","UV light only"], correct:1}
+    ]
+  },
+  {
+    id:5, title:"Reactions of Alkynes",
+    instruction:"Fill in the blank about alkyne reactions.",
+    rows:[
+      ["1","Combustion of C\u2082H\u2082: 2C\u2082H\u2082 + 5O\u2082 \u2192 ___ + ___","4CO2 + 2H2O / 4CO\u2082 + 2H\u2082O"],
+      ["2","Acetylene is used in ___ torches","welding / oxyacetylene"],
+      ["3","Adding 1 mol H\u2082 to ethyne gives ___","ethene / C2H4 / C\u2082H\u2084"],
+      ["4","Adding 2 mol H\u2082 to ethyne gives ___","ethane / C2H6 / C\u2082H\u2086"],
+      ["5","Alkynes undergo ___ reactions like alkenes","addition"],
+      ["6","C\u2082H\u2082 + 2Br\u2082 \u2192 ___","CHBr2-CHBr2 / CHBr\u2082\u2013CHBr\u2082 / 1,1,2,2-tetrabromoethane"],
+      ["7","C\u2082H\u2082 + HCl \u2192 ___ (1 mol HCl)","CH\u2082=CHCl / vinyl chloride / chloroethene"],
+      ["8","CH\u2082=CHCl + HCl \u2192 ___ (second mol HCl, Markovnikov)","CH\u2083CHCl\u2082 / 1,1-dichloroethane"],
+      ["9","Adding H\u2082O to ethyne (mercury catalyst) gives ___","ethanal / acetaldehyde / CH\u2083CHO"],
+      ["10","Propyne + 1 mol H\u2082 \u2192 ___","propene / CH\u2083CH=CH\u2082"],
+      ["11","Propyne + 2 mol H\u2082 \u2192 ___","propane / CH\u2083CH\u2082CH\u2083"],
+      ["12","Terminal alkynes react with Na to form ___ salts","acetylide / sodium acetylide"],
+      ["13","Ethyne burns with a very ___ flame (hot temperature > 3000\u00B0C)","hot"],
+      ["14","C\u2082H\u2082 + 2HBr \u2192 ___","CH\u2083CHBr\u2082 / 1,1-dibromoethane"],
+      ["15","Adding Br\u2082 to 1-butyne (1 mol Br\u2082) gives a ___","dibromo alkene / dibromobutene"]
+    ]
+  },
+  {
+    id:6, title:"Compare Alkanes, Alkenes, Alkynes", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Which family is MOST reactive?", options:["Alkanes","Alkenes","Alkynes","All equally reactive"], correct:2},
+      {q:"Which families undergo addition reactions?", options:["Alkanes only","Alkenes and alkynes","Alkanes and alkenes","All three"], correct:1},
+      {q:"Which family primarily undergoes substitution reactions?", options:["Alkenes","Alkynes","Alkanes","None of them"], correct:2},
+      {q:"Which families decolorize bromine water?", options:["Alkanes only","Alkenes and alkynes","Alkynes only","All three"], correct:1},
+      {q:"Which burns with a smoky flame due to high C:H ratio?", options:["Alkanes","Alkenes","Alkynes","All burn cleanly"], correct:2},
+      {q:"General formula for alkenes is:", options:["C\u2099H\u2082\u2099\u208A\u2082","C\u2099H\u2082\u2099","C\u2099H\u2082\u2099\u208B\u2082","C\u2099H\u2099"], correct:1},
+      {q:"General formula for alkynes is:", options:["C\u2099H\u2082\u2099\u208A\u2082","C\u2099H\u2082\u2099","C\u2099H\u2082\u2099\u208B\u2082","C\u2099H\u2099"], correct:2},
+      {q:"Alkanes are described as:", options:["Unsaturated","Saturated","Polyunsaturated","Aromatic"], correct:1},
+      {q:"Alkenes and alkynes are called ___ hydrocarbons:", options:["Saturated","Aromatic","Unsaturated","Cyclic"], correct:2},
+      {q:"C\u2084H\u2088 could be:", options:["Butane","1-butene or cyclobutane","1-butyne","Butanol"], correct:1},
+      {q:"C\u2084H\u2086 could be:", options:["Butane","Butene","1-butyne or 2-butyne","Butanol"], correct:2},
+      {q:"Which has the highest degree of unsaturation: C\u2086H\u2081\u2084, C\u2086H\u2081\u2082, C\u2086H\u2081\u2080?", options:["C\u2086H\u2081\u2084","C\u2086H\u2081\u2082","C\u2086H\u2081\u2080","All the same"], correct:2},
+      {q:"Degree of unsaturation for C\u2083H\u2084 (propyne) is:", options:["0","1","2","3"], correct:2}
+    ]
+  },
+  {
+    id:7, title:"Mixed Review", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"The double bond in alkenes consists of:", options:["2 sigma bonds","1 sigma + 1 pi bond","2 pi bonds","1 ionic bond"], correct:1},
+      {q:"What is the common name of ethyne?", options:["Ethylene","Methane","Acetylene","Propylene"], correct:2},
+      {q:"Which molecule can exist as cis and trans isomers?", options:["Ethene","Propene","2-butene","1-butene"], correct:2},
+      {q:"Hydrogenation of an alkene produces:", options:["An alkyne","An alcohol","An alkane","An aldehyde"], correct:2},
+      {q:"Propene has how many carbon atoms?", options:["2","3","4","5"], correct:1},
+      {q:"In IUPAC naming, the double bond gets the ___ possible number:", options:["Highest","Lowest","Middle","Any"], correct:1},
+      {q:"Ethylene (ethene) is used in:", options:["Welding","Fruit ripening","Dry cleaning","Photography"], correct:1},
+      {q:"Adding HCl to propene following Markovnikov's rule gives:", options:["1-chloropropane","2-chloropropane","1,2-dichloropropane","3-chloropropane"], correct:1},
+      {q:"The bond angle around C=C in alkenes is approximately:", options:["109.5\u00B0","120\u00B0","180\u00B0","90\u00B0"], correct:1},
+      {q:"The bond angle around C\u2261C in alkynes is approximately:", options:["109.5\u00B0","120\u00B0","180\u00B0","90\u00B0"], correct:2},
+      {q:"Which alkene is used to make PVC?", options:["Ethene","Propene","Chloroethene (vinyl chloride)","Styrene"], correct:2},
+      {q:"Dehydration of an alcohol produces:", options:["An alkane","An alkene","An alkyne","An aldehyde"], correct:1},
+      {q:"What reagent/condition causes dehydration of ethanol to ethene?", options:["NaOH, heat","H\u2082SO\u2084, 170\u00B0C","Ni catalyst","KMnO\u2084"], correct:1},
+      {q:"Catalytic cracking of alkanes produces:", options:["Only alkanes","Only alkenes","Shorter alkanes and alkenes","Alkynes"], correct:2}
+    ]
+  },
+  {
+    id:8, title:"Addition Reaction Products",
+    instruction:"Write the product of each addition reaction.",
+    rows:[
+      ["1","CH\u2082=CH\u2082 + H\u2082 \u2192 ___","CH\u2083CH\u2083 / ethane"],
+      ["2","CH\u2082=CH\u2082 + Br\u2082 \u2192 ___","BrCH\u2082CH\u2082Br / 1,2-dibromoethane"],
+      ["3","CH\u2082=CH\u2082 + HBr \u2192 ___","CH\u2083CH\u2082Br / bromoethane"],
+      ["4","CH\u2082=CH\u2082 + H\u2082O \u2192 ___","CH\u2083CH\u2082OH / ethanol"],
+      ["5","CH\u2083CH=CH\u2082 + H\u2082 \u2192 ___","CH\u2083CH\u2082CH\u2083 / propane"],
+      ["6","CH\u2083CH=CH\u2082 + Br\u2082 \u2192 ___","CH\u2083CHBrCH\u2082Br / 1,2-dibromopropane"],
+      ["7","CH\u2083CH=CH\u2082 + HBr \u2192 ___ (major, Markovnikov)","CH\u2083CHBrCH\u2083 / 2-bromopropane"],
+      ["8","CH\u2083CH=CH\u2082 + H\u2082O \u2192 ___ (major, Markovnikov)","CH\u2083CH(OH)CH\u2083 / 2-propanol"],
+      ["9","CH\u2082=CHCH\u2082CH\u2083 + HCl \u2192 ___ (major, Markovnikov)","CH\u2083CHClCH\u2082CH\u2083 / 2-chlorobutane"],
+      ["10","2-methylpropene + HBr \u2192 ___ (major, Markovnikov)","2-bromo-2-methylpropane"],
+      ["11","Cyclohexene + H\u2082 \u2192 ___","cyclohexane"],
+      ["12","Cyclohexene + Br\u2082 \u2192 ___","1,2-dibromocyclohexane"],
+      ["13","CH\u2261CH + 2H\u2082 \u2192 ___","CH\u2083CH\u2083 / ethane"],
+      ["14","CH\u2261CH + 2Cl\u2082 \u2192 ___","CHCl\u2082CHCl\u2082 / 1,1,2,2-tetrachloroethane"],
+      ["15","CH\u2083C\u2261CH + 1 mol H\u2082 \u2192 ___","CH\u2083CH=CH\u2082 / propene"]
+    ]
+  },
+  {
+    id:9, title:"Polymerization & E/Z Nomenclature", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Addition polymerization requires a ___ as monomer:", options:["Alkane","Alcohol","Alkene","Carboxylic acid"], correct:2},
+      {q:"The repeating unit of polyethylene is:", options:["CH\u2082=CH\u2082","[\u2013CH\u2082\u2013CH\u2082\u2013]","[\u2013CH=CH\u2013]","CH\u2083\u2013CH\u2083"], correct:1},
+      {q:"Polypropylene is made from:", options:["Ethene","Propene","Butene","Styrene"], correct:1},
+      {q:"PVC is made from:", options:["Ethene","Propene","Chloroethene","Fluoroethene"], correct:2},
+      {q:"PTFE (Teflon) is made from:", options:["Ethene","Chloroethene","Tetrafluoroethene","Styrene"], correct:2},
+      {q:"In E/Z naming, Z means higher priority groups on ___ side:", options:["Opposite sides","Same side","Left side","Right side"], correct:1},
+      {q:"In E/Z naming, E means higher priority groups on ___ sides:", options:["Same","Opposite","Left and right","Top and bottom"], correct:1},
+      {q:"In CIP rules, which has higher priority: Br or Cl?", options:["Cl (Z=17)","Br (Z=35)","Equal","Cannot determine"], correct:1},
+      {q:"In CIP rules, which has higher priority: O or N?", options:["N (Z=7)","O (Z=8)","Equal","Cannot determine"], correct:1},
+      {q:"Which can show E/Z isomerism?", options:["1,1-dichloroethene","cis-2-butene","Ethene","Propane"], correct:1}
+    ]
+  },
+  {
+    id:10, title:"Word Arrange: Reaction Steps", type:"arrange",
+    instruction:"Arrange the words to form the correct statement.",
+    sentences:[
+      {prompt:"Describe hydrogenation of an alkene:", words:["Alkene","+","H\u2082","\u2192","alkane","(Ni","catalyst)"]},
+      {prompt:"Markovnikov's rule:", words:["H","adds","to","the","carbon","with","more","hydrogens"]},
+      {prompt:"Halogenation of an alkene:", words:["Alkene","+","X\u2082","\u2192","dihaloalkane"]},
+      {prompt:"What does bromine water test show?", words:["Bromine","water","decolorizes","in","the","presence","of","unsaturation"]},
+      {prompt:"Hydration reaction:", words:["Alkene","+","H\u2082O","\u2192","alcohol","(H\u2082SO\u2084","catalyst)"]},
+      {prompt:"Polymerization of ethene:", words:["n","CH\u2082=CH\u2082","\u2192","polyethylene","(addition","polymerization)"]},
+      {prompt:"Combustion of acetylene:", words:["2C\u2082H\u2082","+","5O\u2082","\u2192","4CO\u2082","+","2H\u2082O"]},
+      {prompt:"Dehydration of ethanol:", words:["CH\u2083CH\u2082OH","\u2192","CH\u2082=CH\u2082","+","H\u2082O","(H\u2082SO\u2084,","170\u00B0C)"]},
+      {prompt:"Hydrogenation of ethyne to ethane:", words:["C\u2082H\u2082","+","2H\u2082","\u2192","C\u2082H\u2086","(Ni","catalyst)"]},
+      {prompt:"cis/trans isomerism requires:", words:["A","double","bond","with","two","different","groups","on","each","carbon"]}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Alkenes & Alkynes - Complete Reference</h3><p><span class="rule">Alkenes:</span> Contain at least one C=C double bond. Suffix: <strong>-ene</strong>. General formula: C<sub>n</sub>H<sub>2n</sub>.</p><p><span class="rule">Alkynes:</span> Contain at least one C\u2261C triple bond. Suffix: <strong>-yne</strong>. General formula: C<sub>n</sub>H<sub>2n\u22122</sub>.</p><table><tr><th>Family</th><th>General Formula</th><th>Bond</th><th>Suffix</th><th>Saturated?</th><th>Typical Reaction</th></tr><tr><td>Alkane</td><td>C<sub>n</sub>H<sub>2n+2</sub></td><td>C\u2013C (single)</td><td>-ane</td><td>Yes</td><td>Substitution</td></tr><tr><td>Alkene</td><td>C<sub>n</sub>H<sub>2n</sub></td><td>C=C (double)</td><td>-ene</td><td>No</td><td>Addition</td></tr><tr><td>Alkyne</td><td>C<sub>n</sub>H<sub>2n\u22122</sub></td><td>C\u2261C (triple)</td><td>-yne</td><td>No</td><td>Addition</td></tr></table><p><span class="rule">IUPAC Naming Rules:</span></p><p>1. Find the longest chain that <strong>contains the double/triple bond</strong>.</p><p>2. Number from the end <strong>nearest the double/triple bond</strong> (the multiple bond gets the lowest number).</p><p>3. Indicate position: but-1-ene (not but-3-ene), pent-2-yne.</p><p>4. If both double and triple bonds present, use -en-yne suffix. Give lowest numbers overall, with double bond getting priority if tied.</p><p><span class="rule">Geometric (cis/trans) Isomers:</span></p><p>Occur when each carbon of C=C has two <strong>different groups</strong>. No free rotation around C=C (the \u03C0 bond locks it).</p><p><strong>cis</strong> = same-side substituents (higher BP, more polar)</p><p><strong>trans</strong> = opposite-side substituents (lower BP, more stable, less polar)</p><p>Requirements: Each C of the C=C must have 2 different substituents. If either C has two identical groups, cis/trans isomers are impossible.</p><p><span class="rule">E/Z Nomenclature (CIP Priority Rules):</span></p><p>Used when cis/trans is ambiguous (more than 2 types of substituents). Assign priority by <strong>atomic number</strong> (higher atomic # = higher priority). Compare atoms bonded directly to each C of the double bond.</p><p><strong>Z (zusammen)</strong> = higher-priority groups on <strong>same side</strong> (like cis)</p><p><strong>E (entgegen)</strong> = higher-priority groups on <strong>opposite sides</strong> (like trans)</p><p>Priority rules: (1) Higher atomic number wins. (2) If tied, compare next atoms outward. (3) Double bond counts as two single bonds to that atom.</p><p><span class="rule">Addition Reactions of Alkenes:</span></p><table><tr><th>Reaction</th><th>Reagent</th><th>Product</th><th>Catalyst/Notes</th></tr><tr><td><strong>Hydrogenation</strong></td><td>H\u2082</td><td>Alkane</td><td>Ni, Pt, or Pd catalyst</td></tr><tr><td><strong>Halogenation</strong></td><td>X\u2082 (Cl\u2082, Br\u2082)</td><td>Dihaloalkane (vicinal)</td><td>No catalyst needed. Br\u2082 decolorization = test for unsaturation</td></tr><tr><td><strong>Hydrohalogenation</strong></td><td>HX (HCl, HBr)</td><td>Haloalkane</td><td>Markovnikov\'s rule applies</td></tr><tr><td><strong>Hydration</strong></td><td>H\u2082O</td><td>Alcohol</td><td>H\u2082SO\u2084 catalyst. Markovnikov\'s rule</td></tr></table><p><span class="rule">Markovnikov\'s Rule:</span> "The rich get richer." When HX adds across C=C, the <strong>H goes to the carbon with MORE H atoms</strong> already attached, and X goes to the carbon with fewer H atoms. This gives the more stable (more substituted) carbocation intermediate.</p><p><span class="rule">Polymerization:</span></p><p>Alkenes can undergo <strong>addition polymerization</strong>. Many small monomers join to form a long polymer chain. The C=C opens up and each carbon bonds to the next monomer.</p><table><tr><th>Monomer</th><th>Polymer</th><th>Use</th></tr><tr><td>Ethene (ethylene)</td><td>Polyethylene (PE)</td><td>Bags, bottles</td></tr><tr><td>Propene (propylene)</td><td>Polypropylene (PP)</td><td>Containers, fibers</td></tr><tr><td>Chloroethene (vinyl chloride)</td><td>PVC</td><td>Pipes, flooring</td></tr><tr><td>Tetrafluoroethene</td><td>Teflon (PTFE)</td><td>Non-stick coatings</td></tr></table><p><span class="rule">Alkynes - Additional Notes:</span></p><p>Alkynes undergo the same types of addition reactions as alkenes but can react with 1 or 2 equivalents of reagent. Terminal alkynes (R\u2013C\u2261C\u2013H) are weakly acidic (pKa ~25) and react with strong bases like NaNH\u2082.</p><p><span class="rule">Test for Unsaturation:</span> Add Br\u2082/CCl\u2084 (brown). If color disappears, the compound is unsaturated (has C=C or C\u2261C). Alkanes do NOT decolorize Br\u2082.</p>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 naming, geometric isomers, reactions \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

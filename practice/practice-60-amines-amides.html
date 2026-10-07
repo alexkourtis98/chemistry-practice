@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice 60 — Amines & Amides</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Practice 60 &mdash; Amines &amp; Amides</h1>
+<p class="subtitle">Deep practice &mdash; -NH\u2082 group, basicity, amide bond, peptide links</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_60';
+const SECTIONS = [
+  {
+    id:1, title:"Amine Classification",
+    instruction:"Fill in the blank about amine types and structure.",
+    rows:[
+      ["1","An amine with one alkyl group on nitrogen (R-NH\u2082) is a ___ amine","primary / 1st / 1"],
+      ["2","An amine with two alkyl groups on nitrogen (R\u2082NH) is a ___ amine","secondary / 2nd / 2"],
+      ["3","An amine with three alkyl groups on nitrogen (R\u2083N) is a ___ amine","tertiary / 3rd / 3"],
+      ["4","The functional group of primary amines is ___","-NH2 / NH2 / amino"],
+      ["5","A nitrogen with four alkyl groups and a positive charge is a ___ ammonium ion","quaternary / 4th / 4"],
+      ["6","Amines are derived from ___ by replacing H with alkyl groups","ammonia / NH3"],
+      ["7","The general formula for a primary amine is ___","R-NH2 / RNH2"],
+      ["8","In amines, nitrogen has a ___ pair of electrons that makes it basic","lone / nonbonding"],
+      ["9","CH\u2083CH\u2082NHCH\u2083 is a ___ amine (1/2/3)","secondary / 2"],
+      ["10","(CH\u2083CH\u2082)\u2083N is a ___ amine (1/2/3)","tertiary / 3"],
+      ["11","Piperidine (6-membered ring with N) is a ___ amine (1/2/3)","secondary / 2"],
+      ["12","The nitrogen in amines has ___ hybridization","sp3"],
+      ["13","The geometry around nitrogen in amines is ___ pyramidal","trigonal"],
+      ["14","(CH\u2083)\u2084N\u207A is a ___ ammonium ion","quaternary / 4"],
+      ["15","Quaternary ammonium ions have ___ lone pairs on nitrogen","no / zero / 0"]
+    ]
+  },
+  {
+    id:2, title:"Naming Amines",
+    instruction:"Fill in the blank about naming amines.",
+    rows:[
+      ["1","IUPAC amine suffix is ___","-amine / amine"],
+      ["2","CH\u2083NH\u2082 is called ___ (IUPAC)","methanamine / methylamine"],
+      ["3","CH\u2083CH\u2082NH\u2082 is called ___ (IUPAC)","ethanamine / ethylamine"],
+      ["4","CH\u2083CH\u2082CH\u2082NH\u2082 is called ___ (IUPAC)","propan-1-amine / propanamine / propylamine"],
+      ["5","C\u2086H\u2085NH\u2082 (amino group on benzene) is commonly called ___","aniline"],
+      ["6","(CH\u2083)\u2082NH is called ___ (common name)","dimethylamine"],
+      ["7","(CH\u2083)\u2083N is called ___ (common name)","trimethylamine"],
+      ["8","In IUPAC naming, the -NH\u2082 group is called the ___ group","amino"],
+      ["9","CH\u2083CH\u2082CH\u2082CH\u2082NH\u2082 is called ___","butan-1-amine / butylamine"],
+      ["10","(CH\u2083)\u2082CHNH\u2082 is called ___","isopropylamine / 2-propanamine"],
+      ["11","C\u2086H\u2085NHCH\u2083 is called ___","N-methylaniline"],
+      ["12","When naming secondary/tertiary amines, extra alkyl groups on N use the ___ prefix","N- / N"],
+      ["13","CH\u2083NHCH\u2082CH\u2083 is called ___","N-methylethanamine / ethylmethylamine"],
+      ["14","Pyridine is an ___ (aromatic/aliphatic) amine","aromatic"],
+      ["15","Histamine (involved in allergic responses) is a biogenic ___","amine"]
+    ]
+  },
+  {
+    id:3, title:"Amine Basicity", type:"mc",
+    instruction:"Select the correct answer about amine basicity.",
+    questions:[
+      {q:"Amines are basic because:", options:["They donate protons","The lone pair on nitrogen accepts H\u207A","They contain oxygen","They are nonpolar"], correct:1},
+      {q:"Low-molecular-weight amines typically smell like:", options:["Flowers","Fish","Fruit","Nothing"], correct:1},
+      {q:"Primary and secondary amines can form hydrogen bonds because:", options:["They have C-H bonds","They have N-H bonds","They are ionic","They have C=O bonds"], correct:1},
+      {q:"Compared to alcohols of similar size, amines have:", options:["Higher boiling points","Similar boiling points","Lower boiling points","Much higher boiling points"], correct:2},
+      {q:"Small amines (methylamine, ethylamine) are ___ in water:", options:["Insoluble","Slightly soluble","Very soluble","Reacts violently"], correct:2},
+      {q:"When an amine reacts with HCl it forms:", options:["An ester","An ammonium salt","An alcohol","An aldehyde"], correct:1},
+      {q:"Aliphatic amines are ___ basic than ammonia:", options:["Less","Equally","More","Not comparable"], correct:2},
+      {q:"Aniline is ___ basic than cyclohexylamine because:", options:["More, it is aromatic","Less, the lone pair is delocalized into the ring","Equally basic","Not basic at all"], correct:1},
+      {q:"The Kb of methylamine (~4.4 x 10\u207B\u2074) indicates it is a:", options:["Strong base","Moderate base","Weak base","Not a base"], correct:2},
+      {q:"Which is the strongest base?", options:["NH\u2083","CH\u2083NH\u2082","(CH\u2083)\u2082NH","Aniline (C\u2086H\u2085NH\u2082)"], correct:2},
+      {q:"Quaternary ammonium ions are ___ (basic/neutral/acidic):", options:["Basic","Neutral","Acidic","Depends"], correct:1},
+      {q:"The conjugate acid of an amine (RNH\u2083\u207A) is:", options:["A stronger base","A weaker acid","An ammonium ion","An amide"], correct:2}
+    ]
+  },
+  {
+    id:4, title:"Amide Formation and Naming",
+    instruction:"Fill in the blank about amide formation and naming.",
+    rows:[
+      ["1","Amide formation: carboxylic acid + amine \u2192 ___ + water","amide"],
+      ["2","This is a ___ reaction (condensation/addition)","condensation"],
+      ["3","The amide functional group is ___","-CONH2 / CONH2 / -CONHR / CONR2"],
+      ["4","IUPAC amide suffix is ___","-amide / amide"],
+      ["5","CH\u2083CONH\u2082 is called ___ (IUPAC)","ethanamide / acetamide"],
+      ["6","HCONH\u2082 is called ___ (IUPAC)","methanamide / formamide"],
+      ["7","The C-N bond in amides has partial ___ bond character","double"],
+      ["8","Amide bond formation releases a molecule of ___","water / H2O"],
+      ["9","CH\u2083CONHCH\u2083 is called ___","N-methylethanamide / N-methylacetamide"],
+      ["10","CH\u2083CON(CH\u2083)\u2082 is called ___","N,N-dimethylethanamide / N,N-dimethylacetamide"],
+      ["11","An amide with -CONH\u2082 (no alkyl on N) is ___ substituted","un / unsubstituted"],
+      ["12","An amide with -CONHR is ___ substituted","mono / N-substituted"],
+      ["13","An amide with -CONR\u2082 is ___ substituted","di / N,N-disubstituted"],
+      ["14","DMF (N,N-dimethylformamide) is a common ___","solvent"],
+      ["15","The amide C-N bond is ___ (shorter/longer) than a typical C-N single bond","shorter"]
+    ]
+  },
+  {
+    id:5, title:"Amide Properties and Resonance", type:"mc",
+    instruction:"Select the correct answer about amide properties.",
+    questions:[
+      {q:"The amide bond is unusually stable because of:", options:["Ionic bonding","Resonance (lone pair on N delocalizes into C=O)","Van der Waals forces","Hydrogen bonding only"], correct:1},
+      {q:"Compared to amines, amides have:", options:["Lower melting points","Similar melting points","Higher melting points","No melting point"], correct:2},
+      {q:"Amides are ___ compared to amines:", options:["Much more basic","Much less basic (nearly neutral)","Equally basic","More acidic than carboxylic acids"], correct:1},
+      {q:"The reason amides are not very basic is:", options:["No nitrogen present","The lone pair on N is delocalized into the carbonyl","They are too large","They have no hydrogen bonds"], correct:1},
+      {q:"Urea (H\u2082NCONH\u2082) is an example of:", options:["An amine","A diamide","An ester","An alcohol"], correct:1},
+      {q:"Nylon is a polymer containing many ___ bonds:", options:["Ester","Ether","Amide","Amine"], correct:2},
+      {q:"The amide bond is ___ (planar/non-planar):", options:["Non-planar","Planar","Tetrahedral","Variable"], correct:1},
+      {q:"Rotation around the amide C-N bond is ___ (free/restricted):", options:["Free","Restricted","Impossible","Very fast"], correct:1},
+      {q:"Primary amides (RCONH\u2082) can form ___ hydrogen bonds per molecule:", options:["0","1","2","4"], correct:2},
+      {q:"The amide group in proteins creates the ___ structure:", options:["Primary","Secondary (alpha helix, beta sheet)","Tertiary","Quaternary"], correct:1}
+    ]
+  },
+  {
+    id:6, title:"Peptide Bond and Proteins",
+    instruction:"Fill in the blank about peptide bonds and proteins.",
+    rows:[
+      ["1","A peptide bond is an ___ bond between amino acids","amide"],
+      ["2","Amino acids have both an -NH\u2082 group and a ___ group","-COOH / carboxyl / COOH"],
+      ["3","Two amino acids joined by a peptide bond form a ___","dipeptide"],
+      ["4","Many amino acids linked together form a ___","polypeptide / protein"],
+      ["5","Peptide bond formation releases a molecule of ___","water / H2O"],
+      ["6","Proteins are polypeptides with ___ or more amino acids","50 / many / hundreds"],
+      ["7","The peptide bond is between the -COOH of one amino acid and the ___ of the next","-NH2 / amino / NH2"],
+      ["8","There are ___ naturally occurring amino acids in proteins","20"],
+      ["9","The peptide bond is ___ (planar/non-planar) due to resonance","planar"],
+      ["10","Breaking peptide bonds by water is called ___","hydrolysis"],
+      ["11","Enzymes that break peptide bonds are called ___","proteases / peptidases"],
+      ["12","Kevlar is a synthetic ___ (polyester/polyamide) used in bulletproof vests","polyamide"],
+      ["13","Nylon 6,6 is made from a diamine and a ___ acid","dicarboxylic / diacid"],
+      ["14","The primary structure of a protein is its ___ sequence","amino acid"],
+      ["15","Alpha helices and beta sheets are examples of ___ structure","secondary"]
+    ]
+  },
+  {
+    id:7, title:"Neurotransmitter Amines", type:"mc",
+    instruction:"Select the correct answer about biologically important amines.",
+    questions:[
+      {q:"Dopamine, serotonin, and norepinephrine are all:", options:["Carboxylic acids","Amines","Esters","Amides"], correct:1},
+      {q:"Histamine triggers ___ responses in the body:", options:["Digestive","Allergic/inflammatory","Muscular","Reproductive"], correct:1},
+      {q:"Antihistamines work by blocking ___ receptors:", options:["Dopamine","Serotonin","Histamine","Acetylcholine"], correct:2},
+      {q:"Adrenaline (epinephrine) is classified as a:", options:["Carboxylic acid","Catecholamine (amine)","Ketone","Ester"], correct:1},
+      {q:"Amphetamine is a synthetic ___ that stimulates the CNS:", options:["Alcohol","Amine","Ester","Amide"], correct:1},
+      {q:"Putrescine (1,4-diaminobutane) is responsible for the smell of:", options:["Flowers","Decaying flesh","Fruit","Vanilla"], correct:1},
+      {q:"Caffeine contains ___ nitrogen atoms:", options:["1","2","3","4"], correct:3},
+      {q:"Gabriel synthesis is a method to produce primary ___ from phthalimide:", options:["Alcohols","Amines","Amides","Esters"], correct:1}
+    ]
+  },
+  {
+    id:8, title:"Amide Bond Formation Word Arrange", type:"arrange",
+    instruction:"Arrange the words to form correct statements about amine and amide chemistry.",
+    sentences:[
+      {prompt:"Amide bond formation:", words:["carboxylic","acid","+","amine","\u2192","amide","+","water"]},
+      {prompt:"Why amides are not basic:", words:["nitrogen","lone","pair","delocalized","into","carbonyl","by","resonance"]},
+      {prompt:"Amine basicity order:", words:["secondary",">","primary",">","ammonia",">","aniline"]},
+      {prompt:"Peptide bond in proteins:", words:["amino","acid","COOH","+","NH2","of","next","\u2192","peptide","bond"]},
+      {prompt:"Amide bond characteristics:", words:["planar,","rigid,","partial","double-bond","character"]},
+      {prompt:"Nylon formation:", words:["diamine","+","dicarboxylic","acid","\u2192","polyamide","+","water"]},
+      {prompt:"Hofmann elimination product:", words:["quaternary","ammonium","+","base","\u2192","alkene","+","amine"]},
+      {prompt:"Amine salt formation:", words:["amine","+","HCl","\u2192","ammonium","chloride","salt"]}
+    ]
+  },
+  {
+    id:9, title:"Mixed Review",
+    instruction:"Fill in the blank (mixed amine and amide problems).",
+    rows:[
+      ["1","Amines are ___ (acidic/basic)","basic"],
+      ["2","The lone pair on ___ makes amines basic","nitrogen / N"],
+      ["3","Aniline is a ___ amine (primary/secondary/tertiary)","primary"],
+      ["4","The amide bond has partial double-bond character due to ___","resonance"],
+      ["5","Proteins are held together by ___ bonds","peptide / amide"],
+      ["6","Trimethylamine is a ___ amine (primary/secondary/tertiary)","tertiary"],
+      ["7","Aniline is ___ (more/less) basic than methylamine","less"],
+      ["8","The Kb of amines is typically in the range of 10\u207B\u2074 to 10\u207B___","5 / 10"],
+      ["9","Quaternary ammonium salts are used as ___ (antiseptics)","surfactants / disinfectants / antiseptics"],
+      ["10","The Hofmann elimination of a quaternary ammonium salt produces an ___","alkene"],
+      ["11","Acetaminophen (Tylenol) contains an ___ group","amide"],
+      ["12","Penicillin contains a beta-___ ring (4-membered ring with N and C=O)","lactam"],
+      ["13","Amino acids at physiological pH exist as ___ (zwitterions)","zwitterions / dipolar ions"],
+      ["14","A zwitterion has both a positive ___ and a negative ___ charge","NH3+, COO- / ammonium, carboxylate"],
+      ["15","Capsaicin (the hot compound in peppers) contains an ___ bond","amide"]
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Amines & Amides Reference</h3>' +
+'<p><span class="rule">Amine Classification:</span></p>' +
+'<table><tr><th>Type</th><th>Structure</th><th>General</th><th>Example</th></tr>' +
+'<tr><td>Primary (1\u00B0)</td><td>R-NH\u2082</td><td>1 R group on N</td><td>CH\u2083NH\u2082 (methylamine)</td></tr>' +
+'<tr><td>Secondary (2\u00B0)</td><td>R\u2082NH</td><td>2 R groups on N</td><td>(CH\u2083)\u2082NH (dimethylamine)</td></tr>' +
+'<tr><td>Tertiary (3\u00B0)</td><td>R\u2083N</td><td>3 R groups on N</td><td>(CH\u2083)\u2083N (trimethylamine)</td></tr>' +
+'<tr><td>Quaternary</td><td>R\u2084N\u207A</td><td>4 R groups on N</td><td>(CH\u2083)\u2084N\u207A (tetramethylammonium)</td></tr></table>' +
+'<p><span class="rule">Naming:</span> IUPAC suffix = -amine. Name as alkanamine (methanamine, ethanamine). For complex amines: N- prefix for substituents on nitrogen (e.g., N-methylethanamine).</p>' +
+'<p><span class="rule">Basicity of Amines:</span> The lone pair on nitrogen accepts H\u207A (Lewis base, Br\u00F8nsted base). Amines are weak bases. Basicity order:</p>' +
+'<p>Aliphatic amines > NH\u2083 > Aromatic amines (aniline)</p>' +
+'<p>Why is aniline (C\u2086H\u2085NH\u2082) LESS basic? The lone pair on N is delocalized into the aromatic ring by resonance \u2192 less available to accept H\u207A.</p>' +
+'<p>Why are aliphatic amines MORE basic than NH\u2083? Alkyl groups are electron-donating (inductive effect) \u2192 increase electron density on N \u2192 lone pair more available.</p>' +
+'<p>Among aliphatic: 2\u00B0 > 1\u00B0 > 3\u00B0 (in water; 3\u00B0 drops due to steric hindrance and poor solvation of conjugate acid).</p>' +
+'<p><span class="rule">Amine Properties:</span> Small amines are water-soluble (H-bonding). Low-MW amines have fishy/ammonia-like odor. Amines have lower BP than alcohols but higher than comparable alkanes (N-H H-bonding is weaker than O-H).</p>' +
+'<p><span class="rule">Amide (-CONH\u2082) Formation:</span> Carboxylic acid + amine \u2192 amide + H\u2082O (condensation). This is a dehydration reaction. R-COOH + R\u2019-NH\u2082 \u2192 R-CONHR\u2019 + H\u2082O.</p>' +
+'<p><span class="rule">Amide Bond = Peptide Bond:</span> The amide bond (-CO-NH-) is the same bond that links amino acids in proteins. Amino acid + amino acid \u2192 dipeptide + H\u2082O. Proteins are polyamides.</p>' +
+'<p><span class="rule">Why Amides are NOT Basic:</span> Although amides contain nitrogen, the lone pair on N is delocalized into the adjacent C=O by resonance. This gives the C-N bond partial double-bond character \u2192 the bond is planar, rigid, and the lone pair is NOT available to accept H\u207A. Amides are essentially neutral (neither acidic nor basic).</p>' +
+'<p><span class="rule">Amide Properties:</span> Very high melting points (strong H-bonding + resonance rigidity). Very stable bonds (resist hydrolysis). The peptide bond in proteins is planar due to this resonance. Amides are the LEAST reactive carboxylic acid derivative.</p>' +
+'<p><span class="rule">Common Compounds:</span></p>' +
+'<table><tr><th>Compound</th><th>Type</th><th>Significance</th></tr>' +
+'<tr><td>Methylamine (CH\u2083NH\u2082)</td><td>1\u00B0 amine</td><td>Simplest primary amine</td></tr>' +
+'<tr><td>Aniline (C\u2086H\u2085NH\u2082)</td><td>Aromatic amine</td><td>Used in dye synthesis, less basic</td></tr>' +
+'<tr><td>Acetamide (CH\u2083CONH\u2082)</td><td>Amide</td><td>Simplest amide</td></tr>' +
+'<tr><td>Urea (H\u2082NCONH\u2082)</td><td>Diamide</td><td>Main nitrogen waste product in urine</td></tr>' +
+'<tr><td>Nylon</td><td>Polyamide</td><td>Synthetic polymer (repeating amide bonds)</td></tr>' +
+'<tr><td>Caffeine</td><td>Amine/amide</td><td>Contains both N-containing groups</td></tr>' +
+'<tr><td>Proteins</td><td>Polypeptides</td><td>Natural polyamides (amino acid chains)</td></tr></table>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 -NH\u2082 group, basicity, amide bond, peptide links \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

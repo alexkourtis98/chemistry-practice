@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice 42 — Aromatic Compounds & Benzene</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Practice 42 &mdash; Aromatic Compounds &amp; Benzene</h1>
+<p class="subtitle">Deep practice &mdash; benzene structure, naming, reactions, aromaticity</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_42';
+const SECTIONS = [
+  {
+    id:1, title:"Benzene Basics",
+    instruction:"Fill in the correct answer for each question about benzene.",
+    rows:[
+      ["1","Molecular formula of benzene","C6H6 / C\u2086H\u2086"],
+      ["2","Benzene has a ___ ring structure","hexagonal / 6-membered"],
+      ["3","Benzene has ___ alternating double bonds (in Kekule structure)","3 / delocalized"],
+      ["4","The \u03c0 electrons in benzene are said to be ___","delocalized"],
+      ["5","Benzene is represented by a hexagon with a ___ inside","circle"],
+      ["6","The C\u2013C bonds in benzene are all ___ length","equal / the same"],
+      ["7","Benzene is a ___ hydrocarbon","aromatic"],
+      ["8","Benzene is ___ reactive than typical alkenes toward addition","less"],
+      ["9","Each carbon in benzene is ___ hybridized","sp2 / sp\u00B2"],
+      ["10","The C-C bond length in benzene is ___ \u00c5","1.40 / 1.39"],
+      ["11","A typical C=C double bond is ___ \u00c5","1.34"],
+      ["12","A typical C-C single bond is ___ \u00c5","1.54"],
+      ["13","Benzene's heat of hydrogenation is ___ than expected for 3 double bonds","lower / less"],
+      ["14","The resonance energy of benzene is approximately ___ kJ/mol","150 / 152 / 36 kcal"],
+      ["15","Benzene has ___ (more/less) stability than cyclohexatriene would have","more"],
+      ["16","The degree of unsaturation (index of hydrogen deficiency) for C\u2086H\u2086 is ___","4"]
+    ]
+  },
+  {
+    id:2, title:"Naming Benzene Derivatives",
+    instruction:"Write the common or IUPAC name, or the positional term.",
+    rows:[
+      ["1","C\u2086H\u2085\u2013CH\u2083 is called ___","toluene / methylbenzene"],
+      ["2","C\u2086H\u2085\u2013OH is called ___","phenol"],
+      ["3","C\u2086H\u2085\u2013NH\u2082 is called ___","aniline"],
+      ["4","C\u2086H\u2085\u2013 (benzene as a substituent) is called ___","phenyl"],
+      ["5","1,2-dimethylbenzene is also called ___","ortho-xylene / o-xylene"],
+      ["6","1,3- positions on benzene are called ___","meta / m-"],
+      ["7","1,4- positions on benzene are called ___","para / p-"],
+      ["8","1,2- positions on benzene are called ___","ortho / o-"],
+      ["9","C\u2086H\u2085\u2013COOH is called ___","benzoic acid"],
+      ["10","C\u2086H\u2085\u2013CHO is called ___","benzaldehyde"],
+      ["11","C\u2086H\u2085\u2013NO\u2082 is called ___","nitrobenzene"],
+      ["12","C\u2086H\u2085\u2013Cl is called ___","chlorobenzene"],
+      ["13","Two fused benzene rings = ___","naphthalene"],
+      ["14","1,3,5-trimethylbenzene is also called ___","mesitylene"],
+      ["15","C\u2086H\u2085\u2013CH=CH\u2082 is called ___","styrene / vinylbenzene / ethenylbenzene"],
+      ["16","The \u2013C\u2086H\u2085 group is named ___ in IUPAC","phenyl"]
+    ]
+  },
+  {
+    id:3, title:"EAS Reactions & Mechanism", type:"mc",
+    instruction:"Select the correct answer about electrophilic aromatic substitution.",
+    questions:[
+      {q:"Benzene primarily undergoes ___ reactions (not addition).", options:["Elimination","Substitution","Addition","Combustion only"], correct:1},
+      {q:"Halogenation of benzene: C\u2086H\u2086 + Br\u2082 \u2192 C\u2086H\u2085Br + ___", options:["H\u2082","Br\u2082","HBr","H\u2082O"], correct:2},
+      {q:"Nitration of benzene uses HNO\u2083 + H\u2082SO\u2084 to add which group?", options:["\u2013OH","\u2013NO\u2082 (nitro)","\u2013NH\u2082","\u2013COOH"], correct:1},
+      {q:"Friedel-Crafts alkylation adds what type of group to benzene?", options:["Halogen","Nitro","Alkyl","Hydroxyl"], correct:2},
+      {q:"Why doesn't benzene undergo addition reactions easily?", options:["It is too small","Addition would destroy aromatic stability","It has no double bonds","It is saturated"], correct:1},
+      {q:"Catalysts for benzene halogenation (FeBr\u2083, AlCl\u2083) are classified as:", options:["Bronsted acids","Lewis acids","Reducing agents","Free radical initiators"], correct:1},
+      {q:"Sulfonation of benzene adds which group?", options:["\u2013SO\u2083H","\u2013SH","\u2013SO\u2082","\u2013S"], correct:0},
+      {q:"The general name for benzene's reaction mechanism is:", options:["Nucleophilic addition","Free radical substitution","Electrophilic aromatic substitution","SN2"], correct:2},
+      {q:"In EAS step 1, the electrophile attacks the ___ cloud:", options:["sigma","pi / \u03c0","d orbital","lone pair"], correct:1},
+      {q:"The intermediate in EAS is called a:", options:["Free radical","Carbanion","Carbocation / arenium ion","Enolate"], correct:2},
+      {q:"In EAS step 2, a ___ is lost to restore aromaticity:", options:["Electron","Proton (H\u207a)","Neutron","Halide"], correct:1},
+      {q:"Friedel-Crafts acylation adds what type of group?", options:["Alkyl","Acyl (RCO\u2013)","Hydroxyl","Amino"], correct:1},
+      {q:"Which cannot undergo Friedel-Crafts reactions?", options:["Toluene","Benzene","Nitrobenzene (strongly deactivated ring)","Phenol"], correct:2},
+      {q:"The electrophile in nitration is:", options:["NO\u2082\u207b","NO\u2082\u207a (nitronium ion)","HNO\u2083","NO"], correct:1},
+      {q:"The electrophile in Friedel-Crafts alkylation is:", options:["R\u207b","R\u207a (carbocation)","AlCl\u2083","RCl"], correct:1}
+    ]
+  },
+  {
+    id:4, title:"Directing Effects",
+    instruction:"Fill in the correct answer about substituent directing effects.",
+    rows:[
+      ["1","Activating groups direct new substituents to ___ and ___ positions","ortho, para / o, p"],
+      ["2","Deactivating groups (except halogens) direct to ___ position","meta / m"],
+      ["3","\u2013OH group is an ___ (activating/deactivating) group","activating"],
+      ["4","\u2013NO\u2082 group is a ___ (activating/deactivating) group","deactivating"],
+      ["5","\u2013CH\u2083 is an ___ directing group","ortho/para / activating / o,p"],
+      ["6","\u2013NH\u2082 is an ___ directing group","ortho/para / activating / o,p"],
+      ["7","\u2013COOH is a ___ directing group","meta / deactivating / m"],
+      ["8","\u2013Cl is ortho/para directing but ___ (activating/deactivating)","deactivating"],
+      ["9","Electron-donating groups are ___ directors","ortho/para / o,p"],
+      ["10","Electron-withdrawing groups are ___ directors","meta / m"],
+      ["11","\u2013OCH\u2083 is an ___ directing group","ortho/para / activating / o,p"],
+      ["12","\u2013CF\u2083 is a ___ directing group","meta / deactivating / m"],
+      ["13","Halogens are unique: they are ___ directing but ___","ortho/para, deactivating"],
+      ["14","Alkyl groups activate the ring by ___ effect","inductive / hyperconjugation / electron donation"],
+      ["15","Strong activating groups make EAS reactions go ___ (faster/slower)","faster"]
+    ]
+  },
+  {
+    id:5, title:"Aromaticity & Huckel's Rule", type:"mc",
+    instruction:"Select the correct answer about aromaticity rules.",
+    questions:[
+      {q:"H\u00fcckel's rule: aromatic compounds have ___ \u03c0 electrons.", options:["4n","4n+1","4n+2","4n+3"], correct:2},
+      {q:"Benzene has 6 \u03c0 electrons. Using 4n+2 = 6, what is n?", options:["0","1","2","3"], correct:1},
+      {q:"Cyclooctatetraene has 8 \u03c0 electrons. Is it aromatic?", options:["Yes, 8 = 4(2)","No, 8 \u2260 4n+2 for any integer n","Yes, it has alternating double bonds","Yes, it is planar"], correct:1},
+      {q:"For a molecule to be aromatic, it must be:", options:["Linear","Planar and cyclic with 4n+2 \u03c0 electrons","Any ring with double bonds","A 6-membered ring only"], correct:1},
+      {q:"Cyclopentadienyl anion (C\u2085H\u2085\u207b) has 6 \u03c0 electrons. Is it aromatic?", options:["No, it is charged","Yes, it satisfies H\u00fcckel's rule","No, it has 5 carbons","Only if heated"], correct:1},
+      {q:"A compound with 4n \u03c0 electrons is called:", options:["Aromatic","Anti-aromatic","Non-aromatic","Super-aromatic"], correct:1},
+      {q:"Cyclopropenyl cation (C\u2083H\u2083\u207a) has 2 \u03c0 electrons. Is it aromatic?", options:["No, too small","Yes, 4(0)+2=2","No, it is charged","Only in solution"], correct:1},
+      {q:"Pyridine (C\u2085H\u2085N) is aromatic because:", options:["It has 5 carbons","It has 6 \u03c0 electrons and is planar cyclic","It contains nitrogen","It is a liquid"], correct:1},
+      {q:"Furan (C\u2084H\u2084O) is aromatic. Its oxygen contributes ___ electrons to the \u03c0 system:", options:["0","1","2","4"], correct:2},
+      {q:"Non-aromatic means:", options:["4n \u03c0 electrons","Does not meet all criteria for aromaticity, but not destabilized","Contains no rings","Always unstable"], correct:1},
+      {q:"Which is aromatic?", options:["Cyclobutadiene (4\u03c0e)","Cycloheptatrienyl cation (6\u03c0e)","Cyclooctatetraene (8\u03c0e)","Linear hexatriene"], correct:1},
+      {q:"The tropylium cation (C\u2087H\u2087\u207a) has ___ \u03c0 electrons:", options:["4","6","8","10"], correct:1}
+    ]
+  },
+  {
+    id:6, title:"Polycyclic Aromatics & Properties", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Naphthalene has ___ fused benzene rings.", options:["1","2","3","4"], correct:1},
+      {q:"Anthracene has ___ fused benzene rings.", options:["2","3","4","5"], correct:1},
+      {q:"PAHs (Polycyclic Aromatic Hydrocarbons) are known to be:", options:["Vitamins","Carcinogens","Catalysts","Inert gases"], correct:1},
+      {q:"Naphthalene is commonly found in:", options:["Table salt","Mothballs","Vinegar","Baking soda"], correct:1},
+      {q:"The molecular formula of naphthalene is:", options:["C\u2086H\u2086","C\u2081\u2080H\u2088","C\u2081\u2084H\u2081\u2080","C\u2088H\u2086"], correct:1},
+      {q:"Phenanthrene has 3 fused rings arranged in a ___ shape.", options:["Linear","Angular/zigzag","Circular","Branched"], correct:1},
+      {q:"Benzene is a ___ (liquid/gas) at room temperature:", options:["Gas","Solid","Liquid","Plasma"], correct:2},
+      {q:"Benzene is classified as a known:", options:["Vitamin","Carcinogen","Nutrient","Catalyst"], correct:1},
+      {q:"TNT (trinitrotoluene) has ___ NO\u2082 groups on a toluene ring:", options:["1","2","3","4"], correct:2},
+      {q:"Styrene (C\u2086H\u2085CH=CH\u2082) is used to make:", options:["Nylon","Polyethylene","Polystyrene","PVC"], correct:2},
+      {q:"Pyrene has ___ fused rings:", options:["2","3","4","5"], correct:2},
+      {q:"Benzo[a]pyrene is a potent carcinogen found in:", options:["Vitamins","Grilled meat / cigarette smoke","Medicine","Soap"], correct:1}
+    ]
+  },
+  {
+    id:7, title:"Mixed Review", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Which is NOT a common benzene derivative?", options:["Toluene","Phenol","Ethane","Aniline"], correct:2},
+      {q:"The ortho position refers to substituents at positions:", options:["1,2","1,3","1,4","2,4"], correct:0},
+      {q:"Benzene's unusual stability comes from:", options:["Strong C\u2013H bonds","Electron delocalization across the ring","High molecular weight","Absence of double bonds"], correct:1},
+      {q:"Electrophilic aromatic substitution preserves:", options:["The substituent","The catalyst","The aromatic ring system","The leaving group"], correct:2},
+      {q:"Which compound is aromatic? (H\u00fcckel's rule)", options:["Cyclobutadiene (4 \u03c0 e\u207b)","Benzene (6 \u03c0 e\u207b)","Cyclooctatetraene (8 \u03c0 e\u207b)","Linear hexatriene"], correct:1},
+      {q:"The C\u2013C bond length in benzene (1.40 \u00c5) is between:", options:["Single (1.54) and double (1.34)","Double and triple","Single and triple","All bonds are single"], correct:0},
+      {q:"Xylene (dimethylbenzene) has ___ structural isomers.", options:["1","2","3","4"], correct:2},
+      {q:"Which reagent combination is used for benzene nitration?", options:["HCl + AlCl\u2083","HNO\u2083 + H\u2082SO\u2084","NaOH + H\u2082O","KMnO\u2084 + heat"], correct:1},
+      {q:"If toluene undergoes nitration, the major products are:", options:["Only meta-nitrotoluene","Ortho- and para-nitrotoluene","Only ortho-nitrotoluene","No reaction occurs"], correct:1},
+      {q:"Nitrobenzene undergoes a second nitration at the ___ position:", options:["Ortho","Para","Meta","No second nitration possible"], correct:2},
+      {q:"Which has a higher melting point: ortho- or para-dichlorobenzene?", options:["Ortho (more polar)","Para (more symmetrical)","Same","Cannot determine"], correct:1},
+      {q:"Benzene does NOT decolorize bromine water because:", options:["It has no electrons","It is too stable for addition; needs Lewis acid catalyst","It is already brominated","It is an alkane"], correct:1}
+    ]
+  },
+  {
+    id:8, title:"Substituent Positions", type:"arrange",
+    instruction:"Arrange the words in the correct order.",
+    sentences:[
+      {prompt:"Order substituent positions by number:", words:["ortho","(1,2)","<","meta","(1,3)","<","para","(1,4)"]},
+      {prompt:"EAS mechanism steps:", words:["electrophile","attacks","pi","cloud,","forms","arenium","ion,","proton","lost,","aromaticity","restored"]},
+      {prompt:"Directing effect classification:", words:["activating","=","ortho/para","directors;","deactivating","=","meta","directors","(except","halogens)"]},
+      {prompt:"Aromaticity criteria:", words:["cyclic,","planar,","conjugated,","4n+2","pi","electrons"]},
+      {prompt:"Rank activating strength (strongest to weakest):", words:["-NH2","(strongest)",">"," -OH",">","-CH3",">","-H","(reference)"]},
+      {prompt:"Rank deactivating strength (weakest to strongest):", words:["-F","(weakest)","<","-COOH","<","-CF3","<","-NO2","(strongest)"]}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>1. Benzene Structure & Resonance</h3><p><span class="rule">Benzene (C\u2086H\u2086):</span> Planar hexagonal ring with 6 delocalized \u03c0 electrons. All C\u2013C bonds are equal length (1.40 \u00c5), intermediate between single (1.54) and double (1.34). All bond angles = 120\u00B0. sp\u00B2 hybridized carbons.</p><p><span class="rule">Resonance:</span> Two equivalent Kekul\u00e9 structures, but benzene is a resonance HYBRID (neither structure alone). The circle-in-hexagon symbol represents the delocalized \u03c0 electron cloud.</p><p><span class="rule">Evidence of delocalization:</span> Equal bond lengths, unusually low heat of hydrogenation (152 kJ/mol less than expected for 3 C=C), resistance to addition reactions.</p><h3>2. Aromaticity Rules (H\u00fcckel\'s Rule)</h3><p><span class="rule">A molecule is aromatic if ALL four criteria are met:</span></p><p>1. <strong>Cyclic</strong> (closed ring)</p><p>2. <strong>Planar</strong> (all atoms in one plane)</p><p>3. <strong>Fully conjugated</strong> (p orbital on every atom in the ring)</p><p>4. <strong>4n+2 \u03c0 electrons</strong> (n = 0, 1, 2, 3...)</p><table><tr><th>\u03c0 electrons</th><th>n value</th><th>Classification</th><th>Examples</th></tr><tr><td>2</td><td>0</td><td>Aromatic</td><td>Cyclopropenyl cation</td></tr><tr><td>6</td><td>1</td><td>Aromatic</td><td>Benzene, pyridine, furan</td></tr><tr><td>10</td><td>2</td><td>Aromatic</td><td>Naphthalene</td></tr><tr><td>14</td><td>3</td><td>Aromatic</td><td>Anthracene</td></tr><tr><td>4</td><td>\u2014</td><td>Anti-aromatic</td><td>Cyclobutadiene</td></tr><tr><td>8</td><td>\u2014</td><td>Anti-aromatic</td><td>Cyclooctatetraene (planar form)</td></tr></table><p><span class="rule">Non-aromatic:</span> Does not satisfy all four criteria (e.g., not cyclic, not planar, not fully conjugated).</p><h3>3. Electrophilic Aromatic Substitution (EAS)</h3><p><span class="rule">General mechanism (3 steps):</span></p><p>1. <strong>Generate electrophile</strong> (E\u207A) using Lewis acid catalyst</p><p>2. <strong>Electrophilic attack:</strong> E\u207A attacks \u03c0 cloud \u2192 arenium ion intermediate (sigma complex, carbocation)</p><p>3. <strong>Deprotonation:</strong> H\u207A lost, aromaticity restored</p><table><tr><th>Reaction</th><th>Electrophile</th><th>Catalyst</th><th>Product</th></tr><tr><td>Halogenation</td><td>Br\u207A or Cl\u207A</td><td>FeBr\u2083 / AlCl\u2083</td><td>Bromobenzene / Chlorobenzene</td></tr><tr><td>Nitration</td><td>NO\u2082\u207A</td><td>H\u2082SO\u2084 / HNO\u2083</td><td>Nitrobenzene</td></tr><tr><td>Sulfonation</td><td>SO\u2083</td><td>H\u2082SO\u2084 (fuming)</td><td>Benzenesulfonic acid</td></tr><tr><td>Friedel-Crafts alkylation</td><td>R\u207A</td><td>AlCl\u2083</td><td>Alkylbenzene</td></tr><tr><td>Friedel-Crafts acylation</td><td>RCO\u207A</td><td>AlCl\u2083</td><td>Acylbenzene (ketone)</td></tr></table><p><span class="rule">Key point:</span> Benzene prefers SUBSTITUTION over addition (preserves aromatic stability).</p><h3>4. Directing Effects (ortho/meta/para)</h3><p><span class="rule">Naming positions:</span></p><table><tr><th>Position</th><th>Numbers</th><th>Prefix</th></tr><tr><td>Adjacent</td><td>1,2-</td><td>ortho- (o-)</td></tr><tr><td>Separated by one</td><td>1,3-</td><td>meta- (m-)</td></tr><tr><td>Opposite</td><td>1,4-</td><td>para- (p-)</td></tr></table><h3>5. Activating vs Deactivating Groups</h3><table><tr><th>Group</th><th>Effect</th><th>Directing</th><th>Examples</th></tr><tr><td>Strong activating</td><td>Speeds up EAS</td><td>ortho/para</td><td>\u2013NH\u2082, \u2013NHR, \u2013OH</td></tr><tr><td>Moderate activating</td><td>Speeds up EAS</td><td>ortho/para</td><td>\u2013OR, \u2013NHCOR</td></tr><tr><td>Weak activating</td><td>Speeds up slightly</td><td>ortho/para</td><td>\u2013R (alkyl), \u2013C\u2086H\u2085</td></tr><tr><td>Weak deactivating</td><td>Slows down</td><td>ortho/para</td><td>\u2013F, \u2013Cl, \u2013Br, \u2013I (halogens!)</td></tr><tr><td>Moderate deactivating</td><td>Slows down</td><td>meta</td><td>\u2013CHO, \u2013COR, \u2013COOH, \u2013COOR</td></tr><tr><td>Strong deactivating</td><td>Slows down greatly</td><td>meta</td><td>\u2013NO\u2082, \u2013CF\u2083, \u2013CN, \u2013SO\u2083H</td></tr></table><p><span class="rule">Key exception:</span> Halogens are deactivating but ortho/para directing (they withdraw by induction but donate by resonance).</p><p><span class="rule">Rule of thumb:</span> Groups with lone pairs on atom attached to ring \u2192 ortho/para. Groups with \u03c0 bonds to electronegative atoms \u2192 meta.</p><h3>6. Common Aromatic Compounds</h3><table><tr><th>Name</th><th>Formula</th><th>Substituent</th><th>Use</th></tr><tr><td>Toluene</td><td>C\u2086H\u2085CH\u2083</td><td>\u2013CH\u2083</td><td>Solvent, TNT precursor</td></tr><tr><td>Phenol</td><td>C\u2086H\u2085OH</td><td>\u2013OH</td><td>Disinfectant, plastic precursor</td></tr><tr><td>Aniline</td><td>C\u2086H\u2085NH\u2082</td><td>\u2013NH\u2082</td><td>Dye manufacturing</td></tr><tr><td>Benzoic acid</td><td>C\u2086H\u2085COOH</td><td>\u2013COOH</td><td>Food preservative</td></tr><tr><td>Nitrobenzene</td><td>C\u2086H\u2085NO\u2082</td><td>\u2013NO\u2082</td><td>Aniline precursor</td></tr><tr><td>Styrene</td><td>C\u2086H\u2085CH=CH\u2082</td><td>\u2013CH=CH\u2082</td><td>Polystyrene monomer</td></tr><tr><td>Naphthalene</td><td>C\u2081\u2080H\u2088</td><td>Two fused rings</td><td>Mothballs</td></tr></table><h3>7. Tips & Common Mistakes</h3><p>1. Benzene does NOT undergo addition (like alkenes do) \u2014 it undergoes substitution to preserve aromaticity</p><p>2. The \u03c0 electrons in benzene belong to the entire ring, not to specific C=C bonds</p><p>3. In multi-substituted benzene, existing groups determine where the next substituent goes</p><p>4. Friedel-Crafts reactions do NOT work on strongly deactivated rings (\u2013NO\u2082, \u2013CN)</p>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 benzene structure, naming, reactions, aromaticity \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

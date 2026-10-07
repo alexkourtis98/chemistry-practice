@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Stoichiometry n-m-M</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the answer...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Stoichiometry n-m-M</h1>
+<p class="subtitle">Deep practice &mdash; n=m/M, m=n&times;M, M=m/n</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_11';
+const SECTIONS = [
+  {
+    id:1, title:"Which formula to use?",
+    instruction:"Write the correct formula (e.g. n=m/M, m=n×M, M=m/n).",
+    rows:[
+      ["1","Given m and M, find n","n = m / M / n=m/M / n = m/M"],
+      ["2","Given n and M, find m","m = n × M / m=n×M / m = n * M / m=nM / m = nM"],
+      ["3","Given m and n, find M","M = m / n / M=m/n / M = m/n"],
+      ["4","Given: 46g Na, M=23. Find n","n = m / M / n=m/M / n = m/M"],
+      ["5","Given: 3 mol, M=58.5. Find m","m = n × M / m=n×M / m = n * M / m=nM"],
+      ["6","Given: 100g, 4 mol. Find M","M = m / n / M=m/n / M = m/n"],
+      ["7","n = m / ?","M"],
+      ["8","m = ? × M","n"],
+      ["9","M = ? / n","m"],
+      ["10","Given: 0.5 mol, mass = 49g. Find M","M = m / n / M=m/n"],
+      ["11","Given: M=44, n=3. Find m","m = n × M / m=n×M"],
+      ["12","Given: m=160g, M=160. Find n","n = m / M / n=m/M"],
+      ["13","To find how many grams I need, use:","m = n × M / m=n×M"],
+      ["14","To identify an unknown substance, find:","M = m / n / M=m/n"],
+      ["15","To know how many moles I have, use:","n = m / M / n=m/M"]
+    ]
+  },
+  {
+    id:2, title:"n = m/M practice",
+    instruction:"Calculate the moles (n = m / M).",
+    rows:[
+      ["1","23g Na (M=23) → n =","1 / 1 mol"],
+      ["2","48g Mg (M=24) → n =","2 / 2 mol"],
+      ["3","54g Al (M=27) → n =","2 / 2 mol"],
+      ["4","72g H₂O (M=18) → n =","4 / 4 mol"],
+      ["5","117g NaCl (M=58.5) → n =","2 / 2 mol"],
+      ["6","490g H₂SO₄ (M=98) → n =","5 / 5 mol"],
+      ["7","12g C (M=12) → n =","1 / 1 mol"],
+      ["8","32g O₂ (M=32) → n =","1 / 1 mol"],
+      ["9","4.6g Na (M=23) → n =","0.2 / 0.2 mol"],
+      ["10","2.4g Mg (M=24) → n =","0.1 / 0.1 mol"],
+      ["11","342g C₁₂H₂₂O₁₁ (M=342) → n =","1 / 1 mol"],
+      ["12","180g glucose (M=180) → n =","1 / 1 mol"],
+      ["13","5.85g NaCl (M=58.5) → n =","0.1 / 0.1 mol"],
+      ["14","0.98g H₂SO₄ (M=98) → n =","0.01 / 0.01 mol"],
+      ["15","160g CuSO₄ (M=159.5) → n =","1 / ≈1 / 1.003 / 1 mol"],
+      ["16","14g N₂ (M=28) → n =","0.5 / 0.5 mol"],
+      ["17","2g H₂ (M=2) → n =","1 / 1 mol"],
+      ["18","71g Cl₂ (M=71) → n =","1 / 1 mol"]
+    ]
+  },
+  {
+    id:3, title:"m = n × M practice",
+    instruction:"Calculate the mass (m = n × M).",
+    rows:[
+      ["1","1 mol Na (M=23) → m =","23 / 23 g"],
+      ["2","3 mol H₂O (M=18) → m =","54 / 54 g"],
+      ["3","0.5 mol CO₂ (M=44) → m =","22 / 22 g"],
+      ["4","2 mol CaCl₂ (M=111) → m =","222 / 222 g"],
+      ["5","4 mol NaCl (M=58.5) → m =","234 / 234 g"],
+      ["6","0.1 mol H₂SO₄ (M=98) → m =","9.8 / 9.8 g"],
+      ["7","10 mol H₂O (M=18) → m =","180 / 180 g"],
+      ["8","1.5 mol MgO (M=40) → m =","60 / 60 g"],
+      ["9","0.25 mol NaOH (M=40) → m =","10 / 10 g"],
+      ["10","0.05 mol H₂SO₄ (M=98) → m =","4.9 / 4.9 g"],
+      ["11","7 mol CO₂ (M=44) → m =","308 / 308 g"],
+      ["12","0.01 mol NaCl (M=58.5) → m =","0.585 / 0.585 g"],
+      ["13","2.5 mol Ca(OH)₂ (M=74) → m =","185 / 185 g"],
+      ["14","0.3 mol Fe₂O₃ (M=160) → m =","48 / 48 g"],
+      ["15","20 mol H₂ (M=2) → m =","40 / 40 g"],
+      ["16","0.001 mol CaCO₃ (M=100) → m =","0.1 / 0.1 g"]
+    ]
+  },
+  {
+    id:4, title:"M = m/n practice",
+    instruction:"Calculate the molar mass (M = m / n).",
+    rows:[
+      ["1","46g / 2 mol → M =","23 / 23 g/mol"],
+      ["2","180g / 10 mol → M =","18 / 18 g/mol"],
+      ["3","111g / 1 mol → M =","111 / 111 g/mol"],
+      ["4","392g / 4 mol → M =","98 / 98 g/mol"],
+      ["5","320g / 2 mol → M =","160 / 160 g/mol"],
+      ["6","74g / 1 mol → M =","74 / 74 g/mol"],
+      ["7","90g / 1 mol → M =","90 / 90 g/mol"],
+      ["8","120g / 3 mol → M =","40 / 40 g/mol"],
+      ["9","684g / 2 mol → M =","342 / 342 g/mol"],
+      ["10","7.1g / 0.1 mol → M =","71 / 71 g/mol"],
+      ["11","44g / 0.5 mol → M =","88 / 88 g/mol"],
+      ["12","585g / 10 mol → M =","58.5 / 58.5 g/mol"],
+      ["13","24g / 1 mol → M =","24 / 24 g/mol"],
+      ["14","102g / 1 mol → M =","102 / 102 g/mol"]
+    ]
+  },
+  {
+    id:5, title:"MC: Stoichiometry", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"n=m/M rearranged for m gives:", options:["m = M / n","m = n / M","m = n × M","m = n + M"], correct:2},
+      {q:"2 mol H₂O weigh? (M=18)", options:["9g","18g","36g","72g"], correct:2},
+      {q:"98g of a substance with M=98 is how many mol?", options:["0.5 mol","1 mol","2 mol","98 mol"], correct:1},
+      {q:"If M=40 g/mol and you have 0.5 mol, m=?", options:["20g","40g","80g","0.5g"], correct:0},
+      {q:"Which formula finds the molar mass?", options:["n = m/M","m = n×M","M = m/n","M = n×m"], correct:2},
+      {q:"100g, M=50. n=?", options:["0.5 mol","2 mol","50 mol","150 mol"], correct:1},
+      {q:"A 3 mol sample weighs 234g. What is M?", options:["78 g/mol","234 g/mol","3 g/mol","702 g/mol"], correct:0},
+      {q:"If you halve the mass (same substance), the moles:", options:["Double","Stay the same","Halve","Become zero"], correct:2},
+      {q:"Which has more moles: 100g of M=50 or 100g of M=100?", options:["M=50 substance (2 mol)","M=100 substance (1 mol)","Same","Cannot tell"], correct:0},
+      {q:"m = n × M. If n=0.1 and M=40, then m=?", options:["400g","0.4g","4g","0.25g"], correct:2},
+      {q:"An unknown substance: 71g = 1 mol. The substance could be:", options:["NaCl (58.5)","Cl₂ (71)","H₂O (18)","CO₂ (44)"], correct:1},
+      {q:"Which is the correct unit triangle? (top=m, bottom left=n, bottom right=M)", options:["m = n ÷ M","m = n × M","m = M ÷ n","m = n + M"], correct:1},
+      {q:"If n = 0, then m must equal:", options:["1","M","0","Cannot determine"], correct:2},
+      {q:"Double the moles, double the ___:", options:["Molar mass","Mass","Atomic number","Formula"], correct:1},
+      {q:"A chemist has 0.25 mol of NaOH (M=40). She has:", options:["10g","40g","100g","0.25g"], correct:0}
+    ]
+  },
+  {
+    id:6, title:"Multi-step problems",
+    instruction:"First find M (if needed), then calculate. Write only the final result.",
+    rows:[
+      ["1","Find M of MgCl₂ (Mg=24, Cl=35.5), then n for 95g → n =","1"],
+      ["2","Find M of NaOH (Na=23,O=16,H=1), then m for 2 mol → m =","80"],
+      ["3","Find M of CaCO₃ (Ca=40,C=12,O=16), then n for 200g → n =","2"],
+      ["4","Find M of Fe₂O₃ (Fe=56,O=16), then m for 0.5 mol → m =","80"],
+      ["5","Find M of H₂SO₄ (H=1,S=32,O=16), then n for 49g → n =","0.5"],
+      ["6","Find M of Al₂O₃ (Al=27,O=16), then m for 3 mol → m =","306"],
+      ["7","Find M of NH₄Cl (N=14,H=1,Cl=35.5), then n for 107g → n =","2"],
+      ["8","Find M of NaHCO₃ (Na=23,H=1,C=12,O=16), then m for 0.5 mol → m =","42"],
+      ["9","Find M of KNO₃ (K=39,N=14,O=16), then n for 505g → n =","5"],
+      ["10","Find M of Ca(OH)₂ (Ca=40,O=16,H=1), then m for 4 mol → m =","296"],
+      ["11","Find M of Mg(OH)₂ (Mg=24,O=16,H=1), then n for 29g → n =","0.5"],
+      ["12","Find M of Na₂CO₃ (Na=23,C=12,O=16), then m for 0.1 mol → m =","10.6"]
+    ]
+  },
+  {
+    id:7, title:"True/False",
+    instruction:"Write true or false.",
+    rows:[
+      ["1","n = M / m","false"],
+      ["2","If m = n × M, then M = m / n","true"],
+      ["3","2 mol H₂O = 36g","true"],
+      ["4","M depends on how many grams you have","false"],
+      ["5","n = 0 if m = 0","true"],
+      ["6","If two substances have the same mass, they have the same moles","false"],
+      ["7","M = m / n can be used to identify an unknown substance","true"],
+      ["8","0.5 mol of H₂SO₄ (M=98) weighs 196g","false"],
+      ["9","n is always positive (or zero)","true"],
+      ["10","To convert grams to moles, divide by M","true"],
+      ["11","To convert moles to grams, divide by M","false"],
+      ["12","If M doubles but m stays the same, n halves","true"]
+    ]
+  },
+  {
+    id:8, title:"Stoichiometry word problems",
+    instruction:"Solve the word problem. Write only the numerical answer with units.",
+    rows:[
+      ["1","A lab needs exactly 0.25 mol of NaCl (M=58.5). What mass should the technician weigh?","14.625 / 14.625 g / 14.63 / 14.63 g"],
+      ["2","A student weighs 7.1g of Cl₂ (M=71). How many moles?","0.1 / 0.1 mol"],
+      ["3","In a reaction, 3 mol of H₂O are produced. What mass of water is that? (M=18)","54 / 54 g"],
+      ["4","A sample of unknown metal weighs 27g and is exactly 1 mol. What element? (give M)","27 / 27 g/mol"],
+      ["5","You dissolve 4g NaOH (M=40) in water. How many moles dissolved?","0.1 / 0.1 mol"],
+      ["6","A reaction requires 1.5 mol of CaCO₃ (M=100). Grams needed?","150 / 150 g"],
+      ["7","You have 500g of Fe₂O₃ (M=160). Moles available?","3.125 / 3.125 mol / 3.13 / 3.13 mol"],
+      ["8","After a reaction, 0.05 mol of CO₂ (M=44) is produced. Mass of CO₂?","2.2 / 2.2 g"]
+    ]
+  },
+  {
+    id:9, title:"MC: Problem-solving strategies", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Step 1 when solving n=m/M problems:", options:["Calculate immediately","Identify what is given and what is unknown","Memorize the periodic table","Convert to liters"], correct:1},
+      {q:"You know m=46g and the substance is Na. What do you need to find n?", options:["Volume","Temperature","M of Na (23 g/mol)","Density"], correct:2},
+      {q:"If a problem gives grams and asks for moles:", options:["n = m × M","n = m / M","n = M / m","n = m + M"], correct:1},
+      {q:"If a problem gives moles and asks for grams:", options:["m = n / M","m = n × M","m = M / n","m = n - M"], correct:1},
+      {q:"A problem says '58.5g of NaCl'. This tells you:", options:["n = 58.5","M = 58.5","m = 58.5","The formula is wrong"], correct:2},
+      {q:"To solve: 'How many grams in 2.5 mol of H₂O?', you:", options:["2.5 / 18","2.5 × 18 = 45","18 / 2.5","2.5 + 18"], correct:1}
+    ]
+  },
+  {
+    id:10, title:"Arrange: problem-solving steps", type:"arrange",
+    instruction:"Arrange the problem-solving steps in order.",
+    sentences:[
+      {prompt:"Solve: 'How many moles in 92g of Na?'", words:["Identify:","m=92g,","M=23","→","n=m/M","→","n=92/23","→","n=4 mol"]},
+      {prompt:"Solve: 'What mass is 3 mol of H₂O?'", words:["Identify:","n=3,","M=18","→","m=n×M","→","m=3×18","→","m=54g"]},
+      {prompt:"Solve: 'Find M if 160g = 1 mol'", words:["Identify:","m=160g,","n=1","→","M=m/n","→","M=160/1","→","M=160"]},
+      {prompt:"Convert grams of NaCl to moles:", words:["Write","m","and","M=58.5","→","use","n=m/M","→","divide"]},
+      {prompt:"Steps for any n-m-M problem:", words:["Read","→","identify given","→","choose formula","→","substitute","→","calculate"]}
+    ]
+  },
+  {
+    id:11, title:"Percent yield & limiting reagent intro",
+    instruction:"Calculate the answer. Write only the number (with %).",
+    rows:[
+      ["1","Theoretical yield = 50g, actual yield = 40g. Percent yield?","80 / 80%"],
+      ["2","Theoretical yield = 100g, actual yield = 95g. Percent yield?","95 / 95%"],
+      ["3","Theoretical yield = 36g, actual yield = 27g. Percent yield?","75 / 75%"],
+      ["4","Theoretical yield = 200g, actual yield = 180g. Percent yield?","90 / 90%"],
+      ["5","Theoretical yield = 44g, actual yield = 44g. Percent yield?","100 / 100%"],
+      ["6","Percent yield formula: (actual / ___) × 100","theoretical / theoretical yield"],
+      ["7","If percent yield = 80% and theoretical = 100g, actual = ?","80 / 80 g"],
+      ["8","If percent yield = 50% and theoretical = 200g, actual = ?","100 / 100 g"]
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Stoichiometry \u2014 Complete Reference</h3>' +
+'<h3>The n-m-M Triangle</h3>' +
+'<p style="text-align:center;font-size:1.2em;margin:8px 0;padding:10px;border:1px solid #333;border-radius:6px;background:rgba(0,0,0,.2)">' +
+'<span class="rule">n = m / M</span> &nbsp; | &nbsp; <span class="rule">m = n \u00D7 M</span> &nbsp; | &nbsp; <span class="rule">M = m / n</span></p>' +
+'<table><tr><th>Symbol</th><th>Quantity</th><th>Unit</th></tr>' +
+'<tr><td><span class="rule">n</span></td><td>Amount (moles)</td><td>mol</td></tr>' +
+'<tr><td><span class="rule">m</span></td><td>Mass</td><td>g</td></tr>' +
+'<tr><td><span class="rule">M</span></td><td>Molar mass</td><td>g/mol</td></tr></table>' +
+'<h3>Stoichiometry Conversion Chain</h3>' +
+'<p style="text-align:center;font-size:.95em;padding:10px;border:1px dashed #555;border-radius:4px;background:rgba(0,0,0,.15)">' +
+'<span class="rule">grams A</span> \u2192 (\u00F7 M\u2090) \u2192 <span class="rule">moles A</span> \u2192 (mole ratio) \u2192 <span class="rule">moles B</span> \u2192 (\u00D7 M\u1D47) \u2192 <span class="rule">grams B</span></p>' +
+'<h3>Mole Ratio from Balanced Equation</h3>' +
+'<p>The coefficients in a balanced equation give the <span class="rule">mole ratio</span>:</p>' +
+'<p>2H\u2082 + O\u2082 \u2192 2H\u2082O</p>' +
+'<ul>' +
+'<li>2 mol H\u2082 : 1 mol O\u2082 : 2 mol H\u2082O</li>' +
+'<li>To go from moles of A to moles of B: n\u1D47 = n\u2090 \u00D7 (coefficient B / coefficient A)</li>' +
+'</ul>' +
+'<h3>Worked Multi-Step Example</h3>' +
+'<p><span class="rule">Problem:</span> How many grams of H\u2082O form from 8 g of H\u2082?</p>' +
+'<p>Equation: 2H\u2082 + O\u2082 \u2192 2H\u2082O</p>' +
+'<ol>' +
+'<li>n(H\u2082) = m/M = 8/2 = <span class="rule">4 mol H\u2082</span></li>' +
+'<li>Mole ratio: 2 mol H\u2082 \u2192 2 mol H\u2082O, so 4 mol H\u2082 \u2192 <span class="rule">4 mol H\u2082O</span></li>' +
+'<li>m(H\u2082O) = n \u00D7 M = 4 \u00D7 18 = <span class="rule">72 g H\u2082O</span></li>' +
+'</ol>' +
+'<h3>Limiting Reagent</h3>' +
+'<p>The <span class="rule">limiting reagent</span> is the reactant that runs out first. It determines how much product forms.</p>' +
+'<ol>' +
+'<li>Convert ALL reactants to moles</li>' +
+'<li>Divide each by its coefficient \u2192 the <span class="rule">smallest result</span> is the limiting reagent</li>' +
+'<li>Use the limiting reagent for all product calculations</li>' +
+'</ol>' +
+'<p>Example: 2H\u2082 + O\u2082 \u2192 2H\u2082O. Given 3 mol H\u2082 and 2 mol O\u2082:</p>' +
+'<p>H\u2082: 3/2 = 1.5 | O\u2082: 2/1 = 2. H\u2082 is smaller \u2192 <span class="rule">H\u2082 is limiting</span></p>' +
+'<h3>Percent Yield</h3>' +
+'<p><span class="rule">% yield = (actual yield / theoretical yield) \u00D7 100</span></p>' +
+'<ul>' +
+'<li>Theoretical yield = maximum product from stoichiometry</li>' +
+'<li>Actual yield = what you actually get in the lab</li>' +
+'<li>% yield is always \u2264 100% (if > 100%, there is an error)</li>' +
+'</ul>' +
+'<h3>Solution Stoichiometry</h3>' +
+'<p><span class="rule">n = C \u00D7 V</span> (C in mol/L, V in L)</p>' +
+'<p>Or equivalently: <span class="rule">n = M \u00D7 V</span> where M = molarity</p>' +
+'<p>Remember to convert mL to L: divide by 1000.</p>' +
+'<h3>Problem-Solving Steps</h3>' +
+'<ol>' +
+'<li><span class="rule">Identify</span> what is given and what is asked</li>' +
+'<li><span class="rule">Convert</span> given quantity to moles (n = m/M or n = C\u00D7V)</li>' +
+'<li><span class="rule">Use mole ratio</span> from balanced equation</li>' +
+'<li><span class="rule">Convert</span> to desired units (m = n\u00D7M or other)</li>' +
+'</ol>' +
+'<h3>Common Atomic Masses</h3>' +
+'<table><tr><th>H</th><th>C</th><th>N</th><th>O</th><th>Na</th><th>Mg</th><th>Al</th><th>S</th><th>Cl</th><th>K</th><th>Ca</th><th>Fe</th></tr>' +
+'<tr><td>1</td><td>12</td><td>14</td><td>16</td><td>23</td><td>24</td><td>27</td><td>32</td><td>35.5</td><td>39</td><td>40</td><td>56</td></tr></table>' +
+'<h3>Common Mistakes</h3>' +
+'<ul>' +
+'<li>Forgetting to balance the equation first</li>' +
+'<li>Using mass ratio instead of mole ratio</li>' +
+'<li>Not converting mL to L for solution problems</li>' +
+'<li>Mixing up M (molar mass, g/mol) and M (molarity, mol/L)</li>' +
+'<li>Using the wrong substance\'s molar mass in conversion</li>' +
+'</ul>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 n=m/M, m=n\u00D7M, M=m/n \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

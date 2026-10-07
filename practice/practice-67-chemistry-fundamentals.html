@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Chemistry Fundamentals</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Chemistry Fundamentals</h1>
+<p class="subtitle">Deep practice &mdash; sig figs, scientific notation, unit conversions, density, temperature</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_67';
+const SECTIONS = [
+  {
+    id:1, title:"Significant Figures: Count them",
+    instruction:"How many significant figures does each number have?",
+    rows:[
+      ["1","0.00340","3"],
+      ["2","100.0","4"],
+      ["3","5020","3"],
+      ["4","0.07080","4"],
+      ["5","1.00","3"],
+      ["6","300","1"],
+      ["7","300.","3"],
+      ["8","300.0","4"],
+      ["9","0.00012","2"],
+      ["10","90,100","3"],
+      ["11","4.050","4"],
+      ["12","0.0030","2"],
+      ["13","8,000,000","1"],
+      ["14","6.022","4"],
+      ["15","10.003","5"],
+      ["16","0.500","3"],
+      ["17","7,200.","4"],
+      ["18","0.10010","5"],
+      ["19","50.00","4"],
+      ["20","0.000001","1"]
+    ]
+  },
+  {
+    id:2, title:"Rounding to Significant Figures",
+    instruction:"Round each number to the specified number of significant figures.",
+    rows:[
+      ["1","Round 3.456 to 3 sig figs","3.46"],
+      ["2","Round 0.002345 to 2 sig figs","0.0023"],
+      ["3","Round 1,234 to 2 sig figs","1,200 / 1200"],
+      ["4","Round 45.678 to 4 sig figs","45.68"],
+      ["5","Round 0.08765 to 3 sig figs","0.0877"],
+      ["6","Round 9.999 to 3 sig figs","10.0"],
+      ["7","Round 567.89 to 2 sig figs","570"],
+      ["8","Round 0.05050 to 2 sig figs","0.051"],
+      ["9","Round 2.345 to 2 sig figs","2.3"],
+      ["10","Round 78,432 to 3 sig figs","78,400 / 78400"],
+      ["11","Round 0.9996 to 3 sig figs","1.00"],
+      ["12","Round 123.45 to 4 sig figs","123.5"],
+      ["13","Round 6.0501 to 3 sig figs","6.05"],
+      ["14","Round 0.003456 to 3 sig figs","0.00346"],
+      ["15","Round 89,999 to 2 sig figs","90,000 / 90000"],
+      ["16","Round 4.005 to 3 sig figs","4.01 / 4.00"],
+      ["17","Round 0.10075 to 4 sig figs","0.1008"],
+      ["18","Round 250.49 to 3 sig figs","250. / 250"],
+      ["19","Round 15.555 to 4 sig figs","15.56"],
+      ["20","Round 0.7777 to 2 sig figs","0.78"]
+    ]
+  },
+  {
+    id:3, title:"MC: Sig Figs Rules", type:"mc",
+    instruction:"Select the correct answer about significant figures.",
+    questions:[
+      {q:"How many sig figs in 0.00450?", options:["2","3","4","5"], correct:1},
+      {q:"Trailing zeros WITHOUT a decimal point are:", options:["Always significant","Never significant","Ambiguous (not significant by convention)","Only significant if after a non-zero digit"], correct:2},
+      {q:"Leading zeros are:", options:["Always significant","Never significant","Sometimes significant","Significant if before a decimal"], correct:1},
+      {q:"How many sig figs in 1,000?", options:["1","2","3","4"], correct:0},
+      {q:"How many sig figs in 1,000.?", options:["1","2","3","4"], correct:3},
+      {q:"Zeros between non-zero digits (captured zeros) are:", options:["Never significant","Always significant","Only significant with a decimal","Depends on context"], correct:1},
+      {q:"How many sig figs in 6.022 \u00D7 10\u00B2\u00B3?", options:["2","3","4","23"], correct:2},
+      {q:"Exact numbers (like 12 eggs in a dozen) have:", options:["1 sig fig","2 sig figs","3 sig figs","Infinite sig figs"], correct:3},
+      {q:"When multiplying, the result should have:", options:["The most sig figs of any factor","The fewest sig figs of any factor","The sum of all sig figs","Always 3 sig figs"], correct:1},
+      {q:"When adding, the result should be rounded to:", options:["The fewest sig figs","The fewest decimal places","The most decimal places","It doesn't matter"], correct:1},
+      {q:"How many sig figs in 0.020?", options:["1","2","3","4"], correct:1},
+      {q:"How many sig figs in 10.00?", options:["2","3","4","1"], correct:2},
+      {q:"How many sig figs in 5.0 \u00D7 10\u207B\u00B3?", options:["1","2","3","4"], correct:1},
+      {q:"What is 2.5 \u00D7 3.42 rounded correctly?", options:["8.55","8.6","8.550","9"], correct:1},
+      {q:"How many sig figs in 100.10?", options:["3","4","5","6"], correct:2},
+      {q:"What is 12.11 + 0.3 rounded correctly?", options:["12.41","12.4","12","12.410"], correct:1},
+      {q:"How many sig figs in 0.0 ?", options:["0","1","2","Undefined"], correct:1},
+      {q:"Conversion factors like 1 km = 1000 m are:", options:["1 sig fig","4 sig figs","Exact (infinite)","3 sig figs"], correct:2},
+      {q:"How many sig figs in 8.200?", options:["2","3","4","1"], correct:2},
+      {q:"Which has 4 sig figs?", options:["0.0032","4500","3.100","50.0"], correct:2}
+    ]
+  },
+  {
+    id:4, title:"Scientific Notation Conversions",
+    instruction:"Write the number in scientific notation (e.g., 4.5 \u00D7 10\u207B\u2074 or 4.5 x 10^-4 or 4.5e-4).",
+    rows:[
+      ["1","0.00045","4.5 x 10^-4 / 4.5e-4"],
+      ["2","6,700,000","6.7 x 10^6 / 6.7e6"],
+      ["3","0.0821","8.21 x 10^-2 / 8.21e-2"],
+      ["4","93,000,000","9.3 x 10^7 / 9.3e7"],
+      ["5","0.000000072","7.2 x 10^-8 / 7.2e-8"],
+      ["6","3,200","3.2 x 10^3 / 3.2e3"],
+      ["7","0.0050","5.0 x 10^-3 / 5.0e-3"],
+      ["8","602,200,000,000,000,000,000,000","6.022 x 10^23 / 6.022e23"],
+      ["9","0.100","1.00 x 10^-1 / 1.0 x 10^-1 / 1e-1"],
+      ["10","450,000","4.5 x 10^5 / 4.5e5"],
+      ["11","0.00000301","3.01 x 10^-6 / 3.01e-6"],
+      ["12","88,000","8.8 x 10^4 / 8.8e4"],
+      ["13","0.0000000091","9.1 x 10^-9 / 9.1e-9"],
+      ["14","1,500","1.5 x 10^3 / 1.5e3"],
+      ["15","0.250","2.50 x 10^-1 / 2.5 x 10^-1 / 2.5e-1"],
+      ["16","7,890,000,000","7.89 x 10^9 / 7.89e9"],
+      ["17","0.0000440","4.40 x 10^-5 / 4.4 x 10^-5 / 4.4e-5"],
+      ["18","123,000","1.23 x 10^5 / 1.23e5"],
+      ["19","0.00602","6.02 x 10^-3 / 6.02e-3"],
+      ["20","10,000,000","1.0 x 10^7 / 1 x 10^7 / 1e7"]
+    ]
+  },
+  {
+    id:5, title:"Unit Conversions (Metric)",
+    instruction:"Convert the given measurement. Write just the number.",
+    rows:[
+      ["1","2.5 kg = ___ g","2500 / 2,500"],
+      ["2","350 mL = ___ L","0.350 / 0.35"],
+      ["3","4.2 m = ___ cm","420"],
+      ["4","75 cm = ___ m","0.75"],
+      ["5","500 mg = ___ g","0.500 / 0.5"],
+      ["6","3.0 L = ___ mL","3000 / 3,000"],
+      ["7","0.025 km = ___ m","25"],
+      ["8","6,500 g = ___ kg","6.5 / 6.500"],
+      ["9","150 nm = ___ m","1.5 x 10^-7 / 1.50 x 10^-7 / 1.5e-7"],
+      ["10","0.45 m = ___ mm","450"],
+      ["11","2,200 mg = ___ g","2.2 / 2.200"],
+      ["12","8.0 cm = ___ mm","80"],
+      ["13","1.5 \u00D7 10\u207B\u00B3 kg = ___ mg","1500 / 1,500"],
+      ["14","0.080 L = ___ mL","80"],
+      ["15","45 \u00B5m = ___ m","4.5 x 10^-5 / 4.5e-5 / 0.000045"]
+    ]
+  },
+  {
+    id:6, title:"MC: Density Problems", type:"mc",
+    instruction:"Select the correct answer. Use d = m/V.",
+    questions:[
+      {q:"An object has mass 50 g and volume 25 mL. Its density is:", options:["0.5 g/mL","2.0 g/mL","25 g/mL","75 g/mL"], correct:1},
+      {q:"Water has density 1.0 g/mL. An object with d = 0.8 g/mL will:", options:["Sink","Float","Stay in the middle","Dissolve"], correct:1},
+      {q:"Which is denser: 100 g in 50 mL or 200 g in 150 mL?", options:["100 g in 50 mL (2.0 g/mL)","200 g in 150 mL (1.33 g/mL)","They are equal","Cannot determine"], correct:0},
+      {q:"If density = 3.0 g/mL and volume = 10 mL, the mass is:", options:["3.0 g","0.33 g","30 g","13 g"], correct:2},
+      {q:"If mass = 45 g and density = 9.0 g/mL, the volume is:", options:["405 mL","5.0 mL","0.20 mL","54 mL"], correct:1},
+      {q:"Density is an example of a(n):", options:["Extensive property","Intensive property","Chemical property","Physical change"], correct:1},
+      {q:"A block has dimensions 2 cm \u00D7 3 cm \u00D7 5 cm and mass 90 g. Its density is:", options:["1.0 g/cm\u00B3","3.0 g/cm\u00B3","9.0 g/cm\u00B3","30 g/cm\u00B3"], correct:1},
+      {q:"If you cut a pure substance in half, its density:", options:["Is halved","Is doubled","Stays the same","Depends on the substance"], correct:2},
+      {q:"Oil floats on water because:", options:["Oil is heavier","Oil has lower density than water","Water is less dense","Oil has more mass"], correct:1},
+      {q:"The density of a gas is typically:", options:["Greater than liquids","Greater than solids","Less than liquids and solids","Equal to liquids"], correct:2},
+      {q:"An object sinks in water (d = 1.0 g/mL) but floats in mercury (d = 13.6 g/mL). Its density could be:", options:["0.5 g/mL","1.0 g/mL","5.0 g/mL","15 g/mL"], correct:2},
+      {q:"What is the mass of 250 mL of ethanol (d = 0.789 g/mL)?", options:["197 g","317 g","0.789 g","250 g"], correct:0},
+      {q:"If 10.0 mL of a liquid has mass 8.0 g, the liquid is most likely:", options:["Water (1.0 g/mL)","Ethanol (0.789 g/mL)","Vegetable oil (0.8 g/mL)","Mercury (13.6 g/mL)"], correct:2},
+      {q:"The SI unit for density is:", options:["g/mL","g/cm\u00B3","kg/m\u00B3","lb/ft\u00B3"], correct:2},
+      {q:"A 150 g sample has a volume of 50.0 cm\u00B3. What is its density?", options:["7,500 g/cm\u00B3","0.333 g/cm\u00B3","3.00 g/cm\u00B3","200 g/cm\u00B3"], correct:2}
+    ]
+  },
+  {
+    id:7, title:"Temperature Conversions",
+    instruction:"Convert the temperature. Round to nearest whole number where appropriate. K = \u00B0C + 273, \u00B0F = (9/5)\u00B0C + 32.",
+    rows:[
+      ["1","25\u00B0C = ___ K","298"],
+      ["2","100\u00B0C = ___ K","373"],
+      ["3","0\u00B0C = ___ K","273"],
+      ["4","-40\u00B0C = ___ K","233"],
+      ["5","37\u00B0C = ___ K (body temp)","310"],
+      ["6","300 K = ___ \u00B0C","27"],
+      ["7","77 K = ___ \u00B0C","-196"],
+      ["8","373 K = ___ \u00B0C","100"],
+      ["9","0\u00B0C = ___ \u00B0F","32"],
+      ["10","100\u00B0C = ___ \u00B0F","212"],
+      ["11","37\u00B0C = ___ \u00B0F","98.6 / 99"],
+      ["12","25\u00B0C = ___ \u00B0F","77"],
+      ["13","-40\u00B0C = ___ \u00B0F","-40"],
+      ["14","212\u00B0F = ___ \u00B0C","100"],
+      ["15","32\u00B0F = ___ \u00B0C","0"]
+    ]
+  },
+  {
+    id:8, title:"MC: Scientific Notation Operations", type:"mc",
+    instruction:"Select the correct answer for each operation.",
+    questions:[
+      {q:"(2.0 \u00D7 10\u00B3) \u00D7 (3.0 \u00D7 10\u00B2) = ?", options:["6.0 \u00D7 10\u2075","6.0 \u00D7 10\u2076","5.0 \u00D7 10\u2075","6.0 \u00D7 10\u00B9"], correct:0},
+      {q:"(8.0 \u00D7 10\u2076) \u00F7 (4.0 \u00D7 10\u00B2) = ?", options:["2.0 \u00D7 10\u00B3","2.0 \u00D7 10\u2074","2.0 \u00D7 10\u2078","4.0 \u00D7 10\u2074"], correct:1},
+      {q:"(5.0 \u00D7 10\u207B\u00B3) \u00D7 (2.0 \u00D7 10\u207B\u00B2) = ?", options:["1.0 \u00D7 10\u207B\u2074","1.0 \u00D7 10\u207B\u2075","1.0 \u00D7 10\u207B\u00B9","10 \u00D7 10\u207B\u2076"], correct:0},
+      {q:"(9.0 \u00D7 10\u2078) \u00F7 (3.0 \u00D7 10\u207B\u00B2) = ?", options:["3.0 \u00D7 10\u00B6","3.0 \u00D7 10\u00B9\u2070","3.0 \u00D7 10\u207B\u2074","6.0 \u00D7 10\u00B6"], correct:1},
+      {q:"(1.5 \u00D7 10\u00B4) + (2.5 \u00D7 10\u00B4) = ?", options:["4.0 \u00D7 10\u00B4","4.0 \u00D7 10\u2078","1.75 \u00D7 10\u00B4","4.0 \u00D7 10\u00B3"], correct:0},
+      {q:"(6.0 \u00D7 10\u00B3) \u00D7 (1.0 \u00D7 10\u207B\u00B3) = ?", options:["6.0","6.0 \u00D7 10\u2076","6.0 \u00D7 10\u207B\u2079","6.0 \u00D7 10\u00B9"], correct:0},
+      {q:"(4.2 \u00D7 10\u00B5) \u00D7 (2.0 \u00D7 10\u00B3) = ?", options:["8.4 \u00D7 10\u2078","8.4 \u00D7 10\u00B9\u2075","8.4 \u00D7 10\u00B2","6.2 \u00D7 10\u2078"], correct:0},
+      {q:"(7.5 \u00D7 10\u207B\u00B2) \u00F7 (2.5 \u00D7 10\u207B\u00B5) = ?", options:["3.0 \u00D7 10\u00B3","3.0 \u00D7 10\u207B\u00B3","3.0 \u00D7 10\u2077","3.0 \u00D7 10\u207B\u2077"], correct:0},
+      {q:"What is 0.000056 in scientific notation?", options:["5.6 \u00D7 10\u207B\u2074","5.6 \u00D7 10\u207B\u2075","56 \u00D7 10\u207B\u2076","0.56 \u00D7 10\u207B\u2074"], correct:1},
+      {q:"What is 3.2 \u00D7 10\u00B4 as a regular number?", options:["320","3,200","32,000","320,000"], correct:2}
+    ]
+  },
+  {
+    id:9, title:"Dimensional Analysis (Multi-step)",
+    instruction:"Solve each conversion using dimensional analysis. Write only the final number with appropriate units.",
+    rows:[
+      ["1","Convert 5.0 km to cm","500,000 / 500000 / 5.0 x 10^5"],
+      ["2","Convert 3,600 seconds to hours","1 / 1.0"],
+      ["3","Convert 2.5 L to mL","2500 / 2,500"],
+      ["4","Convert 72 km/h to m/s","20"],
+      ["5","Convert 250 cm to km","0.0025 / 2.5 x 10^-3"],
+      ["6","Convert 0.500 kg to mg","500,000 / 500000 / 5.0 x 10^5"],
+      ["7","Convert 3 days to minutes","4320 / 4,320"],
+      ["8","Convert 1,500 mL to L","1.5 / 1.500"],
+      ["9","Convert 0.10 km to mm","100,000 / 100000 / 1.0 x 10^5"],
+      ["10","Convert 45 m/s to km/h","162"]
+    ]
+  },
+  {
+    id:10, title:"Arrange: Build the Formula", type:"arrange",
+    instruction:"Click the words in the correct order to build the formula or statement.",
+    sentences:[
+      {prompt:"Density equals mass divided by volume", words:["density","equals","mass","divided by","volume"]},
+      {prompt:"Kelvin equals Celsius plus 273", words:["Kelvin","equals","Celsius","plus","273"]},
+      {prompt:"Fahrenheit equals nine-fifths Celsius plus 32", words:["Fahrenheit","equals","nine-fifths","Celsius","plus","32"]},
+      {prompt:"Scientific notation has one digit before the decimal", words:["Scientific notation","has","one digit","before","the decimal"]},
+      {prompt:"Significant figures indicate measurement precision", words:["Significant figures","indicate","measurement","precision"]}
+    ]
+  },
+  {
+    id:11, title:"MC: Mixed Fundamentals", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"What is 2.34 + 0.1?", options:["2.44","2.4","2.440","2.5"], correct:1},
+      {q:"Accuracy refers to:", options:["How close repeated measurements are to each other","How close a measurement is to the true value","The number of sig figs","The number of decimal places"], correct:1},
+      {q:"Precision refers to:", options:["How close a measurement is to the true value","How close repeated measurements are to each other","The smallest scale division","The number of sig figs"], correct:1},
+      {q:"A measurement that is precise but not accurate:", options:["Cannot exist","Has values clustered far from the true value","Has random scatter","Is always wrong"], correct:1},
+      {q:"What is 4.56 \u00D7 1.4 with correct sig figs?", options:["6.384","6.38","6.4","6"], correct:2},
+      {q:"The metric prefix 'milli-' means:", options:["10\u207B\u00B6","10\u207B\u00B3","10\u00B3","10\u207B\u00B9"], correct:1},
+      {q:"The metric prefix 'kilo-' means:", options:["10\u00B6","10\u00B3","10\u207B\u00B3","10\u00B9"], correct:1},
+      {q:"Which has more sig figs: 0.0020 or 0.020?", options:["0.0020","0.020","They are equal","Neither has sig figs"], correct:2},
+      {q:"What is -273.15\u00B0C in Kelvin?", options:["0 K","273.15 K","-546.3 K","100 K"], correct:0},
+      {q:"The SI base unit for mass is:", options:["gram","kilogram","milligram","pound"], correct:1}
+    ]
+  },
+  {
+    id:12, title:"Identify Measurement Type",
+    instruction:"Is the measurement qualitative or quantitative? Is the data precise or accurate (where applicable)?",
+    rows:[
+      ["1","The solution turned blue","qualitative"],
+      ["2","The mass of the sample is 4.52 g","quantitative"],
+      ["3","The temperature is 25.0\u00B0C","quantitative"],
+      ["4","The liquid has a sweet smell","qualitative"],
+      ["5","The pH measured 7.01, 7.00, 7.02 (true value 7.00)","precise and accurate / precise, accurate"]
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/\u00e1/g,'a').replace(/\u00e9/g,'e').replace(/\u00ed/g,'i').replace(/\u00f3/g,'o').replace(/\u00fa/g,'u');
+  s = s.replace(/\u03ac/g,'\u03b1').replace(/\u03ad/g,'\u03b5').replace(/\u03ae/g,'\u03b7').replace(/\u03af/g,'\u03b9')
+       .replace(/\u03cc/g,'\u03bf').replace(/\u03cd/g,'\u03c5').replace(/\u03ce/g,'\u03c9').replace(/\u0390/g,'\u03b9').replace(/\u03b0/g,'\u03c5');
+  s = s.replace(/\u2080/g,'0').replace(/\u2081/g,'1').replace(/\u2082/g,'2').replace(/\u2083/g,'3').replace(/\u2084/g,'4')
+       .replace(/\u2085/g,'5').replace(/\u2086/g,'6').replace(/\u2087/g,'7').replace(/\u2088/g,'8').replace(/\u2089/g,'9');
+  s = s.replace(/\u207a/g,'+').replace(/\u207b/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Significant Figures \u2014 Rules</h3>' +
+'<ul>' +
+'<li><span class="rule">Non-zero digits</span> are ALWAYS significant. Example: 1234 has 4 sig figs.</li>' +
+'<li><span class="rule">Zeros between non-zero digits</span> (captured/sandwiched zeros) are ALWAYS significant. Example: 1002 has 4 sig figs.</li>' +
+'<li><span class="rule">Leading zeros</span> (before the first non-zero digit) are NEVER significant. Example: 0.0045 has 2 sig figs.</li>' +
+'<li><span class="rule">Trailing zeros WITH a decimal point</span> ARE significant. Example: 100.0 has 4 sig figs; 2.50 has 3 sig figs.</li>' +
+'<li><span class="rule">Trailing zeros WITHOUT a decimal point</span> are NOT significant (ambiguous). Example: 1000 has 1 sig fig.</li>' +
+'<li><span class="rule">Exact numbers</span> (counting, defined values) have infinite sig figs. Example: 12 eggs, 1 km = 1000 m.</li>' +
+'</ul>' +
+'<h3>Sig Figs in Calculations</h3>' +
+'<p><span class="rule">Multiplication/Division:</span> Result has the FEWEST sig figs of any factor.</p>' +
+'<p><span class="rule">Addition/Subtraction:</span> Result has the FEWEST decimal places of any term.</p>' +
+'<h3>Scientific Notation</h3>' +
+'<p>Format: <span class="rule">M \u00D7 10\u207F</span> where 1 \u2264 M &lt; 10 and n is an integer.</p>' +
+'<p>Moving decimal LEFT \u2192 positive exponent. Moving decimal RIGHT \u2192 negative exponent.</p>' +
+'<p>Example: 0.00045 = 4.5 \u00D7 10\u207B\u2074 (moved right 4 places)</p>' +
+'<p>Example: 6,700,000 = 6.7 \u00D7 10\u2076 (moved left 6 places)</p>' +
+'<h3>Metric Prefixes</h3>' +
+'<table><tr><th>Prefix</th><th>Symbol</th><th>Factor</th></tr>' +
+'<tr><td>giga</td><td>G</td><td>10\u2079</td></tr>' +
+'<tr><td>mega</td><td>M</td><td>10\u2076</td></tr>' +
+'<tr><td>kilo</td><td>k</td><td>10\u00B3</td></tr>' +
+'<tr><td>centi</td><td>c</td><td>10\u207B\u00B2</td></tr>' +
+'<tr><td>milli</td><td>m</td><td>10\u207B\u00B3</td></tr>' +
+'<tr><td>micro</td><td>\u00B5</td><td>10\u207B\u2076</td></tr>' +
+'<tr><td>nano</td><td>n</td><td>10\u207B\u2079</td></tr></table>' +
+'<h3>Density</h3>' +
+'<p>Formula: <span class="rule">d = m / V</span> (density = mass \u00F7 volume)</p>' +
+'<p>Units: g/mL, g/cm\u00B3, or kg/m\u00B3 (SI)</p>' +
+'<p>Density of water = 1.00 g/mL at 4\u00B0C. Objects with d &lt; 1.00 g/mL float in water.</p>' +
+'<p>Density is an <span class="rule">intensive property</span> \u2014 it does not depend on sample size.</p>' +
+'<h3>Temperature Conversions</h3>' +
+'<p><span class="rule">K = \u00B0C + 273.15</span> (usually rounded to +273)</p>' +
+'<p><span class="rule">\u00B0F = (9/5)\u00B0C + 32</span></p>' +
+'<p><span class="rule">\u00B0C = (\u00B0F \u2212 32) \u00D7 5/9</span></p>' +
+'<p>Absolute zero = 0 K = \u2212273.15\u00B0C. Kelvin scale has no negative values.</p>' +
+'<p>Water freezes at 0\u00B0C / 273 K / 32\u00B0F. Water boils at 100\u00B0C / 373 K / 212\u00B0F.</p>' +
+'<h3>Accuracy vs Precision</h3>' +
+'<p><span class="rule">Accuracy:</span> How close a measurement is to the TRUE (accepted) value.</p>' +
+'<p><span class="rule">Precision:</span> How close REPEATED measurements are to EACH OTHER (reproducibility).</p>' +
+'<p>A measurement can be precise but not accurate (consistently wrong), accurate but not precise (scattered around the true value), both, or neither.</p>';
+
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 sig figs, scientific notation, unit conversions, density, temperature \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

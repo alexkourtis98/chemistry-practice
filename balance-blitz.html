@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Balance Blitz - Chemistry FYE12</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;min-height:100vh;overflow-x:hidden}
+
+/* ---- BACK LINK ---- */
+a.back{color:#c85028;text-decoration:none;font-weight:700;padding:16px 20px;display:inline-block;font-size:.95em}
+a.back:hover{text-decoration:underline}
+
+/* ---- SCREEN MANAGEMENT ---- */
+.screen{display:none}
+.screen.active{display:block}
+
+/* ============ LEVEL SELECT ============ */
+#levelSelect{max-width:640px;margin:0 auto;padding:0 20px 40px}
+#levelSelect h1{text-align:center;font-size:1.6em;color:#f5f5f5;font-weight:800;padding:0 0 4px;letter-spacing:-.5px}
+.ls-subtitle{text-align:center;color:#888;font-size:.9em;margin-bottom:20px;font-weight:600}
+.level-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.level-card{
+  background:#16213e;
+  border:2px solid #233;
+  border-bottom:4px solid #233;
+  border-radius:16px;
+  padding:20px 16px;
+  cursor:pointer;
+  transition:all .15s;
+  text-align:center;
+  position:relative;
+}
+.level-card:hover{background:#1c2b4a;border-color:#345;border-bottom-color:#345}
+.level-card:active{transform:translateY(2px);border-bottom-width:2px;margin-top:2px}
+.level-card.completed{border-color:#2ecc71;border-bottom-color:#27ae60}
+.level-card.completed:hover{border-color:#2ecc71;border-bottom-color:#27ae60;background:#162e20}
+.level-card h3{color:#f5f5f5;font-size:1.05em;font-weight:800;margin-bottom:2px}
+.level-card .level-info{color:#888;font-size:.8em;font-weight:600}
+.level-card .level-stars{font-size:1.5em;margin-top:8px;line-height:1}
+.level-card .level-best{color:#2ecc71;font-size:.78em;font-weight:700;margin-top:4px}
+.level-card.locked{opacity:.45;cursor:not-allowed}
+.level-card.locked:hover{background:#16213e;border-color:#233;border-bottom-color:#233;transform:none}
+.lock-icon{font-size:1.6em;margin-top:8px;color:#555}
+
+.star-gold{color:#FFC800}
+.star-empty{color:#333}
+
+.reset-all-btn{display:block;margin:24px auto 0;background:none;border:2px solid #333;color:#888;padding:10px 24px;border-radius:12px;cursor:pointer;font-size:.85em;font-weight:700;transition:all .15s}
+.reset-all-btn:hover{border-color:#e74c3c;color:#e74c3c}
+
+/* ============ GET READY COUNTDOWN ============ */
+#getReady{position:fixed;top:0;left:0;width:100%;height:100%;background:#1a1a2e;z-index:100;flex-direction:column;align-items:center;justify-content:center}
+#getReady.active{display:flex}
+#getReady .countdown-number{font-size:120px;font-weight:800;color:#1CB0F6;animation:countPop .4s ease}
+#getReady .countdown-label{font-size:1.1em;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-top:8px}
+@keyframes countPop{0%{transform:scale(.5);opacity:0}60%{transform:scale(1.3)}100%{transform:scale(1);opacity:1}}
+
+/* ============ GAMEPLAY ============ */
+#gameArea{max-width:700px;margin:0 auto;padding:0 16px 20px}
+
+/* Top bar */
+.top-bar{display:flex;align-items:center;gap:12px;padding:12px 0 8px}
+.top-bar .close-btn{
+  background:none;border:none;cursor:pointer;font-size:1.4em;color:#888;
+  padding:4px;line-height:1;font-weight:700;transition:color .15s;
+}
+.top-bar .close-btn:hover{color:#e74c3c}
+.progress-wrap{flex:1;height:16px;background:#233;border-radius:10px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#2ecc71,#58CC02);border-radius:10px;transition:width .3s;width:0}
+.progress-fill.pulse{animation:progPulse .3s ease}
+@keyframes progPulse{0%{transform:scaleY(1)}50%{transform:scaleY(1.3)}100%{transform:scaleY(1)}}
+.top-bar .timer{font-size:1.1em;font-weight:800;color:#f5f5f5;min-width:40px;text-align:right;font-family:'Courier New',monospace}
+.top-bar .timer.warning{color:#FFC800;animation:timerPulse .5s infinite alternate}
+.top-bar .timer.danger{color:#e74c3c;animation:timerPulse .5s infinite alternate}
+@keyframes timerPulse{from{transform:scale(1)}to{transform:scale(1.15)}}
+
+.game-info-bar{display:flex;justify-content:space-between;align-items:center;padding:0 2px 10px}
+.round-label{color:#888;font-size:.85em;font-weight:700}
+.xp-display{font-size:.9em;font-weight:800;color:#c85028;min-height:22px}
+
+/* ============ EQUATION DISPLAY ============ */
+.equation-container{
+  background:#16213e;
+  border-radius:16px;
+  border:2px solid #233;
+  padding:24px 16px;
+  margin-bottom:16px;
+}
+
+.equation-row{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  margin-bottom:20px;
+}
+
+.compound-group{
+  display:flex;
+  align-items:center;
+  gap:2px;
+}
+
+.coeff-control{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+}
+
+.coeff-btn{
+  width:32px;
+  height:24px;
+  background:#233;
+  border:2px solid #345;
+  border-radius:6px;
+  color:#1CB0F6;
+  font-size:.9em;
+  font-weight:800;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:all .15s;
+  user-select:none;
+  line-height:1;
+}
+.coeff-btn:hover{background:#345;border-color:#1CB0F6}
+.coeff-btn:active{transform:scale(.9)}
+
+.coeff-value{
+  width:32px;
+  height:32px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:'Courier New',monospace;
+  font-size:1.3em;
+  font-weight:800;
+  color:#1CB0F6;
+  background:#0f1a30;
+  border-radius:6px;
+  border:2px solid #233;
+  transition:all .2s;
+}
+.coeff-value.changed{color:#c85028;border-color:#c85028}
+.coeff-value.correct{color:#2ecc71;border-color:#2ecc71;background:rgba(46,204,113,.1)}
+
+.formula-text{
+  font-family:'Courier New',monospace;
+  font-size:1.3em;
+  font-weight:700;
+  color:#f5f5f5;
+  padding:0 4px;
+  white-space:nowrap;
+}
+.formula-text sub{font-size:.7em;color:#aaa}
+
+.arrow-sep{
+  font-size:1.4em;
+  color:#c85028;
+  font-weight:800;
+  padding:0 8px;
+}
+
+.plus-sep{
+  font-size:1.2em;
+  color:#888;
+  font-weight:700;
+  padding:0 4px;
+}
+
+/* ============ ATOM COUNT TABLE ============ */
+.atom-table-wrap{margin-top:4px}
+.atom-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:.9em;
+}
+.atom-table th{
+  background:#0f3460;
+  color:#ddd;
+  padding:8px 12px;
+  text-align:center;
+  font-size:.85em;
+  font-weight:700;
+}
+.atom-table th:first-child{text-align:left}
+.atom-table td{
+  padding:8px 12px;
+  border-bottom:1px solid #233;
+  text-align:center;
+  font-family:'Courier New',monospace;
+  font-weight:600;
+  transition:all .2s;
+}
+.atom-table td:first-child{
+  text-align:left;
+  font-weight:700;
+  color:#e0e0e0;
+  font-family:'Segoe UI',system-ui,sans-serif;
+}
+.atom-table tr.balanced td{color:#2ecc71}
+.atom-table tr.balanced td:last-child{color:#2ecc71}
+.atom-table tr.unbalanced td{color:#e0e0e0}
+.atom-table tr.unbalanced td:last-child{color:#e74c3c}
+.atom-table .status-icon{font-size:1.1em}
+
+/* ============ FEEDBACK ============ */
+.feedback-overlay{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  z-index:50;display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.feedback-overlay.show{opacity:1;pointer-events:auto}
+.feedback-overlay.correct-bg{background:rgba(46,204,113,.15)}
+.feedback-overlay.wrong-bg{background:rgba(231,76,60,.15)}
+.feedback-overlay.timeout-bg{background:rgba(231,76,60,.15)}
+
+.feedback-card{
+  background:#16213e;
+  border-radius:20px;
+  padding:32px 40px;
+  text-align:center;
+  max-width:400px;
+  width:90%;
+  border:2px solid #233;
+  transform:scale(.8);
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+}
+.feedback-overlay.show .feedback-card{transform:scale(1)}
+
+.feedback-icon{font-size:3em;margin-bottom:12px}
+.feedback-title{font-size:1.3em;font-weight:800;margin-bottom:6px}
+.feedback-detail{color:#888;font-size:.9em;margin-bottom:4px}
+.feedback-xp{color:#c85028;font-weight:800;font-size:1.1em;margin-top:8px}
+.feedback-solution{
+  color:#888;font-size:.85em;margin-top:10px;
+  font-family:'Courier New',monospace;
+  background:#0f1a30;padding:8px 12px;border-radius:8px;
+}
+
+.feedback-btn{
+  margin-top:16px;
+  padding:12px 40px;
+  border:none;border-radius:12px;
+  font-size:1em;font-weight:800;
+  cursor:pointer;transition:all .15s;
+  text-transform:uppercase;letter-spacing:1px;
+}
+.feedback-btn.correct-btn{background:#2ecc71;color:#fff}
+.feedback-btn.correct-btn:hover{background:#27ae60}
+.feedback-btn.wrong-btn{background:#e74c3c;color:#fff}
+.feedback-btn.wrong-btn:hover{background:#c0392b}
+
+/* ============ LEVEL COMPLETE ============ */
+#levelComplete{max-width:500px;margin:0 auto;padding:40px 20px;text-align:center}
+#levelComplete h2{font-size:1.6em;color:#f5f5f5;font-weight:800;margin-bottom:8px}
+.result-stars{font-size:3em;margin:16px 0;line-height:1}
+.result-stats{
+  background:#16213e;border-radius:16px;border:2px solid #233;
+  padding:20px;margin:20px 0;text-align:left;
+}
+.stat-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #233}
+.stat-row:last-child{border:none}
+.stat-label{color:#888;font-weight:600}
+.stat-value{color:#f5f5f5;font-weight:800}
+.stat-value.xp{color:#c85028}
+.stat-value.time{color:#1CB0F6}
+
+.result-btns{display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap}
+.result-btn{
+  padding:14px 28px;border:none;border-radius:14px;
+  font-size:1em;font-weight:800;cursor:pointer;transition:all .15s;
+  border-bottom:4px solid;
+}
+.result-btn.retry{background:#16213e;color:#f5f5f5;border-bottom-color:#0f1a30}
+.result-btn.retry:hover{background:#1c2b4a}
+.result-btn.next{background:#2ecc71;color:#fff;border-bottom-color:#27ae60}
+.result-btn.next:hover{background:#27ae60}
+.result-btn.menu{background:#16213e;color:#888;border-bottom-color:#0f1a30}
+.result-btn.menu:hover{color:#f5f5f5}
+
+/* ============ PARTICLES ============ */
+.particle{
+  position:fixed;pointer-events:none;z-index:200;
+  font-size:1.4em;animation:particleFly 1s ease-out forwards;
+}
+@keyframes particleFly{
+  0%{opacity:1;transform:translateY(0) scale(1)}
+  100%{opacity:0;transform:translateY(-80px) scale(.5)}
+}
+
+/* ============ RESPONSIVE ============ */
+@media(max-width:520px){
+  .equation-row{gap:3px}
+  .formula-text{font-size:1em}
+  .coeff-btn{width:28px;height:22px;font-size:.8em}
+  .coeff-value{width:28px;height:28px;font-size:1.1em}
+  .arrow-sep{font-size:1.1em;padding:0 4px}
+  .level-grid{grid-template-columns:1fr}
+  .feedback-card{padding:24px 20px}
+}
+</style>
+</head>
+<body>
+
+<a href="index.html" class="back" style="color:#c85028">&#8592; Back to Exercises</a>
+
+<!-- ===================== SCREEN: LEVEL SELECT ===================== -->
+<div id="levelSelect" class="screen active">
+  <h1>&#9878; Balance Blitz</h1>
+  <p class="ls-subtitle">Balance chemical equations against the clock</p>
+  <div class="level-grid" id="levelGrid"></div>
+  <button class="reset-all-btn" onclick="resetAll()">Reset All Progress</button>
+</div>
+
+<!-- ===================== SCREEN: GET READY ===================== -->
+<div id="getReady" class="screen">
+  <div class="countdown-number" id="countdownNum">3</div>
+  <div class="countdown-label">Get Ready</div>
+</div>
+
+<!-- ===================== SCREEN: GAME ===================== -->
+<div id="gameScreen" class="screen">
+  <div id="gameArea">
+    <div class="top-bar">
+      <button class="close-btn" onclick="quitGame()" title="Quit">&#10005;</button>
+      <div class="progress-wrap"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="timer" id="timerDisplay">60</div>
+    </div>
+    <div class="game-info-bar">
+      <span class="round-label" id="roundLabel">1 / 8</span>
+      <span class="xp-display" id="xpDisplay">0 XP</span>
+    </div>
+    <div class="equation-container">
+      <div class="equation-row" id="equationRow"></div>
+      <div class="atom-table-wrap">
+        <table class="atom-table">
+          <thead>
+            <tr><th>Element</th><th>Left</th><th>Right</th><th>Status</th></tr>
+          </thead>
+          <tbody id="atomTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== FEEDBACK OVERLAY ===================== -->
+<div class="feedback-overlay" id="feedbackOverlay">
+  <div class="feedback-card" id="feedbackCard">
+    <div class="feedback-icon" id="feedbackIcon"></div>
+    <div class="feedback-title" id="feedbackTitle"></div>
+    <div class="feedback-detail" id="feedbackDetail"></div>
+    <div class="feedback-xp" id="feedbackXP"></div>
+    <div class="feedback-solution" id="feedbackSolution" style="display:none"></div>
+    <button class="feedback-btn" id="feedbackBtn" onclick="nextEquation()">Continue</button>
+  </div>
+</div>
+
+<!-- ===================== SCREEN: LEVEL COMPLETE ===================== -->
+<div id="levelComplete" class="screen">
+  <h2 id="completeTitle">Level Complete!</h2>
+  <div class="result-stars" id="resultStars"></div>
+  <div class="result-stats" id="resultStats"></div>
+  <div class="result-btns" id="resultBtns"></div>
+</div>
+
+<script>
+// ======================== EQUATIONS DATA ========================
+const EQUATIONS = [
+  {
+    name: "Simple Binary",
+    desc: "Basic two-element compounds",
+    equations: [
+      {reactants:["H2","O2"],products:["H2O"],solution:[2,1,2]},
+      {reactants:["N2","H2"],products:["NH3"],solution:[1,3,2]},
+      {reactants:["Na","Cl2"],products:["NaCl"],solution:[2,1,2]},
+      {reactants:["Mg","O2"],products:["MgO"],solution:[2,1,2]},
+      {reactants:["Fe","O2"],products:["Fe2O3"],solution:[4,3,2]},
+      {reactants:["Al","O2"],products:["Al2O3"],solution:[4,3,2]},
+      {reactants:["Ca","O2"],products:["CaO"],solution:[2,1,2]},
+      {reactants:["K","Cl2"],products:["KCl"],solution:[2,1,2]}
+    ]
+  },
+  {
+    name: "Synthesis & Decomposition",
+    desc: "Combination and breakdown reactions",
+    equations: [
+      {reactants:["H2O2"],products:["H2O","O2"],solution:[2,2,1]},
+      {reactants:["KClO3"],products:["KCl","O2"],solution:[2,2,3]},
+      {reactants:["Li","N2"],products:["Li3N"],solution:[6,1,2]},
+      {reactants:["S","O2"],products:["SO3"],solution:[2,3,2]},
+      {reactants:["CaCO3"],products:["CaO","CO2"],solution:[1,1,1]},
+      {reactants:["Na","H2O"],products:["NaOH","H2"],solution:[2,2,2,1]},
+      {reactants:["Al","Br2"],products:["AlBr3"],solution:[2,3,2]},
+      {reactants:["P","O2"],products:["P2O5"],solution:[4,5,2]}
+    ]
+  },
+  {
+    name: "Combustion",
+    desc: "Burning hydrocarbons in oxygen",
+    equations: [
+      {reactants:["CH4","O2"],products:["CO2","H2O"],solution:[1,2,1,2]},
+      {reactants:["C2H6","O2"],products:["CO2","H2O"],solution:[2,7,4,6]},
+      {reactants:["C3H8","O2"],products:["CO2","H2O"],solution:[1,5,3,4]},
+      {reactants:["C2H4","O2"],products:["CO2","H2O"],solution:[1,3,2,2]},
+      {reactants:["C6H6","O2"],products:["CO2","H2O"],solution:[2,15,12,6]},
+      {reactants:["C2H2","O2"],products:["CO2","H2O"],solution:[2,5,4,2]},
+      {reactants:["CH3OH","O2"],products:["CO2","H2O"],solution:[2,3,2,4]},
+      {reactants:["C4H10","O2"],products:["CO2","H2O"],solution:[2,13,8,10]}
+    ]
+  },
+  {
+    name: "Single Replacement",
+    desc: "One element replaces another",
+    equations: [
+      {reactants:["Zn","HCl"],products:["ZnCl2","H2"],solution:[1,2,1,1]},
+      {reactants:["Fe","CuSO4"],products:["FeSO4","Cu"],solution:[1,1,1,1]},
+      {reactants:["Mg","HCl"],products:["MgCl2","H2"],solution:[1,2,1,1]},
+      {reactants:["Al","HCl"],products:["AlCl3","H2"],solution:[2,6,2,3]},
+      {reactants:["Zn","AgNO3"],products:["Zn(NO3)2","Ag"],solution:[1,2,1,2]},
+      {reactants:["Ca","H2O"],products:["Ca(OH)2","H2"],solution:[1,2,1,1]},
+      {reactants:["Fe","H2SO4"],products:["FeSO4","H2"],solution:[1,1,1,1]},
+      {reactants:["Al","Fe2O3"],products:["Al2O3","Fe"],solution:[2,1,1,2]}
+    ]
+  },
+  {
+    name: "Double Replacement",
+    desc: "Two compounds swap partners",
+    equations: [
+      {reactants:["AgNO3","NaCl"],products:["AgCl","NaNO3"],solution:[1,1,1,1]},
+      {reactants:["BaCl2","Na2SO4"],products:["BaSO4","NaCl"],solution:[1,1,1,2]},
+      {reactants:["Pb(NO3)2","KI"],products:["PbI2","KNO3"],solution:[1,2,1,2]},
+      {reactants:["CaCl2","Na2CO3"],products:["CaCO3","NaCl"],solution:[1,1,1,2]},
+      {reactants:["FeCl3","NaOH"],products:["Fe(OH)3","NaCl"],solution:[1,3,1,3]},
+      {reactants:["Na2S","HCl"],products:["NaCl","H2S"],solution:[1,2,2,1]},
+      {reactants:["CuSO4","NaOH"],products:["Cu(OH)2","Na2SO4"],solution:[1,2,1,1]},
+      {reactants:["AgNO3","Na2CrO4"],products:["Ag2CrO4","NaNO3"],solution:[2,1,1,2]}
+    ]
+  },
+  {
+    name: "Polyatomic Compounds",
+    desc: "Equations with polyatomic ions",
+    equations: [
+      {reactants:["Ca(OH)2","HCl"],products:["CaCl2","H2O"],solution:[1,2,1,2]},
+      {reactants:["Al(OH)3","H2SO4"],products:["Al2(SO4)3","H2O"],solution:[2,3,1,6]},
+      {reactants:["NH4NO3"],products:["N2O","H2O"],solution:[1,1,2]},
+      {reactants:["Ba(OH)2","H3PO4"],products:["Ba3(PO4)2","H2O"],solution:[3,2,1,6]},
+      {reactants:["Fe2O3","HCl"],products:["FeCl3","H2O"],solution:[1,6,2,3]},
+      {reactants:["Ca3(PO4)2","H2SO4"],products:["CaSO4","H3PO4"],solution:[1,3,3,2]},
+      {reactants:["NaHCO3","HCl"],products:["NaCl","H2O","CO2"],solution:[1,1,1,1,1]},
+      {reactants:["Mg(OH)2","HNO3"],products:["Mg(NO3)2","H2O"],solution:[1,2,1,2]}
+    ]
+  },
+  {
+    name: "Redox Reactions",
+    desc: "Oxidation-reduction equations",
+    equations: [
+      {reactants:["Fe2O3","CO"],products:["Fe","CO2"],solution:[1,3,2,3]},
+      {reactants:["Cu","HNO3"],products:["Cu(NO3)2","NO","H2O"],solution:[3,8,3,2,4]},
+      {reactants:["MnO2","HCl"],products:["MnCl2","Cl2","H2O"],solution:[1,4,1,1,2]},
+      {reactants:["KMnO4","HCl"],products:["KCl","MnCl2","Cl2","H2O"],solution:[2,16,2,2,5,8]},
+      {reactants:["Fe","O2","H2O"],products:["Fe(OH)3"],solution:[4,3,6,4]},
+      {reactants:["Cr2O3","Al"],products:["Al2O3","Cr"],solution:[1,2,1,2]},
+      {reactants:["SnO2","H2"],products:["Sn","H2O"],solution:[1,2,1,2]},
+      {reactants:["PbO2","HCl"],products:["PbCl2","Cl2","H2O"],solution:[1,4,1,1,2]}
+    ]
+  },
+  {
+    name: "Mixed Challenge",
+    desc: "Random mix of all types",
+    equations: [
+      {reactants:["C3H8","O2"],products:["CO2","H2O"],solution:[1,5,3,4]},
+      {reactants:["Al","H2SO4"],products:["Al2(SO4)3","H2"],solution:[2,3,1,3]},
+      {reactants:["Fe2O3","C"],products:["Fe","CO2"],solution:[2,3,4,3]},
+      {reactants:["Ca(OH)2","H3PO4"],products:["Ca3(PO4)2","H2O"],solution:[3,2,1,6]},
+      {reactants:["N2","O2"],products:["NO"],solution:[1,1,2]},
+      {reactants:["Al","Fe2O3"],products:["Al2O3","Fe"],solution:[2,1,1,2]},
+      {reactants:["KClO3"],products:["KCl","O2"],solution:[2,2,3]},
+      {reactants:["C2H5OH","O2"],products:["CO2","H2O"],solution:[1,3,2,3]}
+    ]
+  }
+];
+
+// ======================== FORMULA PARSER ========================
+function parseFormula(formula) {
+  const atoms = {};
+  const stack = [atoms];
+
+  let i = 0;
+  while (i < formula.length) {
+    if (formula[i] === '(') {
+      const group = {};
+      stack.push(group);
+      i++;
+    } else if (formula[i] === ')') {
+      i++;
+      let numStr = '';
+      while (i < formula.length && /\d/.test(formula[i])) {
+        numStr += formula[i];
+        i++;
+      }
+      const multiplier = numStr ? parseInt(numStr) : 1;
+      const group = stack.pop();
+      const parent = stack[stack.length - 1];
+      for (const el in group) {
+        parent[el] = (parent[el] || 0) + group[el] * multiplier;
+      }
+    } else if (/[A-Z]/.test(formula[i])) {
+      let elem = formula[i];
+      i++;
+      while (i < formula.length && /[a-z]/.test(formula[i])) {
+        elem += formula[i];
+        i++;
+      }
+      let numStr = '';
+      while (i < formula.length && /\d/.test(formula[i])) {
+        numStr += formula[i];
+        i++;
+      }
+      const count = numStr ? parseInt(numStr) : 1;
+      const current = stack[stack.length - 1];
+      current[elem] = (current[elem] || 0) + count;
+    } else {
+      i++;
+    }
+  }
+  return atoms;
+}
+
+function countAtoms(compounds, coefficients) {
+  const total = {};
+  compounds.forEach((formula, idx) => {
+    const coeff = coefficients[idx] || 1;
+    const atoms = parseFormula(formula);
+    for (const el in atoms) {
+      total[el] = (total[el] || 0) + atoms[el] * coeff;
+    }
+  });
+  return total;
+}
+
+// ======================== SOUND ========================
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playTone(freq, duration, type) {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.type = type || 'sine';
+  osc.frequency.value = freq;
+  gain.gain.value = 0.08;
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+  osc.start();
+  osc.stop(audioCtx.currentTime + duration);
+}
+
+function playClick() { playTone(800, 0.05, 'square'); }
+
+function playCorrect() {
+  playTone(523, 0.12, 'sine');
+  setTimeout(() => playTone(659, 0.12, 'sine'), 100);
+  setTimeout(() => playTone(784, 0.2, 'sine'), 200);
+}
+
+function playWrong() {
+  playTone(300, 0.15, 'sawtooth');
+  setTimeout(() => playTone(250, 0.2, 'sawtooth'), 120);
+}
+
+function playBalance() {
+  playTone(440, 0.08, 'sine');
+}
+
+function playLevelUp() {
+  [523, 587, 659, 784, 880].forEach((f, i) => {
+    setTimeout(() => playTone(f, 0.15, 'sine'), i * 80);
+  });
+}
+
+// ======================== STATE ========================
+const STORAGE_KEY = 'fye12_balance_blitz';
+let state = loadProgress();
+let currentLevel = 0;
+let currentRound = 0;
+let currentEquation = null;
+let coefficients = [];
+let timerInterval = null;
+let timeLeft = 60;
+let totalXP = 0;
+let roundTimes = [];
+let roundResults = [];
+let levelEquations = [];
+let autoSubmitTimeout = null;
+
+function loadProgress() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return { levels: {} };
+}
+
+function saveProgress() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch(e) {}
+  // Also try API
+  try {
+    fetch('/api/balance-progress', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(state)
+    }).catch(() => {});
+  } catch(e) {}
+}
+
+function resetAll() {
+  if (!confirm('Reset all Balance Blitz progress?')) return;
+  state = { levels: {} };
+  saveProgress();
+  renderLevelSelect();
+}
+
+// ======================== LEVEL SELECT ========================
+function renderLevelSelect() {
+  const grid = document.getElementById('levelGrid');
+  grid.innerHTML = '';
+
+  EQUATIONS.forEach((level, idx) => {
+    const data = state.levels[idx];
+    const unlocked = idx === 0 || state.levels[idx - 1];
+    const card = document.createElement('div');
+    card.className = 'level-card' + (data ? ' completed' : '') + (!unlocked ? ' locked' : '');
+
+    let starsHTML = '';
+    if (data) {
+      const s = data.stars || 0;
+      starsHTML = '<div class="level-stars">'
+        + (s >= 1 ? '<span class="star-gold">&#9733;</span>' : '<span class="star-empty">&#9733;</span>')
+        + (s >= 2 ? '<span class="star-gold">&#9733;</span>' : '<span class="star-empty">&#9733;</span>')
+        + (s >= 3 ? '<span class="star-gold">&#9733;</span>' : '<span class="star-empty">&#9733;</span>')
+        + '</div>';
+      if (data.bestAvg) {
+        starsHTML += '<div class="level-best">' + data.bestAvg.toFixed(1) + 's avg</div>';
+      }
+    } else if (!unlocked) {
+      starsHTML = '<div class="lock-icon">&#128274;</div>';
+    } else {
+      starsHTML = '<div class="level-stars">'
+        + '<span class="star-empty">&#9733;</span><span class="star-empty">&#9733;</span><span class="star-empty">&#9733;</span>'
+        + '</div>';
+    }
+
+    card.innerHTML = '<h3>' + (idx + 1) + '. ' + level.name + '</h3>'
+      + '<div class="level-info">' + level.desc + '</div>'
+      + starsHTML;
+
+    if (unlocked) {
+      card.onclick = () => startLevel(idx);
+    }
+    grid.appendChild(card);
+  });
+}
+
+// ======================== SCREENS ========================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ======================== START LEVEL ========================
+function startLevel(levelIdx) {
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  currentLevel = levelIdx;
+  currentRound = 0;
+  totalXP = 0;
+  roundTimes = [];
+  roundResults = [];
+
+  // Shuffle equations
+  levelEquations = [...EQUATIONS[levelIdx].equations];
+  shuffleArray(levelEquations);
+
+  showScreen('getReady');
+  doCountdown(3);
+}
+
+function doCountdown(n) {
+  const el = document.getElementById('countdownNum');
+  if (n <= 0) {
+    showScreen('gameScreen');
+    loadEquation();
+    return;
+  }
+  el.textContent = n;
+  el.style.animation = 'none';
+  void el.offsetWidth;
+  el.style.animation = 'countPop .4s ease';
+  playTone(600, 0.1, 'sine');
+  setTimeout(() => doCountdown(n - 1), 700);
+}
+
+// ======================== LOAD EQUATION ========================
+function loadEquation() {
+  if (currentRound >= 8) {
+    finishLevel();
+    return;
+  }
+
+  currentEquation = levelEquations[currentRound];
+  const allCompounds = [...currentEquation.reactants, ...currentEquation.products];
+  coefficients = allCompounds.map(() => 1);
+  timeLeft = 60;
+
+  updateRoundLabel();
+  updateXPDisplay();
+  renderEquation();
+  updateAtomTable();
+  startTimer();
+}
+
+function updateRoundLabel() {
+  document.getElementById('roundLabel').textContent = (currentRound + 1) + ' / 8';
+  const pct = (currentRound / 8) * 100;
+  const fill = document.getElementById('progressFill');
+  fill.style.width = pct + '%';
+}
+
+function updateXPDisplay() {
+  document.getElementById('xpDisplay').textContent = totalXP + ' XP';
+}
+
+// ======================== RENDER EQUATION ========================
+function renderEquation() {
+  const row = document.getElementById('equationRow');
+  row.innerHTML = '';
+
+  const eq = currentEquation;
+  const allCompounds = [...eq.reactants, ...eq.products];
+
+  allCompounds.forEach((formula, idx) => {
+    // Plus sign between compounds on same side
+    if (idx > 0 && idx < eq.reactants.length) {
+      row.appendChild(createSep('+'));
+    }
+    // Arrow between reactants and products
+    if (idx === eq.reactants.length) {
+      row.appendChild(createSep('→'));
+    }
+    // Plus between products
+    if (idx > eq.reactants.length) {
+      row.appendChild(createSep('+'));
+    }
+
+    const group = document.createElement('div');
+    group.className = 'compound-group';
+
+    // Coefficient control
+    const ctrl = document.createElement('div');
+    ctrl.className = 'coeff-control';
+
+    const upBtn = document.createElement('button');
+    upBtn.className = 'coeff-btn';
+    upBtn.innerHTML = '&#9650;';
+    upBtn.onclick = () => changeCoeff(idx, 1);
+
+    const valDiv = document.createElement('div');
+    valDiv.className = 'coeff-value';
+    valDiv.id = 'coeff-' + idx;
+    valDiv.textContent = coefficients[idx];
+
+    const downBtn = document.createElement('button');
+    downBtn.className = 'coeff-btn';
+    downBtn.innerHTML = '&#9660;';
+    downBtn.onclick = () => changeCoeff(idx, -1);
+
+    ctrl.appendChild(upBtn);
+    ctrl.appendChild(valDiv);
+    ctrl.appendChild(downBtn);
+
+    // Formula display
+    const fDiv = document.createElement('span');
+    fDiv.className = 'formula-text';
+    fDiv.innerHTML = formulaToHTML(formula);
+
+    group.appendChild(ctrl);
+    group.appendChild(fDiv);
+    row.appendChild(group);
+  });
+}
+
+function createSep(type) {
+  const span = document.createElement('span');
+  if (type === '→') {
+    span.className = 'arrow-sep';
+    span.textContent = '→';
+  } else {
+    span.className = 'plus-sep';
+    span.textContent = '+';
+  }
+  return span;
+}
+
+function formulaToHTML(formula) {
+  // Convert formula string to HTML with subscripts
+  let html = '';
+  let i = 0;
+  while (i < formula.length) {
+    if (formula[i] === '(' || formula[i] === ')') {
+      html += formula[i];
+      i++;
+    } else if (/[A-Z]/.test(formula[i])) {
+      html += formula[i];
+      i++;
+      while (i < formula.length && /[a-z]/.test(formula[i])) {
+        html += formula[i];
+        i++;
+      }
+    } else if (/\d/.test(formula[i])) {
+      let num = '';
+      while (i < formula.length && /\d/.test(formula[i])) {
+        num += formula[i];
+        i++;
+      }
+      html += '<sub>' + num + '</sub>';
+    } else {
+      html += formula[i];
+      i++;
+    }
+  }
+  return html;
+}
+
+// ======================== COEFFICIENT CHANGE ========================
+function changeCoeff(idx, delta) {
+  const newVal = coefficients[idx] + delta;
+  if (newVal < 1 || newVal > 20) return;
+  coefficients[idx] = newVal;
+  playClick();
+
+  const valDiv = document.getElementById('coeff-' + idx);
+  valDiv.textContent = newVal;
+  valDiv.classList.remove('changed');
+  void valDiv.offsetWidth;
+  valDiv.classList.add('changed');
+  if (newVal === 1) valDiv.classList.remove('changed');
+
+  updateAtomTable();
+  checkAutoBalance();
+}
+
+// ======================== ATOM TABLE ========================
+function updateAtomTable() {
+  const eq = currentEquation;
+  const leftCompounds = eq.reactants;
+  const rightCompounds = eq.products;
+  const leftCoeffs = coefficients.slice(0, leftCompounds.length);
+  const rightCoeffs = coefficients.slice(leftCompounds.length);
+
+  const leftAtoms = countAtoms(leftCompounds, leftCoeffs);
+  const rightAtoms = countAtoms(rightCompounds, rightCoeffs);
+
+  // Collect all elements
+  const elements = new Set([...Object.keys(leftAtoms), ...Object.keys(rightAtoms)]);
+  const sortedElements = [...elements].sort();
+
+  const tbody = document.getElementById('atomTableBody');
+  tbody.innerHTML = '';
+
+  sortedElements.forEach(el => {
+    const left = leftAtoms[el] || 0;
+    const right = rightAtoms[el] || 0;
+    const balanced = left === right && left > 0;
+
+    const tr = document.createElement('tr');
+    tr.className = balanced ? 'balanced' : 'unbalanced';
+    tr.innerHTML = '<td>' + el + '</td>'
+      + '<td>' + left + '</td>'
+      + '<td>' + right + '</td>'
+      + '<td class="status-icon">' + (balanced ? '&#10003;' : '&#10007;') + '</td>';
+    tbody.appendChild(tr);
+  });
+}
+
+// ======================== AUTO-BALANCE CHECK ========================
+function checkAutoBalance() {
+  const eq = currentEquation;
+  const leftAtoms = countAtoms(eq.reactants, coefficients.slice(0, eq.reactants.length));
+  const rightAtoms = countAtoms(eq.products, coefficients.slice(eq.reactants.length));
+
+  const elements = new Set([...Object.keys(leftAtoms), ...Object.keys(rightAtoms)]);
+  const allBalanced = [...elements].every(el => {
+    const l = leftAtoms[el] || 0;
+    const r = rightAtoms[el] || 0;
+    return l === r && l > 0;
+  });
+
+  if (allBalanced && elements.size > 0) {
+    // Small delay before auto-submit so user sees the table go green
+    if (autoSubmitTimeout) clearTimeout(autoSubmitTimeout);
+    autoSubmitTimeout = setTimeout(() => submitCorrect(), 400);
+  } else {
+    if (autoSubmitTimeout) { clearTimeout(autoSubmitTimeout); autoSubmitTimeout = null; }
+  }
+}
+
+// ======================== TIMER ========================
+function startTimer() {
+  clearInterval(timerInterval);
+  const timerEl = document.getElementById('timerDisplay');
+  timerEl.textContent = timeLeft;
+  timerEl.className = 'timer';
+
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    timerEl.textContent = timeLeft;
+
+    if (timeLeft <= 10) {
+      timerEl.className = 'timer danger';
+    } else if (timeLeft <= 20) {
+      timerEl.className = 'timer warning';
+    }
+
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      submitTimeout();
+    }
+  }, 1000);
+}
+
+function stopTimer() {
+  clearInterval(timerInterval);
+}
+
+// ======================== SUBMIT ========================
+function submitCorrect() {
+  if (autoSubmitTimeout) { clearTimeout(autoSubmitTimeout); autoSubmitTimeout = null; }
+  stopTimer();
+  playCorrect();
+  playBalance();
+
+  const timeTaken = 60 - timeLeft;
+  roundTimes.push(timeTaken);
+  roundResults.push(true);
+
+  // XP: base 100 + time bonus
+  let xp = 100;
+  if (timeTaken < 10) xp += 100;
+  else if (timeTaken < 20) xp += 60;
+  else if (timeTaken < 30) xp += 30;
+  totalXP += xp;
+
+  // Mark coefficient values as correct
+  const allCompounds = [...currentEquation.reactants, ...currentEquation.products];
+  allCompounds.forEach((_, idx) => {
+    const valDiv = document.getElementById('coeff-' + idx);
+    if (valDiv) valDiv.classList.add('correct');
+  });
+
+  // Particles
+  spawnParticles('&#9878;', 6);
+
+  showFeedback('correct', timeTaken, xp);
+}
+
+function submitTimeout() {
+  if (autoSubmitTimeout) { clearTimeout(autoSubmitTimeout); autoSubmitTimeout = null; }
+  stopTimer();
+  playWrong();
+
+  roundTimes.push(60);
+  roundResults.push(false);
+
+  showFeedback('timeout', 60, 0);
+}
+
+// ======================== FEEDBACK ========================
+function showFeedback(type, time, xp) {
+  const overlay = document.getElementById('feedbackOverlay');
+  const icon = document.getElementById('feedbackIcon');
+  const title = document.getElementById('feedbackTitle');
+  const detail = document.getElementById('feedbackDetail');
+  const xpEl = document.getElementById('feedbackXP');
+  const solEl = document.getElementById('feedbackSolution');
+  const btn = document.getElementById('feedbackBtn');
+
+  overlay.className = 'feedback-overlay';
+
+  if (type === 'correct') {
+    overlay.classList.add('show', 'correct-bg');
+    icon.textContent = '&#9878;';
+    icon.innerHTML = '&#9878;';
+    title.textContent = 'Balanced!';
+    title.style.color = '#2ecc71';
+    detail.textContent = time + 's';
+    xpEl.textContent = '+' + xp + ' XP';
+    xpEl.style.display = '';
+    solEl.style.display = 'none';
+    btn.className = 'feedback-btn correct-btn';
+  } else {
+    overlay.classList.add('show', 'timeout-bg');
+    icon.innerHTML = '&#8987;';
+    title.textContent = 'Time\'s Up!';
+    title.style.color = '#e74c3c';
+    detail.textContent = 'The correct answer was:';
+    xpEl.textContent = '+0 XP';
+    xpEl.style.display = '';
+    // Show solution
+    const eq = currentEquation;
+    const sol = eq.solution;
+    const allCompounds = [...eq.reactants, ...eq.products];
+    let solStr = '';
+    allCompounds.forEach((f, i) => {
+      if (i > 0 && i < eq.reactants.length) solStr += ' + ';
+      if (i === eq.reactants.length) solStr += ' \u2192 ';
+      if (i > eq.reactants.length) solStr += ' + ';
+      solStr += sol[i] + ' ' + f;
+    });
+    solEl.textContent = solStr;
+    solEl.style.display = '';
+    btn.className = 'feedback-btn wrong-btn';
+  }
+
+  btn.textContent = currentRound >= 7 ? 'See Results' : 'Continue';
+}
+
+function nextEquation() {
+  const overlay = document.getElementById('feedbackOverlay');
+  overlay.classList.remove('show');
+
+  currentRound++;
+  updateXPDisplay();
+
+  setTimeout(() => loadEquation(), 300);
+}
+
+// ======================== LEVEL COMPLETE ========================
+function finishLevel() {
+  stopTimer();
+  playLevelUp();
+
+  const correctCount = roundResults.filter(r => r).length;
+  const avgTime = roundTimes.reduce((a, b) => a + b, 0) / roundTimes.length;
+
+  let stars = 0;
+  if (correctCount === 8) {
+    stars = 1;
+    if (avgTime < 30) stars = 2;
+    if (avgTime < 15) stars = 3;
+  } else if (correctCount >= 1) {
+    stars = 1;
+  }
+
+  // Save best
+  const prev = state.levels[currentLevel];
+  if (!prev || stars > (prev.stars || 0)) {
+    state.levels[currentLevel] = { stars, bestAvg: avgTime, xp: totalXP };
+  } else if (prev && avgTime < (prev.bestAvg || 999)) {
+    state.levels[currentLevel].bestAvg = avgTime;
+    // Recalculate stars based on new best avg
+    if (correctCount === 8) {
+      let newStars = 1;
+      if (avgTime < 30) newStars = 2;
+      if (avgTime < 15) newStars = 3;
+      if (newStars > (state.levels[currentLevel].stars || 0)) {
+        state.levels[currentLevel].stars = newStars;
+      }
+    }
+  }
+  saveProgress();
+
+  // Update progress bar to 100%
+  document.getElementById('progressFill').style.width = '100%';
+
+  // Show complete screen
+  showScreen('levelComplete');
+
+  const titleEl = document.getElementById('completeTitle');
+  titleEl.textContent = stars >= 1 ? 'Level Complete!' : 'Level Failed';
+
+  const starsEl = document.getElementById('resultStars');
+  starsEl.innerHTML = '';
+  for (let i = 1; i <= 3; i++) {
+    starsEl.innerHTML += i <= stars
+      ? '<span class="star-gold">&#9733;</span>'
+      : '<span class="star-empty">&#9733;</span>';
+  }
+
+  const statsEl = document.getElementById('resultStats');
+  statsEl.innerHTML = ''
+    + '<div class="stat-row"><span class="stat-label">Correct</span><span class="stat-value">' + correctCount + ' / 8</span></div>'
+    + '<div class="stat-row"><span class="stat-label">Average Time</span><span class="stat-value time">' + avgTime.toFixed(1) + 's</span></div>'
+    + '<div class="stat-row"><span class="stat-label">Total XP</span><span class="stat-value xp">' + totalXP + ' XP</span></div>'
+    + '<div class="stat-row"><span class="stat-label">Stars</span><span class="stat-value">'
+    + (stars >= 3 ? '3 &#9733; (under 15s avg!)' : stars >= 2 ? '2 &#9733; (under 30s avg)' : stars >= 1 ? '1 &#9733;' : '0 &#9733;')
+    + '</span></div>';
+
+  const btnsEl = document.getElementById('resultBtns');
+  let btnsHTML = '<button class="result-btn retry" onclick="startLevel(' + currentLevel + ')">Retry</button>';
+  btnsHTML += '<button class="result-btn menu" onclick="goMenu()">Menu</button>';
+  if (currentLevel < EQUATIONS.length - 1 && stars >= 1) {
+    btnsHTML += '<button class="result-btn next" onclick="startLevel(' + (currentLevel + 1) + ')">Next Level</button>';
+  }
+  btnsEl.innerHTML = btnsHTML;
+}
+
+// ======================== QUIT / MENU ========================
+function quitGame() {
+  stopTimer();
+  if (autoSubmitTimeout) { clearTimeout(autoSubmitTimeout); autoSubmitTimeout = null; }
+  goMenu();
+}
+
+function goMenu() {
+  showScreen('levelSelect');
+  renderLevelSelect();
+}
+
+// ======================== PARTICLES ========================
+function spawnParticles(emoji, count) {
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.innerHTML = emoji;
+    p.style.left = (20 + Math.random() * 60) + 'vw';
+    p.style.top = (30 + Math.random() * 30) + 'vh';
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 1000);
+  }
+}
+
+// ======================== UTILS ========================
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ======================== KEYBOARD SUPPORT ========================
+document.addEventListener('keydown', (e) => {
+  // Space or Enter to continue from feedback
+  if ((e.key === ' ' || e.key === 'Enter') && document.getElementById('feedbackOverlay').classList.contains('show')) {
+    e.preventDefault();
+    nextEquation();
+  }
+});
+
+// ======================== INIT ========================
+renderLevelSelect();
+</script>
+</body>
+</html>

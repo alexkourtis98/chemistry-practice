@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Periodic Table: Speed Challenge</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;min-height:100vh}
+.back{display:inline-block;padding:12px 20px;color:#58CC02;text-decoration:none;font-weight:600;font-size:.95em}
+.back:hover{color:#46a302}
+.screen{display:none;max-width:700px;margin:0 auto;padding:10px 16px 60px}
+.screen.active{display:block}
+.menu-title{text-align:center;padding:20px 0 6px}
+.menu-title h1{font-size:2em;color:#f5f5f5;font-weight:800;letter-spacing:1px}
+.menu-title p{color:#888;font-size:.95em;margin-top:4px}
+.diff-bar{display:flex;justify-content:center;gap:10px;margin:16px 0;flex-wrap:wrap}
+.diff-btn{padding:8px 18px;border-radius:8px;border:2px solid #333;background:transparent;color:#e0e0e0;cursor:pointer;font-size:.88em;font-weight:600;transition:all .2s}
+.diff-btn:hover{border-color:#58CC02}
+.diff-btn.active{background:#58CC02;color:#fff;border-color:#58CC02}
+.mode-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;padding:20px 0}
+.mode-card{background:#16213e;border:2px solid #233;border-radius:14px;padding:24px;cursor:pointer;transition:all .2s;text-align:center}
+.mode-card:hover{border-color:#58CC02;transform:translateY(-3px);box-shadow:0 6px 20px rgba(88,204,2,.15)}
+.mode-card .mode-icon{font-size:2.4em;margin-bottom:10px}
+.mode-card h3{font-size:1.15em;color:#f5f5f5;margin-bottom:6px}
+.mode-card p{font-size:.82em;color:#888;line-height:1.4}
+.mode-card .mode-xp{margin-top:10px;font-size:.8em;color:#58CC02;font-weight:600}
+.btn{display:inline-block;padding:12px 28px;border-radius:12px;font-size:1em;font-weight:700;border:none;cursor:pointer;transition:all .15s;text-decoration:none}
+.btn-primary{background:#58CC02;color:#fff;border-bottom:4px solid #46a302}
+.btn-primary:hover{background:#4db800}
+.btn-primary:active{border-bottom-width:2px;transform:translateY(2px)}
+.btn-secondary{background:#0f3460;color:#e0e0e0;border-bottom:4px solid #0a2540}
+.btn-secondary:hover{background:#1a4a80}
+.btn-danger{background:#FF4B4B;color:#fff;border-bottom:4px solid #cc3333}
+.btn-danger:hover{background:#e04040}
+.btn-sm{padding:6px 14px;font-size:.85em;border-radius:8px;border-bottom-width:3px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+/* Speed round */
+.speed-top{display:flex;justify-content:space-between;align-items:center;padding:8px 0;flex-wrap:wrap;gap:8px}
+.speed-top .hearts{font-size:1.5em;letter-spacing:4px}
+.speed-top .hearts .lost{opacity:.2;filter:grayscale(1)}
+.speed-top .score-box{font-size:1.1em;font-weight:700;color:#58CC02}
+.speed-top .q-num{color:#888;font-size:.9em}
+.timer-bar-wrap{width:100%;height:8px;background:#333;border-radius:4px;margin:10px 0;overflow:hidden}
+.timer-bar{height:100%;border-radius:4px;transition:width .1s linear;background:#58CC02}
+.timer-bar.warning{background:#ffd43b}
+.timer-bar.danger{background:#FF4B4B}
+.streak-display{text-align:center;font-size:.9em;color:#FF9600;font-weight:700;min-height:1.4em}
+.fire{display:inline;animation:flicker .4s infinite alternate}
+@keyframes flicker{0%{opacity:.7;transform:scale(1)}100%{opacity:1;transform:scale(1.15)}}
+.question-card{background:#16213e;border:2px solid #0f3460;border-radius:16px;padding:30px 20px;text-align:center;margin:16px 0}
+.question-card .q-text{font-size:1.3em;font-weight:700;color:#f5f5f5;margin-bottom:16px}
+.question-card .q-sub{font-size:.85em;color:#888;margin-bottom:12px}
+.input-area{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;align-items:center}
+.input-area input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:10px 16px;border-radius:8px;font-size:1.1em;width:240px;text-align:center;transition:border-color .2s}
+.input-area input[type="text"]:focus{border-color:#58CC02;outline:none}
+.choice-grid{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:10px}
+.choice-btn{padding:10px 20px;border-radius:10px;border:2px solid #333;background:#1a1a2e;color:#e0e0e0;cursor:pointer;font-size:.95em;font-weight:600;transition:all .2s;min-width:140px}
+.choice-btn:hover{border-color:#58CC02;background:#1a3050}
+.choice-btn.correct-pick{border-color:#58CC02;background:rgba(88,204,2,.2);color:#58CC02}
+.choice-btn.wrong-pick{border-color:#FF4B4B;background:rgba(255,75,75,.15);color:#FF4B4B}
+.feedback-flash{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:2.5em;font-weight:900;pointer-events:none;z-index:999;animation:flashPop .8s ease-out forwards;opacity:0}
+@keyframes flashPop{0%{opacity:1;transform:translate(-50%,-50%) scale(.5)}30%{opacity:1;transform:translate(-50%,-50%) scale(1.2)}100%{opacity:0;transform:translate(-50%,-60%) scale(1)}}
+.correct-answer-bar{background:rgba(255,75,75,.15);border:1px solid #FF4B4B;border-radius:10px;padding:10px 16px;text-align:center;margin-top:10px;color:#FF4B4B;font-weight:600;font-size:.95em}
+/* Mystery mode */
+.mystery-top{display:flex;justify-content:space-between;align-items:center;padding:8px 0;flex-wrap:wrap;gap:8px}
+.mystery-top .round-num{color:#888;font-size:.9em}
+.mystery-top .pts-avail{font-size:1em;font-weight:700;color:#ffd43b}
+.mystery-top .mystery-score{font-size:1.1em;font-weight:700;color:#58CC02}
+.mystery-icon{font-size:4em;text-align:center;margin:10px 0;color:#1CB0F6}
+.clue-container{margin:10px 0}
+.clue-card{background:#16213e;border:2px solid #0f3460;border-radius:12px;padding:14px 18px;margin:8px 0;display:flex;align-items:center;gap:12px;opacity:0;transform:translateY(10px);transition:all .4s ease}
+.clue-card.revealed{opacity:1;transform:translateY(0)}
+.clue-badge{background:#1CB0F6;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85em;flex-shrink:0}
+.clue-text{color:#e0e0e0;font-size:.95em}
+.mystery-actions{display:flex;justify-content:center;gap:10px;margin:14px 0;flex-wrap:wrap}
+.element-reveal{background:#16213e;border:2px solid #58CC02;border-radius:16px;padding:24px;text-align:center;margin:14px 0}
+.element-reveal .rev-sym{font-size:2.5em;font-weight:900;color:#58CC02}
+.element-reveal .rev-name{font-size:1.2em;color:#f5f5f5;margin:4px 0}
+.element-reveal .rev-info{font-size:.85em;color:#888;margin-top:6px}
+/* Results */
+.results-card{background:#16213e;border:2px solid #0f3460;border-radius:16px;padding:36px;text-align:center;max-width:480px;margin:40px auto}
+.results-card h2{font-size:1.8em;color:#f5f5f5;margin-bottom:6px}
+.results-card .result-stars{font-size:3em;margin:14px 0;letter-spacing:4px}
+.star-filled{color:#FF9600}
+.star-empty{color:#333}
+.results-card .result-score{font-size:1.15em;color:#888;margin-bottom:16px}
+.results-card .result-stat{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #233;font-size:.92em}
+.results-card .result-stat:last-child{border:none}
+.results-card .result-stat .label{color:#888}
+.results-card .result-stat .value{font-weight:700;color:#f5f5f5}
+.results-btns{display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap}
+.confetti-container{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;overflow:hidden}
+.confetti{position:absolute;width:8px;height:8px;top:-10px;border-radius:2px;animation:confettiFall 3s linear forwards}
+@keyframes confettiFall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+.sound-toggle{background:transparent;border:1px solid #333;color:#888;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:.82em;position:fixed;top:12px;right:12px;z-index:100}
+.sound-toggle:hover{border-color:#58CC02;color:#58CC02}
+.sound-toggle.on{color:#58CC02;border-color:#58CC02}
+@media(max-width:600px){
+  .menu-title h1{font-size:1.5em}
+  .mode-grid{grid-template-columns:1fr}
+  .question-card .q-text{font-size:1.1em}
+  .results-card{padding:24px 16px}
+  .choice-btn{min-width:100px;padding:8px 14px;font-size:.85em}
+}
+</style>
+</head>
+<body>
+
+<a href="periodic-table-game.html" class="back">&larr; Back to Periodic Table Game</a>
+<button class="sound-toggle" id="soundBtn" onclick="toggleSound()">Sound: OFF</button>
+
+<div class="confetti-container" id="confettiBox"></div>
+
+<!-- MENU -->
+<div class="screen active" id="menuScreen">
+  <div class="menu-title">
+    <h1>Periodic Table: Speed Challenge</h1>
+    <p>Test your reflexes and deduction skills</p>
+  </div>
+  <div class="diff-bar" id="diffBar">
+    <button class="diff-btn active" data-diff="easy">Easy (1-20)</button>
+    <button class="diff-btn" data-diff="medium">Medium (1-36)</button>
+    <button class="diff-btn" data-diff="hard">Hard (1-56)</button>
+    <button class="diff-btn" data-diff="expert">Expert (1-118)</button>
+  </div>
+  <div class="mode-grid">
+    <div class="mode-card" onclick="startSpeed()">
+      <div class="mode-icon">&#9889;</div>
+      <h3>Speed Round</h3>
+      <p>15-second timer, 3 lives, mixed questions. Score big with fast answers and streaks!</p>
+      <div class="mode-xp" id="xp-speed">0 XP</div>
+    </div>
+    <div class="mode-card" onclick="startMystery()">
+      <div class="mode-icon">&#128270;</div>
+      <h3>Mystery Element</h3>
+      <p>Decode the element from progressive clues. Fewer clues = more points!</p>
+      <div class="mode-xp" id="xp-mystery">0 XP</div>
+    </div>
+  </div>
+</div>
+
+<!-- SPEED ROUND -->
+<div class="screen" id="speedScreen">
+  <div class="speed-top">
+    <div class="hearts" id="heartsDisplay"></div>
+    <div class="q-num" id="qNum">Q 1/30</div>
+    <div class="score-box" id="speedScore">0</div>
+  </div>
+  <div class="timer-bar-wrap"><div class="timer-bar" id="speedTimerBar"></div></div>
+  <div class="streak-display" id="speedStreak"></div>
+  <div class="question-card" id="speedQCard">
+    <div class="q-text" id="speedQText"></div>
+    <div class="q-sub" id="speedQSub"></div>
+    <div class="input-area" id="speedInput" style="display:none">
+      <input type="text" id="speedAnswer" placeholder="Type answer..." autocomplete="off" autocapitalize="off" spellcheck="false">
+      <button class="btn btn-sm btn-primary" onclick="submitSpeed()">Submit</button>
+    </div>
+    <div class="choice-grid" id="speedChoices" style="display:none"></div>
+    <div class="correct-answer-bar" id="speedCorrectBar" style="display:none"></div>
+  </div>
+  <div style="text-align:center;margin-top:10px">
+    <button class="btn btn-sm btn-danger" onclick="endSpeed()">End Game</button>
+  </div>
+</div>
+
+<!-- MYSTERY ELEMENT -->
+<div class="screen" id="mysteryScreen">
+  <div class="mystery-top">
+    <div class="round-num" id="mysteryRound">Round 1/10</div>
+    <div class="pts-avail" id="mysteryPts">30 pts</div>
+    <div class="mystery-score" id="mysteryScore">0</div>
+  </div>
+  <div class="mystery-icon" id="mysteryIcon">?</div>
+  <div class="clue-container" id="clueContainer">
+    <div class="clue-card" id="clue1"><div class="clue-badge">1</div><div class="clue-text" id="clue1Text">???</div></div>
+    <div class="clue-card" id="clue2"><div class="clue-badge">2</div><div class="clue-text" id="clue2Text">???</div></div>
+    <div class="clue-card" id="clue3"><div class="clue-badge">3</div><div class="clue-text" id="clue3Text">???</div></div>
+  </div>
+  <div class="mystery-actions">
+    <div class="input-area">
+      <input type="text" id="mysteryAnswer" placeholder="Element name or symbol..." autocomplete="off" autocapitalize="off" spellcheck="false">
+    </div>
+  </div>
+  <div class="mystery-actions">
+    <button class="btn btn-sm btn-primary" id="mysterySubmitBtn" onclick="submitMystery()">Submit Guess</button>
+    <button class="btn btn-sm btn-secondary" id="mysteryClueBtn" onclick="revealNextClue()">Reveal Next Clue</button>
+  </div>
+  <div class="element-reveal" id="mysteryReveal" style="display:none">
+    <div class="rev-sym" id="revSym"></div>
+    <div class="rev-name" id="revName"></div>
+    <div class="rev-info" id="revInfo"></div>
+  </div>
+  <div class="mystery-actions" id="mysteryNextWrap" style="display:none">
+    <button class="btn btn-sm btn-primary" onclick="nextMysteryRound()">Next Round</button>
+  </div>
+  <div style="text-align:center;margin-top:10px">
+    <button class="btn btn-sm btn-danger" onclick="endMystery()">End Game</button>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="screen" id="resultsScreen">
+  <div class="results-card">
+    <h2 id="resultsTitle">Round Complete!</h2>
+    <div class="result-stars" id="resultsStars"></div>
+    <div class="result-score" id="resultsScore"></div>
+    <div id="resultsStats"></div>
+    <div class="results-btns">
+      <button class="btn btn-primary" id="replayBtn" onclick="replay()">Play Again</button>
+      <button class="btn btn-secondary" onclick="backToMenu()">Back to Menu</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const ELEMENTS=[
+{z:1,sym:"H",name:"Hydrogen",cat:"nonmetal",val:1,config:"1s1",p:1,g:1},
+{z:2,sym:"He",name:"Helium",cat:"noble",val:2,config:"1s2",p:1,g:18},
+{z:3,sym:"Li",name:"Lithium",cat:"alkali",val:1,config:"[He] 2s1",p:2,g:1},
+{z:4,sym:"Be",name:"Beryllium",cat:"alkaline",val:2,config:"[He] 2s2",p:2,g:2},
+{z:5,sym:"B",name:"Boron",cat:"metalloid",val:3,config:"[He] 2s2 2p1",p:2,g:13},
+{z:6,sym:"C",name:"Carbon",cat:"nonmetal",val:4,config:"[He] 2s2 2p2",p:2,g:14},
+{z:7,sym:"N",name:"Nitrogen",cat:"nonmetal",val:5,config:"[He] 2s2 2p3",p:2,g:15},
+{z:8,sym:"O",name:"Oxygen",cat:"nonmetal",val:6,config:"[He] 2s2 2p4",p:2,g:16},
+{z:9,sym:"F",name:"Fluorine",cat:"halogen",val:7,config:"[He] 2s2 2p5",p:2,g:17},
+{z:10,sym:"Ne",name:"Neon",cat:"noble",val:8,config:"[He] 2s2 2p6",p:2,g:18},
+{z:11,sym:"Na",name:"Sodium",cat:"alkali",val:1,config:"[Ne] 3s1",p:3,g:1},
+{z:12,sym:"Mg",name:"Magnesium",cat:"alkaline",val:2,config:"[Ne] 3s2",p:3,g:2},
+{z:13,sym:"Al",name:"Aluminium",cat:"post-transition",val:3,config:"[Ne] 3s2 3p1",p:3,g:13},
+{z:14,sym:"Si",name:"Silicon",cat:"metalloid",val:4,config:"[Ne] 3s2 3p2",p:3,g:14},
+{z:15,sym:"P",name:"Phosphorus",cat:"nonmetal",val:5,config:"[Ne] 3s2 3p3",p:3,g:15},
+{z:16,sym:"S",name:"Sulfur",cat:"nonmetal",val:6,config:"[Ne] 3s2 3p4",p:3,g:16},
+{z:17,sym:"Cl",name:"Chlorine",cat:"halogen",val:7,config:"[Ne] 3s2 3p5",p:3,g:17},
+{z:18,sym:"Ar",name:"Argon",cat:"noble",val:8,config:"[Ne] 3s2 3p6",p:3,g:18},
+{z:19,sym:"K",name:"Potassium",cat:"alkali",val:1,config:"[Ar] 4s1",p:4,g:1},
+{z:20,sym:"Ca",name:"Calcium",cat:"alkaline",val:2,config:"[Ar] 4s2",p:4,g:2},
+{z:21,sym:"Sc",name:"Scandium",cat:"transition",val:2,config:"[Ar] 3d1 4s2",p:4,g:3},
+{z:22,sym:"Ti",name:"Titanium",cat:"transition",val:2,config:"[Ar] 3d2 4s2",p:4,g:4},
+{z:23,sym:"V",name:"Vanadium",cat:"transition",val:2,config:"[Ar] 3d3 4s2",p:4,g:5},
+{z:24,sym:"Cr",name:"Chromium",cat:"transition",val:1,config:"[Ar] 3d5 4s1",p:4,g:6},
+{z:25,sym:"Mn",name:"Manganese",cat:"transition",val:2,config:"[Ar] 3d5 4s2",p:4,g:7},
+{z:26,sym:"Fe",name:"Iron",cat:"transition",val:2,config:"[Ar] 3d6 4s2",p:4,g:8},
+{z:27,sym:"Co",name:"Cobalt",cat:"transition",val:2,config:"[Ar] 3d7 4s2",p:4,g:9},
+{z:28,sym:"Ni",name:"Nickel",cat:"transition",val:2,config:"[Ar] 3d8 4s2",p:4,g:10},
+{z:29,sym:"Cu",name:"Copper",cat:"transition",val:1,config:"[Ar] 3d10 4s1",p:4,g:11},
+{z:30,sym:"Zn",name:"Zinc",cat:"transition",val:2,config:"[Ar] 3d10 4s2",p:4,g:12},
+{z:31,sym:"Ga",name:"Gallium",cat:"post-transition",val:3,config:"[Ar] 3d10 4s2 4p1",p:4,g:13},
+{z:32,sym:"Ge",name:"Germanium",cat:"metalloid",val:4,config:"[Ar] 3d10 4s2 4p2",p:4,g:14},
+{z:33,sym:"As",name:"Arsenic",cat:"metalloid",val:5,config:"[Ar] 3d10 4s2 4p3",p:4,g:15},
+{z:34,sym:"Se",name:"Selenium",cat:"nonmetal",val:6,config:"[Ar] 3d10 4s2 4p4",p:4,g:16},
+{z:35,sym:"Br",name:"Bromine",cat:"halogen",val:7,config:"[Ar] 3d10 4s2 4p5",p:4,g:17},
+{z:36,sym:"Kr",name:"Krypton",cat:"noble",val:8,config:"[Ar] 3d10 4s2 4p6",p:4,g:18},
+{z:37,sym:"Rb",name:"Rubidium",cat:"alkali",val:1,config:"[Kr] 5s1",p:5,g:1},
+{z:38,sym:"Sr",name:"Strontium",cat:"alkaline",val:2,config:"[Kr] 5s2",p:5,g:2},
+{z:39,sym:"Y",name:"Yttrium",cat:"transition",val:2,config:"[Kr] 4d1 5s2",p:5,g:3},
+{z:40,sym:"Zr",name:"Zirconium",cat:"transition",val:2,config:"[Kr] 4d2 5s2",p:5,g:4},
+{z:41,sym:"Nb",name:"Niobium",cat:"transition",val:1,config:"[Kr] 4d4 5s1",p:5,g:5},
+{z:42,sym:"Mo",name:"Molybdenum",cat:"transition",val:1,config:"[Kr] 4d5 5s1",p:5,g:6},
+{z:43,sym:"Tc",name:"Technetium",cat:"transition",val:2,config:"[Kr] 4d5 5s2",p:5,g:7},
+{z:44,sym:"Ru",name:"Ruthenium",cat:"transition",val:1,config:"[Kr] 4d7 5s1",p:5,g:8},
+{z:45,sym:"Rh",name:"Rhodium",cat:"transition",val:1,config:"[Kr] 4d8 5s1",p:5,g:9},
+{z:46,sym:"Pd",name:"Palladium",cat:"transition",val:0,config:"[Kr] 4d10",p:5,g:10},
+{z:47,sym:"Ag",name:"Silver",cat:"transition",val:1,config:"[Kr] 4d10 5s1",p:5,g:11},
+{z:48,sym:"Cd",name:"Cadmium",cat:"transition",val:2,config:"[Kr] 4d10 5s2",p:5,g:12},
+{z:49,sym:"In",name:"Indium",cat:"post-transition",val:3,config:"[Kr] 4d10 5s2 5p1",p:5,g:13},
+{z:50,sym:"Sn",name:"Tin",cat:"post-transition",val:4,config:"[Kr] 4d10 5s2 5p2",p:5,g:14},
+{z:51,sym:"Sb",name:"Antimony",cat:"metalloid",val:5,config:"[Kr] 4d10 5s2 5p3",p:5,g:15},
+{z:52,sym:"Te",name:"Tellurium",cat:"metalloid",val:6,config:"[Kr] 4d10 5s2 5p4",p:5,g:16},
+{z:53,sym:"I",name:"Iodine",cat:"halogen",val:7,config:"[Kr] 4d10 5s2 5p5",p:5,g:17},
+{z:54,sym:"Xe",name:"Xenon",cat:"noble",val:8,config:"[Kr] 4d10 5s2 5p6",p:5,g:18},
+{z:55,sym:"Cs",name:"Caesium",cat:"alkali",val:1,config:"[Xe] 6s1",p:6,g:1},
+{z:56,sym:"Ba",name:"Barium",cat:"alkaline",val:2,config:"[Xe] 6s2",p:6,g:2},
+{z:57,sym:"La",name:"Lanthanum",cat:"lanthanide",val:2,config:"[Xe] 5d1 6s2",p:6,g:3},
+{z:58,sym:"Ce",name:"Cerium",cat:"lanthanide",val:2,config:"[Xe] 4f1 5d1 6s2",p:6,g:0},
+{z:59,sym:"Pr",name:"Praseodymium",cat:"lanthanide",val:2,config:"[Xe] 4f3 6s2",p:6,g:0},
+{z:60,sym:"Nd",name:"Neodymium",cat:"lanthanide",val:2,config:"[Xe] 4f4 6s2",p:6,g:0},
+{z:61,sym:"Pm",name:"Promethium",cat:"lanthanide",val:2,config:"[Xe] 4f5 6s2",p:6,g:0},
+{z:62,sym:"Sm",name:"Samarium",cat:"lanthanide",val:2,config:"[Xe] 4f6 6s2",p:6,g:0},
+{z:63,sym:"Eu",name:"Europium",cat:"lanthanide",val:2,config:"[Xe] 4f7 6s2",p:6,g:0},
+{z:64,sym:"Gd",name:"Gadolinium",cat:"lanthanide",val:2,config:"[Xe] 4f7 5d1 6s2",p:6,g:0},
+{z:65,sym:"Tb",name:"Terbium",cat:"lanthanide",val:2,config:"[Xe] 4f9 6s2",p:6,g:0},
+{z:66,sym:"Dy",name:"Dysprosium",cat:"lanthanide",val:2,config:"[Xe] 4f10 6s2",p:6,g:0},
+{z:67,sym:"Ho",name:"Holmium",cat:"lanthanide",val:2,config:"[Xe] 4f11 6s2",p:6,g:0},
+{z:68,sym:"Er",name:"Erbium",cat:"lanthanide",val:2,config:"[Xe] 4f12 6s2",p:6,g:0},
+{z:69,sym:"Tm",name:"Thulium",cat:"lanthanide",val:2,config:"[Xe] 4f13 6s2",p:6,g:0},
+{z:70,sym:"Yb",name:"Ytterbium",cat:"lanthanide",val:2,config:"[Xe] 4f14 6s2",p:6,g:0},
+{z:71,sym:"Lu",name:"Lutetium",cat:"lanthanide",val:2,config:"[Xe] 4f14 5d1 6s2",p:6,g:0},
+{z:72,sym:"Hf",name:"Hafnium",cat:"transition",val:2,config:"[Xe] 4f14 5d2 6s2",p:6,g:4},
+{z:73,sym:"Ta",name:"Tantalum",cat:"transition",val:2,config:"[Xe] 4f14 5d3 6s2",p:6,g:5},
+{z:74,sym:"W",name:"Tungsten",cat:"transition",val:2,config:"[Xe] 4f14 5d4 6s2",p:6,g:6},
+{z:75,sym:"Re",name:"Rhenium",cat:"transition",val:2,config:"[Xe] 4f14 5d5 6s2",p:6,g:7},
+{z:76,sym:"Os",name:"Osmium",cat:"transition",val:2,config:"[Xe] 4f14 5d6 6s2",p:6,g:8},
+{z:77,sym:"Ir",name:"Iridium",cat:"transition",val:2,config:"[Xe] 4f14 5d7 6s2",p:6,g:9},
+{z:78,sym:"Pt",name:"Platinum",cat:"transition",val:1,config:"[Xe] 4f14 5d9 6s1",p:6,g:10},
+{z:79,sym:"Au",name:"Gold",cat:"transition",val:1,config:"[Xe] 4f14 5d10 6s1",p:6,g:11},
+{z:80,sym:"Hg",name:"Mercury",cat:"transition",val:2,config:"[Xe] 4f14 5d10 6s2",p:6,g:12},
+{z:81,sym:"Tl",name:"Thallium",cat:"post-transition",val:3,config:"[Xe] 4f14 5d10 6s2 6p1",p:6,g:13},
+{z:82,sym:"Pb",name:"Lead",cat:"post-transition",val:4,config:"[Xe] 4f14 5d10 6s2 6p2",p:6,g:14},
+{z:83,sym:"Bi",name:"Bismuth",cat:"post-transition",val:5,config:"[Xe] 4f14 5d10 6s2 6p3",p:6,g:15},
+{z:84,sym:"Po",name:"Polonium",cat:"post-transition",val:6,config:"[Xe] 4f14 5d10 6s2 6p4",p:6,g:16},
+{z:85,sym:"At",name:"Astatine",cat:"halogen",val:7,config:"[Xe] 4f14 5d10 6s2 6p5",p:6,g:17},
+{z:86,sym:"Rn",name:"Radon",cat:"noble",val:8,config:"[Xe] 4f14 5d10 6s2 6p6",p:6,g:18},
+{z:87,sym:"Fr",name:"Francium",cat:"alkali",val:1,config:"[Rn] 7s1",p:7,g:1},
+{z:88,sym:"Ra",name:"Radium",cat:"alkaline",val:2,config:"[Rn] 7s2",p:7,g:2},
+{z:89,sym:"Ac",name:"Actinium",cat:"actinide",val:2,config:"[Rn] 6d1 7s2",p:7,g:3},
+{z:90,sym:"Th",name:"Thorium",cat:"actinide",val:2,config:"[Rn] 6d2 7s2",p:7,g:0},
+{z:91,sym:"Pa",name:"Protactinium",cat:"actinide",val:2,config:"[Rn] 5f2 6d1 7s2",p:7,g:0},
+{z:92,sym:"U",name:"Uranium",cat:"actinide",val:2,config:"[Rn] 5f3 6d1 7s2",p:7,g:0},
+{z:93,sym:"Np",name:"Neptunium",cat:"actinide",val:2,config:"[Rn] 5f4 6d1 7s2",p:7,g:0},
+{z:94,sym:"Pu",name:"Plutonium",cat:"actinide",val:2,config:"[Rn] 5f6 7s2",p:7,g:0},
+{z:95,sym:"Am",name:"Americium",cat:"actinide",val:2,config:"[Rn] 5f7 7s2",p:7,g:0},
+{z:96,sym:"Cm",name:"Curium",cat:"actinide",val:2,config:"[Rn] 5f7 6d1 7s2",p:7,g:0},
+{z:97,sym:"Bk",name:"Berkelium",cat:"actinide",val:2,config:"[Rn] 5f9 7s2",p:7,g:0},
+{z:98,sym:"Cf",name:"Californium",cat:"actinide",val:2,config:"[Rn] 5f10 7s2",p:7,g:0},
+{z:99,sym:"Es",name:"Einsteinium",cat:"actinide",val:2,config:"[Rn] 5f11 7s2",p:7,g:0},
+{z:100,sym:"Fm",name:"Fermium",cat:"actinide",val:2,config:"[Rn] 5f12 7s2",p:7,g:0},
+{z:101,sym:"Md",name:"Mendelevium",cat:"actinide",val:2,config:"[Rn] 5f13 7s2",p:7,g:0},
+{z:102,sym:"No",name:"Nobelium",cat:"actinide",val:2,config:"[Rn] 5f14 7s2",p:7,g:0},
+{z:103,sym:"Lr",name:"Lawrencium",cat:"actinide",val:2,config:"[Rn] 5f14 7s2 7p1",p:7,g:0},
+{z:104,sym:"Rf",name:"Rutherfordium",cat:"transition",val:2,config:"[Rn] 5f14 6d2 7s2",p:7,g:4},
+{z:105,sym:"Db",name:"Dubnium",cat:"transition",val:2,config:"[Rn] 5f14 6d3 7s2",p:7,g:5},
+{z:106,sym:"Sg",name:"Seaborgium",cat:"transition",val:2,config:"[Rn] 5f14 6d4 7s2",p:7,g:6},
+{z:107,sym:"Bh",name:"Bohrium",cat:"transition",val:2,config:"[Rn] 5f14 6d5 7s2",p:7,g:7},
+{z:108,sym:"Hs",name:"Hassium",cat:"transition",val:2,config:"[Rn] 5f14 6d6 7s2",p:7,g:8},
+{z:109,sym:"Mt",name:"Meitnerium",cat:"unknown",val:null,config:"[Rn] 5f14 6d7 7s2",p:7,g:9},
+{z:110,sym:"Ds",name:"Darmstadtium",cat:"unknown",val:null,config:"[Rn] 5f14 6d8 7s2",p:7,g:10},
+{z:111,sym:"Rg",name:"Roentgenium",cat:"unknown",val:null,config:"[Rn] 5f14 6d9 7s2",p:7,g:11},
+{z:112,sym:"Cn",name:"Copernicium",cat:"unknown",val:null,config:"[Rn] 5f14 6d10 7s2",p:7,g:12},
+{z:113,sym:"Nh",name:"Nihonium",cat:"unknown",val:null,config:"[Rn] 5f14 6d10 7s2 7p1",p:7,g:13},
+{z:114,sym:"Fl",name:"Flerovium",cat:"unknown",val:null,config:"[Rn] 5f14 6d10 7s2 7p2",p:7,g:14},
+{z:115,sym:"Mc",name:"Moscovium",cat:"unknown",val:null,config:"[Rn] 5f14 6d10 7s2 7p3",p:7,g:15},
+{z:116,sym:"Lv",name:"Livermorium",cat:"unknown",val:null,config:"[Rn] 5f14 6d10 7s2 7p4",p:7,g:16},
+{z:117,sym:"Ts",name:"Tennessine",cat:"halogen",val:7,config:"[Rn] 5f14 6d10 7s2 7p5",p:7,g:17},
+{z:118,sym:"Og",name:"Oganesson",cat:"noble",val:8,config:"[Rn] 5f14 6d10 7s2 7p6",p:7,g:18}
+];
+
+const EL_BY_Z={};
+ELEMENTS.forEach(el=>EL_BY_Z[el.z]=el);
+
+const CAT_INFO={
+  alkali:{label:"Alkali Metal"},alkaline:{label:"Alkaline Earth Metal"},
+  transition:{label:"Transition Metal"},"post-transition":{label:"Post-Transition Metal"},
+  metalloid:{label:"Metalloid"},nonmetal:{label:"Reactive Nonmetal"},
+  halogen:{label:"Halogen"},noble:{label:"Noble Gas"},
+  lanthanide:{label:"Lanthanide"},actinide:{label:"Actinide"},
+  unknown:{label:"Unknown Properties"}
+};
+
+const DIFF_RANGES={easy:{min:1,max:20},medium:{min:1,max:36},hard:{min:1,max:56},expert:{min:1,max:118}};
+
+let diff='easy', soundOn=false, lastMode=null;
+let progress={speed:{xp:0,bestPct:0,played:0,stars:0},mystery:{xp:0,bestPct:0,played:0,stars:0},mastery:{},totalGames:0,badges:{}};
+
+// Audio
+let audioCtx=null;
+function initAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)()}
+function playBeep(f,d,t){if(!soundOn)return;try{initAudio();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=t||'sine';o.frequency.value=f;g.gain.value=.12;g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+d);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+d)}catch(e){}}
+function sndCorrect(){playBeep(880,.15);setTimeout(()=>playBeep(1100,.2),100)}
+function sndWrong(){playBeep(200,.3,'square')}
+function sndComplete(){playBeep(523,.15);setTimeout(()=>playBeep(659,.15),120);setTimeout(()=>playBeep(784,.25),240)}
+function toggleSound(){soundOn=!soundOn;const b=document.getElementById('soundBtn');b.textContent='Sound: '+(soundOn?'ON':'OFF');b.classList.toggle('on',soundOn);if(soundOn){initAudio();playBeep(660,.1)}}
+
+// Navigation
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
+function backToMenu(){stopSpeedTimer();showScreen('menuScreen');updateMenuXP()}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+
+// Difficulty
+document.querySelectorAll('.diff-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');diff=btn.dataset.diff;
+  });
+});
+
+// Progress
+function loadProgress(){try{const s=localStorage.getItem('ptg-progress');if(s){const d=JSON.parse(s);if(d.speed)progress.speed=Object.assign(progress.speed,d.speed);if(d.mystery)progress.mystery=Object.assign(progress.mystery,d.mystery);if(d.mastery)progress.mastery=d.mastery;if(d.totalGames)progress.totalGames=d.totalGames;if(d.badges)progress.badges=Object.assign(progress.badges,d.badges)}}catch(e){}}
+function saveProgress(){try{localStorage.setItem('ptg-progress',JSON.stringify(progress));fetch('/api/periodic-progress',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(progress)}).catch(()=>{})}catch(e){}}
+function updateMenuXP(){const se=document.getElementById('xp-speed');if(se)se.textContent=(progress.speed.xp||0)+' XP';const me=document.getElementById('xp-mystery');if(me)me.textContent=(progress.mystery.xp||0)+' XP'}
+function updateMastery(z,correct){if(!progress.mastery[z])progress.mastery[z]={tested:0,correct:0};progress.mastery[z].tested++;if(correct)progress.mastery[z].correct++}
+
+// Flash feedback
+function showFlash(text,color){const f=document.createElement('div');f.className='feedback-flash';f.style.color=color;f.textContent=text;document.body.appendChild(f);setTimeout(()=>f.remove(),900)}
+
+// Get elements for difficulty
+function getPool(){const r=DIFF_RANGES[diff];return ELEMENTS.filter(el=>el.z>=r.min&&el.z<=r.max)}
+
+// ===================== SPEED ROUND =====================
+let sp={lives:3,score:0,qNum:0,maxQ:30,streak:0,bestStreak:0,correct:0,wrong:0,totalTime:0,times:[],timer:null,timeLeft:15,currentEl:null,qType:null,answered:false,pool:[],firstClueCount:0};
+
+function startSpeed(){
+  lastMode='speed';
+  sp={lives:3,score:0,qNum:0,maxQ:30,streak:0,bestStreak:0,correct:0,wrong:0,totalTime:0,times:[],timer:null,timeLeft:15,currentEl:null,qType:null,answered:false,pool:getPool(),firstClueCount:0};
+  showScreen('speedScreen');
+  renderHearts();
+  document.getElementById('speedScore').textContent='0';
+  document.getElementById('speedStreak').innerHTML='';
+  nextSpeedQ();
+}
+
+function renderHearts(){
+  const h=document.getElementById('heartsDisplay');
+  let html='';
+  for(let i=0;i<3;i++)html+='<span'+(i>=sp.lives?' class="lost"':'')+'>&#10084;&#65039;</span>';
+  h.innerHTML=html;
+}
+
+function stopSpeedTimer(){if(sp.timer){clearInterval(sp.timer);sp.timer=null}}
+
+function startSpeedTimer(){
+  stopSpeedTimer();
+  sp.timeLeft=15;sp.answered=false;
+  updateTimerBar();
+  sp.timer=setInterval(()=>{
+    sp.timeLeft=Math.max(0,sp.timeLeft-0.1);
+    updateTimerBar();
+    if(sp.timeLeft<=0){stopSpeedTimer();speedTimeout()}
+  },100);
+}
+
+function updateTimerBar(){
+  const bar=document.getElementById('speedTimerBar');
+  const pct=(sp.timeLeft/15)*100;
+  bar.style.width=pct+'%';
+  bar.className='timer-bar'+(sp.timeLeft<5?' danger':sp.timeLeft<10?' warning':'');
+}
+
+function getElementRange(){
+  if(sp.qNum<5)return sp.pool.filter(e=>e.z<=10);
+  if(sp.qNum<10)return sp.pool.filter(e=>e.z<=20);
+  return sp.pool;
+}
+
+function pickQType(el){
+  const types=['sym2name','name2sym','z2sym','sym2z'];
+  if(el.cat!=='unknown')types.push('cat');
+  if(el.val!==null)types.push('valence');
+  return pick(types);
+}
+
+function nextSpeedQ(){
+  if(sp.qNum>=sp.maxQ||sp.lives<=0){endSpeed();return}
+  sp.qNum++;
+  document.getElementById('qNum').textContent='Q '+sp.qNum+'/'+sp.maxQ;
+  document.getElementById('speedCorrectBar').style.display='none';
+
+  const range=getElementRange();
+  sp.currentEl=pick(range);
+  sp.qType=pickQType(sp.currentEl);
+  sp.answered=false;
+
+  const el=sp.currentEl;
+  const qt=document.getElementById('speedQText');
+  const qs=document.getElementById('speedQSub');
+  const inp=document.getElementById('speedInput');
+  const choices=document.getElementById('speedChoices');
+
+  qs.textContent='';
+  inp.style.display='none';
+  choices.style.display='none';
+
+  switch(sp.qType){
+    case 'sym2name':
+      qt.textContent='What element has symbol '+el.sym+'?';
+      qs.textContent='Type the element name';
+      inp.style.display='flex';
+      document.getElementById('speedAnswer').value='';
+      document.getElementById('speedAnswer').placeholder='e.g., Helium';
+      document.getElementById('speedAnswer').focus();
+      break;
+    case 'name2sym':
+      qt.textContent='What is the symbol for '+el.name+'?';
+      qs.textContent='Type the chemical symbol';
+      inp.style.display='flex';
+      document.getElementById('speedAnswer').value='';
+      document.getElementById('speedAnswer').placeholder='e.g., He';
+      document.getElementById('speedAnswer').focus();
+      break;
+    case 'z2sym':
+      qt.textContent='What is element Z = '+el.z+'?';
+      qs.textContent='Type the name or symbol';
+      inp.style.display='flex';
+      document.getElementById('speedAnswer').value='';
+      document.getElementById('speedAnswer').placeholder='Name or symbol';
+      document.getElementById('speedAnswer').focus();
+      break;
+    case 'sym2z':
+      qt.textContent='What is the atomic number of '+el.sym+' ('+el.name+')?';
+      qs.textContent='Type the number';
+      inp.style.display='flex';
+      document.getElementById('speedAnswer').value='';
+      document.getElementById('speedAnswer').placeholder='e.g., 2';
+      document.getElementById('speedAnswer').focus();
+      break;
+    case 'cat':
+      qt.textContent='What category is '+el.sym+' ('+el.name+')?';
+      choices.style.display='flex';
+      renderCatChoices(el);
+      break;
+    case 'valence':
+      qt.textContent='How many valence electrons does '+el.sym+' ('+el.name+') have?';
+      inp.style.display='flex';
+      document.getElementById('speedAnswer').value='';
+      document.getElementById('speedAnswer').placeholder='e.g., 2';
+      document.getElementById('speedAnswer').focus();
+      break;
+  }
+  startSpeedTimer();
+}
+
+function renderCatChoices(el){
+  const c=document.getElementById('speedChoices');
+  c.innerHTML='';
+  const allCats=Object.keys(CAT_INFO).filter(k=>k!=='unknown');
+  let options=[el.cat];
+  const others=shuffle(allCats.filter(k=>k!==el.cat));
+  options.push(others[0],others[1],others[2]);
+  shuffle(options);
+  options.forEach(cat=>{
+    const btn=document.createElement('button');
+    btn.className='choice-btn';
+    btn.textContent=CAT_INFO[cat].label;
+    btn.onclick=()=>checkSpeedCat(cat,btn);
+    c.appendChild(btn);
+  });
+}
+
+function submitSpeed(){
+  if(sp.answered)return;
+  const ans=document.getElementById('speedAnswer').value.trim();
+  if(!ans)return;
+  stopSpeedTimer();
+  sp.answered=true;
+  const el=sp.currentEl;
+  let correct=false;
+  switch(sp.qType){
+    case 'sym2name':correct=ans.toLowerCase()===el.name.toLowerCase();break;
+    case 'name2sym':correct=ans.toLowerCase()===el.sym.toLowerCase();break;
+    case 'z2sym':correct=ans.toLowerCase()===el.sym.toLowerCase()||ans.toLowerCase()===el.name.toLowerCase();break;
+    case 'sym2z':correct=parseInt(ans)===el.z;break;
+    case 'valence':correct=parseInt(ans)===el.val;break;
+  }
+  processSpeedAnswer(correct);
+}
+
+function checkSpeedCat(cat,btn){
+  if(sp.answered)return;
+  stopSpeedTimer();
+  sp.answered=true;
+  const correct=cat===sp.currentEl.cat;
+  document.querySelectorAll('.choice-btn').forEach(b=>{
+    b.style.pointerEvents='none';
+    if(b.textContent===CAT_INFO[sp.currentEl.cat].label)b.classList.add('correct-pick');
+  });
+  if(!correct)btn.classList.add('wrong-pick');
+  processSpeedAnswer(correct);
+}
+
+function speedTimeout(){
+  if(sp.answered)return;
+  sp.answered=true;
+  sp.lives--;sp.wrong++;sp.streak=0;
+  renderHearts();
+  flashHeart();
+  sndWrong();
+  updateMastery(sp.currentEl.z,false);
+  showCorrectAnswer();
+  showFlash('TIME UP!','#FF4B4B');
+  updateSpeedStreak();
+  setTimeout(()=>nextSpeedQ(),1500);
+}
+
+function processSpeedAnswer(correct){
+  const elapsed=15-sp.timeLeft;
+  sp.times.push(elapsed);
+  sp.totalTime+=elapsed;
+  updateMastery(sp.currentEl.z,correct);
+
+  if(correct){
+    sp.correct++;sp.streak++;
+    if(sp.streak>sp.bestStreak)sp.bestStreak=sp.streak;
+    let pts=10;
+    if(elapsed<3){pts=30;showFlash('TRIPLE!','#58CC02')}
+    else if(elapsed<5){pts=20;showFlash('DOUBLE!','#ffd43b')}
+    else showFlash('+'+pts,'#58CC02');
+    if(sp.streak===5)pts+=5;
+    if(sp.streak===10)pts+=10;
+    sp.score+=pts;
+    sndCorrect();
+  } else {
+    sp.lives--;sp.wrong++;sp.streak=0;
+    renderHearts();
+    flashHeart();
+    sndWrong();
+    showCorrectAnswer();
+    showFlash('WRONG','#FF4B4B');
+  }
+
+  document.getElementById('speedScore').textContent=sp.score;
+  updateSpeedStreak();
+  setTimeout(()=>nextSpeedQ(),correct?500:1500);
+}
+
+function showCorrectAnswer(){
+  const bar=document.getElementById('speedCorrectBar');
+  const el=sp.currentEl;
+  let ans='';
+  switch(sp.qType){
+    case 'sym2name':ans=el.name;break;
+    case 'name2sym':ans=el.sym;break;
+    case 'z2sym':ans=el.sym+' ('+el.name+')';break;
+    case 'sym2z':ans=el.z;break;
+    case 'cat':ans=CAT_INFO[el.cat].label;break;
+    case 'valence':ans=el.val;break;
+  }
+  bar.textContent='Correct answer: '+ans;
+  bar.style.display='block';
+}
+
+function flashHeart(){
+  const hearts=document.getElementById('heartsDisplay');
+  const lost=hearts.querySelectorAll('.lost');
+  if(lost.length>0){
+    const last=lost[lost.length-1];
+    last.style.transition='transform .3s';
+    last.style.transform='scale(1.5)';
+    setTimeout(()=>{last.style.transform='scale(1)'},300);
+  }
+}
+
+function updateSpeedStreak(){
+  const el=document.getElementById('speedStreak');
+  if(sp.streak>=3){
+    let fire='';
+    if(sp.streak>=10)fire=' <span class="fire">&#128293;&#128293;</span>';
+    else if(sp.streak>=5)fire=' <span class="fire">&#128293;</span>';
+    el.innerHTML=sp.streak+'x streak'+fire;
+  } else el.innerHTML='';
+}
+
+function endSpeed(){
+  stopSpeedTimer();
+  const pct=sp.qNum>0?Math.round((sp.correct/sp.qNum)*100):0;
+  const stars=pct>=90?3:pct>=70?2:pct>=50?1:0;
+  const avgTime=sp.times.length>0?(sp.totalTime/sp.times.length).toFixed(1):'0';
+
+  progress.speed.xp+=sp.score;
+  progress.speed.played=(progress.speed.played||0)+1;
+  if(pct>progress.speed.bestPct)progress.speed.bestPct=pct;
+  if(stars>progress.speed.stars)progress.speed.stars=stars;
+  progress.totalGames=(progress.totalGames||0)+1;
+  if(sp.lives===3&&sp.qNum>=sp.maxQ)progress.badges.speedDemon=true;
+  saveProgress();
+
+  document.getElementById('resultsTitle').textContent=stars===3?'Excellent!':stars===2?'Well Done!':stars===1?'Good Effort!':'Keep Practicing!';
+  let starsHTML='';
+  for(let i=0;i<3;i++)starsHTML+=i<stars?'<span class="star-filled">&#9733;</span>':'<span class="star-empty">&#9733;</span>';
+  document.getElementById('resultsStars').innerHTML=starsHTML;
+  document.getElementById('resultsScore').textContent=sp.score+' points | '+pct+'%';
+  document.getElementById('resultsStats').innerHTML=
+    '<div class="result-stat"><span class="label">Correct</span><span class="value" style="color:#58CC02">'+sp.correct+'</span></div>'+
+    '<div class="result-stat"><span class="label">Wrong</span><span class="value" style="color:#FF4B4B">'+sp.wrong+'</span></div>'+
+    '<div class="result-stat"><span class="label">Questions</span><span class="value">'+sp.qNum+'/'+sp.maxQ+'</span></div>'+
+    '<div class="result-stat"><span class="label">Best Streak</span><span class="value" style="color:#FF9600">'+sp.bestStreak+'</span></div>'+
+    '<div class="result-stat"><span class="label">Lives Remaining</span><span class="value">'+sp.lives+'/3</span></div>'+
+    '<div class="result-stat"><span class="label">Avg Time/Answer</span><span class="value">'+avgTime+'s</span></div>'+
+    '<div class="result-stat"><span class="label">Accuracy</span><span class="value">'+pct+'%</span></div>';
+
+  showScreen('resultsScreen');
+  sndComplete();
+  if(stars>=2)launchConfetti();
+}
+
+// ===================== MYSTERY ELEMENT =====================
+let my={round:0,maxRounds:10,score:0,cluesRevealed:0,currentEl:null,clues:[],answered:false,firstClueCorrect:0,pool:[]};
+
+function startMystery(){
+  lastMode='mystery';
+  my={round:0,maxRounds:10,score:0,cluesRevealed:0,currentEl:null,clues:[],answered:false,firstClueCorrect:0,pool:shuffle(getPool().slice())};
+  showScreen('mysteryScreen');
+  document.getElementById('mysteryScore').textContent='0';
+  nextMysteryRound();
+}
+
+function generateClues(el){
+  const clues=[];
+  const metalTypes=['alkali','alkaline','transition','post-transition','lanthanide','actinide'];
+  const isMetal=metalTypes.includes(el.cat);
+  const isMetalloid=el.cat==='metalloid';
+  const metalLabel=isMetal?'metal':isMetalloid?'metalloid':'nonmetal';
+
+  // Clue 1 (vague)
+  const c1Options=[
+    'I am in period '+el.p,
+    'I am a '+CAT_INFO[el.cat].label,
+    'My atomic number is '+(el.z%2===0?'even':'odd'),
+    'I have '+el.name.length+' letters in my name'
+  ];
+  clues.push(pick(c1Options));
+
+  // Clue 2 (medium)
+  const c2Options=[];
+  if(el.g&&el.g!==0)c2Options.push('I am in group '+el.g);
+  c2Options.push('My symbol starts with "'+el.sym[0]+'"');
+  c2Options.push('I am a '+metalLabel);
+  const nameStart=el.name[0];
+  const nextChar=String.fromCharCode(nameStart.charCodeAt(0)+3);
+  c2Options.push('My name starts with a letter between '+nameStart+' and '+nextChar);
+  if(el.val!==null)c2Options.push('I have '+el.val+' valence electron'+(el.val!==1?'s':''));
+  clues.push(pick(c2Options));
+
+  // Clue 3 (specific)
+  const c3Options=[];
+  c3Options.push('My atomic number is between '+(el.z-2)+' and '+(el.z+2));
+  c3Options.push('My symbol has '+el.sym.length+' letter'+(el.sym.length>1?'s':'')+' and my name is '+el.name.length+' letters long');
+  // neighbor
+  const neighbors=[];
+  if(EL_BY_Z[el.z-1])neighbors.push('after '+EL_BY_Z[el.z-1].name);
+  if(EL_BY_Z[el.z+1])neighbors.push('before '+EL_BY_Z[el.z+1].name);
+  if(neighbors.length)c3Options.push('I am right '+pick(neighbors));
+  // config ending
+  const configParts=el.config.split(' ');
+  c3Options.push('My electron configuration ends with '+configParts[configParts.length-1]);
+  clues.push(pick(c3Options));
+
+  return clues;
+}
+
+function nextMysteryRound(){
+  if(my.round>=my.maxRounds){endMystery();return}
+  my.round++;
+  my.cluesRevealed=0;
+  my.answered=false;
+
+  if(my.pool.length===0)my.pool=shuffle(getPool().slice());
+  my.currentEl=my.pool.pop();
+  my.clues=generateClues(my.currentEl);
+
+  document.getElementById('mysteryRound').textContent='Round '+my.round+'/'+my.maxRounds;
+  document.getElementById('mysteryPts').textContent='30 pts';
+  document.getElementById('mysteryIcon').textContent='?';
+  document.getElementById('mysteryIcon').style.display='block';
+  document.getElementById('mysteryReveal').style.display='none';
+  document.getElementById('mysteryNextWrap').style.display='none';
+  document.getElementById('mysterySubmitBtn').disabled=false;
+  document.getElementById('mysteryClueBtn').disabled=false;
+  document.getElementById('mysteryClueBtn').textContent='Reveal Next Clue';
+  document.getElementById('mysteryAnswer').value='';
+  document.getElementById('mysteryAnswer').disabled=false;
+
+  // Reset clue cards
+  for(let i=1;i<=3;i++){
+    document.getElementById('clue'+i).classList.remove('revealed');
+    document.getElementById('clue'+i+'Text').textContent='???';
+  }
+
+  // Reveal first clue
+  revealClue(1);
+  document.getElementById('mysteryAnswer').focus();
+}
+
+function revealClue(n){
+  if(n<1||n>3)return;
+  my.cluesRevealed=n;
+  document.getElementById('clue'+n).classList.add('revealed');
+  document.getElementById('clue'+n+'Text').textContent=my.clues[n-1];
+  const ptsMap={1:30,2:20,3:10};
+  document.getElementById('mysteryPts').textContent=(ptsMap[n]||10)+' pts';
+  if(n>=3){
+    document.getElementById('mysteryClueBtn').disabled=true;
+    document.getElementById('mysteryClueBtn').textContent='No more clues';
+  }
+}
+
+function revealNextClue(){
+  if(my.answered||my.cluesRevealed>=3)return;
+  revealClue(my.cluesRevealed+1);
+}
+
+function submitMystery(){
+  if(my.answered)return;
+  const ans=document.getElementById('mysteryAnswer').value.trim();
+  if(!ans)return;
+  my.answered=true;
+  const el=my.currentEl;
+  const correct=ans.toLowerCase()===el.name.toLowerCase()||ans.toLowerCase()===el.sym.toLowerCase();
+
+  updateMastery(el.z,correct);
+
+  if(correct){
+    const ptsMap={1:30,2:20,3:10};
+    const pts=ptsMap[my.cluesRevealed]||10;
+    my.score+=pts;
+    if(my.cluesRevealed===1)my.firstClueCorrect++;
+    sndCorrect();
+    showFlash('+'+pts+'!','#58CC02');
+  } else {
+    sndWrong();
+    showFlash('Wrong!','#FF4B4B');
+  }
+
+  document.getElementById('mysteryScore').textContent=my.score;
+  showMysteryReveal(correct);
+}
+
+function showMysteryReveal(correct){
+  const el=my.currentEl;
+  document.getElementById('mysteryIcon').style.display='none';
+  document.getElementById('mysteryReveal').style.display='block';
+  document.getElementById('mysteryReveal').style.borderColor=correct?'#58CC02':'#FF4B4B';
+  document.getElementById('revSym').textContent=el.sym;
+  document.getElementById('revSym').style.color=correct?'#58CC02':'#FF4B4B';
+  document.getElementById('revName').textContent=el.name;
+  document.getElementById('revInfo').textContent='Z='+el.z+' | Period '+el.p+' | '+(el.g?'Group '+el.g:'f-block')+' | '+CAT_INFO[el.cat].label;
+  document.getElementById('mysterySubmitBtn').disabled=true;
+  document.getElementById('mysteryClueBtn').disabled=true;
+  document.getElementById('mysteryAnswer').disabled=true;
+  document.getElementById('mysteryNextWrap').style.display='flex';
+
+  // Reveal all remaining clues
+  for(let i=my.cluesRevealed+1;i<=3;i++)revealClue(i);
+}
+
+function endMystery(){
+  const maxPts=my.maxRounds*30;
+  const pct=maxPts>0?Math.round((my.score/maxPts)*100):0;
+  const stars=pct>=80?3:pct>=50?2:pct>=25?1:0;
+
+  progress.mystery.xp+=my.score;
+  progress.mystery.played=(progress.mystery.played||0)+1;
+  if(pct>progress.mystery.bestPct)progress.mystery.bestPct=pct;
+  if(stars>progress.mystery.stars)progress.mystery.stars=stars;
+  progress.totalGames=(progress.totalGames||0)+1;
+  if(my.firstClueCorrect>=5)progress.badges.mysterySolver=true;
+  saveProgress();
+
+  document.getElementById('resultsTitle').textContent=stars===3?'Excellent!':stars===2?'Well Done!':stars===1?'Good Effort!':'Keep Practicing!';
+  let starsHTML='';
+  for(let i=0;i<3;i++)starsHTML+=i<stars?'<span class="star-filled">&#9733;</span>':'<span class="star-empty">&#9733;</span>';
+  document.getElementById('resultsStars').innerHTML=starsHTML;
+  document.getElementById('resultsScore').textContent=my.score+' points | '+pct+'% of max';
+  document.getElementById('resultsStats').innerHTML=
+    '<div class="result-stat"><span class="label">Rounds Played</span><span class="value">'+my.round+'/'+my.maxRounds+'</span></div>'+
+    '<div class="result-stat"><span class="label">Score</span><span class="value" style="color:#58CC02">'+my.score+'/'+maxPts+'</span></div>'+
+    '<div class="result-stat"><span class="label">First-Clue Solves</span><span class="value" style="color:#ffd43b">'+my.firstClueCorrect+'</span></div>'+
+    '<div class="result-stat"><span class="label">Accuracy</span><span class="value">'+pct+'%</span></div>';
+
+  showScreen('resultsScreen');
+  sndComplete();
+  if(stars>=2)launchConfetti();
+}
+
+// Replay
+function replay(){if(lastMode==='speed')startSpeed();else if(lastMode==='mystery')startMystery();else backToMenu()}
+
+// Confetti
+function launchConfetti(){
+  const box=document.getElementById('confettiBox');box.innerHTML='';
+  const colors=['#58CC02','#FF9600','#FF4B4B','#ffd43b','#1CB0F6','#b197fc','#f783ac'];
+  for(let i=0;i<60;i++){
+    const c=document.createElement('div');c.className='confetti';
+    c.style.left=Math.random()*100+'%';
+    c.style.background=colors[Math.floor(Math.random()*colors.length)];
+    c.style.animationDelay=(Math.random()*1.5)+'s';
+    c.style.animationDuration=(2+Math.random()*2)+'s';
+    c.style.width=(4+Math.random()*8)+'px';
+    c.style.height=(4+Math.random()*8)+'px';
+    box.appendChild(c);
+  }
+  setTimeout(()=>box.innerHTML='',4000);
+}
+
+// Keyboard
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    e.preventDefault();
+    const speedScreen=document.getElementById('speedScreen');
+    const mysteryScreen=document.getElementById('mysteryScreen');
+    if(speedScreen.classList.contains('active')&&!sp.answered)submitSpeed();
+    else if(mysteryScreen.classList.contains('active')&&!my.answered)submitMystery();
+  }
+});
+
+// Init
+loadProgress();
+updateMenuXP();
+</script>
+</body>
+</html>

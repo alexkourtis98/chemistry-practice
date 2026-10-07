@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Polar & Nonpolar Molecules</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Polar & Nonpolar Molecules</h1>
+<p class="subtitle">Deep practice &mdash; molecular polarity, VSEPR geometry, dipole moments, solubility</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_103';
+const SECTIONS = [
+  {
+    id:1, title:"Is this molecule polar or nonpolar?",
+    instruction:"Classify each molecule as polar or nonpolar.",
+    rows:[
+      ["1","H\u2082O","polar"],
+      ["2","CO\u2082","nonpolar"],
+      ["3","NH\u2083","polar"],
+      ["4","CH\u2084","nonpolar"],
+      ["5","HCl","polar"],
+      ["6","CCl\u2084","nonpolar"],
+      ["7","BF\u2083","nonpolar"],
+      ["8","SO\u2082","polar"],
+      ["9","N\u2082","nonpolar"],
+      ["10","HF","polar"],
+      ["11","SF\u2086","nonpolar"],
+      ["12","O\u2082","nonpolar"],
+      ["13","OF\u2082","polar"],
+      ["14","PCl\u2083","polar"],
+      ["15","C\u2082H\u2086","nonpolar"]
+    ]
+  },
+  {
+    id:2, title:"Geometry to polarity",
+    instruction:"Given the molecular geometry, determine if the molecule is polar or nonpolar.",
+    rows:[
+      ["1","Linear with 2 identical atoms bonded to the center (e.g., CO\u2082): polar or nonpolar?","nonpolar"],
+      ["2","Bent shape (e.g., H\u2082O): polar or nonpolar?","polar"],
+      ["3","Trigonal planar with all identical outer atoms (e.g., BF\u2083): polar or nonpolar?","nonpolar"],
+      ["4","Trigonal pyramidal (e.g., NH\u2083): polar or nonpolar?","polar"],
+      ["5","Tetrahedral with 4 identical substituents (e.g., CH\u2084): polar or nonpolar?","nonpolar"],
+      ["6","Tetrahedral with different substituents (e.g., CHCl\u2083): polar or nonpolar?","polar"],
+      ["7","See-saw shape (e.g., SF\u2084): polar or nonpolar?","polar"],
+      ["8","T-shaped (e.g., ClF\u2083): polar or nonpolar?","polar"],
+      ["9","Square planar with all identical outer atoms (e.g., XeF\u2084): polar or nonpolar?","nonpolar"],
+      ["10","Octahedral with all identical outer atoms (e.g., SF\u2086): polar or nonpolar?","nonpolar"],
+      ["11","Square pyramidal (e.g., BrF\u2085): polar or nonpolar?","polar"],
+      ["12","Linear with 2 DIFFERENT atoms (e.g., HCl): polar or nonpolar?","polar"],
+      ["13","Trigonal planar with one different substituent: polar or nonpolar?","polar"],
+      ["14","Bent shape with 2 lone pairs on center (e.g., OF\u2082): polar or nonpolar?","polar"]
+    ]
+  },
+  {
+    id:3, title:"Dipole direction and net dipole", type:"mc",
+    instruction:"Select the correct answer about dipole moments.",
+    questions:[
+      {q:"In HF, the dipole arrow points from ___ to ___.", options:["F to H (toward H)","H to F (toward F)","No dipole exists","Both directions equally"], correct:1},
+      {q:"In CO\u2082 (O=C=O), the two C=O dipoles:", options:["Point in the same direction","Cancel each other out (net \u03BC = 0)","Add up to a large dipole","Only one C=O bond is polar"], correct:1},
+      {q:"In H\u2082O, the two O-H bond dipoles:", options:["Cancel out due to symmetry","Do NOT cancel because the molecule is bent","Point away from oxygen","Are nonpolar bonds"], correct:1},
+      {q:"The dipole moment (\u03BC) is measured in units of:", options:["Joules","Newtons","Debye (D)","Pascals"], correct:2},
+      {q:"A molecule with \u03BC = 0 is:", options:["Always polar","Always nonpolar","Could be either","Always ionic"], correct:1},
+      {q:"Which has a larger dipole moment?", options:["HF (\u03BC = 1.91 D)","HCl (\u03BC = 1.08 D)","HBr (\u03BC = 0.82 D)","HI (\u03BC = 0.44 D)"], correct:0},
+      {q:"In NH\u2083, the three N-H bond dipoles:", options:["Cancel each other out","Partially add up, creating a net dipole pointing away from the lone pair","Point toward nitrogen and cancel","Are nonpolar"], correct:1},
+      {q:"In BF\u2083 (trigonal planar), the three B-F dipoles:", options:["All point toward boron and add up","Cancel out due to 120\u00B0 symmetry","Create a net dipole upward","Only two cancel, one remains"], correct:1},
+      {q:"The dipole moment is a ___ quantity:", options:["Scalar","Vector","Dimensionless","Imaginary"], correct:1},
+      {q:"In CCl\u2084, each C-Cl bond is polar, but the molecule is nonpolar because:", options:["Chlorine is not electronegative","The 4 dipoles cancel due to tetrahedral symmetry","Carbon is more electronegative than chlorine","There are no lone pairs on C"], correct:1},
+      {q:"Which has the LARGEST net dipole moment?", options:["CO\u2082 (linear, symmetric)","BF\u2083 (trigonal planar, symmetric)","H\u2082O (bent, asymmetric)","CCl\u2084 (tetrahedral, symmetric)"], correct:2},
+      {q:"NF\u2083 has a smaller dipole moment than NH\u2083 because:", options:["N-F bonds are nonpolar","The lone pair dipole opposes the N-F bond dipoles","Fluorine is less electronegative than hydrogen","NF\u2083 is nonpolar"], correct:1}
+    ]
+  },
+  {
+    id:4, title:"Symmetrical vs asymmetrical molecules", type:"mc",
+    instruction:"Determine whether symmetry cancels dipoles or not.",
+    questions:[
+      {q:"Which molecule is symmetrical and therefore nonpolar?", options:["H\u2082O (bent)","NH\u2083 (pyramidal)","CH\u2084 (tetrahedral, all H)","CHCl\u2083 (tetrahedral, mixed)"], correct:2},
+      {q:"Which molecule is asymmetrical and therefore polar?", options:["CO\u2082","BF\u2083","SF\u2086","SO\u2082"], correct:3},
+      {q:"A molecule with the formula AX\u2082E\u2082 (2 bonding, 2 lone pairs) is:", options:["Linear and nonpolar","Bent and polar","Trigonal planar and nonpolar","Tetrahedral and nonpolar"], correct:1},
+      {q:"A molecule with formula AX\u2083E (3 bonding, 1 lone pair) has shape:", options:["Trigonal planar","Tetrahedral","Trigonal pyramidal","Linear"], correct:2},
+      {q:"Trigonal pyramidal shape is always ___ because:", options:["Nonpolar, dipoles cancel","Polar, the lone pair creates asymmetry","Nonpolar, there are no lone pairs","Polar, all bonds are ionic"], correct:1},
+      {q:"Which of these is NOT symmetric?", options:["BeCl\u2082 (linear)","BH\u2083 (trigonal planar)","PCl\u2085 (trigonal bipyramidal)","H\u2082S (bent)"], correct:3},
+      {q:"XeF\u2082 is linear (not bent) and therefore:", options:["Polar","Nonpolar","Ionic","Cannot determine"], correct:1},
+      {q:"A molecule AX\u2084E\u2082 has ___ geometry and is ___:", options:["Octahedral, nonpolar","Square planar, nonpolar","Square pyramidal, polar","Tetrahedral, polar"], correct:1},
+      {q:"If you replace one F in BF\u2083 with Cl, the molecule becomes:", options:["More symmetric","Less symmetric and polar","Still nonpolar","Ionic"], correct:1},
+      {q:"PCl\u2085 (trigonal bipyramidal, all Cl) is:", options:["Polar","Nonpolar","Ionic","Cannot exist"], correct:1},
+      {q:"IF\u2085 (square pyramidal) is ___ because:", options:["Nonpolar, all bonds are the same","Polar, the lone pair creates asymmetry","Nonpolar, it has octahedral electron geometry","Polar, iodine is more electronegative"], correct:1},
+      {q:"Which pair are BOTH nonpolar?", options:["H\u2082O and NH\u2083","CO\u2082 and CCl\u2084","HCl and HF","SO\u2082 and PCl\u2083"], correct:1}
+    ]
+  },
+  {
+    id:5, title:"Tetrahedral molecules: polar or nonpolar?",
+    instruction:"All these molecules have tetrahedral electron geometry. Classify as polar or nonpolar.",
+    rows:[
+      ["1","CH\u2084 (4 identical C-H bonds)","nonpolar"],
+      ["2","CCl\u2084 (4 identical C-Cl bonds)","nonpolar"],
+      ["3","CHCl\u2083 (1 H + 3 Cl on carbon)","polar"],
+      ["4","CH\u2082Cl\u2082 (2 H + 2 Cl on carbon)","polar"],
+      ["5","CH\u2083Cl (3 H + 1 Cl on carbon)","polar"],
+      ["6","CBr\u2084 (4 identical C-Br bonds)","nonpolar"],
+      ["7","CH\u2083F (3 H + 1 F on carbon)","polar"],
+      ["8","CF\u2084 (4 identical C-F bonds)","nonpolar"],
+      ["9","SiH\u2084 (4 identical Si-H bonds)","nonpolar"],
+      ["10","SiH\u2083Cl (3 H + 1 Cl on silicon)","polar"],
+      ["11","CHBr\u2083 (1 H + 3 Br on carbon)","polar"],
+      ["12","CH\u2082F\u2082 (2 H + 2 F on carbon)","polar"],
+      ["13","CF\u2082Cl\u2082 (2 F + 2 Cl on carbon, Freon-12)","polar"],
+      ["14","CBrClFI (all 4 different substituents)","polar"]
+    ]
+  },
+  {
+    id:6, title:"Lone pairs and polarity", type:"mc",
+    instruction:"How do lone pairs affect molecular polarity?",
+    questions:[
+      {q:"Lone pairs on the central atom generally make a molecule:", options:["More symmetric","Less symmetric (asymmetric), often polar","Always nonpolar","Ionic"], correct:1},
+      {q:"H\u2082O has 2 lone pairs on oxygen. These lone pairs:", options:["Cancel the O-H bond dipoles","Push the molecule into a bent shape, making it polar","Have no effect on polarity","Make oxygen positive"], correct:1},
+      {q:"NH\u2083 has 1 lone pair on nitrogen. This gives it ___ shape:", options:["Trigonal planar (nonpolar)","Trigonal pyramidal (polar)","Linear (nonpolar)","Bent (polar)"], correct:1},
+      {q:"BF\u2083 has NO lone pairs on boron. Its shape is:", options:["Trigonal pyramidal (polar)","Trigonal planar (nonpolar)","Bent (polar)","T-shaped (polar)"], correct:1},
+      {q:"Compare: BF\u2083 (no lone pairs) vs NF\u2083 (1 lone pair). Which is polar?", options:["BF\u2083","NF\u2083","Both","Neither"], correct:1},
+      {q:"XeF\u2084 has 2 lone pairs but is nonpolar because:", options:["Xe is a noble gas","The 2 lone pairs are opposite each other (square planar), dipoles cancel","Fluorine is not electronegative","It doesn't exist"], correct:1},
+      {q:"ClF\u2083 has 2 lone pairs and is T-shaped. It is:", options:["Nonpolar","Polar","Ionic","Cannot determine"], correct:1},
+      {q:"SO\u2082 has 1 lone pair on sulfur. Its shape is ___ and it is ___:", options:["Linear, nonpolar","Bent, polar","Trigonal planar, nonpolar","Tetrahedral, nonpolar"], correct:1},
+      {q:"Which molecule with lone pairs is actually NONPOLAR?", options:["H\u2082O (2 LP, bent)","NH\u2083 (1 LP, pyramidal)","XeF\u2084 (2 LP, square planar)","SO\u2082 (1 LP, bent)"], correct:2},
+      {q:"ICl\u2085 (square pyramidal, 1 LP) is:", options:["Nonpolar","Polar","Cannot exist","Ionic"], correct:1},
+      {q:"XeF\u2082 has 3 lone pairs on Xe. Its shape is ___ and it is ___:", options:["Bent, polar","T-shaped, polar","Linear, nonpolar","Trigonal planar, nonpolar"], correct:2},
+      {q:"A central atom with 0 lone pairs and all identical bonds is:", options:["Always polar","Always nonpolar","Could be either","Always ionic"], correct:1}
+    ]
+  },
+  {
+    id:7, title:"Rank molecules by polarity/dipole moment",
+    instruction:"Rank from highest to lowest dipole moment. Use > symbol (e.g., A > B > C).",
+    rows:[
+      ["1","Rank: HF, HCl, HBr (highest \u03BC first)","HF > HCl > HBr"],
+      ["2","Rank: H\u2082O, H\u2082S, H\u2082Se (highest \u03BC first)","H\u2082O > H\u2082S > H\u2082Se / H2O > H2S > H2Se"],
+      ["3","Rank: NH\u2083, NF\u2083, NCl\u2083 (highest \u03BC first)","NH\u2083 > NCl\u2083 > NF\u2083 / NH3 > NCl3 > NF3"],
+      ["4","Rank: CO\u2082, SO\u2082, NO\u2082 by polarity (highest first)","NO\u2082 > SO\u2082 > CO\u2082 / NO2 > SO2 > CO2"],
+      ["5","Rank: CH\u2084, CH\u2083Cl, CH\u2082Cl\u2082 (highest \u03BC first)","CH\u2082Cl\u2082 > CH\u2083Cl > CH\u2084 / CH2Cl2 > CH3Cl > CH4"],
+      ["6","Which is more polar: HF or H\u2082O?","HF / HF is more polar"],
+      ["7","Which has zero dipole moment: CO\u2082 or SO\u2082?","CO\u2082 / CO2"],
+      ["8","Which is more polar: NH\u2083 or PH\u2083?","NH\u2083 / NH3"],
+      ["9","Which is more polar: CHCl\u2083 or CCl\u2084?","CHCl\u2083 / CHCl3"],
+      ["10","Which has higher \u03BC: H\u2082O or HF?","HF"]
+    ]
+  },
+  {
+    id:8, title:"CO\u2082 vs SO\u2082: why different polarity?", type:"mc",
+    instruction:"Explain why CO\u2082 is nonpolar but SO\u2082 is polar.",
+    questions:[
+      {q:"CO\u2082 is nonpolar because:", options:["Carbon is not electronegative","It is linear and the 2 C=O dipoles cancel","It has lone pairs on carbon","Oxygen is nonpolar"], correct:1},
+      {q:"SO\u2082 is polar because:", options:["Sulfur is more electronegative than oxygen","It is bent (lone pair on S), so dipoles don't cancel","It is linear","S=O bonds are nonpolar"], correct:1},
+      {q:"CO\u2082 has ___ lone pairs on the central atom:", options:["0","1","2","3"], correct:0},
+      {q:"SO\u2082 has ___ lone pair(s) on sulfur:", options:["0","1","2","3"], correct:1},
+      {q:"The bond angle in CO\u2082 is:", options:["90\u00B0","109.5\u00B0","120\u00B0","180\u00B0"], correct:3},
+      {q:"The bond angle in SO\u2082 is approximately:", options:["90\u00B0","119\u00B0","180\u00B0","109.5\u00B0"], correct:1},
+      {q:"If CO\u2082 were bent instead of linear, it would be:", options:["Still nonpolar","Polar","Ionic","Cannot determine"], correct:1},
+      {q:"CS\u2082 (same shape as CO\u2082) is:", options:["Polar","Nonpolar (linear, dipoles cancel)","Ionic","Bent"], correct:1},
+      {q:"O\u2083 (ozone) is ___ because:", options:["Nonpolar, all oxygen atoms","Polar, bent shape with resonance","Ionic","Linear and nonpolar"], correct:1},
+      {q:"NO\u2082 is polar because:", options:["It is linear","It is bent (odd electron molecule)","Nitrogen is nonpolar","It has no dipole"], correct:1},
+      {q:"Which pair has the SAME polarity classification?", options:["CO\u2082 and SO\u2082","CO\u2082 and CS\u2082 (both nonpolar)","H\u2082O and BF\u2083","NH\u2083 and CH\u2084"], correct:1},
+      {q:"BCl\u2083 is nonpolar but NCl\u2083 is polar. The difference is:", options:["Different elements","BCl\u2083 is trigonal planar (no LP), NCl\u2083 is pyramidal (1 LP)","BCl\u2083 has lone pairs","NCl\u2083 is linear"], correct:1}
+    ]
+  },
+  {
+    id:9, title:"Polar vs nonpolar in organic molecules",
+    instruction:"Classify each organic molecule as polar or nonpolar.",
+    rows:[
+      ["1","CH\u2083OH (methanol, has O-H group)","polar"],
+      ["2","C\u2082H\u2086 (ethane, symmetric hydrocarbon)","nonpolar"],
+      ["3","CH\u2083COOH (acetic acid, has O-H and C=O)","polar"],
+      ["4","C\u2086H\u2086 (benzene, symmetric ring)","nonpolar"],
+      ["5","CH\u2083NH\u2082 (methylamine, has N-H group)","polar"],
+      ["6","C\u2086H\u2081\u2084 (hexane, hydrocarbon chain)","nonpolar"],
+      ["7","CH\u2082O (formaldehyde, has C=O)","polar"],
+      ["8","C\u2088H\u2081\u2088 (octane, symmetric hydrocarbon)","nonpolar"],
+      ["9","CH\u2083Cl (chloromethane)","polar"],
+      ["10","CCl\u2082F\u2082 (Freon-12, different halogens)","polar"],
+      ["11","C\u2082H\u2085OH (ethanol)","polar"],
+      ["12","C\u2083H\u2088 (propane)","nonpolar"]
+    ]
+  },
+  {
+    id:10, title:"Solubility: like dissolves like", type:"mc",
+    instruction:"Predict solubility based on polarity.",
+    questions:[
+      {q:"NaCl dissolves well in water because:", options:["Both are nonpolar","NaCl is ionic, water is polar (like dissolves like)","Both are gases","NaCl is covalent"], correct:1},
+      {q:"Oil does NOT dissolve in water because:", options:["Oil is polar, water is nonpolar","Oil is nonpolar, water is polar (unlike)","Both are polar","Both are ionic"], correct:1},
+      {q:"Which dissolves best in water?", options:["CH\u2084 (nonpolar)","C\u2086H\u2081\u2084 (nonpolar)","C\u2082H\u2085OH (polar, has O-H)","CCl\u2084 (nonpolar)"], correct:2},
+      {q:"Which dissolves best in hexane (nonpolar solvent)?", options:["NaCl","H\u2082O","CH\u2083OH","I\u2082 (nonpolar)"], correct:3},
+      {q:"Sugar (glucose) dissolves in water because:", options:["It is nonpolar","It has many O-H groups (polar, H-bonding with water)","It is ionic","It is a gas"], correct:1},
+      {q:"Vitamin C is water-soluble. It is most likely:", options:["Nonpolar","Polar (many O-H groups)","A pure hydrocarbon","An ionic solid"], correct:1},
+      {q:"Vitamin E is fat-soluble. It is most likely:", options:["Very polar","Mostly nonpolar (long hydrocarbon chain)","Ionic","A metal"], correct:1},
+      {q:"CO\u2082 dissolves poorly in water at room temperature because:", options:["CO\u2082 is nonpolar","CO\u2082 is polar","CO\u2082 is ionic","CO\u2082 is too large"], correct:0},
+      {q:"Ethanol (CH\u2083CH\u2082OH) is miscible with water because:", options:["It is nonpolar","The -OH group forms hydrogen bonds with water","It is ionic","It is a gas"], correct:1},
+      {q:"Which is LEAST soluble in water?", options:["HCl (polar gas)","NH\u2083 (polar)","CH\u2084 (nonpolar)","NaCl (ionic)"], correct:2},
+      {q:"Grease dissolves in gasoline because:", options:["Both are polar","Both are nonpolar (like dissolves like)","Gasoline is ionic","Grease is polar"], correct:1},
+      {q:"Which would be miscible (fully mixable) with water?", options:["Hexane (C\u2086H\u2081\u2084)","Acetone (CH\u2083COCH\u2083, polar)","Cooking oil","Wax"], correct:1}
+    ]
+  },
+  {
+    id:11, title:"Mixed identification: challenging molecules",
+    instruction:"Classify as polar or nonpolar. Think carefully about geometry and symmetry.",
+    rows:[
+      ["1","XeF\u2082 (linear, 3 lone pairs on Xe)","nonpolar"],
+      ["2","XeF\u2084 (square planar, 2 lone pairs on Xe)","nonpolar"],
+      ["3","XeOF\u2082 (see-saw derived, asymmetric)","polar"],
+      ["4","PF\u2085 (trigonal bipyramidal, all F)","nonpolar"],
+      ["5","ClF\u2083 (T-shaped, 2 lone pairs on Cl)","polar"],
+      ["6","BrF\u2085 (square pyramidal, 1 lone pair)","polar"],
+      ["7","SF\u2084 (see-saw, 1 lone pair on S)","polar"],
+      ["8","IF\u2085 (square pyramidal, 1 lone pair)","polar"],
+      ["9","PCl\u2083 (trigonal pyramidal)","polar"],
+      ["10","SiF\u2084 (tetrahedral, all F)","nonpolar"],
+      ["11","AsH\u2083 (trigonal pyramidal)","polar"],
+      ["12","GeH\u2084 (tetrahedral, all H)","nonpolar"],
+      ["13","POCl\u2083 (tetrahedral with different atoms)","polar"],
+      ["14","SO\u2083 (trigonal planar, all O)","nonpolar"],
+      ["15","SOCl\u2082 (pyramidal, different atoms)","polar"]
+    ]
+  },
+  {
+    id:12, title:"Comprehensive review", type:"mc",
+    instruction:"Mixed review questions covering all aspects of molecular polarity.",
+    questions:[
+      {q:"A molecule is nonpolar when:", options:["It has polar bonds only","It has no bonds","The bond dipoles cancel due to symmetry","It is always a gas"], correct:2},
+      {q:"A molecule is polar when:", options:["Bond dipoles do NOT cancel (asymmetric shape)","It has no bonds","It is symmetric","It contains only nonpolar bonds"], correct:0},
+      {q:"Which determines molecular polarity?", options:["Only bond polarity","Only geometry","Both bond polarity AND geometry","Neither"], correct:2},
+      {q:"All diatomic molecules of the SAME element (like O\u2082, N\u2082) are:", options:["Polar","Nonpolar (no electronegativity difference)","Ionic","Cannot determine"], correct:1},
+      {q:"All diatomic molecules of DIFFERENT elements (like HCl, HF) are:", options:["Nonpolar","Always polar (asymmetric by nature)","Ionic","Sometimes polar, sometimes not"], correct:1},
+      {q:"How many of these are polar: H\u2082O, CO\u2082, NH\u2083, CH\u2084, HCl?", options:["1","2","3","4"], correct:2},
+      {q:"How many of these are nonpolar: BF\u2083, SF\u2086, SO\u2082, PCl\u2083, CCl\u2084?", options:["1","2","3","4"], correct:2},
+      {q:"The polarity of a molecule affects its:", options:["Nuclear charge","Boiling point, solubility, and intermolecular forces","Number of protons","Atomic number"], correct:1},
+      {q:"Polar molecules tend to have ___ boiling points than similar nonpolar molecules:", options:["Lower","Higher","The same","Cannot compare"], correct:1},
+      {q:"Which correctly lists molecules from MOST polar to LEAST polar?", options:["CH\u2084 > H\u2082O > HF","HF > H\u2082O > CH\u2084","CO\u2082 > BF\u2083 > H\u2082O","CCl\u2084 > CH\u2084 > H\u2082O"], correct:1},
+      {q:"Which molecule would have the highest boiling point?", options:["CH\u2084 (nonpolar, small)","CCl\u2084 (nonpolar, larger)","H\u2082O (polar, H-bonding)","N\u2082 (nonpolar, small)"], correct:2},
+      {q:"A molecule with a net dipole moment of zero:", options:["Must have no polar bonds","Could have polar bonds that cancel due to symmetry","Is always a noble gas","Must be ionic"], correct:1},
+      {q:"CHCl\u2083 is polar but CCl\u2084 is nonpolar. The reason is:", options:["CHCl\u2083 has a different atom (H vs Cl), breaking symmetry","CCl\u2084 has no polar bonds","CHCl\u2083 is ionic","They have different central atoms"], correct:0},
+      {q:"Which VSEPR shape ALWAYS produces a polar molecule?", options:["Linear","Tetrahedral","Trigonal pyramidal","Trigonal planar"], correct:2}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Polar & Nonpolar Molecules \u2014 Complete Reference</h3>' +
+'<h3>Key Principle</h3>' +
+'<p>Molecular polarity depends on <span class="rule">BOTH</span> bond polarity AND molecular geometry.</p>' +
+'<p>If bond dipoles cancel due to symmetry \u2192 <span class="rule">nonpolar</span>. If they don\'t cancel \u2192 <span class="rule">polar</span>.</p>' +
+'<h3>VSEPR Shapes & Polarity</h3>' +
+'<table><tr><th>Shape</th><th>Bonding/LP</th><th>Polar?</th><th>Example</th></tr>' +
+'<tr><td>Linear</td><td>2/0, same atoms</td><td>Nonpolar</td><td>CO\u2082</td></tr>' +
+'<tr><td>Linear</td><td>2/0, diff atoms</td><td>Polar</td><td>HCl</td></tr>' +
+'<tr><td>Bent</td><td>2/1 or 2/2</td><td><span class="rule">Always polar</span></td><td>H\u2082O, SO\u2082</td></tr>' +
+'<tr><td>Trigonal planar</td><td>3/0, same atoms</td><td>Nonpolar</td><td>BF\u2083</td></tr>' +
+'<tr><td>Trigonal pyramidal</td><td>3/1</td><td><span class="rule">Always polar</span></td><td>NH\u2083</td></tr>' +
+'<tr><td>Tetrahedral</td><td>4/0, same atoms</td><td>Nonpolar</td><td>CH\u2084, CCl\u2084</td></tr>' +
+'<tr><td>Tetrahedral</td><td>4/0, diff atoms</td><td>Polar</td><td>CHCl\u2083</td></tr>' +
+'<tr><td>See-saw</td><td>4/1</td><td><span class="rule">Polar</span></td><td>SF\u2084</td></tr>' +
+'<tr><td>T-shaped</td><td>3/2</td><td><span class="rule">Polar</span></td><td>ClF\u2083</td></tr>' +
+'<tr><td>Square planar</td><td>4/2, same atoms</td><td>Nonpolar</td><td>XeF\u2084</td></tr>' +
+'<tr><td>Square pyramidal</td><td>5/1</td><td><span class="rule">Polar</span></td><td>BrF\u2085</td></tr>' +
+'<tr><td>Octahedral</td><td>6/0, same atoms</td><td>Nonpolar</td><td>SF\u2086</td></tr></table>' +
+'<h3>Key Examples</h3>' +
+'<p><span class="rule">Nonpolar:</span> CO\u2082, CH\u2084, CCl\u2084, BF\u2083, SF\u2086, N\u2082, O\u2082, XeF\u2084, XeF\u2082</p>' +
+'<p><span class="rule">Polar:</span> H\u2082O, NH\u2083, HCl, HF, SO\u2082, CHCl\u2083, PCl\u2083, OF\u2082</p>' +
+'<h3>Dipole Moment (\u03BC)</h3>' +
+'<ul>' +
+'<li>\u03BC is the vector sum of all bond dipoles</li>' +
+'<li>Measured in Debye (D)</li>' +
+'<li>\u03BC = 0 \u2192 nonpolar molecule</li>' +
+'<li>\u03BC > 0 \u2192 polar molecule</li>' +
+'</ul>' +
+'<h3>Solubility Rule</h3>' +
+'<p><span class="rule">Like dissolves like:</span> polar dissolves in polar, nonpolar dissolves in nonpolar.</p>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 molecular polarity, VSEPR geometry, dipole moments, solubility \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Formula Writing Intensive</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Formula Writing Intensive</h1>
+<p class="subtitle">Deep practice &mdash; crisscross mastery, 52+ formula writing drills</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_18';
+const SECTIONS = [
+  {
+    id:1, title:"Binary ionic - simple (1:1 and 2:1)",
+    instruction:"Write the formula from the given ions.",
+    rows:[
+      ["1","Na\u207A + Cl\u207B \u2192","NaCl"],
+      ["2","K\u207A + Br\u207B \u2192","KBr"],
+      ["3","Mg\u00B2\u207A + O\u00B2\u207B \u2192","MgO"],
+      ["4","Ca\u00B2\u207A + S\u00B2\u207B \u2192","CaS"],
+      ["5","Li\u207A + F\u207B \u2192","LiF"],
+      ["6","Ba\u00B2\u207A + O\u00B2\u207B \u2192","BaO"],
+      ["7","Na\u207A + O\u00B2\u207B \u2192","Na2O / Na\u2082O"],
+      ["8","K\u207A + S\u00B2\u207B \u2192","K2S / K\u2082S"],
+      ["9","Li\u207A + O\u00B2\u207B \u2192","Li2O / Li\u2082O"],
+      ["10","Ba\u00B2\u207A + Cl\u207B \u2192","BaCl2 / BaCl\u2082"],
+      ["11","Na\u207A + S\u00B2\u207B \u2192","Na2S / Na\u2082S"],
+      ["12","K\u207A + I\u207B \u2192","KI"],
+      ["13","Ca\u00B2\u207A + Br\u207B \u2192","CaBr2 / CaBr\u2082"],
+      ["14","Mg\u00B2\u207A + F\u207B \u2192","MgF2 / MgF\u2082"],
+      ["15","Li\u207A + Br\u207B \u2192","LiBr"]
+    ]
+  },
+  {
+    id:2, title:"Binary ionic - crisscross needed",
+    instruction:"Use the crisscross method to write the formula.",
+    rows:[
+      ["1","Al\u00B3\u207A + O\u00B2\u207B \u2192","Al2O3 / Al\u2082O\u2083"],
+      ["2","Ca\u00B2\u207A + N\u00B3\u207B \u2192","Ca3N2 / Ca\u2083N\u2082"],
+      ["3","Mg\u00B2\u207A + N\u00B3\u207B \u2192","Mg3N2 / Mg\u2083N\u2082"],
+      ["4","Al\u00B3\u207A + Cl\u207B \u2192","AlCl3 / AlCl\u2083"],
+      ["5","Al\u00B3\u207A + S\u00B2\u207B \u2192","Al2S3 / Al\u2082S\u2083"],
+      ["6","Ca\u00B2\u207A + Cl\u207B \u2192","CaCl2 / CaCl\u2082"],
+      ["7","Ca\u00B2\u207A + F\u207B \u2192","CaF2 / CaF\u2082"],
+      ["8","Mg\u00B2\u207A + Cl\u207B \u2192","MgCl2 / MgCl\u2082"],
+      ["9","Ba\u00B2\u207A + N\u00B3\u207B \u2192","Ba3N2 / Ba\u2083N\u2082"],
+      ["10","Al\u00B3\u207A + F\u207B \u2192","AlF3 / AlF\u2083"],
+      ["11","Al\u00B3\u207A + N\u00B3\u207B \u2192","AlN"],
+      ["12","Mg\u00B2\u207A + P\u00B3\u207B \u2192","Mg3P2 / Mg\u2083P\u2082"],
+      ["13","Ca\u00B2\u207A + O\u00B2\u207B \u2192","CaO"],
+      ["14","Ba\u00B2\u207A + S\u00B2\u207B \u2192","BaS"],
+      ["15","Li\u207A + N\u00B3\u207B \u2192","Li3N / Li\u2083N"]
+    ]
+  },
+  {
+    id:3, title:"Polyatomic ions - basic",
+    instruction:"Write the formula. Use parentheses around polyatomic ions when subscript > 1.",
+    rows:[
+      ["1","Ca\u00B2\u207A + NO\u2083\u207B \u2192","Ca(NO3)2 / Ca(NO\u2083)\u2082"],
+      ["2","Al\u00B3\u207A + SO\u2084\u00B2\u207B \u2192","Al2(SO4)3 / Al\u2082(SO\u2084)\u2083"],
+      ["3","Na\u207A + CO\u2083\u00B2\u207B \u2192","Na2CO3 / Na\u2082CO\u2083"],
+      ["4","K\u207A + PO\u2084\u00B3\u207B \u2192","K3PO4 / K\u2083PO\u2084"],
+      ["5","NH\u2084\u207A + Cl\u207B \u2192","NH4Cl / NH\u2084Cl"],
+      ["6","NH\u2084\u207A + SO\u2084\u00B2\u207B \u2192","(NH4)2SO4 / (NH\u2084)\u2082SO\u2084"],
+      ["7","Ca\u00B2\u207A + PO\u2084\u00B3\u207B \u2192","Ca3(PO4)2 / Ca\u2083(PO\u2084)\u2082"],
+      ["8","Al\u00B3\u207A + OH\u207B \u2192","Al(OH)3 / Al(OH)\u2083"],
+      ["9","Mg\u00B2\u207A + OH\u207B \u2192","Mg(OH)2 / Mg(OH)\u2082"],
+      ["10","Ba\u00B2\u207A + NO\u2083\u207B \u2192","Ba(NO3)2 / Ba(NO\u2083)\u2082"],
+      ["11","K\u207A + OH\u207B \u2192","KOH"],
+      ["12","Na\u207A + HCO\u2083\u207B \u2192","NaHCO3 / NaHCO\u2083"],
+      ["13","Li\u207A + NO\u2083\u207B \u2192","LiNO3 / LiNO\u2083"],
+      ["14","Ca\u00B2\u207A + CO\u2083\u00B2\u207B \u2192","CaCO3 / CaCO\u2083"],
+      ["15","Na\u207A + SO\u2084\u00B2\u207B \u2192","Na2SO4 / Na\u2082SO\u2084"]
+    ]
+  },
+  {
+    id:4, title:"Polyatomic ions - advanced combinations",
+    instruction:"Write the formula. These use harder ion pairings.",
+    rows:[
+      ["1","Al\u00B3\u207A + PO\u2084\u00B3\u207B \u2192","AlPO4 / AlPO\u2084"],
+      ["2","Fe\u00B3\u207A + CO\u2083\u00B2\u207B \u2192","Fe2(CO3)3 / Fe\u2082(CO\u2083)\u2083"],
+      ["3","NH\u2084\u207A + PO\u2084\u00B3\u207B \u2192","(NH4)3PO4 / (NH\u2084)\u2083PO\u2084"],
+      ["4","Fe\u00B3\u207A + OH\u207B \u2192","Fe(OH)3 / Fe(OH)\u2083"],
+      ["5","Cu\u00B2\u207A + SO\u2084\u00B2\u207B \u2192","CuSO4 / CuSO\u2084"],
+      ["6","Pb\u00B2\u207A + NO\u2083\u207B \u2192","Pb(NO3)2 / Pb(NO\u2083)\u2082"],
+      ["7","Cr\u00B3\u207A + SO\u2084\u00B2\u207B \u2192","Cr2(SO4)3 / Cr\u2082(SO\u2084)\u2083"],
+      ["8","NH\u2084\u207A + CO\u2083\u00B2\u207B \u2192","(NH4)2CO3 / (NH\u2084)\u2082CO\u2083"],
+      ["9","Zn\u00B2\u207A + PO\u2084\u00B3\u207B \u2192","Zn3(PO4)2 / Zn\u2083(PO\u2084)\u2082"],
+      ["10","Sn\u00B2\u207A + SO\u2084\u00B2\u207B \u2192","SnSO4 / SnSO\u2084"],
+      ["11","Ag\u207A + CO\u2083\u00B2\u207B \u2192","Ag2CO3 / Ag\u2082CO\u2083"],
+      ["12","Fe\u00B2\u207A + PO\u2084\u00B3\u207B \u2192","Fe3(PO4)2 / Fe\u2083(PO\u2084)\u2082"],
+      ["13","Co\u00B2\u207A + NO\u2083\u207B \u2192","Co(NO3)2 / Co(NO\u2083)\u2082"],
+      ["14","Mn\u00B2\u207A + OH\u207B \u2192","Mn(OH)2 / Mn(OH)\u2082"],
+      ["15","Ni\u00B2\u207A + SO\u2084\u00B2\u207B \u2192","NiSO4 / NiSO\u2084"]
+    ]
+  },
+  {
+    id:5, title:"Parentheses drill", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"NaOH: does it need parentheses?", options:["Yes","No \u2014 subscript is 1"], correct:1},
+      {q:"Ca(OH)\u2082: why parentheses?", options:["Ca has charge 2","Need 2 OH groups \u2014 subscript applies to whole ion","OH has 2 atoms","Convention"], correct:1},
+      {q:"Al\u2082(SO\u2084)\u2083: the subscript 3 means:", options:["3 sulfur atoms","3 SO\u2084\u00B2\u207B groups","3 oxygen atoms","3 aluminum atoms"], correct:1},
+      {q:"Mg(NO\u2083)\u2082: total oxygen atoms?", options:["2","3","6","4"], correct:2},
+      {q:"Ca\u2083(PO\u2084)\u2082: total oxygen atoms?", options:["4","6","8","2"], correct:2},
+      {q:"(NH\u2084)\u2082SO\u2084: total hydrogen atoms?", options:["4","6","8","2"], correct:2},
+      {q:"When is parentheses NOT needed?", options:["When subscript = 1","When ion has 2 atoms","Always needed","For metals only"], correct:0},
+      {q:"K\u2082CO\u2083: parentheses needed?", options:["Yes","No \u2014 K has subscript, CO\u2083 has subscript 1"], correct:1},
+      {q:"Fe\u2082(CO\u2083)\u2083: total carbon atoms?", options:["2","3","6","9"], correct:1},
+      {q:"(NH\u2084)\u2083PO\u2084: total nitrogen atoms?", options:["1","3","4","12"], correct:1},
+      {q:"Ba(NO\u2083)\u2082: total atoms in the formula?", options:["5","7","9","11"], correct:2},
+      {q:"Al(OH)\u2083: total hydrogen atoms?", options:["1","2","3","6"], correct:2},
+      {q:"Cr\u2082(SO\u2084)\u2083: total sulfur atoms?", options:["2","3","5","6"], correct:1},
+      {q:"Fe(OH)\u2083: why parentheses?", options:["Fe has charge 3","3 OH groups needed","Iron is special","OH has oxygen"], correct:1},
+      {q:"Zn\u2083(PO\u2084)\u2082: total phosphorus atoms?", options:["1","2","3","6"], correct:1}
+    ]
+  },
+  {
+    id:6, title:"From name to formula",
+    instruction:"Write the chemical formula from the compound name.",
+    rows:[
+      ["1","Sodium chloride","NaCl"],
+      ["2","Calcium nitrate","Ca(NO3)2 / Ca(NO\u2083)\u2082"],
+      ["3","Aluminum oxide","Al2O3 / Al\u2082O\u2083"],
+      ["4","Potassium sulfate","K2SO4 / K\u2082SO\u2084"],
+      ["5","Magnesium hydroxide","Mg(OH)2 / Mg(OH)\u2082"],
+      ["6","Ammonium phosphate","(NH4)3PO4 / (NH\u2084)\u2083PO\u2084"],
+      ["7","Iron(III) chloride","FeCl3 / FeCl\u2083"],
+      ["8","Copper(II) sulfate","CuSO4 / CuSO\u2084"],
+      ["9","Barium nitrate","Ba(NO3)2 / Ba(NO\u2083)\u2082"],
+      ["10","Lithium carbonate","Li2CO3 / Li\u2082CO\u2083"],
+      ["11","Aluminum sulfate","Al2(SO4)3 / Al\u2082(SO\u2084)\u2083"],
+      ["12","Sodium phosphate","Na3PO4 / Na\u2083PO\u2084"],
+      ["13","Calcium phosphate","Ca3(PO4)2 / Ca\u2083(PO\u2084)\u2082"],
+      ["14","Ammonium sulfate","(NH4)2SO4 / (NH\u2084)\u2082SO\u2084"],
+      ["15","Potassium hydroxide","KOH"],
+      ["16","Lead(II) nitrate","Pb(NO3)2 / Pb(NO\u2083)\u2082"],
+      ["17","Chromium(III) oxide","Cr2O3 / Cr\u2082O\u2083"],
+      ["18","Zinc carbonate","ZnCO3 / ZnCO\u2083"]
+    ]
+  },
+  {
+    id:7, title:"Check if formula is balanced", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"NaCl\u2082: Is this correct for sodium chloride?", options:["Yes","No \u2014 Na\u207A + Cl\u207B = NaCl (1:1)"], correct:1},
+      {q:"Al\u2082O\u2083: balanced? 2(+3) + 3(\u22122) = ?", options:["0 \u2014 balanced \u2713","+1 \u2014 not balanced","\u22121 \u2014 not balanced","+2 \u2014 not balanced"], correct:0},
+      {q:"CaOH\u2082: Is this correct?", options:["Yes","No \u2014 should be Ca(OH)\u2082 with parentheses"], correct:1},
+      {q:"Mg\u2083(PO\u2084)\u2082: balanced? 3(+2) + 2(\u22123) = ?", options:["0 \u2014 balanced \u2713","+1","\u22121","+3"], correct:0},
+      {q:"Fe\u2082(SO\u2084)\u2083: Fe charge must be:", options:["+2","+3 \u2014 to balance 3 \u00D7 (\u22122) = \u22126, need 2 \u00D7 (+3) = +6","+1","+4"], correct:1},
+      {q:"Na\u2082SO\u2084: 2(+1) + 1(\u22122) = ?", options:["0 \u2713","+2","\u22122","Need more info"], correct:0},
+      {q:"K\u2083PO\u2084: balanced? 3(+1) + 1(\u22123) = ?", options:["0 \u2014 balanced \u2713","+1","\u22121","Cannot determine"], correct:0},
+      {q:"AlCl\u2082: Is this correct for aluminum chloride?", options:["Yes","No \u2014 Al\u00B3\u207A needs 3 Cl\u207B = AlCl\u2083"], correct:1},
+      {q:"Ca\u2082(PO\u2084)\u2083: balanced?", options:["Yes","No \u2014 should be Ca\u2083(PO\u2084)\u2082"], correct:1},
+      {q:"(NH\u2084)\u2082SO\u2084: balanced? 2(+1) + 1(\u22122) = ?", options:["0 \u2014 balanced \u2713","+1","\u22121","Need subscripts"], correct:0}
+    ]
+  },
+  {
+    id:8, title:"Error correction: fix wrong formulas",
+    instruction:"Write the correct formula.",
+    rows:[
+      ["1","NaCl\u2082 \u2192 correct formula?","NaCl"],
+      ["2","CaOH\u2082 \u2192 correct formula?","Ca(OH)2 / Ca(OH)\u2082"],
+      ["3","AlO \u2192 correct formula?","Al2O3 / Al\u2082O\u2083"],
+      ["4","Na\u2083SO\u2084 \u2192 correct formula?","Na2SO4 / Na\u2082SO\u2084"],
+      ["5","Ca\u2082Cl \u2192 correct formula?","CaCl2 / CaCl\u2082"],
+      ["6","AlSO\u2084 \u2192 correct formula?","Al2(SO4)3 / Al\u2082(SO\u2084)\u2083"],
+      ["7","MgCl \u2192 correct formula?","MgCl2 / MgCl\u2082"],
+      ["8","K\u2082OH \u2192 correct formula?","KOH"],
+      ["9","Al\u2082(OH)\u2082 \u2192 correct formula?","Al(OH)3 / Al(OH)\u2083"],
+      ["10","Ca\u2082NO\u2083 \u2192 correct formula?","Ca(NO3)2 / Ca(NO\u2083)\u2082"],
+      ["11","BaCl \u2192 correct formula?","BaCl2 / BaCl\u2082"],
+      ["12","FeO\u2083 \u2192 correct formula?","Fe2O3 / Fe\u2082O\u2083"],
+      ["13","Na\u2083PO\u2084\u2082 \u2192 correct formula?","Na3PO4 / Na\u2083PO\u2084"],
+      ["14","MgNO\u2083 \u2192 correct formula?","Mg(NO3)2 / Mg(NO\u2083)\u2082"],
+      ["15","Cu\u2082SO\u2084 \u2192 correct formula?","CuSO4 / CuSO\u2084"]
+    ]
+  },
+  {
+    id:9, title:"Simplification: reduce ratios",
+    instruction:"After crisscross, some formulas need reducing. Write the simplified formula.",
+    rows:[
+      ["1","Mg\u00B2\u207A + O\u00B2\u207B: crisscross gives Mg\u2082O\u2082, simplify:","MgO"],
+      ["2","Ca\u00B2\u207A + S\u00B2\u207B: crisscross gives Ca\u2082S\u2082, simplify:","CaS"],
+      ["3","Sn\u2074\u207A + O\u00B2\u207B: crisscross gives Sn\u2082O\u2084, simplify:","SnO2 / SnO\u2082"],
+      ["4","Pb\u2074\u207A + O\u00B2\u207B: crisscross gives Pb\u2082O\u2084, simplify:","PbO2 / PbO\u2082"],
+      ["5","Fe\u00B3\u207A + N\u00B3\u207B: crisscross gives Fe\u2083N\u2083, simplify:","FeN"],
+      ["6","Ti\u2074\u207A + S\u00B2\u207B: crisscross gives Ti\u2082S\u2084, simplify:","TiS2 / TiS\u2082"],
+      ["7","Ba\u00B2\u207A + O\u00B2\u207B: crisscross gives Ba\u2082O\u2082, simplify:","BaO"],
+      ["8","Cu\u00B2\u207A + S\u00B2\u207B: crisscross gives Cu\u2082S\u2082, simplify:","CuS"]
+    ]
+  },
+  {
+    id:10, title:"Word arrange: formula writing steps", type:"arrange",
+    instruction:"Arrange the steps in the correct order.",
+    sentences:[
+      {prompt:"Steps to write an ionic formula:", words:["Write","cation","and","anion","with","charges"]},
+      {prompt:"After writing charges:", words:["Crisscross","charge","numbers","as","subscripts"]},
+      {prompt:"After crisscross:", words:["Reduce","to","lowest","whole-number","ratio"]},
+      {prompt:"For polyatomic ions:", words:["Add","parentheses","if","subscript","is","greater","than","1"]},
+      {prompt:"Final check:", words:["Total","positive","charge","must","equal","total","negative","charge"]},
+      {prompt:"For Na\u207A + SO\u2084\u00B2\u207B:", words:["Na\u2082SO\u2084","because","2(+1)","balances","(\u22122)"]},
+      {prompt:"For Al\u00B3\u207A + OH\u207B:", words:["Al(OH)\u2083","because","3","OH","groups","balance","+3"]},
+      {prompt:"When subscript = 1:", words:["Do","not","write","the","number","1"]}
+    ]
+  },
+  {
+    id:11, title:"Mixed ionic + covalent formula writing",
+    instruction:"Write the formula. Some are ionic, some are covalent (use prefixes as guide).",
+    rows:[
+      ["1","Carbon dioxide","CO2 / CO\u2082"],
+      ["2","Sodium carbonate","Na2CO3 / Na\u2082CO\u2083"],
+      ["3","Dinitrogen pentoxide","N2O5 / N\u2082O\u2085"],
+      ["4","Iron(III) sulfate","Fe2(SO4)3 / Fe\u2082(SO\u2084)\u2083"],
+      ["5","Sulfur hexafluoride","SF6 / SF\u2086"],
+      ["6","Ammonium nitrate","NH4NO3 / NH\u2084NO\u2083"],
+      ["7","Carbon tetrachloride","CCl4 / CCl\u2084"],
+      ["8","Copper(II) hydroxide","Cu(OH)2 / Cu(OH)\u2082"],
+      ["9","Phosphorus pentachloride","PCl5 / PCl\u2085"],
+      ["10","Silver nitrate","AgNO3 / AgNO\u2083"],
+      ["11","Nitrogen dioxide","NO2 / NO\u2082"],
+      ["12","Zinc phosphate","Zn3(PO4)2 / Zn\u2083(PO\u2084)\u2082"],
+      ["13","Sulfur trioxide","SO3 / SO\u2083"],
+      ["14","Tin(IV) chloride","SnCl4 / SnCl\u2084"],
+      ["15","Carbon monoxide","CO"]
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Crisscross Method - Complete Formula Writing Guide</h3><p><span class="rule">THE CRISSCROSS METHOD - STEP BY STEP</span></p><p><strong>Step 1:</strong> Identify the cation (+) and anion (\u2212) and write their charges.</p><p><strong>Step 2:</strong> Take the NUMBER from each charge and make it the SUBSCRIPT of the OTHER ion. Drop the + and \u2212 signs.</p><p><strong>Step 3:</strong> Simplify (reduce) to the lowest whole-number ratio.</p><p><strong>Step 4:</strong> Put parentheses around polyatomic ions IF the subscript is &gt; 1.</p><p style="margin-top:10px"><span class="rule">THREE WORKED EXAMPLES</span></p><table><tr><th>Step</th><th>Example 1</th><th>Example 2</th><th>Example 3</th></tr><tr><td>Ions</td><td>Al\u00B3\u207A + O\u00B2\u207B</td><td>Ca\u00B2\u207A + NO\u2083\u207B</td><td>Fe\u00B3\u207A + SO\u2084\u00B2\u207B</td></tr><tr><td>Cross</td><td>3\u2192subscript of O, 2\u2192subscript of Al</td><td>2\u2192subscript of NO\u2083, 1\u2192subscript of Ca</td><td>3\u2192subscript of SO\u2084, 2\u2192subscript of Fe</td></tr><tr><td>Result</td><td>Al\u2082O\u2083</td><td>Ca(NO\u2083)\u2082</td><td>Fe\u2082(SO\u2084)\u2083</td></tr><tr><td>Check</td><td>2(+3)+3(\u22122)=0 \u2713</td><td>+2+2(\u22121)=0 \u2713</td><td>2(+3)+3(\u22122)=0 \u2713</td></tr></table><p style="margin-top:10px"><span class="rule">PARENTHESES RULE</span></p><p>Use ( ) around polyatomic ions <strong>ONLY</strong> when their subscript is &gt; 1.</p><table><tr><th>Correct</th><th>Incorrect</th><th>Why</th></tr><tr><td>Ca(NO\u2083)\u2082</td><td>CaNO\u2083\u2082</td><td>Without ( ), the 2 would only apply to the last atom</td></tr><tr><td>NaNO\u2083</td><td>Na(NO\u2083)</td><td>Subscript is 1, no parentheses needed</td></tr><tr><td>Al\u2082(SO\u2084)\u2083</td><td>Al\u2082SO\u2084\u2083</td><td>Need ( ) because subscript is 3</td></tr><tr><td>Na\u2082SO\u2084</td><td>Na\u2082(SO\u2084)</td><td>Subscript is 1, no parentheses needed</td></tr></table><p style="margin-top:10px"><span class="rule">SIMPLIFICATION RULE</span></p><p>After crisscrossing, reduce to lowest ratio ONLY for simple ions (NOT polyatomic).</p><table><tr><th>Before</th><th>After</th><th>Action</th></tr><tr><td>Mg\u2082O\u2082</td><td>MgO</td><td>Divide both by 2</td></tr><tr><td>Sn\u2082O\u2082</td><td>SnO</td><td>Divide both by 2 (but it\'s Sn\u00B2\u207A here)</td></tr><tr><td>Ca\u2082(SO\u2084)\u2082</td><td>CaSO\u2084</td><td>Divide both by 2</td></tr><tr><td>Fe\u2082(SO\u2084)\u2083</td><td>Fe\u2082(SO\u2084)\u2083</td><td>Cannot reduce (2 and 3 have no common factor)</td></tr></table><p style="margin-top:10px"><span class="rule">DECISION FLOWCHART: Name \u2192 Formula</span></p><p>1. Read the compound name</p><p>2. Identify the cation: is it a main group metal? \u2192 use group charge. Transition metal with Roman numeral? \u2192 that IS the charge.</p><p>3. Identify the anion: simple nonmetal (-ide)? \u2192 use group charge. Polyatomic ion? \u2192 look up its charge.</p><p>4. Apply crisscross method</p><p>5. Simplify if possible</p><p>6. Add parentheses if needed</p><p style="margin-top:10px"><span class="rule">COMMON ERRORS TO AVOID</span></p><table><tr><th>Error</th><th>Wrong</th><th>Correct</th></tr><tr><td>Forgetting parentheses</td><td>CaNO\u2083\u2082</td><td>Ca(NO\u2083)\u2082</td></tr><tr><td>Not simplifying</td><td>Mg\u2082O\u2082</td><td>MgO</td></tr><tr><td>Changing polyatomic subscripts</td><td>CaN\u2082O\u2086</td><td>Ca(NO\u2083)\u2082</td></tr><tr><td>Including charge signs</td><td>Na\u207ASO\u2084\u00B2\u207B</td><td>Na\u2082SO\u2084</td></tr><tr><td>Wrong crisscross direction</td><td>NaCl\u2082</td><td>NaCl (both are 1)</td></tr><tr><td>Forgetting to reduce</td><td>Pb\u2082O\u2082</td><td>PbO (for Pb\u00B2\u207A)</td></tr></table><p style="margin-top:10px"><span class="rule">KEY RULE:</span> The final formula must be <strong>electrically neutral</strong>. Total positive charges = total negative charges. Always verify: sum all charges = 0.</p>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 crisscross mastery, all ion types, formula writing drills \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

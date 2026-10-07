@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Resonance & Formal Charge</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Resonance & Formal Charge</h1>
+<p class="subtitle">Deep practice &mdash; resonance structures, formal charge, octet exceptions, Lewis structures</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_93';
+const SECTIONS = [
+  {
+    id:1, title:"Fill: Formal charge formula and basics",
+    instruction:"Complete each statement about formal charge.",
+    rows:[
+      ["1","Formal charge (FC) = V \u2212 N \u2212 B/2. V stands for ___ electrons","valence"],
+      ["2","N stands for ___ (non-bonding/lone pair) electrons","non-bonding / lone pair / nonbonding"],
+      ["3","B stands for ___ electrons (shared in bonds)","bonding / shared / bond"],
+      ["4","B/2 gives the number of ___ around the atom","bonds / bonding pairs"],
+      ["5","The sum of all formal charges must equal the overall ___ of the molecule or ion","charge"],
+      ["6","For a neutral molecule, the sum of all formal charges = ___","0 / zero"],
+      ["7","The best Lewis structure has formal charges closest to ___","0 / zero"],
+      ["8","Negative formal charges should be on the more ___ atom","electronegative"],
+      ["9","Carbon has ___ valence electrons","4"],
+      ["10","Nitrogen has ___ valence electrons","5"],
+      ["11","Oxygen has ___ valence electrons","6"],
+      ["12","Fluorine has ___ valence electrons","7"],
+      ["13","Sulfur has ___ valence electrons","6"],
+      ["14","Phosphorus has ___ valence electrons","5"],
+      ["15","Boron has ___ valence electrons","3"]
+    ]
+  },
+  {
+    id:2, title:"Fill: Calculate formal charges",
+    instruction:"Calculate the formal charge on the specified atom. FC = V - N - B/2.",
+    rows:[
+      ["1","O in H\u2082O: V=6, N=4 (2 lone pairs), B=4 (2 bonds). FC = ___","0"],
+      ["2","N in NH\u2083: V=5, N=2 (1 lone pair), B=6 (3 bonds). FC = ___","0"],
+      ["3","N in NH\u2084\u207A: V=5, N=0, B=8 (4 bonds). FC = ___","+1 / 1"],
+      ["4","O in OH\u207B: V=6, N=6 (3 lone pairs), B=2 (1 bond). FC = ___","-1"],
+      ["5","C in CO (triple bond, 1 lone pair on C): V=4, N=2, B=6. FC = ___","-1"],
+      ["6","O in CO (triple bond, 1 lone pair on O): V=6, N=2, B=6. FC = ___","+1 / 1"],
+      ["7","Central N in NO\u2083\u207B (one double bond, two single bonds, no lone pairs): V=5, N=0, B=8. FC = ___","+1 / 1"],
+      ["8","Double-bonded O in NO\u2083\u207B: V=6, N=4, B=4. FC = ___","0"],
+      ["9","Single-bonded O in NO\u2083\u207B (3 lone pairs, 1 bond): V=6, N=6, B=2. FC = ___","-1"],
+      ["10","B in BF\u2083: V=3, N=0, B=6 (3 bonds). FC = ___","0"],
+      ["11","S in SO\u2084\u00B2\u207B (4 single bonds, no lone pairs on S): V=6, N=0, B=8. FC = ___","-2"],
+      ["12","S in SO\u2084\u00B2\u207B (2 double bonds + 2 single bonds): V=6, N=0, B=12. FC = ___","0"],
+      ["13","O (double bonded) in SO\u2084\u00B2\u207B: V=6, N=4, B=4. FC = ___","0"],
+      ["14","O (single bonded) in SO\u2084\u00B2\u207B: V=6, N=6, B=2. FC = ___","-1"],
+      ["15","Central C in CO\u2082 (two double bonds): V=4, N=0, B=8. FC = ___","0"]
+    ]
+  },
+  {
+    id:3, title:"MC: Resonance structure concepts", type:"mc",
+    instruction:"Select the correct answer about resonance.",
+    questions:[
+      {q:"Resonance structures are:", options:["Different molecules","Different ways to draw the same molecule","Isomers","Excited states"], correct:1},
+      {q:"The actual structure of a resonance hybrid is:", options:["One of the resonance structures","An average/blend of all resonance structures","The most stable resonance structure only","None of the resonance structures"], correct:1},
+      {q:"In resonance structures, what moves between structures?", options:["Atoms","Single bonds","Electrons (especially \u03C0 and lone pairs)","Protons"], correct:2},
+      {q:"The atoms in resonance structures must have:", options:["Different positions","The same positions (only electrons differ)","Different bonding partners","Different charges"], correct:1},
+      {q:"Which species does NOT have resonance structures?", options:["O\u2083 (ozone)","NO\u2083\u207B (nitrate)","CO\u2082 (carbon dioxide)","CH\u2084 (methane)"], correct:3},
+      {q:"The carbonate ion CO\u2083\u00B2\u207B has how many equivalent resonance structures?", options:["1","2","3","4"], correct:2},
+      {q:"In CO\u2083\u00B2\u207B, each C-O bond order is:", options:["1","1.33","2","3"], correct:1},
+      {q:"The nitrate ion NO\u2083\u207B has ___ equivalent resonance structures:", options:["1","2","3","4"], correct:2},
+      {q:"In ozone (O\u2083), the bond order of each O-O bond is:", options:["1","1.5","2","2.5"], correct:1},
+      {q:"Benzene (C\u2086H\u2086) has ___ resonance structures:", options:["1","2","3","6"], correct:1},
+      {q:"In benzene, each C-C bond order is:", options:["1","1.5","2","2.5"], correct:1},
+      {q:"Resonance stabilization means the hybrid is:", options:["Higher in energy than any structure","Lower in energy than any single structure","Same energy as each structure","Unstable"], correct:1},
+      {q:"The resonance arrow (\u2194) is different from the equilibrium arrow (\u21CC) because:", options:["Resonance structures coexist simultaneously, not interconvert","They are the same thing","Resonance is faster","Equilibrium is slower"], correct:0},
+      {q:"Which contributes MORE to the resonance hybrid?", options:["Structure with more formal charges","Structure with fewer formal charges","Structure with charges on less electronegative atoms","Structure with most bonds to hydrogen"], correct:1},
+      {q:"Delocalized electrons in resonance are spread over:", options:["One atom","Two atoms","Multiple atoms","The entire molecule always"], correct:2}
+    ]
+  },
+  {
+    id:4, title:"Fill: Resonance in common species",
+    instruction:"Identify the number of resonance structures or the bond order.",
+    rows:[
+      ["1","CO\u2083\u00B2\u207B (carbonate): number of resonance structures = ___","3"],
+      ["2","CO\u2083\u00B2\u207B: C-O bond order = ___","1.33 / 4/3"],
+      ["3","NO\u2083\u207B (nitrate): number of resonance structures = ___","3"],
+      ["4","NO\u2083\u207B: N-O bond order = ___","1.33 / 4/3"],
+      ["5","NO\u2082\u207B (nitrite): number of resonance structures = ___","2"],
+      ["6","NO\u2082\u207B: N-O bond order = ___","1.5 / 3/2"],
+      ["7","O\u2083 (ozone): number of resonance structures = ___","2"],
+      ["8","O\u2083: O-O bond order = ___","1.5 / 3/2"],
+      ["9","SO\u2083 (sulfur trioxide): number of resonance structures = ___","3"],
+      ["10","C\u2086H\u2086 (benzene): number of Kekule resonance structures = ___","2"],
+      ["11","C\u2086H\u2086: C-C bond order = ___","1.5 / 3/2"],
+      ["12","SO\u2084\u00B2\u207B (sulfate): number of equivalent resonance structures = ___","6 / 4"],
+      ["13","PO\u2084\u00B3\u207B (phosphate): number of equivalent resonance structures = ___","4"],
+      ["14","HCO\u2082\u207B (formate): number of resonance structures = ___","2"],
+      ["15","CH\u2083COO\u207B (acetate): number of resonance structures = ___","2"]
+    ]
+  },
+  {
+    id:5, title:"MC: Octet rule exceptions", type:"mc",
+    instruction:"Select the correct answer about exceptions to the octet rule.",
+    questions:[
+      {q:"BF\u2083 is an example of:", options:["Expanded octet","Incomplete octet (B has only 6 electrons)","Odd-electron species","Normal octet"], correct:1},
+      {q:"How many electrons surround B in BF\u2083?", options:["2","4","6","8"], correct:2},
+      {q:"BeCl\u2082 has an incomplete octet with Be surrounded by ___ electrons:", options:["2","4","6","8"], correct:1},
+      {q:"AlCl\u2083 has aluminum surrounded by ___ electrons:", options:["4","6","8","12"], correct:1},
+      {q:"PCl\u2085 is an example of:", options:["Incomplete octet","Normal octet","Expanded octet (P has 10 e\u207B)","Odd-electron species"], correct:2},
+      {q:"SF\u2086 has sulfur surrounded by ___ electrons:", options:["6","8","10","12"], correct:3},
+      {q:"Expanded octets are possible for elements in period:", options:["1","2","3 and beyond","Any period"], correct:2},
+      {q:"Why can period 3+ elements exceed the octet?", options:["They have d orbitals available","They are larger","They have more protons","They are more electronegative"], correct:0},
+      {q:"NO is an odd-electron species with ___ total valence electrons:", options:["10","11","12","13"], correct:1},
+      {q:"NO\u2082 is an odd-electron species with ___ total valence electrons:", options:["16","17","18","19"], correct:1},
+      {q:"ClO\u2083 has Cl surrounded by more than 8 electrons. This is:", options:["Impossible","An expanded octet","An incomplete octet","An error"], correct:1},
+      {q:"XeF\u2082 has xenon surrounded by ___ electrons (including lone pairs):", options:["4","8","10","12"], correct:2},
+      {q:"XeF\u2084 has xenon surrounded by ___ electrons:", options:["8","10","12","14"], correct:2},
+      {q:"Which element CANNOT form an expanded octet?", options:["S","P","N","Xe"], correct:2},
+      {q:"I\u2083\u207B has iodine with ___ electron groups (expanded octet):", options:["2","3","4","5"], correct:3}
+    ]
+  },
+  {
+    id:6, title:"Fill: Exceptions to the octet rule",
+    instruction:"Identify the octet exception type and electron count around the central atom.",
+    rows:[
+      ["1","BH\u2083: exception type = ___","incomplete octet / incomplete"],
+      ["2","BH\u2083: electrons around B = ___","6"],
+      ["3","BF\u2083: electrons around B (no resonance) = ___","6"],
+      ["4","PCl\u2085: exception type = ___","expanded octet / expanded"],
+      ["5","PCl\u2085: electrons around P = ___","10"],
+      ["6","SF\u2086: electrons around S = ___","12"],
+      ["7","SF\u2084: electrons around S (including lone pair) = ___","10"],
+      ["8","ClF\u2083: electrons around Cl = ___","10"],
+      ["9","XeF\u2082: electrons around Xe = ___","10"],
+      ["10","IF\u2085: electrons around I = ___","12"],
+      ["11","NO: total valence electrons = ___","11"],
+      ["12","NO: exception type = ___","odd-electron / odd electron / radical"],
+      ["13","NO\u2082: total valence electrons = ___","17"],
+      ["14","ClO\u2082: total valence electrons = ___","19"],
+      ["15","BeCl\u2082: electrons around Be = ___","4"]
+    ]
+  },
+  {
+    id:7, title:"MC: Best Lewis structure selection", type:"mc",
+    instruction:"Select the best Lewis structure based on formal charges.",
+    questions:[
+      {q:"For CO, which arrangement minimizes formal charges?", options:[":C=O: (FC: C=0, O=0)","C\u2261O with lone pairs (FC: C=\u22121, O=+1)",":C\u2261O: is the only valid structure","C-O single bond (FC: C=\u22122, O=+2)"], correct:1},
+      {q:"CO is unusual because the better structure has negative FC on:", options:["O (more electronegative, as expected)","C (less electronegative, counterintuitive)","Neither","Both equally"], correct:1},
+      {q:"For N\u2082O (NNO), the best structure has N as the central atom because:", options:["N is more electronegative","It minimizes formal charges","O cannot be central","It has more resonance"], correct:1},
+      {q:"SCN\u207B (thiocyanate) has the arrangement:", options:["S-C-N (C is central)","C-S-N (S is central)","S-N-C (N is central)","Any arrangement works"], correct:0},
+      {q:"For OCN\u207B (cyanate), the best structure has:", options:["Triple bond C\u2261N, single bond O-C","Double bond O=C=N","Single bond O-C, triple bond C\u2261N","All equivalent"], correct:0},
+      {q:"The best Lewis structure for SO\u2082 has:", options:["All single bonds","One double bond (with resonance)","All double bonds","A triple bond"], correct:1},
+      {q:"For POCl\u2083, phosphorus has:", options:["Only single bonds (8 e\u207B)","One P=O double bond + 3 P-Cl (10 e\u207B)","All double bonds","Triple bond to O"], correct:1},
+      {q:"Between two structures, the one with formal charges on MORE electronegative atoms is:", options:["Always worse","Always better","Better if negative charge is on the more electronegative atom","Irrelevant"], correct:2},
+      {q:"A structure with FC of +2 and \u22122 on atoms is ___ than one with all zeros:", options:["Better","Worse","Equivalent","Cannot determine"], correct:1},
+      {q:"For HCN, the structure H-C\u2261N has FC on all atoms of:", options:["All zero (best)","C=\u22121, N=+1","H=+1, C=\u22121","C=+1, N=\u22121"], correct:0},
+      {q:"For CNO\u207B (fulminate), the structure C=N=O has FC:", options:["All zero","C=\u22122, N=+1, O=\u22121","C=\u22121, N=0, O=0","C=0, N=+1, O=\u22122"], correct:0},
+      {q:"Structures with adjacent atoms having the same sign of formal charge are:", options:["Favorable","Unfavorable (charge repulsion)","Neutral","The best"], correct:1},
+      {q:"For BF\u2083, adding a B=F double bond would give B a FC of:", options:["+1","\u22121","0","It would violate the octet on F"], correct:2},
+      {q:"In practice, BF\u2083 has some B=F double bond character. This is shown by:", options:["B-F bonds being shorter than expected for single bonds","B-F bonds being longer","No evidence","B having 8 electrons"], correct:0},
+      {q:"The resonance hybrid of NO\u2082\u207B (nitrite) has N-O bonds that are:", options:["One single, one double","Both single","Both somewhere between single and double","Both triple"], correct:2}
+    ]
+  },
+  {
+    id:8, title:"Fill: Formal charge practice on ions",
+    instruction:"Calculate the formal charge on each specified atom.",
+    rows:[
+      ["1","N in NO\u2082\u207B (bent, one double bond, one single bond, 1 lone pair on N): FC = ___","0"],
+      ["2","O (double bonded) in NO\u2082\u207B: FC = ___","0"],
+      ["3","O (single bonded, 3 lone pairs) in NO\u2082\u207B: FC = ___","-1"],
+      ["4","Sum of FC in NO\u2082\u207B = ___","-1"],
+      ["5","S in SO\u2083\u00B2\u207B (3 single bonds, 1 lone pair): V=6, N=2, B=6. FC = ___","+1"],
+      ["6","O (single bond, 3 lone pairs) in SO\u2083\u00B2\u207B: FC = ___","-1"],
+      ["7","Sum of FC in SO\u2083\u00B2\u207B = ___","-2"],
+      ["8","P in PO\u2084\u00B3\u207B (4 single bonds, no lone pairs): FC = ___","+1"],
+      ["9","Each O (single bond, 3 lone pairs) in PO\u2084\u00B3\u207B: FC = ___","-1"],
+      ["10","Sum of FC in PO\u2084\u00B3\u207B = ___","-3"],
+      ["11","N in N\u2082O (central, double bond to each terminal): FC = ___","+1"],
+      ["12","Terminal N in N\u2082O (triple bond, 1 lone pair): FC = ___","-1"],
+      ["13","O in N\u2082O (double bond, 2 lone pairs): FC = ___","0"],
+      ["14","Cl in ClO\u2084\u207B (perchlorate, 4 bonds): V=7, N=0, B=8. FC = ___","+3"],
+      ["15","Each O in ClO\u2084\u207B (single bond, 3 LPs): FC = ___","-1"]
+    ]
+  },
+  {
+    id:9, title:"Arrange: Steps for drawing Lewis structures with resonance", type:"arrange",
+    instruction:"Click the words in the correct order.",
+    sentences:[
+      {prompt:"Count total valence electrons including charge adjustments", words:["Count","total valence electrons","including","charge adjustments"]},
+      {prompt:"Place the least electronegative atom in the center", words:["Place","the least","electronegative atom","in the center"]},
+      {prompt:"Draw single bonds from central atom to surrounding atoms", words:["Draw","single bonds","from central atom","to surrounding atoms"]},
+      {prompt:"Complete octets on outer atoms first using lone pairs", words:["Complete octets","on outer atoms","first","using lone pairs"]},
+      {prompt:"Place remaining electrons as lone pairs on the central atom", words:["Place","remaining electrons","as lone pairs","on the central atom"]},
+      {prompt:"If central atom lacks an octet convert lone pairs to double bonds", words:["If central atom","lacks an octet","convert lone pairs","to double bonds"]},
+      {prompt:"Calculate formal charges on all atoms to find the best structure", words:["Calculate","formal charges","on all atoms","to find","the best structure"]},
+      {prompt:"Draw all equivalent resonance structures connected by double arrows", words:["Draw","all equivalent","resonance structures","connected by","double arrows"]}
+    ]
+  },
+  {
+    id:10, title:"MC: Comparing resonance contributors", type:"mc",
+    instruction:"Select the correct answer about evaluating resonance structures.",
+    questions:[
+      {q:"The most important resonance contributor generally has:", options:["The most formal charges","The fewest formal charges","The most bonds","The fewest bonds"], correct:1},
+      {q:"In equivalent resonance structures (like CO\u2083\u00B2\u207B), each structure contributes:", options:["Unequally","Equally","Only the first one matters","None contributes"], correct:1},
+      {q:"A resonance structure with a negative FC on oxygen and positive on nitrogen:", options:["Is always the best","Is reasonable (O is more electronegative)","Is always bad","Violates rules"], correct:1},
+      {q:"A resonance structure with positive FC on F is:", options:["Very favorable","Unfavorable (F is most electronegative, shouldn't be +)","Neutral","Common"], correct:1},
+      {q:"The more covalent bonds in a resonance structure, the ___ its contribution:", options:["Less important","More important (more bonds = more stability)","Same","Cannot determine"], correct:1},
+      {q:"If all atoms have FC = 0, the structure is generally:", options:["The worst","The best","Average","Impossible"], correct:1},
+      {q:"Resonance structures with like charges on adjacent atoms are:", options:["Favorable","Unfavorable (high energy)","Neutral","Required"], correct:1},
+      {q:"The resonance hybrid of benzene has:", options:["Alternating single and double bonds","All equivalent C-C bonds (bond order 1.5)","All single bonds","All double bonds"], correct:1},
+      {q:"For a charged species with resonance, charge delocalization:", options:["Increases energy","Stabilizes the ion","Has no effect","Destabilizes the ion"], correct:1},
+      {q:"Acetate ion CH\u2083COO\u207B has two equivalent C-O bonds because:", options:["One is C=O and one is C-O","Resonance gives both bond order 1.5","They are triple bonds","There is no resonance"], correct:1}
+    ]
+  },
+  {
+    id:11, title:"Fill: Odd-electron and radical species",
+    instruction:"Complete each statement about odd-electron species.",
+    rows:[
+      ["1","An odd-electron species has an ___ number of total valence electrons","odd"],
+      ["2","NO has ___ total valence electrons (5 + 6)","11"],
+      ["3","NO\u2082 has ___ total valence electrons (5 + 12)","17"],
+      ["4","ClO\u2082 has ___ total valence electrons (7 + 12)","19"],
+      ["5","Odd-electron species are called free ___","radicals"],
+      ["6","Free radicals are typically very ___ (reactive/stable)","reactive"],
+      ["7","NO is paramagnetic because it has ___ unpaired electron(s)","1 / one"],
+      ["8","NO\u2082 dimerizes to form ___ (formula)","N\u2082O\u2084"],
+      ["9","In NO, the bond order is approximately ___","2.5"],
+      ["10","The unpaired electron in NO\u2082 is on the ___ atom","nitrogen / N"],
+      ["11","O\u2082 has ___ total valence electrons and ___ unpaired electrons","12, 2"],
+      ["12","O\u2082 is an exception: Lewis structure predicts ___ unpaired electrons","0 / zero"],
+      ["13","MO theory correctly shows O\u2082 has ___ unpaired electrons in \u03C0* orbitals","2"],
+      ["14","Chlorine atoms (Cl\u00B7) are radicals with ___ unpaired electron(s)","1 / one"],
+      ["15","Methyl radical (CH\u2083\u00B7) has ___ total valence electrons","7"]
+    ]
+  },
+  {
+    id:12, title:"MC: Advanced resonance and formal charge", type:"mc",
+    instruction:"Think carefully about these challenging questions.",
+    questions:[
+      {q:"The C-O bond length in CO\u2083\u00B2\u207B is:", options:["Equal to a C=O double bond","Equal to a C-O single bond","Between C-O single and C=O double bond lengths","Equal to a C\u2261O triple bond"], correct:2},
+      {q:"Which has the most resonance stabilization?", options:["Ethylene (C\u2082H\u2084)","Benzene (C\u2086H\u2086)","Ethane (C\u2082H\u2086)","Methane (CH\u2084)"], correct:1},
+      {q:"In SO\u2082, the S-O bond order is approximately:", options:["1","1.5","2","2.5"], correct:1},
+      {q:"The formal charge on S in SO\u2082 (with one double bond, one single bond, 1 LP) is:", options:["-1","0","+1","+2"], correct:2},
+      {q:"Hyperconjugation is related to resonance in that it involves:", options:["Lone pair delocalization only","Sigma bond electron delocalization","Pi bond rotation","Ion pair formation"], correct:1},
+      {q:"The azide ion N\u2083\u207B has ___ resonance structures:", options:["1","2","3","4"], correct:2},
+      {q:"In N\u2083\u207B, the N-N bond order is:", options:["1","1.5","2","2.5"], correct:2},
+      {q:"Formate (HCO\u2082\u207B) has two C-O bonds that are:", options:["One C=O, one C-O","Both equivalent (bond order 1.5)","Both C=O","Both C\u2261O"], correct:1},
+      {q:"The allyl cation (CH\u2082=CH-CH\u2082\u207A) has ___ resonance structures:", options:["1","2","3","4"], correct:1},
+      {q:"Electron delocalization through resonance generally ___ bond lengths:", options:["Lengthens all bonds","Shortens all bonds","Equalizes bond lengths between contributing structures","Has no effect on bond length"], correct:2},
+      {q:"PCl\u2085 has an expanded octet. Its geometry is:", options:["Tetrahedral","Trigonal bipyramidal","Octahedral","Square planar"], correct:1},
+      {q:"SF\u2086 has an expanded octet. Its geometry is:", options:["Tetrahedral","Trigonal bipyramidal","Octahedral","Square planar"], correct:2},
+      {q:"BF\u2083 acts as a Lewis acid because B has:", options:["A full octet","An empty orbital (incomplete octet)","Extra electrons","A lone pair"], correct:1},
+      {q:"When BF\u2083 reacts with NH\u2083, boron achieves:", options:["A 6-electron configuration","An expanded octet","A complete octet (8 electrons)","10 electrons"], correct:2},
+      {q:"The total number of valence electrons in SO\u2084\u00B2\u207B is:", options:["30","32","34","36"], correct:1}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Resonance & Formal Charge \u2014 Complete Reference</h3>' +
+'<h3>Formal Charge</h3>' +
+'<p><span class="rule">FC = V \u2212 N \u2212 B/2</span></p>' +
+'<p>V = valence electrons, N = non-bonding (lone pair) electrons, B = bonding electrons</p>' +
+'<p>Sum of all FC = overall charge of molecule/ion</p>' +
+'<h3>Rules for Best Structure</h3>' +
+'<ol>' +
+'<li>Minimize formal charges (closest to zero)</li>' +
+'<li>Negative FC on more electronegative atom</li>' +
+'<li>Avoid like charges on adjacent atoms</li>' +
+'<li>More covalent bonds = generally more stable</li>' +
+'</ol>' +
+'<h3>Resonance</h3>' +
+'<ul>' +
+'<li>Multiple valid Lewis structures for the same molecule</li>' +
+'<li>Atoms stay in same positions; only electrons move</li>' +
+'<li>Real structure = hybrid (average) of all contributors</li>' +
+'<li>Connected by double-headed arrow \u2194</li>' +
+'<li>Equivalent structures contribute equally</li>' +
+'</ul>' +
+'<h3>Common Resonance Species</h3>' +
+'<table><tr><th>Species</th><th># Structures</th><th>Bond Order</th></tr>' +
+'<tr><td>CO\u2083\u00B2\u207B</td><td>3</td><td>1.33</td></tr>' +
+'<tr><td>NO\u2083\u207B</td><td>3</td><td>1.33</td></tr>' +
+'<tr><td>NO\u2082\u207B</td><td>2</td><td>1.5</td></tr>' +
+'<tr><td>O\u2083</td><td>2</td><td>1.5</td></tr>' +
+'<tr><td>C\u2086H\u2086</td><td>2 (Kekule)</td><td>1.5</td></tr>' +
+'<tr><td>SO\u2083</td><td>3</td><td>1.33\u20132</td></tr>' +
+'<tr><td>CH\u2083COO\u207B</td><td>2</td><td>1.5</td></tr></table>' +
+'<h3>Octet Rule Exceptions</h3>' +
+'<table><tr><th>Type</th><th>Examples</th><th>Electrons on Central</th></tr>' +
+'<tr><td><span class="rule">Incomplete octet</span></td><td>BF\u2083, BeCl\u2082, AlCl\u2083</td><td>< 8 (6, 4, 6)</td></tr>' +
+'<tr><td><span class="rule">Expanded octet</span></td><td>PCl\u2085, SF\u2086, XeF\u2082</td><td>> 8 (10, 12, 10)</td></tr>' +
+'<tr><td><span class="rule">Odd-electron</span></td><td>NO, NO\u2082, ClO\u2082</td><td>Odd total e\u207B</td></tr></table>' +
+'<p>Expanded octets: only period 3+ (have d orbitals)</p>' +
+'<p>Period 2 elements (C, N, O, F) NEVER exceed octet</p>' +
+'<h3>Valence Electrons by Group</h3>' +
+'<table><tr><th>Element</th><th>Group</th><th>Valence e\u207B</th></tr>' +
+'<tr><td>B</td><td>3A</td><td>3</td></tr>' +
+'<tr><td>C</td><td>4A</td><td>4</td></tr>' +
+'<tr><td>N, P</td><td>5A</td><td>5</td></tr>' +
+'<tr><td>O, S</td><td>6A</td><td>6</td></tr>' +
+'<tr><td>F, Cl, Br, I</td><td>7A</td><td>7</td></tr></table>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 resonance structures, formal charge, octet exceptions, Lewis structures \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

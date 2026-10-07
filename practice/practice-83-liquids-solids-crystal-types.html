@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Liquids, Solids & Crystal Types</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Liquids, Solids & Crystal Types</h1>
+<p class="subtitle">Deep practice &mdash; unit cells, crystal lattices, solid properties, packing efficiency</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_83';
+const SECTIONS = [
+  {
+    id:1, title:"Fill: Unit cell basics",
+    instruction:"Complete each statement about unit cells and crystal packing.",
+    rows:[
+      ["1","The simplest repeating unit in a crystal lattice is called the ___","unit cell"],
+      ["2","In a simple cubic (SC) unit cell, there are ___ atom(s) per unit cell","1"],
+      ["3","In a body-centered cubic (BCC) unit cell, there are ___ atoms per unit cell","2"],
+      ["4","In a face-centered cubic (FCC) unit cell, there are ___ atoms per unit cell","4"],
+      ["5","The coordination number for simple cubic is ___","6"],
+      ["6","The coordination number for BCC is ___","8"],
+      ["7","The coordination number for FCC is ___","12"],
+      ["8","The packing efficiency of simple cubic is approximately ___% ","52 / 52%"],
+      ["9","The packing efficiency of BCC is approximately ___% ","68 / 68%"],
+      ["10","The packing efficiency of FCC is approximately ___% ","74 / 74%"],
+      ["11","A corner atom is shared among ___ unit cells","8"],
+      ["12","A face atom is shared between ___ unit cells","2"],
+      ["13","A body-center atom is shared among ___ unit cell(s)","1"],
+      ["14","An edge atom is shared among ___ unit cells","4"],
+      ["15","The relationship between edge length a and atomic radius r for SC is a = ___","2r"]
+    ]
+  },
+  {
+    id:2, title:"Fill: Types of crystalline solids",
+    instruction:"Identify the type of crystalline solid (ionic, molecular, metallic, or network covalent).",
+    rows:[
+      ["1","NaCl is a(n) ___ solid","ionic"],
+      ["2","Ice (H\u2082O) is a(n) ___ solid","molecular"],
+      ["3","Diamond is a(n) ___ solid","network covalent / covalent network"],
+      ["4","Copper (Cu) is a(n) ___ solid","metallic"],
+      ["5","Dry ice (CO\u2082) is a(n) ___ solid","molecular"],
+      ["6","SiO\u2082 (quartz) is a(n) ___ solid","network covalent / covalent network"],
+      ["7","Iron (Fe) is a(n) ___ solid","metallic"],
+      ["8","CaF\u2082 is a(n) ___ solid","ionic"],
+      ["9","Sugar (C\u2081\u2082H\u2082\u2082O\u2081\u2081) is a(n) ___ solid","molecular"],
+      ["10","SiC (silicon carbide) is a(n) ___ solid","network covalent / covalent network"],
+      ["11","Graphite is a(n) ___ solid","network covalent / covalent network"],
+      ["12","Naphthalene (C\u2081\u2080H\u2088) is a(n) ___ solid","molecular"],
+      ["13","MgO is a(n) ___ solid","ionic"],
+      ["14","Aluminum (Al) is a(n) ___ solid","metallic"],
+      ["15","BN (boron nitride) is a(n) ___ solid","network covalent / covalent network"]
+    ]
+  },
+  {
+    id:3, title:"MC: Properties of solid types", type:"mc",
+    instruction:"Select the correct answer about crystalline solid properties.",
+    questions:[
+      {q:"Which type of solid typically has the highest melting point?", options:["Molecular","Ionic","Metallic","Network covalent"], correct:3},
+      {q:"Which type of solid conducts electricity in the solid state?", options:["Ionic","Molecular","Metallic","Network covalent (most)"], correct:2},
+      {q:"Ionic solids conduct electricity when:", options:["Solid","Dissolved in water or melted","Cooled below 0\u00B0C","Never"], correct:1},
+      {q:"Molecular solids are typically:", options:["Hard with high melting points","Soft with low melting points","Good conductors","Brittle and very hard"], correct:1},
+      {q:"Which solid is held together by covalent bonds extending throughout the entire structure?", options:["Ionic","Molecular","Network covalent","Metallic"], correct:2},
+      {q:"Metallic solids are malleable and ductile because:", options:["Ionic bonds are strong","Covalent bonds break easily","Metal cations slide through a sea of delocalized electrons","Molecules rearrange"], correct:2},
+      {q:"Glass is an example of a(n) ___ solid:", options:["Crystalline","Amorphous","Ionic","Network covalent"], correct:1},
+      {q:"Which property is characteristic of ionic solids?", options:["Low melting point","Soft and waxy","Brittle, high melting point, conducts when dissolved","Malleable and ductile"], correct:2},
+      {q:"Diamond has an extremely high melting point (~3550\u00B0C) because:", options:["It has ionic bonds","Each C is bonded to 4 others in a 3D covalent network","It has metallic bonding","It has strong London dispersion forces"], correct:1},
+      {q:"Which type of intermolecular force holds molecular solids together?", options:["Ionic bonds","Metallic bonds","Covalent bonds within the network","London dispersion, dipole-dipole, or hydrogen bonds"], correct:3},
+      {q:"The melting point of NaCl (801\u00B0C) is much higher than ice (0\u00B0C) because:", options:["NaCl has stronger covalent bonds","Ionic bonds are much stronger than hydrogen bonds","NaCl is molecular","Ice has metallic bonds"], correct:1},
+      {q:"Which solid sublimes easily at room temperature?", options:["NaCl","Diamond","Dry ice (CO\u2082)","Iron"], correct:2},
+      {q:"Graphite conducts electricity because:", options:["It is ionic","Delocalized \u03C0 electrons move between layers","It has metallic bonds","It dissolves in water"], correct:1},
+      {q:"An amorphous solid differs from a crystalline solid in that it:", options:["Has a regular repeating pattern","Lacks long-range order","Is always harder","Has a sharp melting point"], correct:1},
+      {q:"Ceramics are typically classified as:", options:["Metallic solids","Molecular solids","Ionic or network covalent solids","Amorphous molecular solids"], correct:2}
+    ]
+  },
+  {
+    id:4, title:"Fill: Atoms per unit cell calculations",
+    instruction:"Calculate the number of atoms per unit cell.",
+    rows:[
+      ["1","SC: 8 corners \u00D7 (1/8) = ___","1"],
+      ["2","BCC: 8 corners \u00D7 (1/8) + 1 body center = ___","2"],
+      ["3","FCC: 8 corners \u00D7 (1/8) + 6 faces \u00D7 (1/2) = ___","4"],
+      ["4","A hexagonal close-packed (HCP) unit cell contains ___ atoms","6"],
+      ["5","In FCC, the fraction of a corner atom belonging to one unit cell is ___","1/8"],
+      ["6","In FCC, the fraction of a face atom belonging to one unit cell is ___","1/2"],
+      ["7","For BCC, the relationship a = 4r/\u221A3. If r = 1.24 \u00C5, a \u2248 ___ \u00C5 (round to 2 decimal)","2.86"],
+      ["8","For FCC, the relationship a = 2\u221A2 \u00B7 r. If r = 1.44 \u00C5, a \u2248 ___ \u00C5 (round to 2 decimal)","4.07"],
+      ["9","For SC, if a = 3.00 \u00C5, then r = ___ \u00C5","1.50 / 1.5"],
+      ["10","The void space (empty space) in FCC packing is approximately ___% ","26 / 26%"],
+      ["11","The void space in BCC packing is approximately ___% ","32 / 32%"],
+      ["12","The void space in SC packing is approximately ___% ","48 / 48%"],
+      ["13","Polonium (Po) is the only element that crystallizes in a ___ structure","simple cubic / SC"],
+      ["14","Most metals crystallize in ___ or ___ structures","FCC or BCC / BCC or FCC / FCC, BCC / BCC, FCC"]
+    ]
+  },
+  {
+    id:5, title:"MC: Unit cell geometry and calculations", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"In a BCC unit cell, the body diagonal equals:", options:["2r","4r","2\u221A2 r","2\u221A3 r"], correct:1},
+      {q:"In an FCC unit cell, the face diagonal equals:", options:["2r","4r","2\u221A2 r","2\u221A3 r"], correct:1},
+      {q:"Which unit cell has the highest packing efficiency?", options:["Simple cubic","BCC","FCC","All are equal"], correct:2},
+      {q:"Gold crystallizes in FCC. Each unit cell contains:", options:["1 Au atom","2 Au atoms","4 Au atoms","8 Au atoms"], correct:2},
+      {q:"Iron at room temperature has BCC structure. Its coordination number is:", options:["4","6","8","12"], correct:2},
+      {q:"Aluminum crystallizes in FCC with a = 4.05 \u00C5. The atomic radius is closest to:", options:["1.00 \u00C5","1.43 \u00C5","2.03 \u00C5","2.86 \u00C5"], correct:1},
+      {q:"Which metal does NOT typically crystallize in FCC?", options:["Cu","Al","Fe (at room temp)","Au"], correct:2},
+      {q:"The density of a crystal can be calculated from unit cell data using:", options:["\u03C1 = nM/(N\u2090a\u00B3)","PV=nRT","\u03C1 = m/V only","E=mc\u00B2"], correct:0},
+      {q:"In the density formula \u03C1 = nM/(N\u2090a\u00B3), n represents:", options:["Avogadro's number","Moles","Number of atoms per unit cell","Coordination number"], correct:2},
+      {q:"CsCl has a BCC-like structure but is NOT truly BCC because:", options:["The corner and body atoms are different (Cs\u207A and Cl\u207B)","It has too many atoms","It is amorphous","CsCl is molecular"], correct:0},
+      {q:"Which packing arrangement achieves 74% efficiency?", options:["Simple cubic only","BCC only","Both FCC and HCP","Only HCP"], correct:2},
+      {q:"A unit cell edge length of 3.61 \u00C5 for Cu (FCC). Calculate r:", options:["1.28 \u00C5","1.81 \u00C5","0.90 \u00C5","2.55 \u00C5"], correct:0},
+      {q:"In a simple cubic structure, atoms touch along the:", options:["Face diagonal","Body diagonal","Edge","They don't touch"], correct:2},
+      {q:"In FCC, atoms touch along the:", options:["Edge","Face diagonal","Body diagonal","They don't touch"], correct:1},
+      {q:"In BCC, atoms touch along the:", options:["Edge","Face diagonal","Body diagonal","They don't touch"], correct:2}
+    ]
+  },
+  {
+    id:6, title:"Fill: Properties comparison of solid types",
+    instruction:"Fill in the typical property for each solid type.",
+    rows:[
+      ["1","Ionic solids have ___ melting points (high/low)","high"],
+      ["2","Molecular solids have ___ melting points (high/low)","low"],
+      ["3","Network covalent solids have ___ melting points (high/low)","high / very high"],
+      ["4","Metallic solids have ___ melting points (variable/always low)","variable"],
+      ["5","Ionic solids are ___ (hard and brittle / soft and flexible)","hard and brittle"],
+      ["6","Metallic solids are ___ and ___ (malleable/ductile)","malleable and ductile / malleable, ductile"],
+      ["7","Molecular solids are ___ (hard / soft)","soft"],
+      ["8","Network covalent solids are ___ (hard / soft)","hard / very hard"],
+      ["9","Ionic solids conduct electricity when ___ or in ___","melted or in solution / dissolved or melted / molten or dissolved"],
+      ["10","Metallic solids conduct electricity in the ___ state","solid"],
+      ["11","Most molecular solids are ___ conductors","poor / bad / non"],
+      ["12","Diamond is a ___ conductor of electricity","poor / bad / non"],
+      ["13","The forces holding molecular solids together are called ___ forces","intermolecular / van der Waals"],
+      ["14","The 'sea of electrons' model describes ___ bonding","metallic"],
+      ["15","Ionic solids dissolve best in ___ solvents","polar"]
+    ]
+  },
+  {
+    id:7, title:"MC: Identifying solid types from descriptions", type:"mc",
+    instruction:"Identify the type of crystalline solid based on the description.",
+    questions:[
+      {q:"A solid with mp = 35\u00B0C, does not conduct, dissolves in nonpolar solvents:", options:["Ionic","Molecular","Network covalent","Metallic"], correct:1},
+      {q:"A solid with mp = 2072\u00B0C, conducts when molten, dissolves in water:", options:["Ionic","Molecular","Network covalent","Metallic"], correct:0},
+      {q:"A solid with mp = 3550\u00B0C, does not conduct, extremely hard:", options:["Ionic","Molecular","Network covalent","Metallic"], correct:2},
+      {q:"A solid with mp = 1085\u00B0C, conducts in solid state, malleable:", options:["Ionic","Molecular","Network covalent","Metallic"], correct:3},
+      {q:"A white solid that shatters when struck, mp = 776\u00B0C, conducts in aqueous solution:", options:["Ionic","Molecular","Network covalent","Metallic"], correct:0},
+      {q:"A solid with mp = -78\u00B0C (sublimes), does not conduct:", options:["Ionic","Molecular","Network covalent","Metallic"], correct:1},
+      {q:"A solid that can be drawn into wire, shiny luster, mp = 660\u00B0C:", options:["Ionic","Molecular","Network covalent","Metallic"], correct:3},
+      {q:"SiC: mp = 2730\u00B0C, extremely hard, poor conductor:", options:["Ionic","Molecular","Network covalent","Metallic"], correct:2},
+      {q:"A substance with mp = 80\u00B0C, pleasant smell, dissolves in organic solvents:", options:["Ionic","Molecular","Network covalent","Metallic"], correct:1},
+      {q:"A solid that conducts in solid and liquid state, mp = 1538\u00B0C:", options:["Ionic","Molecular","Network covalent","Metallic"], correct:3},
+      {q:"Glucose (C\u2086H\u2081\u2082O\u2086): mp = 146\u00B0C, dissolves in water, doesn't conduct:", options:["Ionic","Molecular","Network covalent","Metallic"], correct:1},
+      {q:"CaO: mp = 2614\u00B0C, conducts when molten:", options:["Ionic","Molecular","Network covalent","Metallic"], correct:0}
+    ]
+  },
+  {
+    id:8, title:"Fill: Amorphous vs crystalline solids",
+    instruction:"Complete the comparison between amorphous and crystalline solids.",
+    rows:[
+      ["1","Crystalline solids have a ___ repeating pattern","regular / ordered / long-range"],
+      ["2","Amorphous solids lack ___ order","long-range / long range"],
+      ["3","Crystalline solids have a ___ melting point (sharp/range)","sharp / definite"],
+      ["4","Amorphous solids soften over a ___ of temperatures","range"],
+      ["5","Glass is a common example of a(n) ___ solid","amorphous"],
+      ["6","Rubber is a(n) ___ solid","amorphous"],
+      ["7","Table salt (NaCl) is a(n) ___ solid","crystalline"],
+      ["8","Amorphous solids are sometimes called ___ liquids","supercooled"],
+      ["9","When crystalline solids are broken, they produce flat surfaces called ___","cleavage planes / crystal faces"],
+      ["10","Amorphous solids break with ___ (smooth/irregular) surfaces","irregular / curved / conchoidal"]
+    ]
+  },
+  {
+    id:9, title:"Arrange: Crystal structure concepts", type:"arrange",
+    instruction:"Click the words in the correct order to build each statement.",
+    sentences:[
+      {prompt:"FCC has four atoms per unit cell", words:["FCC","has","four","atoms","per","unit cell"]},
+      {prompt:"Ionic solids conduct electricity when dissolved or melted", words:["Ionic solids","conduct","electricity","when","dissolved","or","melted"]},
+      {prompt:"Network covalent solids have the highest melting points", words:["Network covalent","solids","have","the highest","melting points"]},
+      {prompt:"Corner atoms are shared among eight unit cells", words:["Corner atoms","are shared","among","eight","unit cells"]},
+      {prompt:"Metallic bonding involves a sea of delocalized electrons", words:["Metallic bonding","involves","a sea","of","delocalized","electrons"]},
+      {prompt:"Amorphous solids lack long-range crystalline order", words:["Amorphous solids","lack","long-range","crystalline","order"]},
+      {prompt:"Diamond is the hardest known natural material", words:["Diamond","is","the hardest","known","natural","material"]}
+    ]
+  },
+  {
+    id:10, title:"MC: Crystal structure examples and details", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Which element crystallizes in simple cubic?", options:["Iron","Copper","Polonium","Gold"], correct:2},
+      {q:"NaCl adopts which crystal structure?", options:["Simple cubic","BCC","FCC (rock salt)","HCP"], correct:2},
+      {q:"Which is NOT a close-packed structure?", options:["FCC","HCP","BCC","Both FCC and HCP are close-packed"], correct:2},
+      {q:"The coordination number of Na\u207A in NaCl is:", options:["4","6","8","12"], correct:1},
+      {q:"Tungsten (W), mp = 3422\u00B0C, is a ___ solid:", options:["Ionic","Molecular","Network covalent","Metallic"], correct:3},
+      {q:"Which has a higher melting point: SiO\u2082 or CO\u2082?", options:["CO\u2082 (stronger bonds)","SiO\u2082 (network covalent vs molecular)","They are about the same","CO\u2082 (heavier molecule)"], correct:1},
+      {q:"Ice floats on water because:", options:["Hydrogen bonds create an open lattice, making ice less dense","Ice is a network solid","Ice molecules are smaller","Water is denser due to ionic bonds"], correct:0},
+      {q:"ZnS (zinc blende) has ___ coordination:", options:["4:4 (tetrahedral)","6:6 (octahedral)","8:8 (cubic)","12:12"], correct:0},
+      {q:"The CsCl structure has ___ coordination:", options:["4:4","6:6","8:8","12:12"], correct:2},
+      {q:"Allotropes of carbon include diamond and graphite. Graphite is softer because:", options:["Weaker C-C bonds","Layers held by weak van der Waals forces can slide","It has ionic bonds","It is amorphous"], correct:1},
+      {q:"Which molecular solid has unusually high melting point due to hydrogen bonding?", options:["CH\u2084","CO\u2082","H\u2082O (ice)","CCl\u2084"], correct:2},
+      {q:"Bronze (Cu-Sn alloy) is a ___ solid:", options:["Ionic","Molecular","Network covalent","Metallic"], correct:3}
+    ]
+  },
+  {
+    id:11, title:"Fill: Examples of each crystal type",
+    instruction:"Give the crystal solid type for each example.",
+    rows:[
+      ["1","KBr: ___ solid","ionic"],
+      ["2","Ar (solid): ___ solid","molecular"],
+      ["3","W (tungsten): ___ solid","metallic"],
+      ["4","Si (silicon): ___ solid","network covalent / covalent network"],
+      ["5","I\u2082 (solid iodine): ___ solid","molecular"],
+      ["6","LiF: ___ solid","ionic"],
+      ["7","Bronze: ___ solid","metallic"],
+      ["8","Rubber: ___ solid","amorphous / molecular"],
+      ["9","Sucrose: ___ solid","molecular"],
+      ["10","CaCO\u2083 (calcite): ___ solid","ionic"],
+      ["11","Ge (germanium): ___ solid","network covalent / covalent network"],
+      ["12","CH\u2084 (solid methane): ___ solid","molecular"],
+      ["13","Brass (Cu-Zn): ___ solid","metallic"],
+      ["14","Al\u2082O\u2083 (corundum): ___ solid","ionic / network covalent"],
+      ["15","P\u2084 (white phosphorus): ___ solid","molecular"]
+    ]
+  },
+  {
+    id:12, title:"MC: Comprehensive solid state review", type:"mc",
+    instruction:"Challenging mixed questions on solids and crystal types.",
+    questions:[
+      {q:"Rank melting points: molecular < ionic < network covalent. Which order is generally correct?", options:["Yes, this is the typical order","No, ionic is always highest","No, molecular is highest","No, they are all the same"], correct:0},
+      {q:"A solid shatters when hit with a hammer and has a high mp. It's most likely:", options:["Metallic","Molecular","Ionic","Amorphous"], correct:2},
+      {q:"Which pair are both network covalent?", options:["NaCl and KBr","Diamond and SiC","Fe and Cu","H\u2082O and CO\u2082"], correct:1},
+      {q:"The band theory explains conductivity in ___ solids:", options:["Ionic","Molecular","Network covalent","Metallic"], correct:3},
+      {q:"Increasing temperature generally ___ the conductivity of metals:", options:["Increases","Decreases","Has no effect","First increases then decreases"], correct:1},
+      {q:"Semiconductors like Si have conductivity that ___ with temperature:", options:["Decreases","Increases","Stays constant","Oscillates"], correct:1},
+      {q:"An X-ray diffraction pattern is used to determine:", options:["Melting point","Crystal structure","Color","Density only"], correct:1},
+      {q:"Which has the lowest melting point?", options:["SiO\u2082","NaCl","Ne (solid)","Fe"], correct:2},
+      {q:"Polymorphism means a substance can exist in:", options:["Only one crystal form","Multiple crystal forms","Only amorphous form","Both gas and liquid"], correct:1},
+      {q:"Carbon has two common polymorphs: diamond and graphite. Diamond is ___ but graphite is ___:", options:["Insulator, conductor","Conductor, insulator","Both conductors","Both insulators"], correct:0},
+      {q:"The unit cell volume for a cubic cell with a = 4.00 \u00C5 is:", options:["16.0 \u00C5\u00B3","32.0 \u00C5\u00B3","64.0 \u00C5\u00B3","256 \u00C5\u00B3"], correct:2},
+      {q:"Which substance would you expect to be soluble in water?", options:["SiO\u2082","Diamond","NaCl","Naphthalene"], correct:2}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Liquids, Solids & Crystal Types \u2014 Complete Reference</h3>' +
+'<h3>Unit Cells</h3>' +
+'<table><tr><th>Type</th><th>Atoms/Cell</th><th>Coord #</th><th>Packing %</th><th>Relationship</th></tr>' +
+'<tr><td><span class="rule">Simple Cubic (SC)</span></td><td>1</td><td>6</td><td>52%</td><td>a = 2r</td></tr>' +
+'<tr><td><span class="rule">Body-Centered Cubic (BCC)</span></td><td>2</td><td>8</td><td>68%</td><td>a = 4r/\u221A3</td></tr>' +
+'<tr><td><span class="rule">Face-Centered Cubic (FCC)</span></td><td>4</td><td>12</td><td>74%</td><td>a = 2\u221A2\u00B7r</td></tr>' +
+'<tr><td><span class="rule">HCP</span></td><td>6</td><td>12</td><td>74%</td><td>\u2014</td></tr></table>' +
+'<h3>Counting Atoms in Unit Cells</h3>' +
+'<ul><li>Corner atom: shared by 8 cells \u2192 1/8 per cell</li>' +
+'<li>Edge atom: shared by 4 cells \u2192 1/4 per cell</li>' +
+'<li>Face atom: shared by 2 cells \u2192 1/2 per cell</li>' +
+'<li>Body atom: belongs to 1 cell \u2192 1 per cell</li></ul>' +
+'<h3>Types of Crystalline Solids</h3>' +
+'<table><tr><th>Type</th><th>Particles</th><th>Forces</th><th>MP</th><th>Conductivity</th><th>Examples</th></tr>' +
+'<tr><td><span class="rule">Ionic</span></td><td>Ions</td><td>Electrostatic</td><td>High</td><td>When molten/dissolved</td><td>NaCl, CaF\u2082</td></tr>' +
+'<tr><td><span class="rule">Molecular</span></td><td>Molecules</td><td>IMFs (LDF, DD, HB)</td><td>Low</td><td>Poor</td><td>H\u2082O, CO\u2082, sugar</td></tr>' +
+'<tr><td><span class="rule">Metallic</span></td><td>Metal atoms</td><td>Metallic bond</td><td>Variable</td><td>Excellent (solid)</td><td>Fe, Cu, Al</td></tr>' +
+'<tr><td><span class="rule">Network Covalent</span></td><td>Atoms</td><td>Covalent bonds</td><td>Very high</td><td>Poor (except graphite)</td><td>Diamond, SiO\u2082, SiC</td></tr></table>' +
+'<h3>Amorphous vs Crystalline</h3>' +
+'<table><tr><th>Property</th><th>Crystalline</th><th>Amorphous</th></tr>' +
+'<tr><td>Order</td><td>Long-range, repeating</td><td>Short-range only</td></tr>' +
+'<tr><td>Melting</td><td>Sharp mp</td><td>Softens over range</td></tr>' +
+'<tr><td>Examples</td><td>NaCl, diamond, ice</td><td>Glass, rubber, plastic</td></tr></table>' +
+'<h3>Density Formula</h3>' +
+'<p><span class="rule">\u03C1 = nM / (N\u2090 \u00B7 a\u00B3)</span></p>' +
+'<p>n = atoms per unit cell, M = molar mass, N\u2090 = Avogadro\'s number, a = edge length</p>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 unit cells, crystal lattices, solid properties, packing efficiency \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

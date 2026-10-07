@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice 38 — Electrochemistry</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Practice 38 &mdash; Electrochemistry</h1>
+<p class="subtitle">Deep practice &mdash; galvanic cells, E&deg;, electrolysis, Faraday's law, corrosion</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_38';
+const SECTIONS = [
+  {
+    id:1, title:"Galvanic (Voltaic) Cells",
+    instruction:"Fill in the blank with the correct term.",
+    rows:[
+      ["1","A galvanic cell converts ___ energy to electrical energy","chemical"],
+      ["2","Oxidation occurs at the ___","anode"],
+      ["3","Reduction occurs at the ___","cathode"],
+      ["4","Electrons flow from ___ to cathode","anode"],
+      ["5","The salt bridge maintains ___","electrical neutrality / charge balance"],
+      ["6","In a galvanic cell, the anode is the ___ electrode (positive/negative)","negative"],
+      ["7","In a galvanic cell, the cathode is the ___ electrode","positive"],
+      ["8","Mnemonic: An Ox, Red Cat means ___","Anode Oxidation, Reduction Cathode"],
+      ["9","Electrons flow through the ___ wire from anode to cathode","external"],
+      ["10","Ions flow through the ___ to complete the circuit","salt bridge / internal circuit"],
+      ["11","The anode ___ mass as it is oxidized (gains/loses)","loses"],
+      ["12","The cathode ___ mass as ions are reduced onto it","gains"],
+      ["13","In the salt bridge, anions migrate toward the ___","anode"],
+      ["14","In the salt bridge, cations migrate toward the ___","cathode"],
+      ["15","A battery is a practical application of a ___ cell","galvanic / voltaic"],
+      ["16","The Daniell cell uses ___ and ___ electrodes","zinc, copper / Zn, Cu"],
+      ["17","A fuel cell converts ___ energy directly to electrical energy","chemical"]
+    ]
+  },
+  {
+    id:2, title:"Standard Reduction Potentials",
+    instruction:"Fill in the blank with the correct value or term.",
+    rows:[
+      ["1","E\u00B0 is measured in ___","volts / V"],
+      ["2","E\u00B0cell = E\u00B0cathode \u2212 E\u00B0___","anode"],
+      ["3","SHE (Standard Hydrogen Electrode) has E\u00B0 = ___","0.00 V / 0 / 0.00"],
+      ["4","More positive E\u00B0 means ___ tendency to be reduced","greater / stronger"],
+      ["5","If E\u00B0cell > 0, the reaction is ___","spontaneous"],
+      ["6","If E\u00B0cell < 0, the reaction is ___","nonspontaneous / non-spontaneous / not spontaneous"],
+      ["7","Cu\u00B2\u207A/Cu E\u00B0=+0.34V, Zn\u00B2\u207A/Zn E\u00B0=\u22120.76V. E\u00B0cell = ?","1.10 / 1.10 V / 1.1 / 1.1 V"],
+      ["8","The stronger reducing agent has a ___ E\u00B0 value","more negative / lower"],
+      ["9","The stronger oxidizing agent has a ___ E\u00B0 value","more positive / higher"],
+      ["10","F\u2082 has E\u00B0 = +2.87 V. It is the ___ oxidizing agent","strongest"],
+      ["11","Li has E\u00B0 = \u22123.04 V. It is the ___ reducing agent","strongest"],
+      ["12","Fe\u00B2\u207A/Fe E\u00B0=\u22120.44V, Cu\u00B2\u207A/Cu E\u00B0=+0.34V. E\u00B0cell = ?","0.78 / 0.78 V"],
+      ["13","Ag\u207A/Ag E\u00B0=+0.80V, Cu\u00B2\u207A/Cu E\u00B0=+0.34V. E\u00B0cell = ?","0.46 / 0.46 V"],
+      ["14","Ag\u207A/Ag E\u00B0=+0.80V, Zn\u00B2\u207A/Zn E\u00B0=\u22120.76V. E\u00B0cell = ?","1.56 / 1.56 V"],
+      ["15","\u0394G\u00B0 = \u2212nFE\u00B0. If E\u00B0 > 0, then \u0394G\u00B0 is ___","negative"],
+      ["16","If \u0394G\u00B0 < 0, the reaction is ___","spontaneous"],
+      ["17","E\u00B0 values are ___ (intensive/extensive) properties","intensive"],
+      ["18","When reversing a half-reaction, the sign of E\u00B0 ___","changes / is reversed / flips"]
+    ]
+  },
+  {
+    id:3, title:"Electrolytic Cells",
+    instruction:"Fill in the blank with the correct term.",
+    rows:[
+      ["1","Electrolysis converts ___ energy to chemical energy","electrical"],
+      ["2","Electrolysis is ___ (spontaneous/nonspontaneous)","nonspontaneous / non-spontaneous"],
+      ["3","Electrolysis of water produces ___ and oxygen","hydrogen / H2"],
+      ["4","Electrolysis of NaCl(aq) produces Cl\u2082, ___, and NaOH","H2 / hydrogen"],
+      ["5","Electroplating uses an ___ cell","electrolytic"],
+      ["6","In an electrolytic cell, the anode is ___ (positive/negative)","positive"],
+      ["7","Faraday's constant F = ___ C/mol","96485 / 96500"],
+      ["8","To deposit 1 mol Cu from Cu\u00B2\u207A, you need ___ mol of electrons","2"],
+      ["9","In an electrolytic cell, the cathode is ___ (positive/negative)","negative"],
+      ["10","Electrolysis of molten NaCl produces Na metal and ___ gas","Cl\u2082 / chlorine"],
+      ["11","At the cathode in electrolysis, ___ occurs","reduction"],
+      ["12","At the anode in electrolysis, ___ occurs","oxidation"],
+      ["13","Aluminum is produced by electrolysis of ___ (ore)","bauxite / Al\u2082O\u2083 / alumina"],
+      ["14","The minimum voltage needed to drive electrolysis is called the ___ potential","decomposition"],
+      ["15","Electrolysis of water requires the addition of an ___ to increase conductivity","electrolyte / acid / base"],
+      ["16","In electroplating with silver, the silver bar is the ___","anode"],
+      ["17","In electroplating with silver, the object to be plated is the ___","cathode"]
+    ]
+  },
+  {
+    id:4, title:"Faraday's Law Calculations",
+    instruction:"Fill in the blank with the correct value or term.",
+    rows:[
+      ["1","Charge (C) = current (A) \u00D7 ___ (s)","time"],
+      ["2","Moles of electrons = charge / ___","96485 / F"],
+      ["3","If 5 A flows for 1000 s, charge = ___ C","5000"],
+      ["4","5000 C / 96485 C/mol = ___ mol e\u207B","0.052 / 0.05"],
+      ["5","To deposit 63.5 g Cu (1 mol) from Cu\u00B2\u207A, charge needed \u2248 ___ C","193000 / 192970"],
+      ["6","Moles of metal deposited = moles of e\u207B / ___","charge of ion / n / ion charge"],
+      ["7","If 10 A flows for 500 s, charge = ___ C","5000"],
+      ["8","If 2 A flows for 2 hours (7200 s), charge = ___ C","14400"],
+      ["9","14400 C / 96485 = ___ mol e\u207B","0.149 / 0.15"],
+      ["10","To deposit Ag\u207A (1+ charge): 0.15 mol e\u207B deposits ___ mol Ag","0.15 / 0.149"],
+      ["11","0.15 mol Ag \u00D7 108 g/mol = ___ g Ag deposited","16.2 / 16.1"],
+      ["12","To deposit Al from Al\u00B3\u207A, you need ___ mol e\u207B per mol Al","3"],
+      ["13","Mass deposited = (I \u00D7 t \u00D7 M) / (n \u00D7 ___) where M = molar mass","F / 96485"],
+      ["14","1 Faraday of charge deposits 1 ___ of electrons","mole"],
+      ["15","If 3 A flows for 1 hour, charge = ___ C","10800"],
+      ["16","10800 C can deposit ___ mol of Cu\u00B2\u207A (2 e\u207B needed)","0.056 / 0.06"]
+    ]
+  },
+  {
+    id:5, title:"Corrosion & Protection", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Rusting of iron is an ___ reaction", options:["Reduction","Oxidation","Neutralization","Decomposition"], correct:1},
+      {q:"Iron corrodes faster in ___ water", options:["Pure","Distilled","Salt","Deionized"], correct:2},
+      {q:"Galvanizing means coating iron with ___", options:["Copper","Tin","Zinc","Chromium"], correct:2},
+      {q:"Zinc protects iron because zinc is ___ reactive", options:["Less","Equally","More","Not"], correct:2},
+      {q:"This type of protection is called ___ protection", options:["Anodic","Cathodic (sacrificial)","Passive","Electrolytic"], correct:1},
+      {q:"Stainless steel resists corrosion due to ___", options:["High carbon content","Chromium oxide layer","Zinc coating","Copper alloy"], correct:1},
+      {q:"Painting iron prevents corrosion by:", options:["Making it more noble","Blocking O\u2082 and H\u2082O contact","Changing E\u00B0","Adding electrons"], correct:1},
+      {q:"If zinc coating on iron is scratched, iron is STILL protected because:", options:["Paint heals","Zinc oxidizes preferentially (sacrificial)","Iron becomes noble","Chromium layer forms"], correct:1},
+      {q:"If tin coating on iron is scratched, iron corrodes FASTER because:", options:["Tin is more reactive","Iron becomes the anode (more reactive than tin)","Tin is toxic","Temperature rises"], correct:1},
+      {q:"Rust is primarily ___", options:["Fe\u2082O\u2083\u00B7xH\u2082O (hydrated iron oxide)","FeO","FeCl\u2082","Fe(OH)\u2082"], correct:0},
+      {q:"Corrosion requires iron, ___, and water", options:["Nitrogen","Hydrogen","Oxygen","Helium"], correct:2},
+      {q:"Ships use zinc blocks attached to the hull for:", options:["Weight","Cathodic protection","Decoration","Conductivity"], correct:1}
+    ]
+  },
+  {
+    id:6, title:"Cell Notation",
+    instruction:"Fill in the blank with the correct term.",
+    rows:[
+      ["1","In cell notation, || represents the ___","salt bridge"],
+      ["2","The anode is written on the ___","left"],
+      ["3","Zn|Zn\u00B2\u207A||Cu\u00B2\u207A|Cu: the anode metal is ___","Zn / zinc"],
+      ["4","A single | separates different ___","phases"],
+      ["5","Zn|Zn\u00B2\u207A||Cu\u00B2\u207A|Cu: the cathode metal is ___","Cu / copper"],
+      ["6","In cell notation, the cathode is written on the ___","right"],
+      ["7","Fe|Fe\u00B2\u207A||Cu\u00B2\u207A|Cu: which is oxidized?","Fe / iron"],
+      ["8","Fe|Fe\u00B2\u207A||Cu\u00B2\u207A|Cu: which is reduced?","Cu\u00B2\u207A / Cu2+ / copper ion"],
+      ["9","Mg|Mg\u00B2\u207A||Ag\u207A|Ag: the anode is ___","Mg / magnesium"],
+      ["10","Mg|Mg\u00B2\u207A||Ag\u207A|Ag: the cathode is ___","Ag / silver"],
+      ["11","Write cell notation for Zn anode, Ag cathode: Zn|Zn\u00B2\u207A||___|Ag","Ag\u207A / Ag+"],
+      ["12","Concentrations are shown in ___ after the ion","parentheses"],
+      ["13","Standard conditions: all concentrations = ___ M","1"],
+      ["14","If a gas electrode is used, the inert electrode is usually ___","Pt / platinum"]
+    ]
+  },
+  {
+    id:7, title:"Nernst Equation & \u0394G", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"The Nernst equation relates E to E\u00B0 and ___", options:["Temperature only","Concentrations (Q)","Pressure only","Mass"], correct:1},
+      {q:"Nernst equation: E = E\u00B0 \u2212 (RT/nF)ln(Q). At standard conditions Q = 1, so E = ___", options:["0","E\u00B0","2E\u00B0","\u2212E\u00B0"], correct:1},
+      {q:"As a galvanic cell discharges, E ___ until equilibrium", options:["Increases","Stays constant","Decreases to 0","Becomes negative"], correct:2},
+      {q:"At equilibrium, E = ___ and Q = K", options:["E\u00B0","1","0","\u2212E\u00B0"], correct:2},
+      {q:"\u0394G\u00B0 = \u2212nFE\u00B0. n represents:", options:["Number of atoms","Moles of electrons transferred","Avogadro's number","Number of cells"], correct:1},
+      {q:"If E\u00B0 = 1.10 V and n = 2, \u0394G\u00B0 = \u2212(2)(96485)(1.10) = ___ kJ", options:["\u2212212.3","\u221296.5","+212.3","\u2212106.1"], correct:0},
+      {q:"A positive E\u00B0 corresponds to a ___ \u0394G\u00B0", options:["Positive","Negative","Zero","Cannot determine"], correct:1},
+      {q:"A dead battery has E = ___ (the cell reached equilibrium)", options:["E\u00B0","Maximum","0","\u22121"], correct:2}
+    ]
+  },
+  {
+    id:8, title:"Mixed Review", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"In a galvanic cell, which electrode loses mass over time?", options:["Cathode","Salt bridge","Anode","Both equally"], correct:2},
+      {q:"E\u00B0cell for Zn-Cu cell: E\u00B0(Cu\u00B2\u207A/Cu)=+0.34V, E\u00B0(Zn\u00B2\u207A/Zn)=\u22120.76V. E\u00B0cell = ?", options:["0.42 V","\u22120.42 V","1.10 V","\u22121.10 V"], correct:2},
+      {q:"Which process occurs in electrolysis but NOT in a galvanic cell?", options:["Oxidation","Reduction","External power source drives the reaction","Electron flow"], correct:2},
+      {q:"Faraday's constant represents the charge of ___", options:["1 electron","1 mole of electrons","1 atom","1 mole of protons"], correct:1},
+      {q:"In a galvanic cell, cations in the salt bridge migrate toward the ___", options:["Anode","Cathode","External wire","Neither"], correct:1},
+      {q:"Electroplating a ring with silver: the ring is the ___", options:["Anode","Cathode","Salt bridge","Electrolyte"], correct:1},
+      {q:"Which metal would be the BEST sacrificial anode to protect iron? (Most negative E\u00B0)", options:["Copper","Silver","Magnesium","Gold"], correct:2},
+      {q:"Cell notation Zn|Zn\u00B2\u207A(1M)||Ag\u207A(1M)|Ag: which is reduced?", options:["Zn","Zn\u00B2\u207A","Ag\u207A","Neither"], correct:2},
+      {q:"A rechargeable battery uses a ___ reaction", options:["Irreversible","Reversible","Decomposition","Neutralization"], correct:1},
+      {q:"Lead-acid battery in cars: anode is ___ and cathode is ___", options:["Pb, PbO\u2082","PbO\u2082, Pb","Cu, Zn","Zn, Cu"], correct:0},
+      {q:"E\u00B0(Fe\u00B2\u207A/Fe)=\u22120.44V, E\u00B0(Sn\u00B2\u207A/Sn)=\u22120.14V. Which is reduced?", options:["Fe\u00B2\u207A (more negative)","Sn\u00B2\u207A (less negative, higher E\u00B0)","Both","Neither"], correct:1},
+      {q:"E\u00B0(Fe\u00B2\u207A/Fe)=\u22120.44V, E\u00B0(Sn\u00B2\u207A/Sn)=\u22120.14V. E\u00B0cell = ?", options:["0.30 V","\u22120.30 V","0.58 V","\u22120.58 V"], correct:0},
+      {q:"In electrolysis of CuSO\u2084(aq) with inert electrodes, Cu deposits at the:", options:["Anode","Cathode","Salt bridge","Both"], correct:1},
+      {q:"In electrolysis of CuSO\u2084(aq) with inert electrodes, O\u2082 forms at the:", options:["Anode","Cathode","Salt bridge","Neither"], correct:0}
+    ]
+  },
+  {
+    id:9, title:"Word Arrange: Electrochemistry Concepts", type:"arrange",
+    instruction:"Arrange the words to form the correct statement.",
+    sentences:[
+      {prompt:"E\u00B0cell formula:", words:["E\u00B0cell","=","E\u00B0cathode","\u2212","E\u00B0anode"]},
+      {prompt:"Galvanic cell energy conversion:", words:["Chemical","energy","is","converted","to","electrical","energy"]},
+      {prompt:"Electrolysis energy conversion:", words:["Electrical","energy","drives","a","nonspontaneous","chemical","reaction"]},
+      {prompt:"Faraday's law:", words:["Charge","=","current","\u00D7","time","(Q","=","I","\u00D7","t)"]},
+      {prompt:"Cathodic protection:", words:["A","more","reactive","metal","is","sacrificed","to","protect","iron"]},
+      {prompt:"Cell notation order:", words:["Anode","|","anode","ion","||","cathode","ion","|","Cathode"]},
+      {prompt:"\u0394G and E\u00B0 relationship:", words:["\u0394G\u00B0","=","\u2212nFE\u00B0"]},
+      {prompt:"At equilibrium in an electrochemical cell:", words:["E","=","0","and","Q","=","K","(battery","is","dead)"]}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>1. Galvanic vs Electrolytic Cells</h3><table><tr><th>Property</th><th>Galvanic (Voltaic)</th><th>Electrolytic</th></tr><tr><td>Energy conversion</td><td>Chemical \u2192 Electrical</td><td>Electrical \u2192 Chemical</td></tr><tr><td>Spontaneity</td><td>Spontaneous (E\u00B0 &gt; 0)</td><td>Nonspontaneous (needs external power)</td></tr><tr><td>Anode sign</td><td>Negative (\u2212)</td><td>Positive (+)</td></tr><tr><td>Cathode sign</td><td>Positive (+)</td><td>Negative (\u2212)</td></tr><tr><td>Anode reaction</td><td>Oxidation</td><td>Oxidation</td></tr><tr><td>Cathode reaction</td><td>Reduction</td><td>Reduction</td></tr><tr><td>Anode mass</td><td>Decreases (dissolves)</td><td>May decrease</td></tr><tr><td>Cathode mass</td><td>Increases (deposition)</td><td>Increases (plating)</td></tr></table><p><span class="rule">Mnemonic:</span> An Ox, Red Cat (Anode = Oxidation, Reduction = Cathode) applies to BOTH cell types.</p><h3>2. E\u00B0cell Calculation</h3><p><span class="rule">Formula:</span> E\u00B0cell = E\u00B0cathode \u2212 E\u00B0anode</p><p><span class="rule">Rules:</span> E\u00B0 values are intensive (do NOT multiply by coefficients). When reversing a half-reaction, change the sign.</p><h3>3. Standard Reduction Potentials (Selected)</h3><table><tr><th>Half-reaction</th><th>E\u00B0 (V)</th></tr><tr><td>F\u2082 + 2e\u207B \u2192 2F\u207B</td><td>+2.87</td></tr><tr><td>Au\u00B3\u207A + 3e\u207B \u2192 Au</td><td>+1.50</td></tr><tr><td>Ag\u207A + e\u207B \u2192 Ag</td><td>+0.80</td></tr><tr><td>Cu\u00B2\u207A + 2e\u207B \u2192 Cu</td><td>+0.34</td></tr><tr><td>2H\u207A + 2e\u207B \u2192 H\u2082 (SHE)</td><td>0.00</td></tr><tr><td>Sn\u00B2\u207A + 2e\u207B \u2192 Sn</td><td>\u22120.14</td></tr><tr><td>Fe\u00B2\u207A + 2e\u207B \u2192 Fe</td><td>\u22120.44</td></tr><tr><td>Zn\u00B2\u207A + 2e\u207B \u2192 Zn</td><td>\u22120.76</td></tr><tr><td>Al\u00B3\u207A + 3e\u207B \u2192 Al</td><td>\u22121.66</td></tr><tr><td>Mg\u00B2\u207A + 2e\u207B \u2192 Mg</td><td>\u22122.37</td></tr><tr><td>Li\u207A + e\u207B \u2192 Li</td><td>\u22123.04</td></tr></table><p><span class="rule">Reading the table:</span> More positive E\u00B0 = stronger oxidizing agent (wants electrons). More negative E\u00B0 = stronger reducing agent (gives up electrons).</p><p><span class="rule">Worked example:</span> Zn-Cu cell: E\u00B0cell = E\u00B0(Cu) \u2212 E\u00B0(Zn) = +0.34 \u2212 (\u22120.76) = 1.10 V</p><h3>4. Nernst Equation</h3><p><span class="rule">Full form:</span> E = E\u00B0 \u2212 (RT/nF)ln(Q)</p><p><span class="rule">At 25\u00B0C:</span> E = E\u00B0 \u2212 (0.0592/n)log(Q)</p><p>At standard conditions (Q = 1): E = E\u00B0. At equilibrium (Q = K): E = 0.</p><p><span class="rule">As cell discharges:</span> Q increases, E decreases, until E = 0 (dead battery, Q = K).</p><h3>5. Spontaneity: \u0394G = \u2212nFE\u00B0</h3><table><tr><th>E\u00B0cell</th><th>\u0394G\u00B0</th><th>K</th><th>Reaction</th></tr><tr><td>&gt; 0</td><td>&lt; 0</td><td>&gt; 1</td><td>Spontaneous (galvanic)</td></tr><tr><td>= 0</td><td>= 0</td><td>= 1</td><td>At equilibrium</td></tr><tr><td>&lt; 0</td><td>&gt; 0</td><td>&lt; 1</td><td>Nonspontaneous (electrolytic)</td></tr></table><p>F = 96,485 C/mol, n = moles of electrons transferred. \u0394G\u00B0 in Joules if E\u00B0 in Volts.</p><p><span class="rule">Link to K:</span> E\u00B0 = (RT/nF)ln(K) = (0.0592/n)log(K) at 25\u00B0C</p><h3>6. Faraday\'s Law of Electrolysis</h3><p><span class="rule">Step 1:</span> Q = I \u00D7 t (charge in Coulombs = current in Amps \u00D7 time in seconds)</p><p><span class="rule">Step 2:</span> mol e\u207B = Q / F = Q / 96,485</p><p><span class="rule">Step 3:</span> mol metal = mol e\u207B / n (n = charge of metal ion: Cu\u00B2\u207A needs 2, Ag\u207A needs 1, Al\u00B3\u207A needs 3)</p><p><span class="rule">Step 4:</span> mass = mol metal \u00D7 molar mass</p><p><span class="rule">Worked example:</span> 5 A for 1000 s depositing Cu: Q = 5000 C, mol e\u207B = 0.052, mol Cu = 0.026, mass = 0.026 \u00D7 63.5 = 1.65 g</p><h3>7. Cell Notation</h3><p><span class="rule">Format:</span> Anode | Anode ion (conc) || Cathode ion (conc) | Cathode</p><p>Single | = phase boundary. Double || = salt bridge. Anode always on LEFT.</p><p>Example: Zn(s) | Zn\u00B2\u207A(1 M) || Cu\u00B2\u207A(1 M) | Cu(s)</p><p>Inert electrodes (Pt) used when no solid metal electrode: Pt | H\u2082(g) | H\u207A(aq) || ...</p><h3>8. Corrosion & Protection</h3><table><tr><th>Method</th><th>How It Works</th></tr><tr><td>Galvanizing (Zn coating)</td><td>Zn is more reactive, oxidizes preferentially (even if scratched)</td></tr><tr><td>Cathodic protection</td><td>Attach sacrificial anode (Zn, Mg) that corrodes instead</td></tr><tr><td>Passivation</td><td>Cr\u2082O\u2083 layer in stainless steel blocks O\u2082/H\u2082O</td></tr><tr><td>Painting/Coating</td><td>Physical barrier blocks O\u2082 and moisture</td></tr><tr><td>Tin plating</td><td>Barrier only, if scratched iron corrodes FASTER (tin is less reactive)</td></tr></table>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 galvanic cells, E\u00B0, electrolysis, Faraday\'s law, corrosion \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

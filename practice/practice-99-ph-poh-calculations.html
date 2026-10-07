@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: pH, pOH & Acid-Base Calculations</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: pH, pOH & Acid-Base Calculations</h1>
+<p class="subtitle">Deep practice &mdash; pH, pOH, Ka, Kb, ICE tables, percent ionization</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_99';
+
+function chemFormat(s) {
+  return s.replace(/(\d+)\+/g, '<sup>$1+</sup>')
+          .replace(/(\d+)\-/g, '<sup>$1-</sup>')
+          .replace(/([A-Za-z\)])(\d+)/g, '$1<sub>$2</sub>')
+          .replace(/\^(\d+[+-]?)/g, '<sup>$1</sup>')
+          .replace(/\^\{([^}]+)\}/g, '<sup>$1</sup>');
+}
+
+const SECTIONS = [
+  {
+    id:1, title:"Fill: Calculate pH from [H\u207A]",
+    instruction:"Given the hydrogen ion concentration, calculate the pH. Round to 2 decimal places where needed.",
+    rows:[
+      ["1","[H\u207A] = 1.0 \u00D7 10\u207B\u00B3 M. pH = ___","3 / 3.00"],
+      ["2","[H\u207A] = 1.0 \u00D7 10\u207B\u2077 M. pH = ___","7 / 7.00"],
+      ["3","[H\u207A] = 1.0 \u00D7 10\u207B\u00B9 M. pH = ___","1 / 1.00"],
+      ["4","[H\u207A] = 1.0 \u00D7 10\u207B\u00B9\u2074 M. pH = ___","14 / 14.00"],
+      ["5","[H\u207A] = 1.0 \u00D7 10\u207B\u2075 M. pH = ___","5 / 5.00"],
+      ["6","[H\u207A] = 0.01 M. pH = ___","2 / 2.00"],
+      ["7","[H\u207A] = 0.001 M. pH = ___","3 / 3.00"],
+      ["8","[H\u207A] = 1.0 \u00D7 10\u207B\u2079 M. pH = ___","9 / 9.00"],
+      ["9","[H\u207A] = 0.1 M. pH = ___","1 / 1.00"],
+      ["10","[H\u207A] = 1.0 \u00D7 10\u207B\u00B9\u00B2 M. pH = ___","12 / 12.00"],
+      ["11","[H\u207A] = 2.5 \u00D7 10\u207B\u2074 M. pH = ___","3.60"],
+      ["12","[H\u207A] = 4.7 \u00D7 10\u207B\u00B9\u00B9 M. pH = ___","10.33"],
+      ["13","[H\u207A] = 3.2 \u00D7 10\u207B\u2076 M. pH = ___","5.49 / 5.50"],
+      ["14","[H\u207A] = 5.0 \u00D7 10\u207B\u00B2 M. pH = ___","1.30"]
+    ]
+  },
+  {
+    id:2, title:"Fill: Calculate [H\u207A] from pH",
+    instruction:"Given the pH, find the hydrogen ion concentration. Express as a power of 10 (e.g., 1.0 x 10^-3 or 10^-3).",
+    rows:[
+      ["1","pH = 4. [H\u207A] = ___","1.0 x 10^-4 / 10^-4 / 1 x 10^-4 / 0.0001"],
+      ["2","pH = 2. [H\u207A] = ___","1.0 x 10^-2 / 10^-2 / 0.01 / 1 x 10^-2"],
+      ["3","pH = 7. [H\u207A] = ___","1.0 x 10^-7 / 10^-7 / 1 x 10^-7"],
+      ["4","pH = 10. [H\u207A] = ___","1.0 x 10^-10 / 10^-10 / 1 x 10^-10"],
+      ["5","pH = 1. [H\u207A] = ___","0.1 / 1.0 x 10^-1 / 10^-1 / 1 x 10^-1"],
+      ["6","pH = 13. [H\u207A] = ___","1.0 x 10^-13 / 10^-13 / 1 x 10^-13"],
+      ["7","pH = 0. [H\u207A] = ___","1 / 1.0 / 10^0 / 1 M"],
+      ["8","pH = 6. [H\u207A] = ___","1.0 x 10^-6 / 10^-6 / 0.000001"],
+      ["9","pH = 3.5. [H\u207A] = ___","3.16 x 10^-4 / 3.2 x 10^-4"],
+      ["10","pH = 8.0. [H\u207A] = ___","1.0 x 10^-8 / 10^-8 / 1 x 10^-8"],
+      ["11","pH = 5.2. [H\u207A] = ___","6.3 x 10^-6 / 6.31 x 10^-6"],
+      ["12","pH = 11.5. [H\u207A] = ___","3.16 x 10^-12 / 3.2 x 10^-12"]
+    ]
+  },
+  {
+    id:3, title:"Fill: Calculate pOH from [OH\u207B]",
+    instruction:"Given the hydroxide ion concentration, calculate the pOH.",
+    rows:[
+      ["1","[OH\u207B] = 1.0 \u00D7 10\u207B\u2074 M. pOH = ___","4 / 4.00"],
+      ["2","[OH\u207B] = 1.0 \u00D7 10\u207B\u2077 M. pOH = ___","7 / 7.00"],
+      ["3","[OH\u207B] = 1.0 \u00D7 10\u207B\u00B2 M. pOH = ___","2 / 2.00"],
+      ["4","[OH\u207B] = 0.1 M. pOH = ___","1 / 1.00"],
+      ["5","[OH\u207B] = 1.0 \u00D7 10\u207B\u00B9\u00B2 M. pOH = ___","12 / 12.00"],
+      ["6","[OH\u207B] = 0.001 M. pOH = ___","3 / 3.00"],
+      ["7","[OH\u207B] = 1.0 \u00D7 10\u207B\u2076 M. pOH = ___","6 / 6.00"],
+      ["8","[OH\u207B] = 5.0 \u00D7 10\u207B\u00B3 M. pOH = ___","2.30"],
+      ["9","[OH\u207B] = 2.0 \u00D7 10\u207B\u2075 M. pOH = ___","4.70"],
+      ["10","[OH\u207B] = 8.0 \u00D7 10\u207B\u2079 M. pOH = ___","8.10"]
+    ]
+  },
+  {
+    id:4, title:"Fill: pH \u2194 pOH conversions",
+    instruction:"Use pH + pOH = 14 (at 25\u00B0C) to convert between pH and pOH.",
+    rows:[
+      ["1","pH = 3. pOH = ___","11"],
+      ["2","pH = 9. pOH = ___","5"],
+      ["3","pOH = 2. pH = ___","12"],
+      ["4","pOH = 10. pH = ___","4"],
+      ["5","pH = 7. pOH = ___","7"],
+      ["6","pH = 1. pOH = ___","13"],
+      ["7","pOH = 5.5. pH = ___","8.5"],
+      ["8","pH = 4.3. pOH = ___","9.7"],
+      ["9","pOH = 0. pH = ___","14"],
+      ["10","pH = 14. pOH = ___","0"],
+      ["11","pOH = 6.8. pH = ___","7.2"],
+      ["12","pH = 11.4. pOH = ___","2.6"],
+      ["13","pOH = 12.5. pH = ___","1.5"],
+      ["14","pH = 2.7. pOH = ___","11.3"]
+    ]
+  },
+  {
+    id:5, title:"MC: Classify as acidic, neutral, or basic from pH", type:"mc",
+    instruction:"Select the correct classification.",
+    questions:[
+      {q:"pH = 3.5", options:["Acidic","Neutral","Basic","Cannot determine"], correct:0},
+      {q:"pH = 7.0", options:["Acidic","Neutral","Basic","Slightly acidic"], correct:1},
+      {q:"pH = 11.2", options:["Acidic","Neutral","Basic","Slightly acidic"], correct:2},
+      {q:"pH = 1.0", options:["Weakly acidic","Neutral","Basic","Strongly acidic"], correct:3},
+      {q:"pH = 6.9", options:["Acidic","Neutral","Basic","Cannot determine"], correct:0},
+      {q:"pH = 7.1", options:["Acidic","Neutral","Basic","Cannot determine"], correct:2},
+      {q:"pH = 13.5", options:["Weakly basic","Neutral","Strongly basic","Acidic"], correct:2},
+      {q:"pOH = 3.0 (so pH = 11)", options:["Acidic","Neutral","Basic","Cannot determine"], correct:2},
+      {q:"pOH = 12.0 (so pH = 2)", options:["Acidic","Neutral","Basic","Cannot determine"], correct:0},
+      {q:"[H\u207A] = 1.0 \u00D7 10\u207B\u2077 M", options:["Acidic","Neutral","Basic","Slightly basic"], correct:1},
+      {q:"[H\u207A] = 3.0 \u00D7 10\u207B\u00B2 M", options:["Acidic","Neutral","Basic","Cannot determine"], correct:0},
+      {q:"[OH\u207B] = 5.0 \u00D7 10\u207B\u00B3 M (pOH = 2.3, pH = 11.7)", options:["Acidic","Neutral","Basic","Weakly acidic"], correct:2}
+    ]
+  },
+  {
+    id:6, title:"Fill: pH of strong acids",
+    instruction:"Calculate the pH of these strong acid solutions. pH = -log[H\u207A]. For strong acids, [H\u207A] = [acid]. Round to 2 decimal places.",
+    rows:[
+      ["1","0.1 M HCl. pH = ___","1 / 1.00"],
+      ["2","0.01 M HCl. pH = ___","2 / 2.00"],
+      ["3","0.001 M HNO\u2083. pH = ___","3 / 3.00"],
+      ["4","1.0 M HCl. pH = ___","0 / 0.00"],
+      ["5","0.05 M HBr. pH = ___","1.30"],
+      ["6","0.0025 M HClO\u2084. pH = ___","2.60"],
+      ["7","0.1 M HNO\u2083. pH = ___","1 / 1.00"],
+      ["8","0.02 M HI. pH = ___","1.70"],
+      ["9","0.005 M HCl. pH = ___","2.30"],
+      ["10","0.25 M HBr. pH = ___","0.60"],
+      ["11","0.1 M H\u2082SO\u2084 (diprotic, both H\u207A dissociate). [H\u207A] = 0.2 M. pH = ___","0.70"],
+      ["12","0.05 M H\u2082SO\u2084. [H\u207A] = 0.1 M. pH = ___","1 / 1.00"]
+    ]
+  },
+  {
+    id:7, title:"Fill: pH of strong bases",
+    instruction:"Calculate the pH of strong base solutions. Find pOH first, then pH = 14 - pOH. Round to 2 decimal places.",
+    rows:[
+      ["1","0.1 M NaOH. [OH\u207B] = 0.1 M. pOH = 1. pH = ___","13 / 13.00"],
+      ["2","0.01 M NaOH. pOH = 2. pH = ___","12 / 12.00"],
+      ["3","0.001 M KOH. pOH = 3. pH = ___","11 / 11.00"],
+      ["4","1.0 M NaOH. pOH = 0. pH = ___","14 / 14.00"],
+      ["5","0.05 M NaOH. pOH = 1.30. pH = ___","12.70"],
+      ["6","0.025 M KOH. pOH = 1.60. pH = ___","12.40"],
+      ["7","0.1 M Ba(OH)\u2082 (gives 0.2 M OH\u207B). pOH = 0.70. pH = ___","13.30"],
+      ["8","0.002 M NaOH. pOH = 2.70. pH = ___","11.30"],
+      ["9","0.5 M NaOH. pOH = 0.30. pH = ___","13.70"],
+      ["10","0.0001 M NaOH. pOH = 4. pH = ___","10 / 10.00"],
+      ["11","0.05 M Ca(OH)\u2082 (gives 0.1 M OH\u207B). pOH = 1. pH = ___","13 / 13.00"],
+      ["12","0.01 M Ba(OH)\u2082 (gives 0.02 M OH\u207B). pOH = 1.70. pH = ___","12.30"]
+    ]
+  },
+  {
+    id:8, title:"Fill: Write Ka expressions",
+    instruction:"Write the Ka expression for each weak acid equilibrium. Use brackets for concentration, e.g. [H+][A-]/[HA].",
+    rows:[
+      ["1","HF \u21CC H\u207A + F\u207B. Ka = ___","[H+][F-]/[HF]"],
+      ["2","CH\u2083COOH \u21CC H\u207A + CH\u2083COO\u207B. Ka = ___","[H+][CH3COO-]/[CH3COOH]"],
+      ["3","HCN \u21CC H\u207A + CN\u207B. Ka = ___","[H+][CN-]/[HCN]"],
+      ["4","HNO\u2082 \u21CC H\u207A + NO\u2082\u207B. Ka = ___","[H+][NO2-]/[HNO2]"],
+      ["5","H\u2082CO\u2083 \u21CC H\u207A + HCO\u2083\u207B (Ka1). Ka1 = ___","[H+][HCO3-]/[H2CO3]"],
+      ["6","NH\u2084\u207A \u21CC H\u207A + NH\u2083. Ka = ___","[H+][NH3]/[NH4+]"],
+      ["7","HCOOH \u21CC H\u207A + HCOO\u207B. Ka = ___","[H+][HCOO-]/[HCOOH]"],
+      ["8","H\u2082SO\u2083 \u21CC H\u207A + HSO\u2083\u207B (Ka1). Ka1 = ___","[H+][HSO3-]/[H2SO3]"],
+      ["9","HClO \u21CC H\u207A + ClO\u207B. Ka = ___","[H+][ClO-]/[HClO]"],
+      ["10","H\u2082S \u21CC H\u207A + HS\u207B (Ka1). Ka1 = ___","[H+][HS-]/[H2S]"]
+    ]
+  },
+  {
+    id:9, title:"MC: Weak acid pH calculations (ICE table)", type:"mc",
+    instruction:"Use ICE tables to determine the pH of weak acid solutions.",
+    questions:[
+      {q:"0.10 M acetic acid (Ka = 1.8 \u00D7 10\u207B\u2075). What is [H\u207A]?", options:["1.8 \u00D7 10\u207B\u2075 M","1.3 \u00D7 10\u207B\u00B3 M","0.10 M","4.2 \u00D7 10\u207B\u00B3 M"], correct:1},
+      {q:"For the above (0.10 M acetic acid), the pH is approximately:", options:["5.00","2.87","1.00","4.74"], correct:1},
+      {q:"0.20 M HF (Ka = 6.8 \u00D7 10\u207B\u2074). [H\u207A] is approximately:", options:["6.8 \u00D7 10\u207B\u2074 M","1.2 \u00D7 10\u207B\u00B2 M","0.20 M","3.4 \u00D7 10\u207B\u00B3 M"], correct:1},
+      {q:"When Ka is very small (Ka << C\u2080), the assumption x << C\u2080 means:", options:["All acid dissociates","Very little acid dissociates","pH = 7","Ka = Kb"], correct:1},
+      {q:"In an ICE table for HA \u21CC H\u207A + A\u207B, if initial [HA] = 0.50 M and x = [H\u207A], then equilibrium [HA] =", options:["0.50","0.50 - x","0.50 + x","x"], correct:1},
+      {q:"A weak acid with Ka = 1.0 \u00D7 10\u207B\u00B9\u2070 at 0.1 M will have a pH closest to:", options:["1","5.5","7","10"], correct:1},
+      {q:"Increasing the concentration of a weak acid from 0.01 M to 0.10 M will:", options:["Increase pH","Decrease pH","pH stays 7","No effect on pH"], correct:1},
+      {q:"Which has the lowest pH? (all at 0.1 M)", options:["HCN (Ka = 6.2 \u00D7 10\u207B\u00B9\u2070)","HF (Ka = 6.8 \u00D7 10\u207B\u2074)","CH\u2083COOH (Ka = 1.8 \u00D7 10\u207B\u2075)","HClO (Ka = 3.0 \u00D7 10\u207B\u2078)"], correct:1},
+      {q:"For a weak acid at equilibrium, x = [H\u207A] = [A\u207B]. The formula x = \u221A(Ka \u00D7 C\u2080) assumes:", options:["Complete dissociation","x << C\u2080 (5% rule)","Ka = 1","pH = pKa"], correct:1},
+      {q:"0.050 M benzoic acid (Ka = 6.3 \u00D7 10\u207B\u2075). pH is approximately:", options:["1.00","2.25","4.20","7.00"], correct:1},
+      {q:"If the 5% rule fails (x > 5% of C\u2080), you must:", options:["Ignore the problem","Use the quadratic formula","Assume complete dissociation","Set pH = 7"], correct:1},
+      {q:"A 0.01 M weak acid with Ka = 1.0 \u00D7 10\u207B\u2074. Is the 5% rule valid?", options:["Yes, x/C\u2080 < 5%","No, x/C\u2080 = 10% (must use quadratic)","Cannot determine","Always valid"], correct:1}
+    ]
+  },
+  {
+    id:10, title:"MC: Weak base pH calculations", type:"mc",
+    instruction:"Calculate pH of weak base solutions.",
+    questions:[
+      {q:"0.10 M NH\u2083 (Kb = 1.8 \u00D7 10\u207B\u2075). [OH\u207B] is approximately:", options:["1.8 \u00D7 10\u207B\u2075 M","1.3 \u00D7 10\u207B\u00B3 M","0.10 M","1.8 \u00D7 10\u207B\u00B3 M"], correct:1},
+      {q:"For 0.10 M NH\u2083 (Kb = 1.8 \u00D7 10\u207B\u2075), pOH is approximately:", options:["2.87","5.00","11.13","7.00"], correct:0},
+      {q:"For 0.10 M NH\u2083, the pH is approximately:", options:["2.87","5.00","11.13","7.00"], correct:2},
+      {q:"For a weak base B + H\u2082O \u21CC BH\u207A + OH\u207B, the Kb expression is:", options:["[B][H\u2082O]/[BH\u207A][OH\u207B]","[BH\u207A][OH\u207B]/[B]","[B]/[BH\u207A][OH\u207B]","[OH\u207B]/[B]"], correct:1},
+      {q:"A weak base with Kb = 4.0 \u00D7 10\u207B\u00B9\u2070 at 0.20 M. [OH\u207B] is approximately:", options:["8.9 \u00D7 10\u207B\u2076 M","4.0 \u00D7 10\u207B\u00B9\u2070 M","2.0 \u00D7 10\u207B\u00B9\u2070 M","0.20 M"], correct:0},
+      {q:"If Kb is very small, the solution pH will be:", options:["Very acidic","Close to 7 (slightly basic)","Exactly 7","Very basic (pH > 13)"], correct:1},
+      {q:"Which has the highest pH at 0.1 M?", options:["NH\u2083 (Kb = 1.8 \u00D7 10\u207B\u2075)","Pyridine (Kb = 1.7 \u00D7 10\u207B\u2079)","Aniline (Kb = 4.3 \u00D7 10\u207B\u00B9\u2070)","Methylamine (Kb = 4.4 \u00D7 10\u207B\u2074)"], correct:3},
+      {q:"Ka \u00D7 Kb = Kw for a conjugate acid-base pair. If Ka of NH\u2084\u207A = 5.6 \u00D7 10\u207B\u00B9\u2070, Kb of NH\u2083 = ___", options:["5.6 \u00D7 10\u207B\u00B9\u2070","1.8 \u00D7 10\u207B\u2075","1.0 \u00D7 10\u207B\u00B9\u2074","1.0 \u00D7 10\u207B\u2077"], correct:1},
+      {q:"pKa + pKb = ___ for conjugate pairs at 25\u00B0C", options:["7","10","14","1"], correct:2},
+      {q:"A base has Kb = 1.0 \u00D7 10\u207B\u2076. Its conjugate acid has Ka = ___", options:["1.0 \u00D7 10\u207B\u2076","1.0 \u00D7 10\u207B\u2078","1.0 \u00D7 10\u207B\u00B9\u2074","1.0 \u00D7 10\u207B\u2077"], correct:1}
+    ]
+  },
+  {
+    id:11, title:"Fill: Percent ionization",
+    instruction:"Calculate percent ionization = ([H\u207A]/[HA]\u2080) \u00D7 100%. Round to 1 decimal place.",
+    rows:[
+      ["1","0.10 M acid, [H\u207A] = 1.3 \u00D7 10\u207B\u00B3 M. % ionization = ___","1.3% / 1.3"],
+      ["2","0.050 M acid, [H\u207A] = 5.0 \u00D7 10\u207B\u00B3 M. % ionization = ___","10% / 10.0% / 10"],
+      ["3","0.10 M HF (Ka = 6.8 \u00D7 10\u207B\u2074), [H\u207A] = 8.2 \u00D7 10\u207B\u00B3 M. % = ___","8.2% / 8.2"],
+      ["4","1.0 M acetic acid, [H\u207A] = 4.2 \u00D7 10\u207B\u00B3 M. % = ___","0.42% / 0.42 / 0.4%"],
+      ["5","0.010 M acetic acid, [H\u207A] = 4.2 \u00D7 10\u207B\u2074 M. % = ___","4.2% / 4.2"],
+      ["6","As concentration of a weak acid decreases, % ionization ___ (increases/decreases)","increases"],
+      ["7","A 0.20 M weak acid has 2.5% ionization. [H\u207A] = ___","5.0 x 10^-3 / 0.005 / 5 x 10^-3"],
+      ["8","A 0.50 M acid with Ka = 1.0 \u00D7 10\u207B\u2074. x = \u221A(Ka\u00D7C) = \u221A(5\u00D710\u207B\u2075) \u2248 7.1 \u00D7 10\u207B\u00B3. % = ___","1.4% / 1.4 / 1.42%"],
+      ["9","If % ionization = 0.1%, the acid is classified as ___","weak / very weak"],
+      ["10","If % ionization = 100%, the acid is classified as ___","strong"],
+      ["11","0.0010 M weak acid, [H\u207A] = 1.0 \u00D7 10\u207B\u2074 M. % = ___","10% / 10"],
+      ["12","Which gives higher % ionization: 0.01 M or 1.0 M of the same weak acid?","0.01 M / 0.01"]
+    ]
+  },
+  {
+    id:12, title:"MC: Comprehensive pH review", type:"mc",
+    instruction:"Mixed pH, pOH, Ka, Kb questions.",
+    questions:[
+      {q:"Kw = [H\u207A][OH\u207B] at 25\u00B0C equals:", options:["1.0 \u00D7 10\u207B\u2077","1.0 \u00D7 10\u207B\u00B9\u2074","1.0 \u00D7 10\u207B\u00B9","7.0"], correct:1},
+      {q:"pKa = -log(Ka). If Ka = 1.8 \u00D7 10\u207B\u2075, pKa = ___", options:["4.74","5.00","1.80","2.87"], correct:0},
+      {q:"A solution with pH = 4 has [H\u207A] ___ times greater than pH = 6:", options:["2","10","100","1000"], correct:2},
+      {q:"The 6 common strong acids include HCl, HBr, HI, HNO\u2083, H\u2082SO\u2084, and:", options:["HF","HClO\u2084","CH\u2083COOH","H\u2082CO\u2083"], correct:1},
+      {q:"Pure water at 25\u00B0C has pH = 7 because:", options:["[H\u207A] = [OH\u207B] = 1.0 \u00D7 10\u207B\u2077 M","No ions are present","All acids are neutralized","pH is always 7"], correct:0},
+      {q:"If pH = 3 and pOH = 11, the solution is:", options:["Basic","Neutral","Acidic","Cannot determine"], correct:2},
+      {q:"Mixing a strong acid and strong base in equal moles produces pH =", options:["0","7","14","Depends on volumes"], correct:1},
+      {q:"A buffer solution resists changes in pH because:", options:["It has high pH","It contains a weak acid and its conjugate base","It contains only water","It contains a strong acid"], correct:1},
+      {q:"At the half-equivalence point of a weak acid titration, pH = ___", options:["7","pKa","pKb","14"], correct:1},
+      {q:"The stronger the acid (larger Ka), the ___ the pH:", options:["Higher","Lower","Same","Cannot determine"], correct:1},
+      {q:"Which is the strongest acid?", options:["Ka = 1.8 \u00D7 10\u207B\u2075","Ka = 6.8 \u00D7 10\u207B\u2074","Ka = 6.2 \u00D7 10\u207B\u00B9\u2070","Ka = 4.0 \u00D7 10\u207B\u2074"], correct:1},
+      {q:"A solution has [OH\u207B] = 0.01 M. Its pH is:", options:["2","7","12","14"], correct:2}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>pH, pOH & Acid-Base Calculations \u2014 Complete Reference</h3>' +
+'<h3>The pH Scale</h3>' +
+'<table><tr><th>pH Range</th><th>Classification</th><th>Example</th></tr>' +
+'<tr><td>0\u20133</td><td>Strongly acidic</td><td>HCl, H\u2082SO\u2084</td></tr>' +
+'<tr><td>3\u20136</td><td>Weakly acidic</td><td>Vinegar, orange juice</td></tr>' +
+'<tr><td>7</td><td>Neutral</td><td>Pure water</td></tr>' +
+'<tr><td>8\u201311</td><td>Weakly basic</td><td>Baking soda, soap</td></tr>' +
+'<tr><td>11\u201314</td><td>Strongly basic</td><td>NaOH, KOH</td></tr></table>' +
+'<h3>Key Formulas</h3>' +
+'<table><tr><th>Formula</th><th>Meaning</th></tr>' +
+'<tr><td><span class="rule">pH = -log[H\u207A]</span></td><td>pH from hydrogen ion concentration</td></tr>' +
+'<tr><td><span class="rule">[H\u207A] = 10^(-pH)</span></td><td>Hydrogen ion from pH</td></tr>' +
+'<tr><td><span class="rule">pOH = -log[OH\u207B]</span></td><td>pOH from hydroxide ion concentration</td></tr>' +
+'<tr><td><span class="rule">pH + pOH = 14</span></td><td>At 25\u00B0C</td></tr>' +
+'<tr><td><span class="rule">Kw = [H\u207A][OH\u207B] = 1.0 \u00D7 10\u207B\u00B9\u2074</span></td><td>Water autoionization constant</td></tr>' +
+'<tr><td><span class="rule">Ka = [H\u207A][A\u207B]/[HA]</span></td><td>Acid dissociation constant</td></tr>' +
+'<tr><td><span class="rule">Kb = [BH\u207A][OH\u207B]/[B]</span></td><td>Base dissociation constant</td></tr>' +
+'<tr><td><span class="rule">Ka \u00D7 Kb = Kw</span></td><td>Conjugate pair relationship</td></tr>' +
+'<tr><td><span class="rule">% ionization = ([H\u207A]/C\u2080) \u00D7 100%</span></td><td>Fraction dissociated</td></tr></table>' +
+'<h3>Strong Acids (memorize)</h3>' +
+'<p>HCl, HBr, HI, HNO\u2083, H\u2082SO\u2084, HClO\u2084</p>' +
+'<p>For strong acids: [H\u207A] = [acid], pH = -log[acid]</p>' +
+'<h3>Strong Bases (memorize)</h3>' +
+'<p>LiOH, NaOH, KOH, Ca(OH)\u2082, Ba(OH)\u2082, Sr(OH)\u2082</p>' +
+'<p>For strong bases: [OH\u207B] = [base] (or 2\u00D7[base] for group 2), then pH = 14 - pOH</p>' +
+'<h3>ICE Table Method</h3>' +
+'<p>For weak acid HA \u21CC H\u207A + A\u207B:</p>' +
+'<table><tr><th></th><th>HA</th><th>H\u207A</th><th>A\u207B</th></tr>' +
+'<tr><td>I</td><td>C\u2080</td><td>0</td><td>0</td></tr>' +
+'<tr><td>C</td><td>-x</td><td>+x</td><td>+x</td></tr>' +
+'<tr><td>E</td><td>C\u2080 - x</td><td>x</td><td>x</td></tr></table>' +
+'<p>Ka = x\u00B2/(C\u2080 - x). If x << C\u2080: <span class="rule">x = \u221A(Ka \u00D7 C\u2080)</span></p>' +
+'<p>5% rule: if x/C\u2080 < 0.05, the approximation is valid.</p>';
+
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 pH, pOH, Ka, Kb, ICE tables, percent ionization \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

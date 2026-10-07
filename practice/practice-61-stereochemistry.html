@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice 61 — Stereochemistry</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Practice 61 &mdash; Stereochemistry</h1>
+<p class="subtitle">Deep practice &mdash; chirality, R/S configuration, optical activity, enantiomers, diastereomers</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_61';
+const SECTIONS = [
+  {
+    id:1, title:"Chirality Basics",
+    instruction:"Fill in the blank about chirality and chiral centers.",
+    rows:[
+      ["1","A chiral center is a carbon bonded to ___ different groups","4 / four"],
+      ["2","A chiral center is also called a ___ center","stereocenter / stereogenic / asymmetric"],
+      ["3","A molecule that is non-superimposable on its mirror image is ___","chiral"],
+      ["4","A molecule that IS superimposable on its mirror image is ___","achiral"],
+      ["5","The simplest chiral amino acid has ___ different groups on the central carbon","4 / four"],
+      ["6","CHBrClF has ___ chiral center(s)","1 / one"],
+      ["7","CH\u2082BrCl has ___ chiral centers (it is achiral)","0 / zero / none"],
+      ["8","Objects like hands that are non-superimposable mirror images exhibit ___","chirality / handedness"],
+      ["9","2-butanol (CH\u2083CH(OH)CH\u2082CH\u2083) has ___ chiral center(s)","1 / one"],
+      ["10","2-bromobutane has ___ chiral center(s)","1 / one"],
+      ["11","A molecule with a plane of symmetry is ___ (chiral/achiral)","achiral"],
+      ["12","Glycine (H\u2082NCH\u2082COOH) is the only amino acid that is ___ (chiral/achiral)","achiral"],
+      ["13","Alanine (CH\u2083CH(NH\u2082)COOH) ___ (is/is not) chiral","is"],
+      ["14","3-methylhexane has ___ chiral center(s)","1 / one"],
+      ["15","A carbon in a double bond ___ (can/cannot) be a chiral center","cannot"]
+    ]
+  },
+  {
+    id:2, title:"CIP Priority Rules",
+    instruction:"Fill in the blank about Cahn-Ingold-Prelog priority rules.",
+    rows:[
+      ["1","CIP priority is assigned by ___ number (higher = higher priority)","atomic"],
+      ["2","Between -H (Z=1) and -OH (Z=8), ___ has higher priority","-OH / OH"],
+      ["3","Between -CH\u2083 and -NH\u2082, ___ has higher priority","-NH2 / NH2"],
+      ["4","If atoms directly bonded are the same, go to the ___ atom outward","next / second"],
+      ["5","When the lowest priority group points away from you and the 1\u21922\u21923 path is clockwise, the configuration is ___","R"],
+      ["6","When the lowest priority group points away and the 1\u21922\u21923 path is counterclockwise, the configuration is ___","S"],
+      ["7","R stands for ___ (Latin)","rectus"],
+      ["8","S stands for ___ (Latin)","sinister"],
+      ["9","Between -Br (Z=35) and -Cl (Z=17), ___ has higher priority","-Br / Br"],
+      ["10","Between -I (Z=53) and -Br (Z=35), ___ has higher priority","-I / I"],
+      ["11","Between -CH\u2082CH\u2083 and -CH(CH\u2083)\u2082, priority goes to ___ (at the first point of difference)","-CH(CH3)2"],
+      ["12","A double bond to O (C=O) counts as C bonded to O ___ (once/twice)","twice"],
+      ["13","A triple bond to N (C\u2261N) counts as C bonded to N ___ times","three / 3"],
+      ["14","Between -CH=CH\u2082 and -CH\u2082CH\u2083, ___ has higher priority","-CH=CH2"],
+      ["15","If the lowest priority group points toward you, the assignment is ___ (same/reversed)","reversed / opposite"],
+      ["16","Between -F (Z=9) and -OH (Z=8), ___ has higher priority","-F / F"],
+      ["17","Between -CH\u2082OH and -CHO, ___ has higher priority","-CHO"],
+      ["18","The order I > Br > Cl > F > O > N > C > H follows ___ number","atomic"]
+    ]
+  },
+  {
+    id:3, title:"Enantiomers", type:"mc",
+    instruction:"Select the correct answer about enantiomers.",
+    questions:[
+      {q:"Enantiomers are:", options:["Identical molecules","Non-superimposable mirror images","Structural isomers","Geometric isomers"], correct:1},
+      {q:"Enantiomers have ___ physical properties (BP, MP, density):", options:["Different","Identical","Opposite","Unpredictable"], correct:1},
+      {q:"Enantiomers rotate plane-polarized light:", options:["In the same direction","In opposite directions by equal amounts","Not at all","In opposite directions by different amounts"], correct:1},
+      {q:"The (+) enantiomer rotates light:", options:["Counterclockwise (left)","Clockwise (right)","Both directions","Neither direction"], correct:1},
+      {q:"The (-) enantiomer rotates light:", options:["Clockwise (right)","Counterclockwise (left)","Both directions","Neither direction"], correct:1},
+      {q:"(+) and (-) are also labeled as:", options:["R and S","d and l","cis and trans","E and Z"], correct:1},
+      {q:"Can you determine (+) or (-) from the R/S designation alone?", options:["Yes, R is always (+)","Yes, S is always (+)","No, there is no direct correlation","Yes, R is always (-)"], correct:2},
+      {q:"Enantiomers react differently with:", options:["Achiral reagents","Other chiral molecules","All reagents","No reagents"], correct:1},
+      {q:"(R)-ibuprofen and (S)-ibuprofen are:", options:["Identical","Enantiomers","Diastereomers","Constitutional isomers"], correct:1},
+      {q:"Only the (S)-enantiomer of ibuprofen is pharmacologically active. This illustrates:", options:["Chirality doesn't matter","Chiral recognition in biology","Enantiomers are identical","Racemic mixtures are better"], correct:1},
+      {q:"Thalidomide tragedy: one enantiomer was therapeutic, the other caused:", options:["Headaches","Birth defects","No effect","Weight gain"], correct:1},
+      {q:"Enantiomers have the same ___ but differ in optical rotation:", options:["Configuration","Constitution, BP, MP, density","Color","Molecular formula only"], correct:1}
+    ]
+  },
+  {
+    id:4, title:"Diastereomers and Multiple Stereocenters",
+    instruction:"Fill in the blank about diastereomers.",
+    rows:[
+      ["1","Diastereomers are stereoisomers that are ___ mirror images","not / NOT"],
+      ["2","Unlike enantiomers, diastereomers have ___ physical properties","different"],
+      ["3","Cis/trans isomers are a type of ___","diastereomer / diastereomers"],
+      ["4","A molecule with 2 chiral centers can have up to ___ stereoisomers","4 / four"],
+      ["5","A molecule with n chiral centers can have up to ___ stereoisomers","2^n / 2n"],
+      ["6","Cis-2-butene and trans-2-butene are ___ of each other","diastereomers"],
+      ["7","(2R,3R) and (2R,3S) are ___ of each other","diastereomers"],
+      ["8","(2R,3R) and (2S,3S) are ___ of each other","enantiomers"],
+      ["9","A molecule with 4 chiral centers has up to ___ stereoisomers","16"],
+      ["10","Diastereomers ___ (can/cannot) be separated by ordinary physical methods","can"],
+      ["11","Enantiomers ___ (can/cannot) be separated by ordinary physical methods","cannot"],
+      ["12","The process of separating enantiomers is called ___","resolution"],
+      ["13","Epimers differ in configuration at only ___ chiral center(s)","1 / one"],
+      ["14","Glucose and galactose are ___ (epimers that differ at C-4)","epimers"],
+      ["15","Anomers differ in configuration at the ___ carbon (in sugars)","anomeric / C-1"]
+    ]
+  },
+  {
+    id:5, title:"Optical Activity", type:"mc",
+    instruction:"Select the correct answer about optical activity.",
+    questions:[
+      {q:"A polarimeter measures:", options:["Molecular weight","Rotation of plane-polarized light","Melting point","pH"], correct:1},
+      {q:"Specific rotation [\u03B1] depends on:", options:["Only concentration","Only temperature","Concentration, path length, temperature, wavelength, and solvent","Only the solvent"], correct:2},
+      {q:"A racemic mixture contains:", options:["Only the R enantiomer","Only the S enantiomer","Equal amounts of both enantiomers","No chiral molecules"], correct:2},
+      {q:"A racemic mixture has an optical rotation of:", options:["+90\u00B0","-90\u00B0","0\u00B0","Cannot determine"], correct:2},
+      {q:"An optically active compound must be:", options:["Ionic","Chiral (non-racemic)","Very large","Colored"], correct:1},
+      {q:"Enantiomeric excess (ee) of a pure enantiomer is:", options:["0%","50%","100%","Cannot determine"], correct:2},
+      {q:"If a mixture is 75% R and 25% S, the ee is:", options:["25%","50%","75%","100%"], correct:1},
+      {q:"A mixture with 90% S and 10% R has ee = :", options:["80%","90%","10%","45%"], correct:0},
+      {q:"If pure (R) has [\u03B1] = +40\u00B0, a racemic mixture has [\u03B1] = :", options:["+40\u00B0","-40\u00B0","0\u00B0","+20\u00B0"], correct:2},
+      {q:"If pure (S) has [\u03B1] = -25\u00B0 and observed rotation is -12.5\u00B0, the ee is:", options:["25%","50%","75%","100%"], correct:1}
+    ]
+  },
+  {
+    id:6, title:"Meso Compounds",
+    instruction:"Fill in the blank about meso compounds.",
+    rows:[
+      ["1","A meso compound has chiral centers but is overall ___ due to an internal mirror plane","achiral / optically inactive"],
+      ["2","A meso compound is optically ___ (active/inactive)","inactive"],
+      ["3","Meso compounds have an internal plane of ___","symmetry"],
+      ["4","Tartaric acid can exist as R,R / S,S enantiomers and also as a ___ form","meso"],
+      ["5","The meso form of tartaric acid has configuration ___","R,S / RS / (R,S)"],
+      ["6","A meso compound and its mirror image are ___ (identical/enantiomers)","identical / superimposable"],
+      ["7","2,3-dibromobutane has ___ stereoisomers (including meso)","3 / three"],
+      ["8","The meso form of 2,3-dibromobutane has configuration ___","R,S / 2R,3S"],
+      ["9","A meso compound reduces the maximum stereoisomers from 2\u207F because it makes two isomers ___","identical / the same"],
+      ["10","Cis-1,2-dimethylcyclohexane ___ (is/is not) a meso compound","is not"]
+    ]
+  },
+  {
+    id:7, title:"Fischer Projections and Newman Projections",
+    instruction:"Fill in the blank about stereochemical representations.",
+    rows:[
+      ["1","In a Fischer projection, horizontal lines represent bonds coming ___ the viewer","toward / out"],
+      ["2","In a Fischer projection, vertical lines represent bonds going ___ from the viewer","away / behind / back"],
+      ["3","In a Newman projection, the front carbon is shown as a ___","dot / point"],
+      ["4","In a Newman projection, the back carbon is shown as a ___","circle"],
+      ["5","The most stable Newman conformation is ___","anti / staggered"],
+      ["6","The least stable Newman conformation is ___","eclipsed / syn-periplanar"],
+      ["7","In the anti conformation, the dihedral angle between the largest groups is ___ degrees","180"],
+      ["8","In gauche conformation, the dihedral angle is ___ degrees","60"],
+      ["9","Steric strain in eclipsed conformations comes from ___ of electron clouds","repulsion / overlap"],
+      ["10","Conformational isomers are interconverted by ___ around single bonds","rotation"]
+    ]
+  },
+  {
+    id:8, title:"CIP Priority Word Arrange", type:"arrange",
+    instruction:"Arrange groups from highest to lowest CIP priority.",
+    sentences:[
+      {prompt:"Priority order (highest first):", words:["-OH",">","-NH2",">","-CH3",">","-H"]},
+      {prompt:"Halogen priority order:", words:["-I",">","-Br",">","-Cl",">","-F"]},
+      {prompt:"R vs S assignment rule:", words:["lowest","priority","away,","1->2->3","clockwise","=","R"]},
+      {prompt:"Enantiomer properties:", words:["same","BP,","MP,","density,","but","opposite","optical","rotation"]},
+      {prompt:"Racemic mixture:", words:["equal","amounts","of","both","enantiomers,","net","rotation","zero"]},
+      {prompt:"Meso compound definition:", words:["has","chiral","centers","but","internal","mirror","plane","makes","it","achiral"]},
+      {prompt:"Max stereoisomers formula:", words:["maximum","stereoisomers","=","2","to","the","power","n"]},
+      {prompt:"Fischer projection convention:", words:["horizontal","=","toward","viewer,","vertical","=","away","from","viewer"]}
+    ]
+  },
+  {
+    id:9, title:"Mixed Review", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Two molecules that are non-superimposable mirror images are:", options:["Diastereomers","Enantiomers","Constitutional isomers","Identical"], correct:1},
+      {q:"(2R,3S)-tartaric acid and (2S,3R)-tartaric acid are:", options:["Enantiomers","Diastereomers","Identical (meso)","Constitutional isomers"], correct:2},
+      {q:"(2R,3R)-tartaric acid and (2S,3S)-tartaric acid are:", options:["Identical","Diastereomers","Enantiomers","Constitutional isomers"], correct:2},
+      {q:"A carbon bonded to H, OH, CH\u2083, and Cl is:", options:["Achiral","Chiral","Cannot determine","Always S"], correct:1},
+      {q:"In CIP rules, between Br (Z=35) and Cl (Z=17):", options:["Cl has higher priority","Br has higher priority","Equal priority","Cannot compare"], correct:1},
+      {q:"How many stereoisomers does a molecule with 3 chiral centers have (maximum)?", options:["3","6","8","12"], correct:2},
+      {q:"A 50:50 mixture of enantiomers is called:", options:["A meso compound","A racemic mixture","A diastereomeric pair","An achiral solution"], correct:1},
+      {q:"Which type of isomers MUST have different boiling points?", options:["Enantiomers","Diastereomers","Neither","Both"], correct:1},
+      {q:"The anti conformation of butane has the methyl groups at ___ degrees:", options:["0","60","120","180"], correct:3},
+      {q:"How many chiral centers does cholesterol have?", options:["0","4","8","More than 8"], correct:2},
+      {q:"L-amino acids and D-amino acids are:", options:["Identical","Enantiomers","Diastereomers","Constitutional isomers"], correct:1},
+      {q:"Most natural amino acids in proteins are the ___ enantiomer:", options:["D","L","Racemic","Either"], correct:1}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Stereochemistry Reference</h3>' +
+'<p><span class="rule">Chirality:</span> A carbon bonded to 4 DIFFERENT groups is a chiral center (stereocenter, asymmetric carbon). A chiral molecule is non-superimposable on its mirror image (like left and right hands). If a molecule has a chiral center AND no internal mirror plane, it is chiral.</p>' +
+'<p><span class="rule">CIP Priority Rules (Cahn-Ingold-Prelog):</span></p>' +
+'<p>1. Higher atomic number = higher priority (I > Br > Cl > S > O > N > C > H)</p>' +
+'<p>2. If atoms directly attached are the same, compare the NEXT set of atoms outward until a difference is found</p>' +
+'<p>3. Double bonds: C=O treated as C bonded to O,O and O bonded to C,C. Triple bonds: count as three single bonds to that atom</p>' +
+'<p>4. Isotopes: higher mass number = higher priority (deuterium > hydrogen)</p>' +
+'<p><span class="rule">R/S Assignment:</span></p>' +
+'<p>1. Assign priorities 1 (highest) to 4 (lowest) to the 4 groups using CIP rules</p>' +
+'<p>2. Orient the molecule so group #4 (lowest priority) points AWAY from you (into the page)</p>' +
+'<p>3. Trace 1\u21922\u21923: Clockwise = R (rectus, Latin for right). Counterclockwise = S (sinister, Latin for left)</p>' +
+'<p>4. Shortcut: if #4 is already pointing back (wedge/dash), read directly. If #4 is coming forward, determine CW/CCW then FLIP the answer.</p>' +
+'<table><tr><th>Relationship</th><th>Mirror Images?</th><th>Physical Properties</th><th>Optical Rotation</th></tr>' +
+'<tr><td><span class="rule">Enantiomers</span></td><td>Yes (non-superimposable)</td><td>SAME (BP, MP, solubility, density)</td><td>Equal magnitude, opposite sign</td></tr>' +
+'<tr><td><span class="rule">Diastereomers</span></td><td>No</td><td>DIFFERENT (BP, MP, solubility)</td><td>Different (unrelated values)</td></tr>' +
+'<tr><td><span class="rule">Meso compound</span></td><td>Has chiral centers</td><td>ACHIRAL (internal mirror plane)</td><td>Optically inactive (0\u00B0)</td></tr></table>' +
+'<p><span class="rule">Optical Activity:</span> Chiral molecules rotate plane-polarized light. (+) = dextrorotatory (clockwise rotation). (-) = levorotatory (counterclockwise rotation). The sign (+/-) has NO correlation with R/S configuration \u2014 it must be measured experimentally.</p>' +
+'<p><span class="rule">Racemic Mixture:</span> Exactly 50:50 mixture of two enantiomers. Net optical rotation = 0\u00B0 (the two rotations cancel). Denoted (\u00B1) or (d,l) or (rac). Produced by SN1 reactions (carbocation is planar, attacked from both sides equally).</p>' +
+'<p><span class="rule">Maximum Stereoisomers:</span> 2\u207F where n = number of chiral centers. Example: 2 chiral centers \u2192 max 4 stereoisomers (2 pairs of enantiomers, or 1 pair + meso). If a meso form exists, actual number is less than 2\u207F.</p>' +
+'<p><span class="rule">Fischer Projections:</span> 2D representation of 3D molecule. Vertical lines = bonds going BACK (away from viewer). Horizontal lines = bonds coming FORWARD (toward viewer). The chiral center is at each intersection. D-sugar: -OH on last chiral center is on the RIGHT. L-sugar: -OH on the LEFT.</p>' +
+'<p><span class="rule">Newman Projections:</span> View along a C-C bond. Front C = dot, back C = circle. Conformations: Anti (180\u00B0 dihedral, most stable, lowest energy), Gauche (60\u00B0, some steric strain), Eclipsed (0\u00B0, high energy, torsional strain). Energy: anti < gauche < eclipsed < totally eclipsed.</p>' +
+'<p><span class="rule">E/Z Isomerism (Geometric):</span> For alkenes with restricted rotation. Z (zusammen) = higher priority groups on SAME side. E (entgegen) = higher priority groups on OPPOSITE sides. Uses CIP priority rules.</p>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 chirality, R/S configuration, optical activity, enantiomers, diastereomers \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

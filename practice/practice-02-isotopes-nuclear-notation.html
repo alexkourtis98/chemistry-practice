@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Isotopes &amp; Nuclear Notation</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Isotopes &amp; Nuclear Notation</h1>
+<p class="subtitle">Deep practice &mdash; isotopes, nuclear notation, weighted average</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_02';
+const SECTIONS = [
+  {
+    id:1, title:"Isotope basics",
+    instruction:"Fill in the blank with the correct term.",
+    rows:[
+      ["1","Isotopes have the same number of ___","protons / Z"],
+      ["2","Isotopes differ in the number of ___","neutrons"],
+      ["3","\u00b9\u00b2C: protons?","6"],
+      ["4","\u00b9\u00b2C: neutrons?","6"],
+      ["5","\u00b9\u2074C: protons?","6"],
+      ["6","\u00b9\u2074C: neutrons?","8"],
+      ["7","\u00b9\u00b2C and \u00b9\u2074C are ___","isotopes"],
+      ["8","Do isotopes have the same chemical properties?","yes"],
+      ["9","Isotopes have the same ___ number but different ___ number","atomic, mass / Z, A"],
+      ["10","The word isotope means 'same ___'","place"],
+      ["11","\u00b9H (no neutrons) is called ___","protium"],
+      ["12","\u00b2H (1 neutron) is called ___","deuterium"],
+      ["13","\u00b3H (2 neutrons) is called ___","tritium"],
+      ["14","C-12 and C-13 differ by ___ neutron(s)","1"],
+      ["15","All isotopes of oxygen have ___ protons","8"],
+      ["16","Chemical behavior depends on the number of ___","electrons / protons"],
+      ["17","Physical properties like mass ___ between isotopes","differ / change / vary"],
+      ["18","Radioactive isotopes are called ___","radioisotopes"]
+    ]
+  },
+  {
+    id:2, title:"Isotope calculations (N = A \u2212 Z)",
+    instruction:"Calculate the number of neutrons.",
+    rows:[
+      ["1","\u00b3\u2075Cl: Z=17, neutrons?","18"],
+      ["2","\u00b3\u2077Cl: Z=17, neutrons?","20"],
+      ["3","\u00b9H: neutrons?","0"],
+      ["4","\u00b2H (deuterium): neutrons?","1"],
+      ["5","\u00b3H (tritium): neutrons?","2"],
+      ["6","\u00b2\u00b3\u2075U: Z=92, neutrons?","143"],
+      ["7","\u00b2\u00b3\u2078U: Z=92, neutrons?","146"],
+      ["8","\u2075\u2076Fe: Z=26, neutrons?","30"],
+      ["9","O-16: Z=8, neutrons?","8"],
+      ["10","O-18: Z=8, neutrons?","10"],
+      ["11","N-14: Z=7, neutrons?","7"],
+      ["12","N-15: Z=7, neutrons?","8"],
+      ["13","C-13: Z=6, neutrons?","7"],
+      ["14","K-39: Z=19, neutrons?","20"],
+      ["15","K-40: Z=19, neutrons?","21"],
+      ["16","Ca-40: Z=20, neutrons?","20"],
+      ["17","Ca-44: Z=20, neutrons?","24"],
+      ["18","Pb-206: Z=82, neutrons?","124"],
+      ["19","Pb-208: Z=82, neutrons?","126"],
+      ["20","Sr-90: Z=38, neutrons?","52"]
+    ]
+  },
+  {
+    id:3, title:"MC: Isotopes", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Which pair are isotopes?", options:["C-12 and N-14","Na-23 and Mg-24","C-12 and C-14","O-16 and S-16"], correct:2},
+      {q:"Isotopes differ in the number of:", options:["protons","neutrons","electrons","all particles"], correct:1},
+      {q:"What remains the same in isotopes?", options:["Mass number A","Atomic number Z","Number of neutrons","Mass"], correct:1},
+      {q:"Atomic weight is:", options:["Mass of the most common isotope","Weighted average of isotopes","Sum of all masses","Number of protons"], correct:1},
+      {q:"\u00b2H is called:", options:["tritium","protium","deuterium","helium"], correct:2},
+      {q:"\u00b3H is called:", options:["deuterium","protium","tritium","helium"], correct:2},
+      {q:"Which isotope of hydrogen has no neutrons?", options:["Deuterium","Tritium","Protium","All have neutrons"], correct:2},
+      {q:"O-16 and O-18 have the same:", options:["Mass number","Number of neutrons","Chemical properties","Physical properties"], correct:2},
+      {q:"If an element has atomic weight 35.5, what does this tell you?", options:["All atoms weigh 35.5 u","It has 35.5 protons","It is a mixture of isotopes","The mass number is 35.5"], correct:2},
+      {q:"C-14 is used for:", options:["Nuclear power","Carbon dating","Medical imaging","Water purification"], correct:1},
+      {q:"Which pair are NOT isotopes?", options:["H-1 and H-2","C-12 and C-14","N-14 and O-14","Cl-35 and Cl-37"], correct:2},
+      {q:"Isotopes of chlorine are Cl-35 and Cl-37. They differ by:", options:["1 proton","2 neutrons","2 protons","2 electrons"], correct:1},
+      {q:"The atomic mass on the periodic table is closest to which isotope?", options:["The lightest one","The heaviest one","The most abundant one","The average of all"], correct:2},
+      {q:"How many known isotopes does hydrogen have?", options:["1","2","3","4"], correct:2},
+      {q:"U-235 and U-238 differ in:", options:["3 protons","3 neutrons","3 electrons","Everything"], correct:1}
+    ]
+  },
+  {
+    id:4, title:"Weighted average atomic mass",
+    instruction:"Calculate the weighted average: (%\u2081 \u00d7 A\u2081 + %\u2082 \u00d7 A\u2082) / 100",
+    rows:[
+      ["1","Cl: 75% \u00b3\u2075Cl + 25% \u00b3\u2077Cl = ?","35.5"],
+      ["2","B: 20% \u00b9\u2070B + 80% \u00b9\u00b9B = ?","10.8"],
+      ["3","Cu: 69% \u2076\u00b3Cu + 31% \u2076\u2075Cu = ?","63.62 / 63.6"],
+      ["4","Li: 7.5% \u2076Li + 92.5% \u2077Li = ?","6.925 / 6.93 / 6.9"],
+      ["5","C: 98.9% \u00b9\u00b2C + 1.1% \u00b9\u00b3C = ?","12.011 / 12.01 / 12"],
+      ["6","Ag: 52% \u00b9\u2070\u2077Ag + 48% \u00b9\u2070\u2079Ag = ?","107.96 / 107.9 / 108"],
+      ["7","Br: 51% \u2077\u2079Br + 49% \u2078\u00b9Br = ?","79.98 / 79.9 / 80"],
+      ["8","N: 99.6% \u00b9\u2074N + 0.4% \u00b9\u2075N = ?","14.004 / 14.0 / 14"],
+      ["9","Ga: 60% \u2076\u2079Ga + 40% \u2077\u00b9Ga = ?","69.8"],
+      ["10","Rb: 72% \u2078\u2075Rb + 28% \u2078\u2077Rb = ?","85.56 / 85.6 / 86"],
+      ["11","Si: 92% \u00b2\u2078Si + 5% \u00b2\u2079Si + 3% \u00b3\u2070Si = ?","28.11 / 28.1"],
+      ["12","Mg: 79% \u00b2\u2074Mg + 10% \u00b2\u2075Mg + 11% \u00b2\u2076Mg = ?","24.32 / 24.3"],
+      ["13","Ne: 90.5% \u00b2\u2070Ne + 0.3% \u00b2\u00b9Ne + 9.2% \u00b2\u00b2Ne = ?","20.187 / 20.19 / 20.2"],
+      ["14","K: 93.3% \u00b3\u2079K + 6.7% \u2074\u00b9K = ?","39.134 / 39.1 / 39"],
+      ["15","Tl: 30% \u00b2\u2070\u00b3Tl + 70% \u00b2\u2070\u2075Tl = ?","204.4"]
+    ]
+  },
+  {
+    id:5, title:"Nuclear notation: identify",
+    instruction:"Identify values from nuclear notation.",
+    rows:[
+      ["1","Notation: \u00b2\u00b3\u2081\u2081Na. What is Z?","11"],
+      ["2","Notation: \u00b2\u00b3\u2081\u2081Na. What is A?","23"],
+      ["3","Notation: \u2075\u2076\u2082\u2076Fe. Neutrons?","30"],
+      ["4","Notation: \u2074\u2070\u2082\u2070Ca. Electrons (neutral)?","20"],
+      ["5","Notation: \u00b2\u2077\u2081\u00b3Al. Protons?","13"],
+      ["6","Notation: \u00b9\u2076\u2088O. Neutrons?","8"],
+      ["7","Notation: \u00b9\u2074\u2086C. How many protons?","6"],
+      ["8","Notation: \u00b9\u2074\u2086C. How many neutrons?","8"],
+      ["9","Notation: \u00b3\u2075\u2081\u2087Cl. Mass number?","35"],
+      ["10","Notation: \u00b3\u2075\u2081\u2087Cl. Neutrons?","18"],
+      ["11","Notation: \u00b2\u00b3\u2078\u2089\u2082U. Protons?","92"],
+      ["12","Notation: \u00b2\u00b3\u2078\u2089\u2082U. Neutrons?","146"],
+      ["13","Notation: \u00b2\u00b3\u2075\u2089\u2082U. Neutrons?","143"],
+      ["14","Notation: \u00b9\u00b2\u2086C. Protons + Neutrons?","12"],
+      ["15","Notation: \u2074\u2070\u2081\u2089K. What element?","potassium / K"],
+      ["16","Notation: \u2074\u2070\u2081\u2089K. Neutrons?","21"],
+      ["17","If Z=16, A=32, what element?","sulfur / S"],
+      ["18","If Z=16, A=32, neutrons?","16"]
+    ]
+  },
+  {
+    id:6, title:"True/False",
+    instruction:"Write true or false.",
+    rows:[
+      ["1","\u00b9\u00b2C and \u00b9\u2074N are isotopes","false"],
+      ["2","Isotopes have the same mass number","false"],
+      ["3","Atomic weight is a weighted average","true"],
+      ["4","\u00b9H has no neutrons","true"],
+      ["5","Isotopes of an element have the same chemical properties","true"],
+      ["6","Mass number A = Z + e\u207b","false"],
+      ["7","Cl-35 and Cl-37 have the same number of protons","true"],
+      ["8","U-235 is used in nuclear reactors","true"],
+      ["9","All atoms of an element have exactly the same mass","false"],
+      ["10","The atomic weight of chlorine is exactly 35","false"],
+      ["11","K-40 and Ca-40 are isotopes","false"],
+      ["12","K-40 and Ca-40 are isobars (same A, different Z)","true"],
+      ["13","Deuterium is radioactive","false"],
+      ["14","Tritium is radioactive","true"],
+      ["15","The more abundant isotope contributes more to atomic weight","true"],
+      ["16","Carbon-14 has more protons than Carbon-12","false"],
+      ["17","Every element has at least 2 stable isotopes","false"],
+      ["18","Nuclear notation shows A on top and Z on bottom","true"]
+    ]
+  },
+  {
+    id:7, title:"MC: Nuclear notation and weighted average", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"In nuclear notation, what does the top number represent?", options:["Atomic number Z","Mass number A","Number of neutrons","Number of electrons"], correct:1},
+      {q:"In nuclear notation, what does the bottom number represent?", options:["Mass number A","Atomic number Z","Number of neutrons","Atomic weight"], correct:1},
+      {q:"If atomic weight is 63.5, which isotope is more abundant: Cu-63 or Cu-65?", options:["Cu-65","They are equal","Cu-63","Cannot determine"], correct:2},
+      {q:"Why is chlorine's atomic weight 35.5 and not a whole number?", options:["Measurement error","Cl has half a neutron","It is a weighted average of Cl-35 and Cl-37","Chlorine is special"], correct:2},
+      {q:"Two isotopes: X-10 (20%) and X-11 (80%). Atomic weight?", options:["10.5","10.8","10.2","11.0"], correct:1},
+      {q:"Which notation is correct for sodium-23?", options:["Na-23-11","23/11 Na","Na with 23 on top, 11 on bottom","Na with 11 on top, 23 on bottom"], correct:2},
+      {q:"Fe-54, Fe-56, Fe-57, Fe-58 are:", options:["Different elements","Isotopes of iron","Isobars","Ions of iron"], correct:1},
+      {q:"If element X has atomic weight 6.94 and isotopes X-6 and X-7, which is more abundant?", options:["X-6","X-7","Equal amounts","Cannot tell"], correct:1},
+      {q:"What are isobars?", options:["Atoms with same Z, different A","Atoms with same A, different Z","Atoms with same neutrons","Atoms with same electrons"], correct:1},
+      {q:"How do you find the number of neutrons from nuclear notation?", options:["Z + A","A - Z","Z - A","A \u00d7 Z"], correct:1}
+    ]
+  },
+  {
+    id:8, title:"Reverse: given atomic weight, find abundance",
+    instruction:"Given the atomic weight, estimate which isotope is more abundant or calculate the percentage.",
+    rows:[
+      ["1","Atomic weight of Cl = 35.5. Which isotope is more abundant: Cl-35 or Cl-37?","Cl-35"],
+      ["2","Atomic weight of Cu = 63.5. More abundant: Cu-63 or Cu-65?","Cu-63"],
+      ["3","Atomic weight of B = 10.8. More abundant: B-10 or B-11?","B-11"],
+      ["4","Atomic weight of Li = 6.94. More abundant: Li-6 or Li-7?","Li-7"],
+      ["5","Atomic weight of Ag = 107.9. More abundant: Ag-107 or Ag-109?","Ag-107"],
+      ["6","Element X: isotopes X-20 and X-22. Atomic weight = 20.2. More abundant?","X-20"],
+      ["7","Element Y: isotopes Y-69 and Y-71. Atomic weight = 69.7. More abundant?","Y-69"],
+      ["8","Atomic weight of Br = 79.9. More abundant: Br-79 or Br-81?","Br-79"],
+      ["9","Atomic weight of Rb = 85.5. More abundant: Rb-85 or Rb-87?","Rb-85"],
+      ["10","If atomic weight = 24.3, and isotopes are 24, 25, 26, which is most abundant?","24"]
+    ]
+  },
+  {
+    id:9, title:"Write nuclear notation",
+    instruction:"Write the notation as Symbol-MassNumber (e.g., Na-23).",
+    rows:[
+      ["1","Sodium with 12 neutrons","Na-23"],
+      ["2","Carbon with 6 neutrons","C-12"],
+      ["3","Carbon with 8 neutrons","C-14"],
+      ["4","Chlorine with 18 neutrons","Cl-35"],
+      ["5","Chlorine with 20 neutrons","Cl-37"],
+      ["6","Uranium with 143 neutrons","U-235"],
+      ["7","Uranium with 146 neutrons","U-238"],
+      ["8","Iron with 30 neutrons","Fe-56"],
+      ["9","Oxygen with 8 neutrons","O-16"],
+      ["10","Oxygen with 10 neutrons","O-18"],
+      ["11","Hydrogen with 0 neutrons","H-1"],
+      ["12","Hydrogen with 1 neutron","H-2"],
+      ["13","Calcium with 20 neutrons","Ca-40"],
+      ["14","Potassium with 21 neutrons","K-40"],
+      ["15","Lead with 126 neutrons","Pb-208"]
+    ]
+  },
+  {
+    id:10, title:"Word Arrange", type:"arrange",
+    instruction:"Click the words in the correct order.",
+    sentences:[
+      {prompt:"Isotopes have same Z", words:["Isotopes","have","the same","Z"]},
+      {prompt:"A = protons + neutrons", words:["A","=","protons","+","neutrons"]},
+      {prompt:"Atomic weight is weighted average", words:["Atomic","weight","=","weighted","average"]},
+      {prompt:"C-12 has 6 neutrons", words:["\u00b9\u00b2C","has","6","neutrons"]},
+      {prompt:"Isotopes differ in neutron count", words:["Isotopes","differ","in","neutron","count"]},
+      {prompt:"N equals A minus Z", words:["N","equals","A","minus","Z"]},
+      {prompt:"The top number in nuclear notation is A", words:["The top","number","in nuclear","notation","is A"]},
+      {prompt:"Deuterium has 1 proton and 1 neutron", words:["Deuterium","has","1 proton","and","1 neutron"]},
+      {prompt:"Atomic weight depends on isotope abundance", words:["Atomic weight","depends on","isotope","abundance"]},
+      {prompt:"Cl-35 is more abundant than Cl-37", words:["Cl-35","is more","abundant","than","Cl-37"]}
+    ]
+  },
+  {
+    id:11, title:"MC: Tricky isotope questions", type:"mc",
+    instruction:"Think carefully before answering.",
+    questions:[
+      {q:"An element has atomic weight 63.55. Its isotopes are X-63 and X-65. What is the approximate abundance of X-63?", options:["About 50%","About 73%","About 27%","About 90%"], correct:1},
+      {q:"If all atoms of element X had the same mass, what would atomic weight equal?", options:["Zero","The mass number A of that isotope","Still a weighted average","Twice A"], correct:1},
+      {q:"C-12 is used as the standard for atomic mass units because:", options:["It is the lightest element","It was chosen by international agreement","It has equal protons and neutrons","It is the most common element"], correct:1},
+      {q:"Can the atomic weight of an element be less than any of its isotopes' mass numbers?", options:["Yes, always","No, never","Only for hydrogen","Only for radioactive elements"], correct:1},
+      {q:"Cl has atomic weight 35.5. This means:", options:["Each Cl atom weighs 35.5 u","The average mass of Cl atoms is 35.5 u","Cl has 35.5 neutrons","Cl has 0.5 of a neutron"], correct:1},
+      {q:"Which contributes more to Fe's atomic weight: Fe-56 (92%) or Fe-54 (6%)?", options:["Fe-54 because it is lighter","Fe-56 because it is more abundant","They contribute equally","Cannot determine"], correct:1},
+      {q:"An atom has Z=19, A=40. Is it potassium or calcium?", options:["Calcium (Z=20)","Potassium (Z=19)","Could be either","Neither"], correct:1},
+      {q:"Which statement about nuclear notation is FALSE?", options:["A is written as superscript","Z is written as subscript","The symbol is written to the right","Neutrons are written explicitly"], correct:3}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/\u03AC/g,'\u03B1').replace(/\u03AD/g,'\u03B5').replace(/\u03AE/g,'\u03B7').replace(/\u03AF/g,'\u03B9')
+       .replace(/\u03CC/g,'\u03BF').replace(/\u03CD/g,'\u03C5').replace(/\u03CE/g,'\u03C9').replace(/\u0390/g,'\u03B9').replace(/\u03B0/g,'\u03C5');
+  s = s.replace(/\u2080/g,'0').replace(/\u2081/g,'1').replace(/\u2082/g,'2').replace(/\u2083/g,'3').replace(/\u2084/g,'4')
+       .replace(/\u2085/g,'5').replace(/\u2086/g,'6').replace(/\u2087/g,'7').replace(/\u2088/g,'8').replace(/\u2089/g,'9');
+  s = s.replace(/\u207A/g,'+').replace(/\u207B/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Isotopes & Nuclear Notation \u2014 Complete Reference</h3>' +
+'<h3>What Are Isotopes?</h3>' +
+'<p><span class="rule">Isotopes</span> = atoms of the same element (same Z) with different mass numbers A (different number of neutrons).</p>' +
+'<ul>' +
+'<li>Same: atomic number Z, protons, electrons, chemical properties</li>' +
+'<li>Different: mass number A, neutrons, mass, some physical properties</li>' +
+'<li>The word "isotope" means "same place" (same spot on the periodic table)</li>' +
+'</ul>' +
+'<h3>Nuclear Notation</h3>' +
+'<p>Written as: <span class="rule">\u1D2C<sub>Z</sub>X</span></p>' +
+'<ul>' +
+'<li><span class="rule">A</span> (superscript, top) = mass number = protons + neutrons</li>' +
+'<li><span class="rule">Z</span> (subscript, bottom) = atomic number = protons</li>' +
+'<li>X = element symbol</li>' +
+'<li>N = A \u2212 Z = number of neutrons</li>' +
+'</ul>' +
+'<p>Alternative notation: Element-A (e.g., C-14, U-235, Na-23)</p>' +
+'<h3>Key Isotopes Table</h3>' +
+'<table><tr><th>Isotope</th><th>Name</th><th>Z</th><th>A</th><th>N</th><th>Notes</th></tr>' +
+'<tr><td>\u00B9H</td><td>Protium</td><td>1</td><td>1</td><td>0</td><td>Most common H (99.98%)</td></tr>' +
+'<tr><td>\u00B2H</td><td>Deuterium</td><td>1</td><td>2</td><td>1</td><td>Stable, heavy water</td></tr>' +
+'<tr><td>\u00B3H</td><td>Tritium</td><td>1</td><td>3</td><td>2</td><td>Radioactive</td></tr>' +
+'<tr><td>\u00B9\u00B2C</td><td>Carbon-12</td><td>6</td><td>12</td><td>6</td><td>amu standard</td></tr>' +
+'<tr><td>\u00B9\u2074C</td><td>Carbon-14</td><td>6</td><td>14</td><td>8</td><td>Carbon dating</td></tr>' +
+'<tr><td>\u00B3\u2075Cl</td><td>Chlorine-35</td><td>17</td><td>35</td><td>18</td><td>75% abundant</td></tr>' +
+'<tr><td>\u00B3\u2077Cl</td><td>Chlorine-37</td><td>17</td><td>37</td><td>20</td><td>25% abundant</td></tr>' +
+'<tr><td>\u00B2\u00B3\u2075U</td><td>Uranium-235</td><td>92</td><td>235</td><td>143</td><td>Fission fuel</td></tr>' +
+'<tr><td>\u00B2\u00B3\u2078U</td><td>Uranium-238</td><td>92</td><td>238</td><td>146</td><td>Most common U</td></tr></table>' +
+'<h3>Average Atomic Mass Formula</h3>' +
+'<p><span class="rule">Atomic weight = \u03A3(fraction \u00D7 isotope mass)</span></p>' +
+'<p>Or equivalently: \u03A3(% abundance \u00D7 mass) / 100</p>' +
+'<h3>Worked Example</h3>' +
+'<p>Chlorine: 75.0% Cl-35 + 25.0% Cl-37</p>' +
+'<p>= (0.750 \u00D7 35) + (0.250 \u00D7 37) = 26.25 + 9.25 = <span class="rule">35.5 u</span></p>' +
+'<h3>Quick Tips</h3>' +
+'<ul>' +
+'<li>The atomic weight on the periodic table is closest to the <span class="rule">most abundant</span> isotope</li>' +
+'<li>If atomic weight is NOT a whole number, the element has multiple isotopes</li>' +
+'<li><span class="rule">Isobars</span> = same A, different Z (e.g., K-40 and Ca-40)</li>' +
+'<li>C-12 is the standard: 1 amu = 1/12 the mass of C-12</li>' +
+'</ul>' +
+'<h3>Common Mistakes</h3>' +
+'<ul>' +
+'<li>Isotopes are NOT different elements (same Z!)</li>' +
+'<li>Atomic weight is NOT the mass of a single atom</li>' +
+'<li>C-12 and N-14 are NOT isotopes (different Z)</li>' +
+'<li>Not all isotopes are radioactive</li>' +
+'</ul>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 isotopes, nuclear notation, weighted average \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice 36 — Chemical Kinetics</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Practice 36 &mdash; Chemical Kinetics</h1>
+<p class="subtitle">Deep practice &mdash; reaction rates, rate laws, activation energy, half-life</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_36';
+const SECTIONS = [
+  {
+    id:1, title:"Reaction Rate Basics",
+    instruction:"Fill in the blank for each statement.",
+    rows:[
+      ["1","Reaction rate measures how fast ___ change to ___","reactants, products / reactants to products"],
+      ["2","Rate is usually expressed as change in ___ per unit time","concentration"],
+      ["3","Units of rate are typically ___","mol/(L\u00B7s) / M/s"],
+      ["4","As a reaction proceeds, reactant concentration ___","decreases"],
+      ["5","As a reaction proceeds, product concentration ___","increases"],
+      ["6","Faster reactions have ___ activation energies","lower"],
+      ["7","Temperature increase ___ reaction rate","increases"],
+      ["8","A catalyst ___ activation energy","lowers / decreases"],
+      ["9","Rate = \u2212\u0394[reactant]/\u0394t. The negative sign means reactant is ___","consumed / decreasing"],
+      ["10","Rate = +\u0394[product]/\u0394t. Positive because product is ___","formed / increasing"],
+      ["11","Instantaneous rate is the rate at a ___ point in time","specific / particular / single"],
+      ["12","Average rate is calculated over a ___ interval","time"],
+      ["13","Initial rate is the rate at t = ___","0 / zero"],
+      ["14","For 2A \u2192 B, rate of disappearance of A is ___ the rate of appearance of B","twice / 2 times / double"],
+      ["15","Reaction rate ___ as the reaction proceeds (increases/decreases)","decreases"]
+    ]
+  },
+  {
+    id:2, title:"Factors Affecting Rate", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Increasing temperature increases rate because:", options:["Particles move slower","More particles have enough energy to react","Activation energy increases","Fewer collisions occur"], correct:1},
+      {q:"Increasing concentration increases rate because:", options:["Particles slow down","Temperature rises","More frequent collisions occur","Activation energy drops"], correct:2},
+      {q:"A catalyst works by:", options:["Increasing temperature","Adding more reactant","Providing an alternative pathway with lower Ea","Increasing the enthalpy of reaction"], correct:2},
+      {q:"Increasing surface area increases rate because:", options:["Temperature increases","More contact area for collisions","Activation energy decreases","Concentration increases"], correct:1},
+      {q:"Which does NOT affect reaction rate?", options:["Temperature","Concentration","Catalyst","\u0394H (enthalpy change)"], correct:3},
+      {q:"Enzymes are ___ catalysts.", options:["Inorganic","Biological","Homogeneous","Irreversible"], correct:1},
+      {q:"A catalyst is ___ in the reaction.", options:["Consumed","Destroyed","Unchanged","Created"], correct:2},
+      {q:"Collision theory: reactions occur when particles ___ with enough energy.", options:["Separate","Collide","Dissolve","Evaporate"], correct:1},
+      {q:"A homogeneous catalyst is in the ___ phase as reactants:", options:["Different","Same","Gas","Solid"], correct:1},
+      {q:"A heterogeneous catalyst is in a ___ phase from reactants:", options:["Same","Similar","Different","Liquid"], correct:2},
+      {q:"Roughly, a 10\u00B0C increase doubles the rate. This is called:", options:["Hess's rule","The rate-temperature rule","Arrhenius law","Le Chatelier's principle"], correct:1},
+      {q:"Particle size matters because smaller particles have:", options:["Less mass","Greater surface area to volume ratio","Lower temperature","Higher Ea"], correct:1}
+    ]
+  },
+  {
+    id:3, title:"Rate Laws",
+    instruction:"Fill in the blank for each rate law concept.",
+    rows:[
+      ["1","For A \u2192 products, rate = k[A]\u207F. k is the ___","rate constant"],
+      ["2","n is the ___ of the reaction","order"],
+      ["3","If rate = k[A]\u00B2, the reaction is ___ order in A","second / 2nd / 2"],
+      ["4","If doubling [A] doubles the rate, the order in A is ___","1 / first"],
+      ["5","If doubling [A] quadruples the rate, the order in A is ___","2 / second"],
+      ["6","If changing [A] doesn't affect rate, the order in A is ___","0 / zero"],
+      ["7","Overall order = sum of ___","individual orders / exponents"],
+      ["8","Rate = k[A][B]: overall order is ___","2"],
+      ["9","Rate = k[A]\u00B2[B]: overall order is ___","3"],
+      ["10","Rate = k (no concentration terms): this is ___ order","zero / 0"],
+      ["11","For zero-order: units of k are ___","M/s / mol/(L\u00B7s)"],
+      ["12","For first-order: units of k are ___","s\u207B\u00B9 / 1/s"],
+      ["13","For second-order: units of k are ___","M\u207B\u00B9s\u207B\u00B9 / L/(mol\u00B7s) / 1/(M\u00B7s)"],
+      ["14","Rate laws are determined ___ (experimentally/theoretically)","experimentally"],
+      ["15","If tripling [A] triples the rate, the order in A is ___","1 / first"],
+      ["16","If tripling [A] gives 9x the rate, the order in A is ___","2 / second"],
+      ["17","If tripling [A] gives 27x the rate, the order in A is ___","3 / third"]
+    ]
+  },
+  {
+    id:4, title:"Activation Energy & Arrhenius",
+    instruction:"Fill in the blank for each activation energy concept.",
+    rows:[
+      ["1","Ea is the minimum energy needed to ___","start a reaction / react"],
+      ["2","In an energy diagram, Ea is the height from ___ to ___","reactants to transition state / reactants, peak"],
+      ["3","The transition state is also called the ___","activated complex"],
+      ["4","A catalyst lowers Ea but does NOT change ___","\u0394H / enthalpy"],
+      ["5","The Arrhenius equation relates k to ___","temperature / T and Ea"],
+      ["6","Higher Ea means ___ rate","slower"],
+      ["7","Arrhenius equation: k = A \u00D7 e^(\u2212Ea/___)","RT"],
+      ["8","A in the Arrhenius equation is called the ___ factor","frequency / pre-exponential"],
+      ["9","R in the Arrhenius equation = ___ J/(mol\u00B7K)","8.314"],
+      ["10","As T increases, e^(\u2212Ea/RT) ___ (increases/decreases)","increases"],
+      ["11","As T increases, k ___ (increases/decreases)","increases"],
+      ["12","ln(k) vs 1/T gives a ___ line (for Arrhenius plot)","straight"],
+      ["13","Slope of ln(k) vs 1/T = ___","\u2212Ea/R"],
+      ["14","From the slope you can calculate ___","Ea / activation energy"],
+      ["15","Two-point Arrhenius: ln(k\u2082/k\u2081) = (Ea/R)(1/T\u2081 \u2212 1/___)","T\u2082"]
+    ]
+  },
+  {
+    id:5, title:"Half-Life & Integrated Rate Laws",
+    instruction:"Fill in the blank for each concept.",
+    rows:[
+      ["1","Half-life (t\u00BD) is the time for concentration to drop to ___","half / 50%"],
+      ["2","For first-order: t\u00BD = 0.693/___","k"],
+      ["3","First-order half-life is ___ of concentration (independent/dependent)","independent"],
+      ["4","If t\u00BD = 10 min, after 30 min, fraction remaining = ___","1/8 / 12.5%"],
+      ["5","Radioactive decay follows ___ order kinetics","first"],
+      ["6","After 2 half-lives, ___ % of original remains","25"],
+      ["7","After 1 half-life, ___ % of original remains","50"],
+      ["8","After 5 half-lives, fraction remaining = ___","1/32 / 3.125%"],
+      ["9","Zero-order integrated: [A] = [A]\u2080 \u2212 ___","kt"],
+      ["10","First-order integrated: ln[A] = ln[A]\u2080 \u2212 ___","kt"],
+      ["11","Second-order integrated: 1/[A] = 1/[A]\u2080 + ___","kt"],
+      ["12","For zero-order: plot ___ vs t gives a straight line","[A]"],
+      ["13","For first-order: plot ___ vs t gives a straight line","ln[A]"],
+      ["14","For second-order: plot ___ vs t gives a straight line","1/[A]"],
+      ["15","Zero-order half-life: t\u00BD = [A]\u2080 / ___","2k"],
+      ["16","Second-order half-life: t\u00BD = 1 / (k \u00D7 ___)","[A]\u2080"],
+      ["17","If k = 0.0231 s\u207B\u00B9 (first-order), t\u00BD = ___ s","30"]
+    ]
+  },
+  {
+    id:6, title:"Energy Diagrams", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"In an energy diagram for an exothermic reaction, the products are:", options:["Higher than reactants","At the same level","Lower than reactants","At the peak"], correct:2},
+      {q:"The peak of an energy diagram represents:", options:["The products","The reactants","The transition state","The catalyst"], correct:2},
+      {q:"Adding a catalyst to an energy diagram:", options:["Raises the peak","Lowers the peak","Changes product energy","Changes reactant energy"], correct:1},
+      {q:"Ea (forward) on an energy diagram is measured from:", options:["Products to peak","Reactants to peak","Reactants to products","Peak to products"], correct:1},
+      {q:"\u0394H on an energy diagram is the difference between:", options:["Peak and reactants","Peak and products","Reactants and products","Two peaks"], correct:2},
+      {q:"For an endothermic reaction, the energy diagram shows:", options:["Products lower than reactants","Products higher than reactants","No peak","Negative Ea"], correct:1},
+      {q:"Ea (reverse) for an exothermic reaction is:", options:["Smaller than Ea (forward)","Larger than Ea (forward)","Equal to Ea (forward)","Equal to zero"], correct:1},
+      {q:"Which statement is true about a catalyzed reaction?", options:["\u0394H changes","Ea increases","Both forward and reverse Ea decrease","Only forward Ea decreases"], correct:2},
+      {q:"Ea(forward) = 100 kJ, \u0394H = \u221240 kJ. Ea(reverse) = ?", options:["60 kJ","140 kJ","100 kJ","40 kJ"], correct:1},
+      {q:"Ea(forward) = 80 kJ, Ea(reverse) = 120 kJ. \u0394H = ?", options:["\u221240 kJ","+40 kJ","\u2212200 kJ","+200 kJ"], correct:0},
+      {q:"A multi-step reaction energy diagram can have:", options:["Only one peak","Multiple peaks (one per step)","No peaks","Only two peaks"], correct:1},
+      {q:"The rate-determining step in a multi-step reaction has the:", options:["Lowest Ea","Highest Ea","Smallest \u0394H","Largest \u0394H"], correct:1}
+    ]
+  },
+  {
+    id:7, title:"Mixed Review", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Which factor does NOT increase reaction rate?", options:["Higher temperature","Higher concentration","Adding a catalyst","Decreasing surface area"], correct:3},
+      {q:"For a zero-order reaction, the rate:", options:["Doubles when [A] doubles","Is independent of [A]","Quadruples when [A] doubles","Halves when [A] doubles"], correct:1},
+      {q:"The rate constant k has different units depending on:", options:["Temperature","Pressure","Reaction order","Concentration"], correct:2},
+      {q:"If a reaction is first-order with k = 0.0693 min\u207B\u00B9, the half-life is:", options:["5 min","10 min","20 min","100 min"], correct:1},
+      {q:"A reaction has Ea = 50 kJ/mol. With a catalyst, Ea = 30 kJ/mol. The catalyst:", options:["Changed \u0394H by 20 kJ","Lowered Ea by 20 kJ","Increased rate AND changed products","Had no effect"], correct:1},
+      {q:"Which best describes why reactions speed up at higher temperature?", options:["More molecules exceed Ea","Ea decreases","Molecules get smaller","\u0394H becomes more negative"], correct:0},
+      {q:"After 4 half-lives of a first-order reaction, what fraction remains?", options:["1/2","1/4","1/8","1/16"], correct:3},
+      {q:"Rate = k[NO]\u00B2[O\u2082]. The overall order is:", options:["1","2","3","4"], correct:2},
+      {q:"In experiment: [A] doubled, [B] held constant, rate quadrupled. Order in A:", options:["0","1","2","3"], correct:2},
+      {q:"In experiment: [A] held constant, [B] tripled, rate unchanged. Order in B:", options:["0","1","2","3"], correct:0},
+      {q:"The rate-determining step is the ___ step:", options:["Fastest","Slowest","Middle","First"], correct:1},
+      {q:"Reaction mechanism is the ___ of elementary steps:", options:["Sum","Sequence","Product","Average"], correct:1},
+      {q:"Molecularity of A + B \u2192 products is:", options:["Unimolecular","Bimolecular","Termolecular","Zero-molecular"], correct:1},
+      {q:"A first-order reaction has t\u00BD = 20 min. After 60 min, what % remains?", options:["50%","25%","12.5%","6.25%"], correct:2}
+    ]
+  },
+  {
+    id:8, title:"Word Arrange: Kinetics Concepts", type:"arrange",
+    instruction:"Arrange the words to form the correct statement.",
+    sentences:[
+      {prompt:"Collision theory requirement:", words:["Particles","must","collide","with","sufficient","energy","and","proper","orientation"]},
+      {prompt:"Effect of catalyst:", words:["A","catalyst","lowers","activation","energy","without","changing","\u0394H"]},
+      {prompt:"Rate law determination:", words:["Rate","laws","are","determined","experimentally,","not","from","balanced","equations"]},
+      {prompt:"First-order half-life:", words:["t\u00BD","=","0.693","/","k","(independent","of","concentration)"]},
+      {prompt:"Arrhenius equation meaning:", words:["Higher","temperature","increases","k","because","more","molecules","exceed","Ea"]},
+      {prompt:"Rate-determining step:", words:["The","slowest","elementary","step","determines","the","overall","reaction","rate"]},
+      {prompt:"Factors affecting rate:", words:["Temperature,","concentration,","surface","area,","and","catalysts","affect","reaction","rate"]},
+      {prompt:"Zero-order characteristic:", words:["Rate","is","constant","and","independent","of","reactant","concentration"]}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>1. Rate Laws & Reaction Orders</h3><p><span class="rule">General Rate Law:</span> rate = k[A]\u207F[B]\u1D50</p><p>k = rate constant, n and m = reaction orders (determined experimentally, NOT from coefficients)</p><table><tr><th>Order</th><th>Rate Law</th><th>Doubling [A]</th><th>Units of k</th><th>Half-life</th></tr><tr><td>0</td><td>rate = k</td><td>No change</td><td>M/s</td><td>t\u00BD = [A]\u2080 / 2k</td></tr><tr><td>1st</td><td>rate = k[A]</td><td>Rate \u00D72</td><td>s\u207B\u00B9</td><td>t\u00BD = 0.693 / k</td></tr><tr><td>2nd</td><td>rate = k[A]\u00B2</td><td>Rate \u00D74</td><td>M\u207B\u00B9s\u207B\u00B9</td><td>t\u00BD = 1 / (k[A]\u2080)</td></tr></table><p><span class="rule">Overall order</span> = sum of individual orders. Example: rate = k[A]\u00B2[B] \u2192 overall = 3rd order</p><p><span class="rule">How to determine order experimentally:</span> Compare two trials where only ONE concentration changes. If [A] triples and rate triples \u2192 1st order. If rate \u00D79 \u2192 2nd order. If rate unchanged \u2192 0th order.</p><h3>2. Integrated Rate Laws</h3><table><tr><th>Order</th><th>Integrated Law</th><th>Plot for straight line</th><th>Slope</th></tr><tr><td>0</td><td>[A] = [A]\u2080 \u2212 kt</td><td>[A] vs t</td><td>\u2212k</td></tr><tr><td>1st</td><td>ln[A] = ln[A]\u2080 \u2212 kt</td><td>ln[A] vs t</td><td>\u2212k</td></tr><tr><td>2nd</td><td>1/[A] = 1/[A]\u2080 + kt</td><td>1/[A] vs t</td><td>+k</td></tr></table><p><span class="rule">Key point:</span> 1st-order half-life is INDEPENDENT of concentration. 0th and 2nd order half-lives depend on [A]\u2080.</p><h3>3. Half-Life Calculations</h3><table><tr><th>Half-lives</th><th>Fraction remaining</th><th>% remaining</th></tr><tr><td>1</td><td>1/2</td><td>50%</td></tr><tr><td>2</td><td>1/4</td><td>25%</td></tr><tr><td>3</td><td>1/8</td><td>12.5%</td></tr><tr><td>4</td><td>1/16</td><td>6.25%</td></tr><tr><td>5</td><td>1/32</td><td>3.125%</td></tr></table><p><span class="rule">Worked example:</span> k = 0.0231 s\u207B\u00B9 (1st order). t\u00BD = 0.693/0.0231 = 30 s. After 90 s (3 half-lives): 12.5% remains.</p><h3>4. Arrhenius Equation & Activation Energy</h3><p><span class="rule">Arrhenius:</span> k = Ae^(\u2212Ea/RT), where A = frequency factor, Ea = activation energy, R = 8.314 J/(mol\u00B7K)</p><p><span class="rule">Arrhenius plot:</span> ln(k) vs 1/T gives a straight line with slope = \u2212Ea/R</p><p><span class="rule">Two-point form:</span> ln(k\u2082/k\u2081) = (Ea/R)(1/T\u2081 \u2212 1/T\u2082)</p><p><span class="rule">Key relationships:</span> Higher T \u2192 larger k \u2192 faster rate. Higher Ea \u2192 smaller k \u2192 slower rate.</p><h3>5. Collision Theory & Catalysts</h3><p><span class="rule">For a reaction to occur:</span> 1) Molecules must collide, 2) With sufficient energy (\u2265 Ea), 3) With proper orientation</p><p><span class="rule">Factors affecting rate:</span></p><table><tr><th>Factor</th><th>Effect</th><th>Why</th></tr><tr><td>Temperature \u2191</td><td>Rate \u2191</td><td>More molecules exceed Ea</td></tr><tr><td>Concentration \u2191</td><td>Rate \u2191</td><td>More frequent collisions</td></tr><tr><td>Surface area \u2191</td><td>Rate \u2191</td><td>More contact area</td></tr><tr><td>Catalyst added</td><td>Rate \u2191</td><td>Lowers Ea (alternative pathway)</td></tr></table><p><span class="rule">Catalyst types:</span> Homogeneous = same phase as reactants. Heterogeneous = different phase. Enzyme = biological catalyst.</p><p><span class="rule">Key:</span> A catalyst lowers Ea for BOTH forward and reverse reactions equally. It does NOT change \u0394H, K, or equilibrium position.</p><h3>6. Reaction Mechanisms</h3><p><span class="rule">Mechanism:</span> A sequence of elementary steps that sum to the overall reaction.</p><p><span class="rule">Rate-determining step (RDS):</span> The slowest elementary step. The overall rate law is determined by the RDS.</p><p><span class="rule">Molecularity:</span> Unimolecular (A \u2192 products), Bimolecular (A + B \u2192 products), Termolecular (rare, A + B + C).</p><p><span class="rule">Intermediates:</span> Species produced in one step and consumed in a later step. They do NOT appear in the overall equation or rate law.</p><h3>7. Energy Diagrams</h3><p><span class="rule">Reading diagrams:</span> Ea(forward) = peak \u2212 reactants. Ea(reverse) = peak \u2212 products. \u0394H = products \u2212 reactants.</p><p><span class="rule">Relationship:</span> Ea(forward) = Ea(reverse) + \u0394H (for exothermic, Ea reverse &gt; Ea forward)</p><p><span class="rule">Multi-step:</span> Multiple peaks, each = one elementary step. Highest peak = RDS. Valleys between peaks = intermediates.</p>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 reaction rates, rate laws, activation energy, half-life \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

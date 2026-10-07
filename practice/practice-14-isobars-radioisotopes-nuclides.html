@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Isobars, Radioisotopes &amp; Nuclides</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Isobars, Radioisotopes &amp; Nuclides</h1>
+<p class="subtitle">Deep practice &mdash; isobars, stable vs radioactive, nuclide notation</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_14';
+const SECTIONS = [
+  {
+    id:1, title:"Isotope vs Isobar identification",
+    instruction:"Write whether the pair are isotopes or isobars.",
+    rows:[
+      ["1","\u00b9\u00b2C and \u00b9\u2074C: isotopes or isobars?","isotopes"],
+      ["2","\u00b9\u2074C and \u00b9\u2074N: isotopes or isobars?","isobars"],
+      ["3","\u00b3\u2075Cl and \u00b3\u2077Cl: isotopes or isobars?","isotopes"],
+      ["4","\u2074\u2070Ar and \u2074\u2070Ca: isotopes or isobars?","isobars"],
+      ["5","\u00b9\u2076O and \u00b9\u2078O: isotopes or isobars?","isotopes"],
+      ["6","\u2074\u2070K and \u2074\u2070Ar: isotopes or isobars?","isobars"],
+      ["7","\u00b2\u00b3\u2075U and \u00b2\u00b3\u2078U: isotopes or isobars?","isotopes"],
+      ["8","\u2078\u2077Rb and \u2078\u2077Sr: isotopes or isobars?","isobars"],
+      ["9","\u00b9H, \u00b2H, \u00b3H: isotopes or isobars?","isotopes"],
+      ["10","\u00b9\u00b3\u00b9I and \u00b9\u00b3\u00b9Xe: isotopes or isobars?","isobars"],
+      ["11","\u2075\u2076Fe and \u2075\u2078Fe: isotopes or isobars?","isotopes"],
+      ["12","\u2074\u2070Ar, \u2074\u2070K, \u2074\u2070Ca: isotopes or isobars?","isobars"],
+      ["13","\u2076\u2070Co and \u2076\u2070Ni: isotopes or isobars?","isobars"],
+      ["14","\u00b9\u2076O and \u00b9\u2076N: isotopes or isobars?","isobars"],
+      ["15","\u00b2\u2070\u2076Pb and \u00b2\u2070\u2078Pb: isotopes or isobars?","isotopes"],
+      ["16","\u00b3He and \u00b3H: isotopes or isobars?","isobars"],
+      ["17","\u00b9\u2079F and \u00b9\u2079Ne: isotopes or isobars?","isobars"],
+      ["18","\u2076\u2074Zn and \u2076\u2076Zn: isotopes or isobars?","isotopes"]
+    ]
+  },
+  {
+    id:2, title:"Radioisotope definition & examples", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"A radioisotope is an isotope that:", options:["Has too many protons","Is unstable and decays","Has no neutrons","Is man-made only"], correct:1},
+      {q:"\u00b9\u2074C is used for:", options:["Nuclear power","Carbon dating","Medical imaging only","Food preservation"], correct:1},
+      {q:"Which is radioactive?", options:["\u00b9\u00b2C","\u00b9\u2074C","Both","Neither"], correct:1},
+      {q:"Radioisotopes decay because:", options:["They have too many electrons","Their nucleus is unstable","They are too heavy","They lack protons"], correct:1},
+      {q:"Half-life is:", options:["Time for all atoms to decay","Time for half to decay","Time for element to form","Mass of isotope"], correct:1},
+      {q:"Which hydrogen isotope is radioactive?", options:["Protium (\u00b9H)","Deuterium (\u00b2H)","Tritium (\u00b3H)","All of them"], correct:2},
+      {q:"\u2079\u2079\u1d50Tc is used in:", options:["Nuclear weapons","Medical imaging","Carbon dating","Fuel cells"], correct:1},
+      {q:"\u00b9\u00b3\u00b9I is used to treat:", options:["Bone cancer","Thyroid disorders","Heart disease","Diabetes"], correct:1},
+      {q:"\u2076\u2070Co is primarily used for:", options:["Carbon dating","Sterilization and cancer radiotherapy","Nuclear fuel","Water purification"], correct:1},
+      {q:"\u00b2\u2074\u00b9Am is found in household:", options:["Lightbulbs","Smoke detectors","Batteries","Thermometers"], correct:1},
+      {q:"PET scans commonly use which radioisotope?", options:["\u00b9\u2074C","\u00b9\u2078F (fluorine-18)","\u00b2\u00b3\u2075U","\u2076\u2070Co"], correct:1},
+      {q:"\u2074\u2070K (potassium-40) is used for:", options:["Medical imaging","Dating rocks and minerals","Food irradiation","Nuclear reactors"], correct:1}
+    ]
+  },
+  {
+    id:3, title:"Stable vs Radioactive", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Most elements in nature are:", options:["All radioactive","Mostly stable isotopes","Always unstable","50/50 stable/unstable"], correct:1},
+      {q:"Stability depends primarily on:", options:["Number of electrons","Neutron-to-proton ratio","Atomic mass only","Chemical bonds"], correct:1},
+      {q:"Elements with Z > 83 (bismuth) are:", options:["All stable","All radioactive","Sometimes stable","Synthetic only"], correct:1},
+      {q:"\u00b9\u00b2C has 6p and 6n. It is:", options:["Radioactive","Stable","An isobar","A radioisotope"], correct:1},
+      {q:"\u00b9\u2074C has 6p and 8n. It is:", options:["Stable","Radioactive","An isobar of \u00b9\u00b2C","Not found in nature"], correct:1},
+      {q:"Stable nuclei generally have n/p ratio:", options:["Always exactly 1","Close to 1 for light elements","Always > 2","Less than 0.5"], correct:1},
+      {q:"Which is stable?", options:["\u00b2\u00b3\u2078U","\u00b2\u00b3\u2075U","\u00b9\u00b2C","\u00b9\u2074C"], correct:2},
+      {q:"Radioactive decay transforms:", options:["Electrons only","The nucleus","Chemical bonds","Molecular structure"], correct:1},
+      {q:"For heavier stable nuclei (Z > 20), the n/p ratio is:", options:["Exactly 1","Greater than 1","Less than 1","Zero"], correct:1},
+      {q:"The band of stability is a region on a plot of:", options:["Mass vs volume","N (neutrons) vs Z (protons)","Electrons vs protons","Energy vs temperature"], correct:1},
+      {q:"Why is \u2074He (helium-4) extremely stable?", options:["It has equal protons and neutrons (2p, 2n) and double magic","It is a noble gas","It is the lightest","It has no neutrons"], correct:0},
+      {q:"Which of these is a 'magic number' for nuclear stability?", options:["2, 8, 20, 28, 50, 82, 126","1, 3, 5, 7","10, 20, 30","Any even number"], correct:0},
+      {q:"Nuclei with even numbers of both protons and neutrons tend to be:", options:["Less stable","More stable","Radioactive","Nonexistent"], correct:1},
+      {q:"Technetium (Z=43) is unusual because:", options:["It has no stable isotopes at all","It is the heaviest element","It has no protons","It cannot decay"], correct:0}
+    ]
+  },
+  {
+    id:4, title:"Nuclide concept",
+    instruction:"Fill in the blank.",
+    rows:[
+      ["1","A nuclide is defined by its number of ___ and ___","protons and neutrons / Z and N"],
+      ["2","The nuclide \u00b9\u2074C (carbon-14) has ___ protons","6"],
+      ["3","The nuclide \u00b9\u2074C (carbon-14) has ___ neutrons","8"],
+      ["4","Two nuclides with same Z but different N are called ___","isotopes"],
+      ["5","Two nuclides with same A but different Z are called ___","isobars"],
+      ["6","Total number of known nuclides is approximately ___","3000 / ~3000 / about 3000 / 3300"],
+      ["7","Of the ~3000 known nuclides, roughly ___ are stable","250 / ~250 / about 250 / 252"],
+      ["8","A specific nuclide is uniquely identified by ___ and ___","Z and A / atomic number and mass number"],
+      ["9","\u00b2\u00b3\u2078U: Z = ___, A = ___, N = ___","92, 238, 146"],
+      ["10","\u2075\u2076Fe: Z = ___, A = ___, N = ___","26, 56, 30"],
+      ["11","\u00b9\u2076O: Z = ___, A = ___, N = ___","8, 16, 8"],
+      ["12","If a nuclide has Z=20 and N=20, then A = ___","40"],
+      ["13","If a nuclide has A=56 and Z=26, then N = ___","30"],
+      ["14","If a nuclide has A=197 and N=118, then Z = ___","79"],
+      ["15","A nuclide with Z=79 is the element ___","gold / Au"]
+    ]
+  },
+  {
+    id:5, title:"Deuterium & Tritium",
+    instruction:"Fill in the blank about hydrogen isotopes.",
+    rows:[
+      ["1","Deuterium symbol: \u00b2H or ___","D"],
+      ["2","Tritium symbol: \u00b3H or ___","T"],
+      ["3","Deuterium has ___ neutron(s)","1"],
+      ["4","Tritium has ___ neutron(s)","2"],
+      ["5","Heavy water (D\u2082O) contains ___ instead of normal hydrogen","deuterium / D / \u00b2H"],
+      ["6","Of H isotopes, which is radioactive?","tritium / T / \u00b3H"],
+      ["7","Protium (\u00b9H) has ___ neutron(s)","0"],
+      ["8","The half-life of tritium is approximately ___ years","12.3 / 12 / ~12"],
+      ["9","Deuterium is used in ___ reactors (nuclear fusion)","fusion / nuclear fusion"],
+      ["10","Heavy water is used as a ___ in some nuclear reactors","moderator / neutron moderator"],
+      ["11","Protium makes up ___% of natural hydrogen","99.98 / 99.99 / ~100"],
+      ["12","Deuterium makes up about ___% of natural hydrogen","0.02 / 0.01"]
+    ]
+  },
+  {
+    id:6, title:"Radioisotope applications",
+    instruction:"Fill in the application or radioisotope name.",
+    rows:[
+      ["1","\u2079\u2079\u1d50Tc is used for ___ imaging in hospitals","medical / diagnostic / nuclear medicine"],
+      ["2","\u00b9\u2074C dating can date objects up to about ___ years old","50000 / 50,000 / ~50000"],
+      ["3","\u00b9\u00b3\u00b9I targets the ___ gland","thyroid"],
+      ["4","\u2076\u2070Co emits ___ rays used in cancer treatment","gamma"],
+      ["5","\u2074\u2070K decays to \u2074\u2070Ar and is used for ___ dating","geological / rock / potassium-argon"],
+      ["6","The radioisotope in smoke detectors is ___","americium-241 / Am-241"],
+      ["7","Uranium-235 is used as fuel in ___ reactors","nuclear / fission"],
+      ["8","Strontium-90 is dangerous because it mimics ___ in bones","calcium / Ca"],
+      ["9","\u00b9\u2078F (fluorine-18) is used in ___ scans","PET"],
+      ["10","The half-life of \u00b9\u2074C is approximately ___ years","5730 / 5,730 / ~5730"],
+      ["11","Radioactive tracers work because radioisotopes have the same ___ properties as stable isotopes","chemical"],
+      ["12","Food irradiation uses ___ rays to kill bacteria","gamma"]
+    ]
+  },
+  {
+    id:7, title:"Nuclear notation (arrange)", type:"arrange",
+    instruction:"Arrange the words to form a correct statement about nuclear notation.",
+    sentences:[
+      {prompt:"The symbol \u1d2c_Z X tells us:", words:["A","is","mass","number","and","Z","is","atomic","number"]},
+      {prompt:"Isotopes share the same:", words:["atomic","number","Z","but","have","different","mass","numbers","A"]},
+      {prompt:"Isobars share the same:", words:["mass","number","A","but","have","different","atomic","numbers","Z"]},
+      {prompt:"Isotones share the same:", words:["number","of","neutrons","N","but","different","Z","and","A"]},
+      {prompt:"To find neutrons from notation:", words:["N","equals","A","minus","Z"]},
+      {prompt:"A radioisotope is:", words:["an","unstable","nuclide","that","undergoes","radioactive","decay"]},
+      {prompt:"Magic numbers for nuclear stability:", words:["2","8","20","28","50","82","and","126"]},
+      {prompt:"The neutron-to-proton ratio determines:", words:["whether","a","nucleus","is","stable","or","radioactive"]}
+    ]
+  },
+  {
+    id:8, title:"Why isotopes have same chemical properties", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Isotopes have the same chemical properties because:", options:["Same mass number","Same number of electrons/protons","Same number of neutrons","They are identical"], correct:1},
+      {q:"Chemical properties are determined by:", options:["Neutrons","Mass number","Electron configuration","Nuclear mass"], correct:2},
+      {q:"\u00b9\u00b2C and \u00b9\u2074C react the same way because:", options:["Same number of neutrons","Same electron arrangement","Same mass","Different protons"], correct:1},
+      {q:"Physical properties (like mass) differ between isotopes because:", options:["Different electrons","Different neutrons (different mass)","Different protons","Different chemical bonds"], correct:1},
+      {q:"Why can \u00b9\u2074C be used for dating?", options:["It has different chemistry","It decays at a known rate while \u00b9\u00b2C doesn't","It is heavier","It bonds differently"], correct:1},
+      {q:"Isotopes have different:", options:["Chemical properties","Atomic numbers","Mass numbers","Number of protons"], correct:2}
+    ]
+  },
+  {
+    id:9, title:"Decay types & nuclear stability", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Alpha decay emits:", options:["An electron","A helium-4 nucleus","A photon","A neutron"], correct:1},
+      {q:"Beta-minus decay converts:", options:["A proton to a neutron","A neutron to a proton (emits electron)","An electron to a proton","A neutron to an electron"], correct:1},
+      {q:"Gamma radiation is:", options:["A particle","A helium nucleus","High-energy electromagnetic radiation","A neutron beam"], correct:2},
+      {q:"In alpha decay, the mass number decreases by:", options:["1","2","4","0"], correct:2},
+      {q:"In alpha decay, the atomic number decreases by:", options:["1","2","4","0"], correct:1},
+      {q:"In beta-minus decay, the atomic number:", options:["Decreases by 1","Increases by 1","Stays the same","Decreases by 2"], correct:1},
+      {q:"Gamma emission changes:", options:["Mass number only","Atomic number only","Neither A nor Z","Both A and Z"], correct:2},
+      {q:"Which has the greatest penetrating power?", options:["Alpha particles","Beta particles","Gamma rays","All equal"], correct:2},
+      {q:"Which radiation is stopped by a sheet of paper?", options:["Alpha","Beta","Gamma","None"], correct:0},
+      {q:"Positron emission is similar to beta decay but emits:", options:["A negative electron","A positive electron (positron)","A neutron","An alpha particle"], correct:1},
+      {q:"Electron capture involves:", options:["Emitting an electron","An inner electron being absorbed by the nucleus","Losing a neutron","Gaining a proton"], correct:1},
+      {q:"After \u00b2\u00b3\u2078U undergoes alpha decay, the daughter nuclide is:", options:["\u00b2\u00b3\u2074Th","\u00b2\u00b3\u2074Pa","\u00b2\u00b3\u2076U","\u00b2\u00b3\u2078Np"], correct:0}
+    ]
+  },
+  {
+    id:10, title:"Mixed identification",
+    instruction:"Fill in the blank.",
+    rows:[
+      ["1","\u2074\u2070K, \u2074\u2070Ar, \u2074\u2070Ca all have A = ___","40"],
+      ["2","\u2074\u2070K has Z=19, \u2074\u2070Ar has Z=18. They are ___","isobars"],
+      ["3","\u2074\u2070K is radioactive and decays to \u2074\u2070Ar. \u2074\u2070K is a ___","radioisotope"],
+      ["4","The notation \u1d2c_Z X shows: A = ___, Z = ___","mass number, atomic number"],
+      ["5","Isotones have the same number of ___","neutrons"],
+      ["6","\u00b9\u00b3C and \u00b9\u2074N both have ___ neutrons","7"],
+      ["7","\u00b3H and \u00b3He are ___ (same A, different Z)","isobars"],
+      ["8","\u2076\u2070Co and \u2076\u2070Ni are ___","isobars"],
+      ["9","\u00b9\u2074C has Z=6. After beta decay, the daughter has Z=___","7"],
+      ["10","The daughter of \u00b9\u2074C beta decay is \u00b9\u2074___","N / nitrogen"],
+      ["11","Nuclides with Z=2, 8, 20, 28, 50, 82, or 126 are called ___ nuclei","magic / magic number"],
+      ["12","Tin (Z=50) has the most stable ___ of any element","isotopes"],
+      ["13","Lead-208 (Z=82, N=126) is exceptionally stable because it has ___ magic numbers","two / double / 2"],
+      ["14","An element with no stable isotopes: Tc (Z=___) and Pm (Z=___)","43, 61"],
+      ["15","\u00b9H has ___ protons and ___ neutrons","1, 0"],
+      ["16","The n/p ratio of \u2074He is ___","1 / 1.0 / 1:1"],
+      ["17","The n/p ratio of \u00b2\u2070\u2078Pb (Z=82, N=126) is approximately ___","1.54 / 1.5 / ~1.5"],
+      ["18","As Z increases, stable nuclei require ___ neutrons relative to protons","more / increasingly more"]
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/\u03AC/g,'\u03B1').replace(/\u03AD/g,'\u03B5').replace(/\u03AE/g,'\u03B7').replace(/\u03AF/g,'\u03B9')
+       .replace(/\u03CC/g,'\u03BF').replace(/\u03CD/g,'\u03C5').replace(/\u03CE/g,'\u03C9').replace(/\u0390/g,'\u03B9').replace(/\u03B0/g,'\u03C5');
+  s = s.replace(/\u2080/g,'0').replace(/\u2081/g,'1').replace(/\u2082/g,'2').replace(/\u2083/g,'3').replace(/\u2084/g,'4')
+       .replace(/\u2085/g,'5').replace(/\u2086/g,'6').replace(/\u2087/g,'7').replace(/\u2088/g,'8').replace(/\u2089/g,'9');
+  s = s.replace(/\u207A/g,'+').replace(/\u207B/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Isobars, Radioisotopes &amp; Nuclides</h3><p><span class="rule">KEY DEFINITIONS</span></p><table><tr><th>Concept</th><th>Same</th><th>Different</th><th>Example</th></tr><tr><td><strong>Isotopes</strong></td><td>Z (protons)</td><td>A, N</td><td>\u00b9\u00b2C and \u00b9\u2074C (same element)</td></tr><tr><td><strong>Isobars</strong></td><td>A (mass #)</td><td>Z, N</td><td>\u00b9\u2074C and \u00b9\u2074N (different elements!)</td></tr><tr><td><strong>Isotones</strong></td><td>N (neutrons)</td><td>Z, A</td><td>\u00b9\u00b3C (7n) and \u00b9\u2074N (7n)</td></tr></table><p><span class="rule">Nuclide</span> = a specific nuclear species defined by a unique combination of Z (protons) and N (neutrons). There are ~3000 known nuclides, only ~252 are stable.</p><p><span class="rule">Radioisotope</span> = an unstable nuclide that undergoes radioactive decay to become more stable.</p><p style="margin-top:10px"><span class="rule">HYDROGEN ISOTOPES</span></p><table><tr><th>Name</th><th>Symbol</th><th>Protons</th><th>Neutrons</th><th>Radioactive?</th></tr><tr><td>Protium</td><td>\u00b9H</td><td>1</td><td>0</td><td>No (99.98%)</td></tr><tr><td>Deuterium</td><td>\u00b2H or D</td><td>1</td><td>1</td><td>No (0.02%)</td></tr><tr><td>Tritium</td><td>\u00b3H or T</td><td>1</td><td>2</td><td>Yes (t\u00BD = 12.3 yr)</td></tr></table><p>Heavy water (D\u2082O) uses deuterium. Used as neutron moderator in some nuclear reactors.</p><p style="margin-top:10px"><span class="rule">NUCLEAR STABILITY</span></p><p><span class="rule">Belt of stability:</span> Plot of N vs Z shows stable nuclides cluster in a band.</p><p>\u2022 Light elements (Z \u2264 20): stable when n/p \u2248 1</p><p>\u2022 Heavy elements (Z &gt; 20): stable when n/p &gt; 1 (need more neutrons)</p><p>\u2022 All elements with Z &gt; 83 (Bi) are radioactive</p><p><span class="rule">Magic Numbers:</span> 2, 8, 20, 28, 50, 82, 126 \u2014 nuclei with magic numbers of p or n are especially stable.</p><p>Example: \u00b2\u2070\u2078Pb (Z=82, N=126) is \"doubly magic\" and exceptionally stable.</p><p>Even-even nuclei (even Z, even N) tend to be more stable than odd-odd.</p><p style="margin-top:10px"><span class="rule">COMMON RADIOISOTOPES &amp; APPLICATIONS</span></p><table><tr><th>Isotope</th><th>Half-life</th><th>Application</th></tr><tr><td>\u00b9\u2074C</td><td>5,730 yr</td><td>Carbon dating (up to ~50,000 yr)</td></tr><tr><td>\u2079\u2079\u1d50Tc</td><td>6 hr</td><td>Medical imaging (most used)</td></tr><tr><td>\u00b9\u00b3\u00b9I</td><td>8 days</td><td>Thyroid treatment</td></tr><tr><td>\u2076\u2070Co</td><td>5.27 yr</td><td>Cancer radiotherapy, sterilization</td></tr><tr><td>\u2074\u2070K</td><td>1.25 Gyr</td><td>Geological/rock dating</td></tr><tr><td>\u00b9\u2078F</td><td>110 min</td><td>PET scans</td></tr><tr><td>\u00b2\u2074\u00b9Am</td><td>432 yr</td><td>Smoke detectors</td></tr><tr><td>\u00b2\u00b3\u2075U</td><td>704 Myr</td><td>Nuclear fuel (fission)</td></tr></table><p style="margin-top:10px"><span class="rule">DECAY TYPES OVERVIEW</span></p><table><tr><th>Type</th><th>Particle</th><th>\u0394A</th><th>\u0394Z</th><th>Penetration</th></tr><tr><td>Alpha (\u03B1)</td><td>\u2074He nucleus</td><td>\u22124</td><td>\u22122</td><td>Low (stopped by paper)</td></tr><tr><td>Beta\u207B (\u03B2\u207B)</td><td>Electron (n\u2192p+e\u207B)</td><td>0</td><td>+1</td><td>Medium (stopped by Al foil)</td></tr><tr><td>Beta\u207A (\u03B2\u207A)</td><td>Positron (p\u2192n+e\u207A)</td><td>0</td><td>\u22121</td><td>Medium</td></tr><tr><td>Gamma (\u03B3)</td><td>High-energy photon</td><td>0</td><td>0</td><td>High (needs Pb/concrete)</td></tr></table><p>Example: \u00b2\u00b3\u2078U \u2192 \u03B1 decay \u2192 \u00b2\u00b3\u2074Th (A\u22124, Z\u22122)</p><p>Example: \u00b9\u2074C \u2192 \u03B2\u207B decay \u2192 \u00b9\u2074N (Z+1, A same)</p>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 isobars, stable vs radioactive, nuclide notation \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

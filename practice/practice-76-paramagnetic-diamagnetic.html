@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Paramagnetic & Diamagnetic</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Paramagnetic & Diamagnetic</h1>
+<p class="subtitle">Deep practice &mdash; magnetic properties, unpaired electrons, electron configurations</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_76';
+const SECTIONS = [
+  {
+    id:1, title:"Fill: Define magnetic terms",
+    instruction:"Complete each definition about magnetic properties.",
+    rows:[
+      ["1","Paramagnetic means the substance has ___","unpaired electrons / at least one unpaired electron"],
+      ["2","Diamagnetic means the substance has ___","all paired electrons / no unpaired electrons / all electrons paired"],
+      ["3","Paramagnetic substances are ___ by a magnetic field","attracted to / attracted"],
+      ["4","Diamagnetic substances are ___ by a magnetic field","slightly repelled by / repelled / weakly repelled"],
+      ["5","Ferromagnetic materials have ___ magnetic effects","strong permanent / very strong / permanent"],
+      ["6","The three ferromagnetic elements are Fe, Co, and ___","Ni / nickel"],
+      ["7","Paramagnetism is a ___ effect (temporary/permanent)","temporary / weak"],
+      ["8","When a paramagnetic substance is removed from a magnetic field, it ___ its magnetism","loses / no longer has"],
+      ["9","The magnetic behavior of atoms depends on the number of ___ electrons","unpaired"],
+      ["10","Hund\u2019s rule says electrons fill degenerate orbitals ___ before pairing","singly / one at a time / with parallel spins"],
+      ["11","An atom with all filled or empty orbitals is ___","diamagnetic"],
+      ["12","An atom with partially filled orbitals is likely ___","paramagnetic"],
+      ["13","The stronger the paramagnetism, the ___ unpaired electrons","more"],
+      ["14","Diamagnetism is present in ___ substances (all/some)","all"],
+      ["15","In paramagnetic substances, paramagnetism ___ the diamagnetic effect","overwhelms / dominates / overpowers / is stronger than"]
+    ]
+  },
+  {
+    id:2, title:"Fill: Classify elements as para/diamagnetic",
+    instruction:"Given the electron configuration, classify as paramagnetic or diamagnetic.",
+    rows:[
+      ["1","He: 1s\u00B2","diamagnetic"],
+      ["2","Li: 1s\u00B2 2s\u00B9","paramagnetic"],
+      ["3","Be: 1s\u00B2 2s\u00B2","diamagnetic"],
+      ["4","B: 1s\u00B2 2s\u00B2 2p\u00B9","paramagnetic"],
+      ["5","C: 1s\u00B2 2s\u00B2 2p\u00B2","paramagnetic"],
+      ["6","N: 1s\u00B2 2s\u00B2 2p\u00B3","paramagnetic"],
+      ["7","O: 1s\u00B2 2s\u00B2 2p\u2074","paramagnetic"],
+      ["8","F: 1s\u00B2 2s\u00B2 2p\u2075","paramagnetic"],
+      ["9","Ne: 1s\u00B2 2s\u00B2 2p\u2076","diamagnetic"],
+      ["10","Na: [Ne] 3s\u00B9","paramagnetic"],
+      ["11","Mg: [Ne] 3s\u00B2","diamagnetic"],
+      ["12","Al: [Ne] 3s\u00B2 3p\u00B9","paramagnetic"],
+      ["13","Si: [Ne] 3s\u00B2 3p\u00B2","paramagnetic"],
+      ["14","P: [Ne] 3s\u00B2 3p\u00B3","paramagnetic"],
+      ["15","Ar: [Ne] 3s\u00B2 3p\u2076","diamagnetic"],
+      ["16","Ca: [Ar] 4s\u00B2","diamagnetic"],
+      ["17","Zn: [Ar] 3d\u00B9\u2070 4s\u00B2","diamagnetic"],
+      ["18","Fe: [Ar] 3d\u2076 4s\u00B2","paramagnetic"],
+      ["19","Cu: [Ar] 3d\u00B9\u2070 4s\u00B9","paramagnetic"],
+      ["20","Kr: [Ar] 3d\u00B9\u2070 4s\u00B2 4p\u2076","diamagnetic"]
+    ]
+  },
+  {
+    id:3, title:"MC: Paramagnetic vs diamagnetic", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Which is paramagnetic?", options:["Ne (all paired)","O (2 unpaired in 2p)","Ar (all paired)","Zn (all paired)"], correct:1},
+      {q:"Which is diamagnetic?", options:["Fe","Co","Ni","Zn"], correct:3},
+      {q:"An atom with electron config [Ar] 3d\u2075 4s\u00B2 is:", options:["Diamagnetic","Paramagnetic with 5 unpaired e\u207B","Paramagnetic with 7 unpaired e\u207B","Ferromagnetic"], correct:1},
+      {q:"An atom with config [Kr] 4d\u00B9\u2070 5s\u00B2 is:", options:["Paramagnetic","Diamagnetic","Ferromagnetic","Cannot determine"], correct:1},
+      {q:"Which noble gas is paramagnetic?", options:["He","Ne","Ar","None of them"], correct:3},
+      {q:"All alkali metals are:", options:["Diamagnetic","Paramagnetic (1 unpaired s electron)","Ferromagnetic","Varies"], correct:1},
+      {q:"All alkaline earth metals are:", options:["Paramagnetic","Diamagnetic (filled s orbital)","Ferromagnetic","Half are para, half are dia"], correct:1},
+      {q:"Which transition metal is diamagnetic?", options:["Fe ([Ar]3d\u20764s\u00B2)","Ti ([Ar]3d\u00B24s\u00B2)","Zn ([Ar]3d\u00B9\u20704s\u00B2)","V ([Ar]3d\u00B34s\u00B2)"], correct:2},
+      {q:"Cr has the config [Ar] 3d\u2075 4s\u00B9 (exception). It is:", options:["Diamagnetic","Paramagnetic with 6 unpaired e\u207B","Paramagnetic with 1 unpaired e\u207B","Ferromagnetic"], correct:1},
+      {q:"Cu has the config [Ar] 3d\u00B9\u2070 4s\u00B9 (exception). It is:", options:["Diamagnetic","Paramagnetic with 1 unpaired e\u207B","Paramagnetic with 10 unpaired e\u207B","Ferromagnetic"], correct:1},
+      {q:"Which has more unpaired electrons: Fe or Mn?", options:["Fe (4 unpaired)","Mn (5 unpaired)","They are equal","Cannot determine"], correct:1},
+      {q:"Sc ([Ar] 3d\u00B9 4s\u00B2) has how many unpaired electrons?", options:["0","1","2","3"], correct:1},
+      {q:"Ni ([Ar] 3d\u2078 4s\u00B2) has how many unpaired electrons?", options:["0","2","4","8"], correct:1},
+      {q:"Which group of elements are all paramagnetic?", options:["Noble gases","Alkaline earth metals","Halogens","Transition metals (most)"], correct:2},
+      {q:"Halogens (F, Cl, Br, I) are all paramagnetic because they have:", options:["No electrons","1 unpaired electron in the p subshell","All paired electrons","3 unpaired electrons"], correct:1},
+      {q:"S ([Ne] 3s\u00B2 3p\u2074) has how many unpaired electrons?", options:["0","2","4","6"], correct:1},
+      {q:"Cl ([Ne] 3s\u00B2 3p\u2075) has how many unpaired electrons?", options:["0","1","3","5"], correct:1},
+      {q:"Which is more strongly paramagnetic: O or N?", options:["O (2 unpaired)","N (3 unpaired)","They are equal","Neither is paramagnetic"], correct:1},
+      {q:"Ti\u00B2\u207A ([Ar] 3d\u00B2) is:", options:["Diamagnetic","Paramagnetic with 2 unpaired e\u207B","Paramagnetic with 4 unpaired e\u207B","Cannot determine"], correct:1},
+      {q:"Cu\u00B2\u207A ([Ar] 3d\u2079) is:", options:["Diamagnetic","Paramagnetic with 1 unpaired e\u207B","Paramagnetic with 9 unpaired e\u207B","Ferromagnetic"], correct:1}
+    ]
+  },
+  {
+    id:4, title:"Fill: Count unpaired electrons",
+    instruction:"Write the number of unpaired electrons.",
+    rows:[
+      ["1","H: 1s\u00B9","1"],
+      ["2","He: 1s\u00B2","0"],
+      ["3","C: [He] 2s\u00B2 2p\u00B2","2"],
+      ["4","N: [He] 2s\u00B2 2p\u00B3","3"],
+      ["5","O: [He] 2s\u00B2 2p\u2074","2"],
+      ["6","F: [He] 2s\u00B2 2p\u2075","1"],
+      ["7","Ne: [He] 2s\u00B2 2p\u2076","0"],
+      ["8","Fe: [Ar] 3d\u2076 4s\u00B2","4"],
+      ["9","Co: [Ar] 3d\u2077 4s\u00B2","3"],
+      ["10","Ni: [Ar] 3d\u2078 4s\u00B2","2"],
+      ["11","Cu: [Ar] 3d\u00B9\u2070 4s\u00B9","1"],
+      ["12","Zn: [Ar] 3d\u00B9\u2070 4s\u00B2","0"],
+      ["13","Cr: [Ar] 3d\u2075 4s\u00B9","6"],
+      ["14","Mn: [Ar] 3d\u2075 4s\u00B2","5"],
+      ["15","V: [Ar] 3d\u00B3 4s\u00B2","3"],
+      ["16","Ti: [Ar] 3d\u00B2 4s\u00B2","2"],
+      ["17","Sc: [Ar] 3d\u00B9 4s\u00B2","1"],
+      ["18","Fe\u00B2\u207A: [Ar] 3d\u2076","4"],
+      ["19","Fe\u00B3\u207A: [Ar] 3d\u2075","5"],
+      ["20","Cu\u207A: [Ar] 3d\u00B9\u2070","0"]
+    ]
+  },
+  {
+    id:5, title:"MC: Magnetic properties of ions", type:"mc",
+    instruction:"Determine the magnetic properties of these ions.",
+    questions:[
+      {q:"Fe\u00B2\u207A ([Ar] 3d\u2076) is:", options:["Diamagnetic","Paramagnetic (4 unpaired)","Paramagnetic (6 unpaired)","Ferromagnetic"], correct:1},
+      {q:"Fe\u00B3\u207A ([Ar] 3d\u2075) is:", options:["Diamagnetic","Paramagnetic (3 unpaired)","Paramagnetic (5 unpaired)","Ferromagnetic"], correct:2},
+      {q:"Which has more unpaired electrons?", options:["Fe\u00B2\u207A (3d\u2076, 4 unpaired)","Fe\u00B3\u207A (3d\u2075, 5 unpaired)","They are equal","Neither has unpaired electrons"], correct:1},
+      {q:"Cu\u207A ([Ar] 3d\u00B9\u2070) is:", options:["Paramagnetic","Diamagnetic (d\u00B9\u2070 = all paired)","Ferromagnetic","Depends on compound"], correct:1},
+      {q:"Cu\u00B2\u207A ([Ar] 3d\u2079) is:", options:["Diamagnetic","Paramagnetic (1 unpaired)","Paramagnetic (2 unpaired)","Ferromagnetic"], correct:1},
+      {q:"Mn\u00B2\u207A ([Ar] 3d\u2075) has ___ unpaired electrons:", options:["3","4","5","0"], correct:2},
+      {q:"Zn\u00B2\u207A ([Ar] 3d\u00B9\u2070) is:", options:["Paramagnetic","Diamagnetic","Ferromagnetic","Weakly paramagnetic"], correct:1},
+      {q:"Ti\u00B3\u207A ([Ar] 3d\u00B9) is:", options:["Diamagnetic","Paramagnetic (1 unpaired)","Paramagnetic (3 unpaired)","Cannot determine"], correct:1},
+      {q:"Co\u00B2\u207A ([Ar] 3d\u2077) has how many unpaired electrons?", options:["1","3","5","7"], correct:1},
+      {q:"Cr\u00B3\u207A ([Ar] 3d\u00B3) has how many unpaired electrons?", options:["0","1","3","6"], correct:2},
+      {q:"When a transition metal loses electrons to form a cation, electrons are lost from ___ first:", options:["3d","4s","4p","3p"], correct:1},
+      {q:"Ni\u00B2\u207A ([Ar] 3d\u2078) has how many unpaired electrons?", options:["0","2","4","8"], correct:1},
+      {q:"Sc\u00B3\u207A ([Ar]) is:", options:["Paramagnetic","Diamagnetic (noble gas config)","Ferromagnetic","Cannot determine"], correct:1},
+      {q:"V\u00B3\u207A ([Ar] 3d\u00B2) is:", options:["Diamagnetic","Paramagnetic (2 unpaired)","Paramagnetic (3 unpaired)","Ferromagnetic"], correct:1},
+      {q:"Ag\u207A ([Kr] 4d\u00B9\u2070) is:", options:["Paramagnetic","Diamagnetic","Ferromagnetic","Depends on the compound"], correct:1}
+    ]
+  },
+  {
+    id:6, title:"Fill: Electron config and magnetism",
+    instruction:"Write the electron configuration, then classify as paramagnetic (P) or diamagnetic (D).",
+    rows:[
+      ["1","S (Z=16): config = [Ne] 3s\u00B2 3p\u2074. Magnetic: ___","P / paramagnetic"],
+      ["2","Cl (Z=17): config = [Ne] 3s\u00B2 3p\u2075. Magnetic: ___","P / paramagnetic"],
+      ["3","Ar (Z=18): config = [Ne] 3s\u00B2 3p\u2076. Magnetic: ___","D / diamagnetic"],
+      ["4","K (Z=19): config = [Ar] 4s\u00B9. Magnetic: ___","P / paramagnetic"],
+      ["5","Ca (Z=20): config = [Ar] 4s\u00B2. Magnetic: ___","D / diamagnetic"],
+      ["6","V (Z=23): config = [Ar] 3d\u00B3 4s\u00B2. Magnetic: ___","P / paramagnetic"],
+      ["7","Mn (Z=25): config = [Ar] 3d\u2075 4s\u00B2. Magnetic: ___","P / paramagnetic"],
+      ["8","Zn (Z=30): config = [Ar] 3d\u00B9\u2070 4s\u00B2. Magnetic: ___","D / diamagnetic"],
+      ["9","Ga (Z=31): config = [Ar] 3d\u00B9\u2070 4s\u00B2 4p\u00B9. Magnetic: ___","P / paramagnetic"],
+      ["10","Ge (Z=32): config = [Ar] 3d\u00B9\u2070 4s\u00B2 4p\u00B2. Magnetic: ___","P / paramagnetic"],
+      ["11","Se (Z=34): config = [Ar] 3d\u00B9\u2070 4s\u00B2 4p\u2074. Magnetic: ___","P / paramagnetic"],
+      ["12","Br (Z=35): config = [Ar] 3d\u00B9\u2070 4s\u00B2 4p\u2075. Magnetic: ___","P / paramagnetic"],
+      ["13","Sr (Z=38): config = [Kr] 5s\u00B2. Magnetic: ___","D / diamagnetic"],
+      ["14","Pd (Z=46): config = [Kr] 4d\u00B9\u2070. Magnetic: ___","D / diamagnetic"],
+      ["15","Cd (Z=48): config = [Kr] 4d\u00B9\u2070 5s\u00B2. Magnetic: ___","D / diamagnetic"]
+    ]
+  },
+  {
+    id:7, title:"MC: O\u2082 and molecular orbital theory", type:"mc",
+    instruction:"Questions about molecular magnetism and MO theory.",
+    questions:[
+      {q:"O\u2082 is predicted to be diamagnetic by Lewis structure but is actually:", options:["Diamagnetic","Paramagnetic","Ferromagnetic","Non-magnetic"], correct:1},
+      {q:"MO theory correctly predicts O\u2082 is paramagnetic because:", options:["It has 2 unpaired electrons in \u03C0* antibonding orbitals","It has no bonds","O atoms are large","Lewis structure is always wrong"], correct:0},
+      {q:"How many unpaired electrons does O\u2082 have according to MO theory?", options:["0","1","2","4"], correct:2},
+      {q:"N\u2082 according to MO theory is:", options:["Paramagnetic","Diamagnetic (all electrons paired)","Ferromagnetic","Has 1 unpaired electron"], correct:1},
+      {q:"B\u2082 according to MO theory is:", options:["Diamagnetic","Paramagnetic (2 unpaired in \u03C0 orbitals)","Ferromagnetic","Non-magnetic"], correct:1},
+      {q:"C\u2082 according to MO theory is:", options:["Paramagnetic","Diamagnetic","Ferromagnetic","Cannot determine"], correct:1},
+      {q:"The bond order of O\u2082 is:", options:["1","2","3","0"], correct:1},
+      {q:"O\u2082\u207B (superoxide) has ___ unpaired electron(s):", options:["0","1","2","3"], correct:1},
+      {q:"O\u2082\u00B2\u207B (peroxide) has ___ unpaired electron(s):", options:["0","1","2","3"], correct:0},
+      {q:"NO has ___ unpaired electron(s) and is:", options:["0, diamagnetic","1, paramagnetic","2, paramagnetic","3, paramagnetic"], correct:1}
+    ]
+  },
+  {
+    id:8, title:"Fill: Ferromagnetic materials",
+    instruction:"Answer questions about ferromagnetism.",
+    rows:[
+      ["1","The three ferromagnetic elements at room temperature are Fe, ___, and ___","Co, Ni / Co and Ni / cobalt, nickel"],
+      ["2","Ferromagnetic materials can be ___ magnetized","permanently / strongly"],
+      ["3","Ferromagnetic materials have aligned magnetic ___ (regions)","domains"],
+      ["4","Above the ___ temperature, ferromagnets become paramagnetic","Curie / Curie temperature"],
+      ["5","The Curie temperature of iron is approximately ___ \u00B0C","770 / 770\u00B0C"],
+      ["6","Ferromagnetism is ___ than paramagnetism (stronger/weaker)","stronger / much stronger"],
+      ["7","Permanent magnets are made from ___ materials","ferromagnetic"],
+      ["8","Gadolinium (Gd) is also ___ below 20\u00B0C","ferromagnetic"],
+      ["9","Antiferromagnetism occurs when adjacent magnetic moments are ___","antiparallel / opposite / opposed"],
+      ["10","Ferrimagnetic materials (like Fe\u2083O\u2084) have ___ aligned magnetic moments but unequal magnitudes","antiparallel / oppositely"]
+    ]
+  },
+  {
+    id:9, title:"Arrange: Build statements about magnetism", type:"arrange",
+    instruction:"Click the words in the correct order.",
+    sentences:[
+      {prompt:"Paramagnetic substances have unpaired electrons", words:["Paramagnetic","substances","have","unpaired","electrons"]},
+      {prompt:"Diamagnetic substances have all electrons paired", words:["Diamagnetic","substances","have","all","electrons","paired"]},
+      {prompt:"Hund's rule maximizes unpaired electrons in degenerate orbitals", words:["Hund's rule","maximizes","unpaired electrons","in","degenerate","orbitals"]},
+      {prompt:"Iron cobalt and nickel are ferromagnetic", words:["Iron","cobalt","and","nickel","are","ferromagnetic"]},
+      {prompt:"Molecular oxygen is paramagnetic with two unpaired electrons", words:["Molecular oxygen","is","paramagnetic","with","two","unpaired","electrons"]}
+    ]
+  },
+  {
+    id:10, title:"MC: Hund\u2019s rule application", type:"mc",
+    instruction:"Apply Hund\u2019s rule to determine electron configurations and magnetism.",
+    questions:[
+      {q:"Hund\u2019s rule states that electrons in degenerate orbitals:", options:["Pair up first","Fill singly with parallel spins first","Fill randomly","Always have opposite spins"], correct:1},
+      {q:"For carbon (2p\u00B2), Hund\u2019s rule predicts:", options:["Both electrons in one 2p orbital","One electron in each of two 2p orbitals, parallel spins","One electron in each of two 2p orbitals, antiparallel","Both in 2s"], correct:1},
+      {q:"Nitrogen (2p\u00B3) has electrons distributed as:", options:["All 3 in one orbital","One in each of the three 2p orbitals","Two paired + one single","Random distribution"], correct:1},
+      {q:"For d\u2075 (like Mn\u00B2\u207A), Hund\u2019s rule gives:", options:["5 unpaired electrons (one in each d orbital)","3 paired + 2 unpaired","All paired","1 unpaired"], correct:0},
+      {q:"For d\u2076 (like Fe\u00B2\u207A), after filling d\u2075 singly, the 6th electron:", options:["Goes to 4s","Pairs in one of the d orbitals","Goes to 4p","Is ejected"], correct:1},
+      {q:"For d\u2078 (like Ni\u00B2\u207A), unpaired electrons =", options:["0","2","4","8"], correct:1},
+      {q:"Violating Hund\u2019s rule by pairing before filling singly would:", options:["Increase stability","Decrease stability (higher energy)","Have no effect","Create a diamagnetic atom"], correct:1},
+      {q:"The exchange energy that stabilizes parallel spins is:", options:["Very large","Moderate","Always negative","Zero"], correct:0},
+      {q:"For p\u2074 (like O), the configuration is:", options:["All 4 in two orbitals","3 singly + 1 paired, giving 2 unpaired","2 pairs, 0 unpaired","4 singly, 4 unpaired"], correct:1},
+      {q:"The maximum number of unpaired electrons for a d subshell is:", options:["2","3","5","10"], correct:2}
+    ]
+  },
+  {
+    id:11, title:"Fill: Transition metal magnetism",
+    instruction:"Give the number of unpaired d-electrons for each species.",
+    rows:[
+      ["1","Ti\u00B2\u207A (d\u00B2): unpaired = ___","2"],
+      ["2","V\u00B3\u207A (d\u00B2): unpaired = ___","2"],
+      ["3","Cr\u00B3\u207A (d\u00B3): unpaired = ___","3"],
+      ["4","Mn\u00B2\u207A (d\u2075): unpaired = ___","5"],
+      ["5","Fe\u00B2\u207A (d\u2076): unpaired = ___","4"],
+      ["6","Fe\u00B3\u207A (d\u2075): unpaired = ___","5"],
+      ["7","Co\u00B2\u207A (d\u2077): unpaired = ___","3"],
+      ["8","Ni\u00B2\u207A (d\u2078): unpaired = ___","2"],
+      ["9","Cu\u00B2\u207A (d\u2079): unpaired = ___","1"],
+      ["10","Zn\u00B2\u207A (d\u00B9\u2070): unpaired = ___","0"]
+    ]
+  },
+  {
+    id:12, title:"MC: Tricky magnetism questions", type:"mc",
+    instruction:"Think carefully about these challenging questions.",
+    questions:[
+      {q:"Cr has the config [Ar] 3d\u2075 4s\u00B9 instead of 3d\u2074 4s\u00B2 because:", options:["Half-filled d subshell is extra stable","Cr is anomalous for no reason","4s is higher energy than 3d","Cr has fewer electrons than expected"], correct:0},
+      {q:"Cu has the config [Ar] 3d\u00B9\u2070 4s\u00B9 instead of 3d\u2079 4s\u00B2 because:", options:["Fully filled d subshell is extra stable","Cu is radioactive","4s fills before 3d always","Random fluctuation"], correct:0},
+      {q:"Cu\u207A is diamagnetic but Cu\u00B2\u207A is paramagnetic because:", options:["Cu\u207A is [Ar]3d\u00B9\u2070 (all paired), Cu\u00B2\u207A is [Ar]3d\u2079 (1 unpaired)","Cu\u207A has no electrons","Cu\u00B2\u207A is ferromagnetic","They have the same config"], correct:0},
+      {q:"Co\u00B3\u207A in a strong field ligand complex can be:", options:["Only paramagnetic","Diamagnetic (low spin d\u2076 = 0 unpaired)","Only ferromagnetic","Always has 4 unpaired"], correct:1},
+      {q:"In crystal/ligand field theory, strong field ligands cause:", options:["High spin (more unpaired)","Low spin (fewer unpaired)","No change in spin","Ferromagnetism"], correct:1},
+      {q:"O\u2082 is paramagnetic. This was key evidence for:", options:["Lewis structures being incomplete","Valence bond theory","Atomic theory","Kinetic molecular theory"], correct:0},
+      {q:"Which d-electron count gives the MOST unpaired electrons?", options:["d\u00B3 (3 unpaired)","d\u2075 (5 unpaired)","d\u2077 (3 unpaired)","d\u00B9\u2070 (0 unpaired)"], correct:1},
+      {q:"Ag (Z=47) has the config [Kr] 4d\u00B9\u2070 5s\u00B9. It is:", options:["Diamagnetic","Paramagnetic (1 unpaired)","Ferromagnetic","Depends on temperature"], correct:1},
+      {q:"W (Z=74) has config [Xe] 4f\u00B9\u2074 5d\u2074 6s\u00B2. Unpaired electrons:", options:["0","2","4","6"], correct:2},
+      {q:"A compound is attracted into a magnetic field. It is definitely:", options:["Diamagnetic","Paramagnetic or ferromagnetic","Ferromagnetic only","Non-magnetic"], correct:1}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Paramagnetic & Diamagnetic \u2014 Complete Reference</h3>' +
+'<h3>Definitions</h3>' +
+'<table><tr><th>Type</th><th>Unpaired e\u207B</th><th>Magnetic Response</th><th>Strength</th></tr>' +
+'<tr><td><span class="rule">Paramagnetic</span></td><td>Has unpaired e\u207B</td><td>Attracted to magnet</td><td>Weak, temporary</td></tr>' +
+'<tr><td><span class="rule">Diamagnetic</span></td><td>All e\u207B paired</td><td>Slightly repelled</td><td>Very weak</td></tr>' +
+'<tr><td><span class="rule">Ferromagnetic</span></td><td>Has unpaired e\u207B + domains</td><td>Strongly attracted</td><td>Strong, permanent</td></tr></table>' +
+'<h3>How to Determine</h3>' +
+'<ol>' +
+'<li>Write the electron configuration</li>' +
+'<li>Fill orbitals following Aufbau, Pauli, and <span class="rule">Hund\u2019s rule</span></li>' +
+'<li>Count unpaired electrons</li>' +
+'<li>Any unpaired \u2192 paramagnetic; all paired \u2192 diamagnetic</li>' +
+'</ol>' +
+'<h3>Hund\u2019s Rule</h3>' +
+'<p>Electrons fill <span class="rule">degenerate orbitals</span> (same energy) singly with parallel spins before pairing.</p>' +
+'<p>This maximizes the number of unpaired electrons.</p>' +
+'<h3>d-Electron Unpaired Count</h3>' +
+'<table><tr><th>Config</th><th>Unpaired</th><th>Magnetic</th></tr>' +
+'<tr><td>d\u00B9</td><td>1</td><td>Para</td></tr>' +
+'<tr><td>d\u00B2</td><td>2</td><td>Para</td></tr>' +
+'<tr><td>d\u00B3</td><td>3</td><td>Para</td></tr>' +
+'<tr><td>d\u2074</td><td>4</td><td>Para</td></tr>' +
+'<tr><td>d\u2075</td><td><span class="rule">5 (max)</span></td><td>Para</td></tr>' +
+'<tr><td>d\u2076</td><td>4</td><td>Para</td></tr>' +
+'<tr><td>d\u2077</td><td>3</td><td>Para</td></tr>' +
+'<tr><td>d\u2078</td><td>2</td><td>Para</td></tr>' +
+'<tr><td>d\u2079</td><td>1</td><td>Para</td></tr>' +
+'<tr><td>d\u00B9\u2070</td><td><span class="rule">0</span></td><td>Dia</td></tr></table>' +
+'<h3>O\u2082 Paramagnetism (MO Theory)</h3>' +
+'<p>Lewis structure predicts O\u2082 is diamagnetic (O=O, all paired).</p>' +
+'<p><span class="rule">MO theory</span> correctly shows 2 unpaired electrons in \u03C0*2p antibonding orbitals.</p>' +
+'<p>This was a major triumph for MO theory over Lewis/VB theory.</p>' +
+'<h3>Common Paramagnetic Species</h3>' +
+'<ul>' +
+'<li>Most transition metals and their ions (except d\u00B9\u2070, d\u2070)</li>' +
+'<li>O\u2082, NO, NO\u2082</li>' +
+'<li>All atoms with odd number of electrons</li>' +
+'<li>Free radicals</li>' +
+'</ul>' +
+'<h3>Common Diamagnetic Species</h3>' +
+'<ul>' +
+'<li>Noble gases (He, Ne, Ar, Kr, Xe)</li>' +
+'<li>Zn, Zn\u00B2\u207A, Cu\u207A, Ag\u207A (d\u00B9\u2070)</li>' +
+'<li>Alkaline earth metals (Be, Mg, Ca, Sr, Ba)</li>' +
+'<li>N\u2082, CO\u2082, H\u2082O</li>' +
+'</ul>' +
+'<h3>Exceptions to Remember</h3>' +
+'<ul>' +
+'<li><span class="rule">Cr</span>: [Ar] 3d\u2075 4s\u00B9 (not 3d\u2074 4s\u00B2) \u2014 half-filled d stability</li>' +
+'<li><span class="rule">Cu</span>: [Ar] 3d\u00B9\u2070 4s\u00B9 (not 3d\u2079 4s\u00B2) \u2014 filled d stability</li>' +
+'<li>Ions lose 4s electrons BEFORE 3d electrons</li>' +
+'</ul>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 magnetic properties, unpaired electrons, electron configurations \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

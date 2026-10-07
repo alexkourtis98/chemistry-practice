@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice 21 — Quantum Numbers & Electron Configuration</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Practice 21 &mdash; Quantum Numbers &amp; Electron Configuration</h1>
+<p class="subtitle">Deep practice &mdash; quantum numbers, subshells, Aufbau, electron configs</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_21';
+const SECTIONS = [
+  {
+    id:1, title:"The Four Quantum Numbers",
+    instruction:"Fill in the correct quantum number or value.",
+    rows:[
+      ["1","Which quantum number determines the energy level (shell)?","n / principal"],
+      ["2","Which quantum number determines the shape of the orbital?","l / angular momentum"],
+      ["3","Which quantum number determines the orientation of the orbital?","ml / magnetic"],
+      ["4","Which quantum number describes the spin of the electron?","ms / spin"],
+      ["5","What values can l take for n=3?","0, 1, 2"],
+      ["6","How many orbitals in a subshell with l=2?","5"],
+      ["7","What are the possible values of ms?","+1/2, -1/2 / +1/2 and -1/2"],
+      ["8","For n=2, what are the possible values of l?","0, 1"],
+      ["9","What values can l take for n=4?","0, 1, 2, 3"],
+      ["10","For n=1, what is the only possible value of l?","0"],
+      ["11","If l=1, what are the possible values of ml?","-1, 0, 1 / -1, 0, +1"],
+      ["12","If l=3, how many possible values of ml are there?","7"],
+      ["13","What is the maximum value of l for an electron with n=5?","4"],
+      ["14","For n=3 and l=2, what are the possible ml values?","-2, -1, 0, 1, 2 / -2, -1, 0, +1, +2"],
+      ["15","The total number of orbitals in the n=2 shell is ___","4"],
+      ["16","What is the formula for the number of orbitals in a subshell? (in terms of l)","2l+1 / 2l + 1"],
+      ["17","For n=3, l=1, ml=0, what are the possible ms values?","+1/2, -1/2 / +1/2 and -1/2"],
+      ["18","How many quantum numbers are needed to fully describe an electron?","4"]
+    ]
+  },
+  {
+    id:2, title:"Allowed vs Forbidden Quantum Number Sets", type:"mc",
+    instruction:"Select whether the quantum number set (n, l, ml, ms) is ALLOWED or FORBIDDEN.",
+    questions:[
+      {q:"(2, 1, 0, +1/2)", options:["Allowed","Forbidden"], correct:0},
+      {q:"(1, 1, 0, +1/2)", options:["Allowed","Forbidden - l cannot equal n"], correct:1},
+      {q:"(3, 2, -3, +1/2)", options:["Allowed","Forbidden - ml out of range"], correct:1},
+      {q:"(4, 3, -2, -1/2)", options:["Allowed","Forbidden"], correct:0},
+      {q:"(2, 0, 0, +1/3)", options:["Allowed","Forbidden - ms must be +1/2 or -1/2"], correct:1},
+      {q:"(3, 1, -1, -1/2)", options:["Allowed","Forbidden"], correct:0},
+      {q:"(0, 0, 0, +1/2)", options:["Allowed","Forbidden - n must be >= 1"], correct:1},
+      {q:"(5, 2, 2, +1/2)", options:["Allowed","Forbidden"], correct:0},
+      {q:"(3, 0, 1, +1/2)", options:["Allowed","Forbidden - ml must be 0 when l=0"], correct:1},
+      {q:"(4, 2, -1, +1/2)", options:["Allowed","Forbidden"], correct:0},
+      {q:"(2, -1, 0, +1/2)", options:["Allowed","Forbidden - l cannot be negative"], correct:1},
+      {q:"(3, 2, 0, -1/2)", options:["Allowed","Forbidden"], correct:0},
+      {q:"(1, 0, 0, 0)", options:["Allowed","Forbidden - ms cannot be 0"], correct:1},
+      {q:"(6, 0, 0, -1/2)", options:["Allowed","Forbidden"], correct:0},
+      {q:"(2, 2, 0, +1/2)", options:["Allowed","Forbidden - l must be less than n"], correct:1}
+    ]
+  },
+  {
+    id:3, title:"Subshell Labels & Capacity",
+    instruction:"Identify subshell labels and maximum electron capacities.",
+    rows:[
+      ["1","l=0 corresponds to which subshell letter?","s"],
+      ["2","l=1 corresponds to which subshell letter?","p"],
+      ["3","l=2 corresponds to which subshell letter?","d"],
+      ["4","l=3 corresponds to which subshell letter?","f"],
+      ["5","Maximum electrons in 3d?","10"],
+      ["6","Maximum electrons in 2p?","6"],
+      ["7","How many orbitals in an s subshell?","1"],
+      ["8","How many orbitals in a p subshell?","3"],
+      ["9","How many orbitals in a d subshell?","5"],
+      ["10","How many orbitals in an f subshell?","7"],
+      ["11","Maximum electrons in 4f?","14"],
+      ["12","Maximum electrons in any single orbital?","2"],
+      ["13","Maximum electrons in 1s?","2"],
+      ["14","Maximum electrons in 5p?","6"],
+      ["15","Maximum electrons in 6s?","2"],
+      ["16","Total electrons the n=4 shell can hold?","32"],
+      ["17","Formula for max electrons in a subshell (in terms of l)?","4l+2 / 4l + 2 / 2(2l+1)"],
+      ["18","Which subshell type holds the most electrons?","f"]
+    ]
+  },
+  {
+    id:4, title:"Aufbau Filling Order",
+    instruction:"Write the next subshell in the Aufbau filling order.",
+    rows:[
+      ["1","After 1s, the next subshell is ___","2s"],
+      ["2","After 2s, the next subshell is ___","2p"],
+      ["3","After 2p, the next subshell is ___","3s"],
+      ["4","After 3s, the next subshell is ___","3p"],
+      ["5","After 3p, the next subshell is ___","4s"],
+      ["6","After 4s, the next subshell is ___","3d"],
+      ["7","After 3d, the next subshell is ___","4p"],
+      ["8","After 4p, the next subshell is ___","5s"],
+      ["9","After 5s, the next subshell is ___","4d"],
+      ["10","After 4d, the next subshell is ___","5p"],
+      ["11","After 5p, the next subshell is ___","6s"],
+      ["12","After 6s, the next subshell is ___","4f"],
+      ["13","After 4f, the next subshell is ___","5d"],
+      ["14","After 5d, the next subshell is ___","6p"],
+      ["15","After 6p, the next subshell is ___","7s"],
+      ["16","After 7s, the next subshell is ___","5f"]
+    ]
+  },
+  {
+    id:5, title:"Aufbau Filling Order (Word Arrange)", type:"arrange",
+    instruction:"Arrange the subshells in correct Aufbau filling order.",
+    sentences:[
+      {prompt:"First 6 subshells in filling order:", words:["1s","2s","2p","3s","3p","4s"]},
+      {prompt:"Subshells filled from 4s through 5p:", words:["4s","3d","4p","5s","4d","5p"]},
+      {prompt:"Subshells from 6s to 6p:", words:["6s","4f","5d","6p"]},
+      {prompt:"First 4 subshells only:", words:["1s","2s","2p","3s"]},
+      {prompt:"From 5p to 5f:", words:["5p","6s","4f","5d","6p","7s","5f"]},
+      {prompt:"The three subshells in the n=2 and n=3 s/p range:", words:["2s","2p","3s","3p"]}
+    ]
+  },
+  {
+    id:6, title:"Write Electron Configurations",
+    instruction:"Write the full electron configuration for each element.",
+    rows:[
+      ["1","H (Z=1)","1s1"],
+      ["2","He (Z=2)","1s2"],
+      ["3","Li (Z=3)","1s2 2s1"],
+      ["4","Be (Z=4)","1s2 2s2"],
+      ["5","B (Z=5)","1s2 2s2 2p1"],
+      ["6","C (Z=6)","1s2 2s2 2p2"],
+      ["7","N (Z=7)","1s2 2s2 2p3"],
+      ["8","O (Z=8)","1s2 2s2 2p4"],
+      ["9","F (Z=9)","1s2 2s2 2p5"],
+      ["10","Ne (Z=10)","1s2 2s2 2p6"],
+      ["11","Na (Z=11)","1s2 2s2 2p6 3s1"],
+      ["12","Mg (Z=12)","1s2 2s2 2p6 3s2"],
+      ["13","Al (Z=13)","1s2 2s2 2p6 3s2 3p1"],
+      ["14","Si (Z=14)","1s2 2s2 2p6 3s2 3p2"],
+      ["15","P (Z=15)","1s2 2s2 2p6 3s2 3p3"],
+      ["16","S (Z=16)","1s2 2s2 2p6 3s2 3p4"],
+      ["17","Cl (Z=17)","1s2 2s2 2p6 3s2 3p5"],
+      ["18","Ar (Z=18)","1s2 2s2 2p6 3s2 3p6"],
+      ["19","Sc (Z=21)","1s2 2s2 2p6 3s2 3p6 4s2 3d1"],
+      ["20","Ti (Z=22)","1s2 2s2 2p6 3s2 3p6 4s2 3d2"]
+    ]
+  },
+  {
+    id:7, title:"Noble Gas Notation",
+    instruction:"Write the electron configuration using noble gas (shorthand) notation.",
+    rows:[
+      ["1","Na","[Ne] 3s1 / [ne] 3s1"],
+      ["2","Ca","[Ar] 4s2 / [ar] 4s2"],
+      ["3","Fe","[Ar] 3d6 4s2 / [ar] 3d6 4s2"],
+      ["4","Br","[Ar] 3d10 4s2 4p5 / [ar] 3d10 4s2 4p5"],
+      ["5","K","[Ar] 4s1 / [ar] 4s1"],
+      ["6","S","[Ne] 3s2 3p4 / [ne] 3s2 3p4"],
+      ["7","Mg","[Ne] 3s2 / [ne] 3s2"],
+      ["8","Ti","[Ar] 4s2 3d2 / [ar] 4s2 3d2 / [Ar] 3d2 4s2 / [ar] 3d2 4s2"],
+      ["9","Ni","[Ar] 3d8 4s2 / [ar] 3d8 4s2"],
+      ["10","Zn","[Ar] 3d10 4s2 / [ar] 3d10 4s2"],
+      ["11","As","[Ar] 3d10 4s2 4p3 / [ar] 3d10 4s2 4p3"],
+      ["12","Kr","[Ar] 3d10 4s2 4p6 / [ar] 3d10 4s2 4p6"],
+      ["13","Rb","[Kr] 5s1 / [kr] 5s1"],
+      ["14","Sr","[Kr] 5s2 / [kr] 5s2"],
+      ["15","I","[Kr] 4d10 5s2 5p5 / [kr] 4d10 5s2 5p5"],
+      ["16","Ba","[Xe] 6s2 / [xe] 6s2"]
+    ]
+  },
+  {
+    id:8, title:"Electron Configurations of Ions",
+    instruction:"Write the electron configuration for each ion.",
+    rows:[
+      ["1","Na+ (Z=11, lost 1 e\u207B)","1s2 2s2 2p6"],
+      ["2","Cl\u207B (Z=17, gained 1 e\u207B)","1s2 2s2 2p6 3s2 3p6"],
+      ["3","O\u00B2\u207B (Z=8, gained 2 e\u207B)","1s2 2s2 2p6"],
+      ["4","Ca\u00B2+ (Z=20, lost 2 e\u207B)","1s2 2s2 2p6 3s2 3p6"],
+      ["5","Fe\u00B2+ (Z=26, lost 2 e\u207B from 4s)","[Ar] 3d6 / 1s2 2s2 2p6 3s2 3p6 3d6"],
+      ["6","Fe\u00B3+ (Z=26, lost 3 e\u207B)","[Ar] 3d5 / 1s2 2s2 2p6 3s2 3p6 3d5"],
+      ["7","Cu+ (Z=29, lost 1 e\u207B)","[Ar] 3d10 / 1s2 2s2 2p6 3s2 3p6 3d10"],
+      ["8","Cu\u00B2+ (Z=29, lost 2 e\u207B)","[Ar] 3d9 / 1s2 2s2 2p6 3s2 3p6 3d9"],
+      ["9","Mg\u00B2+ (Z=12)","1s2 2s2 2p6"],
+      ["10","Al\u00B3+ (Z=13)","1s2 2s2 2p6"],
+      ["11","S\u00B2\u207B (Z=16)","1s2 2s2 2p6 3s2 3p6"],
+      ["12","Cr\u00B3+ (Z=24, lost 1 from 4s and 2 from 3d)","[Ar] 3d3 / 1s2 2s2 2p6 3s2 3p6 3d3"],
+      ["13","Zn\u00B2+ (Z=30)","[Ar] 3d10 / 1s2 2s2 2p6 3s2 3p6 3d10"],
+      ["14","When transition metals form ions, electrons are lost from ___ first.","4s"],
+      ["15","Na+ and Ne have the same electron configuration. They are called ___","isoelectronic"]
+    ]
+  },
+  {
+    id:9, title:"Exceptions: Cr and Cu", type:"mc",
+    instruction:"Select the correct answer about chromium and copper exceptions.",
+    questions:[
+      {q:"The expected configuration of Cr (Z=24) is [Ar] 3d4 4s2, but the actual is:", options:["[Ar] 3d5 4s1","[Ar] 3d6","[Ar] 3d4 4s2","[Ar] 3d3 4s2"], correct:0},
+      {q:"The expected configuration of Cu (Z=29) is [Ar] 3d9 4s2, but the actual is:", options:["[Ar] 3d10","[Ar] 3d10 4s1","[Ar] 3d9 4s2","[Ar] 3d8 4s2"], correct:1},
+      {q:"What makes a half-filled d subshell (d5) special?", options:["It has maximum exchange energy stabilization","It has minimum energy","It can't hold more electrons","It loses electrons easily"], correct:0},
+      {q:"What makes a fully filled d subshell (d10) special?", options:["It is paramagnetic","It has maximum exchange energy stabilization","It has no electrons","It needs more electrons"], correct:1},
+      {q:"Mo (Z=42) is another exception. Its actual configuration is:", options:["[Kr] 4d5 5s1","[Kr] 4d4 5s2","[Kr] 4d6","[Kr] 4d3 5s2"], correct:0},
+      {q:"Ag (Z=47) is an exception like Cu. Its actual configuration is:", options:["[Kr] 4d9 5s2","[Kr] 4d10 5s1","[Kr] 4d10","[Kr] 4d8 5s2"], correct:1},
+      {q:"The reason for these exceptions is related to:", options:["The Pauli exclusion principle","Hund's rule only","Extra stability of half-filled and fully filled d orbitals","The Aufbau principle being wrong"], correct:2},
+      {q:"Au (Z=79) follows the same pattern as Cu and Ag. Its config is:", options:["[Xe] 4f14 5d10 6s1","[Xe] 4f14 5d9 6s2","[Xe] 4f14 5d10 6s2","[Xe] 4f13 5d10 6s2"], correct:0}
+    ]
+  },
+  {
+    id:10, title:"Hund's Rule & Pauli Exclusion", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Hund's rule states that electrons in the same subshell will:", options:["Pair up immediately in the first orbital","Fill orbitals singly before pairing","Always have the same spin","Occupy the highest energy orbital first"], correct:1},
+      {q:"The Pauli exclusion principle states that:", options:["Electrons fill the lowest energy level first","No two electrons in an atom can have the same set of 4 quantum numbers","Electrons prefer half-filled subshells","Orbitals of equal energy are filled evenly"], correct:1},
+      {q:"The Aufbau principle states that:", options:["Electrons fill the lowest energy subshell first","Electrons fill orbitals singly before pairing","No two electrons can have the same 4 quantum numbers","Electrons prefer half-filled subshells"], correct:0},
+      {q:"How many unpaired electrons does nitrogen (Z=7) have?", options:["0","1","2","3"], correct:3},
+      {q:"How many unpaired electrons does oxygen (Z=8) have?", options:["0","1","2","3"], correct:2},
+      {q:"How many unpaired electrons does carbon (Z=6) have?", options:["0","1","2","4"], correct:2},
+      {q:"Which element has the configuration 1s2 2s2 2p6 3s2 3p6 4s1?", options:["Ca","Na","K","Ar"], correct:2},
+      {q:"The configuration [He] 2s2 2p5 belongs to:", options:["O","N","F","Ne"], correct:2},
+      {q:"Why is Cr written as [Ar] 3d5 4s1 instead of [Ar] 3d4 4s2?", options:["Cr loses an electron easily","Half-filled d subshell is more stable","4s fills before 3d always","It is an error in most textbooks"], correct:1},
+      {q:"Cu is [Ar] 3d10 4s1 instead of [Ar] 3d9 4s2 because:", options:["Cu is a transition metal","Fully filled d subshell is more stable","4s has higher energy than 3d","Cu has an extra proton"], correct:1},
+      {q:"Which arrangement violates the Pauli exclusion principle?", options:["\u2191\u2193 in the same orbital","\u2191\u2191 in the same orbital","\u2191 and \u2193 in different orbitals","An empty orbital next to a half-filled one"], correct:1},
+      {q:"Which arrangement violates Hund's rule?", options:["\u2191 \u2191 \u2191 in three p orbitals","\u2191\u2193 _ _ in three p orbitals","\u2191 _ _ in three p orbitals","\u2191 \u2191 _ in three p orbitals"], correct:1},
+      {q:"How many unpaired electrons does Fe (Z=26) have?", options:["2","3","4","5"], correct:2},
+      {q:"How many unpaired electrons does Ne (Z=10) have?", options:["0","2","5","10"], correct:0},
+      {q:"Which principle/rule is violated when an electron skips a lower-energy orbital?", options:["Pauli exclusion principle","Hund's rule","Aufbau principle","Heisenberg uncertainty principle"], correct:2}
+    ]
+  },
+  {
+    id:11, title:"Orbital Diagrams (Conceptual)", type:"mc",
+    instruction:"Select the correct answer about orbital diagrams.",
+    questions:[
+      {q:"In an orbital diagram, each box represents:", options:["An energy level","A subshell","A single orbital","An electron"], correct:2},
+      {q:"Arrows pointing up and down in the same box represent:", options:["Two electrons with opposite spin","Two electrons with same spin","An electron pair in different orbitals","A bonding pair"], correct:0},
+      {q:"For the 2p subshell, how many boxes should be drawn?", options:["1","2","3","6"], correct:2},
+      {q:"Boron (Z=5) has the configuration 1s2 2s2 2p1. In the orbital diagram, the 2p electron is:", options:["Paired in the first 2p box","A single arrow in one of the three 2p boxes","Split across two boxes","In the 3s box"], correct:1},
+      {q:"For carbon's 2p2, Hund's rule requires:", options:["Both electrons in the same 2p orbital","One electron in each of two different 2p orbitals, same spin","One electron in each of two different 2p orbitals, opposite spin","Both electrons in the 2s orbital"], correct:1},
+      {q:"Neon's orbital diagram has ___ completely filled boxes total.", options:["3","4","5","10"], correct:2},
+      {q:"Which element has this 3d orbital diagram: \u2191\u2193 \u2191\u2193 \u2191\u2193 \u2191\u2193 \u2191\u2193 (all five d orbitals filled)?", options:["Fe","Co","Ni","Zn"], correct:3},
+      {q:"Phosphorus (Z=15) has ___ half-filled 3p orbitals.", options:["1","2","3","0"], correct:2}
+    ]
+  },
+  {
+    id:12, title:"Mixed Review",
+    instruction:"Answer the following review questions on quantum numbers and electron configuration.",
+    rows:[
+      ["1","How many electrons can the n=3 shell hold in total?","18"],
+      ["2","What is the electron configuration of Ar (Z=18)?","1s2 2s2 2p6 3s2 3p6"],
+      ["3","Which subshell is being filled in elements Z=21 to Z=30?","3d"],
+      ["4","The maximum number of electrons in a shell with principal quantum number n is ___","2n2 / 2n^2"],
+      ["5","Write the noble gas notation for Zn (Z=30)","[Ar] 3d10 4s2 / [ar] 3d10 4s2"],
+      ["6","How many subshells does the n=4 shell contain?","4"],
+      ["7","How many electrons can the n=1 shell hold?","2"],
+      ["8","How many electrons can the n=2 shell hold?","8"],
+      ["9","How many electrons can the n=4 shell hold?","32"],
+      ["10","Which subshell is being filled in elements Z=57 to Z=71?","4f"],
+      ["11","Which subshell is being filled in elements Z=31 to Z=36?","4p"],
+      ["12","What is the electron configuration of K+ (Z=19)?","1s2 2s2 2p6 3s2 3p6"],
+      ["13","Fe2+ and Fe3+ differ in the number of ___ electrons","3d / d"],
+      ["14","How many electrons does Mn (Z=25) have in its 3d subshell?","5"],
+      ["15","What element has the noble gas notation [Xe] 6s1?","Cs / cesium"]
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Quantum Numbers &amp; Electron Configuration - Complete Guide</h3><p><span class="rule">THE 4 QUANTUM NUMBERS</span></p><table><tr><th>Quantum #</th><th>Symbol</th><th>Allowed Values</th><th>Determines</th><th>Think of it as...</th></tr><tr><td>Principal</td><td>n</td><td>1, 2, 3, 4, ...</td><td>Energy level (shell)</td><td>Which floor of the building</td></tr><tr><td>Angular momentum</td><td>l</td><td>0, 1, 2, ... (n\u22121)</td><td>Shape (subshell)</td><td>Type of apartment on that floor</td></tr><tr><td>Magnetic</td><td>m\u2097</td><td>\u2212l, ..., 0, ..., +l</td><td>Orientation (orbital)</td><td>Which room in the apartment</td></tr><tr><td>Spin</td><td>m\u209B</td><td>+\u00BD or \u2212\u00BD</td><td>Spin direction</td><td>Which bed in the room (max 2)</td></tr></table><p style="margin-top:10px"><span class="rule">SUBSHELL SHAPES &amp; LABELS</span></p><table><tr><th>l value</th><th>Letter</th><th>Shape</th><th># orbitals (2l+1)</th><th>Max e\u207B (2(2l+1))</th></tr><tr><td>0</td><td>s</td><td>Spherical</td><td>1</td><td><strong>2</strong></td></tr><tr><td>1</td><td>p</td><td>Dumbbell (figure-8)</td><td>3</td><td><strong>6</strong></td></tr><tr><td>2</td><td>d</td><td>Cloverleaf (4 lobes)</td><td>5</td><td><strong>10</strong></td></tr><tr><td>3</td><td>f</td><td>Complex (8 lobes)</td><td>7</td><td><strong>14</strong></td></tr></table><p>Shell capacity formula: 2n\u00B2. Shell 1: 2e\u207B, Shell 2: 8e\u207B, Shell 3: 18e\u207B, Shell 4: 32e\u207B</p><p style="margin-top:10px"><span class="rule">AUFBAU FILLING ORDER DIAGRAM</span></p><p style="font-family:monospace;font-size:.85em;line-height:1.8">1s \u2192 2s \u2192 2p \u2192 3s \u2192 3p \u2192 <strong>4s \u2192 3d</strong> \u2192 4p \u2192 <strong>5s \u2192 4d</strong> \u2192 5p \u2192 <strong>6s \u2192 4f \u2192 5d</strong> \u2192 6p \u2192 <strong>7s \u2192 5f \u2192 6d</strong> \u2192 7p</p><p>Key pattern: 4s fills BEFORE 3d, 5s before 4d, 6s before 4f and 5d.</p><p>Remember: \"1s 2s 2p 3s 3p\" is straightforward. The diagonal rule kicks in starting at 4s.</p><p style="margin-top:10px"><span class="rule">THREE FUNDAMENTAL RULES</span></p><p>1. <strong>Aufbau principle:</strong> Electrons fill the lowest-energy subshell first (follow the filling order above).</p><p>2. <strong>Pauli exclusion principle:</strong> No two electrons can have the same 4 quantum numbers. Max 2 electrons per orbital, and they must have opposite spins (\u2191\u2193).</p><p>3. <strong>Hund\'s rule:</strong> Within a subshell, electrons fill each orbital singly with parallel spins (\u2191\u2191\u2191) before any orbital gets a second electron. Maximizes stability.</p><p style="margin-top:10px"><span class="rule">NOBLE GAS (SHORTHAND) NOTATION</span></p><p>Write the nearest noble gas in [ ] brackets, then continue from there.</p><table><tr><th>Element</th><th>Full config</th><th>Noble gas notation</th></tr><tr><td>Na (11)</td><td>1s\u00B2 2s\u00B2 2p\u2076 3s\u00B9</td><td>[Ne] 3s\u00B9</td></tr><tr><td>Fe (26)</td><td>1s\u00B2 2s\u00B2 2p\u2076 3s\u00B2 3p\u2076 4s\u00B2 3d\u2076</td><td>[Ar] 4s\u00B2 3d\u2076</td></tr><tr><td>Br (35)</td><td>...4s\u00B2 3d\u00B9\u2070 4p\u2075</td><td>[Ar] 4s\u00B2 3d\u00B9\u2070 4p\u2075</td></tr></table><p style="margin-top:10px"><span class="rule">IMPORTANT EXCEPTIONS (half-filled &amp; fully-filled d stability)</span></p><table><tr><th>Element</th><th>Expected</th><th>Actual</th><th>Why?</th></tr><tr><td>Cr (24)</td><td>[Ar] 4s\u00B2 3d\u2074</td><td>[Ar] <strong>4s\u00B9 3d\u2075</strong></td><td>Half-filled d\u2075 is extra stable</td></tr><tr><td>Cu (29)</td><td>[Ar] 4s\u00B2 3d\u2079</td><td>[Ar] <strong>4s\u00B9 3d\u00B9\u2070</strong></td><td>Fully-filled d\u00B9\u2070 is extra stable</td></tr><tr><td>Mo (42)</td><td>[Kr] 5s\u00B2 4d\u2074</td><td>[Kr] <strong>5s\u00B9 4d\u2075</strong></td><td>Same reason as Cr</td></tr><tr><td>Ag (47)</td><td>[Kr] 5s\u00B2 4d\u2079</td><td>[Kr] <strong>5s\u00B9 4d\u00B9\u2070</strong></td><td>Same reason as Cu</td></tr></table><p style="margin-top:10px"><span class="rule">ELECTRON CONFIG FOR IONS</span></p><p><strong>Cations (+ ions):</strong> Remove electrons from the HIGHEST n value first (outermost shell).</p><p>Fe\u00B2\u207A: [Ar] 4s\u00B2 3d\u2076 \u2192 remove 2 from 4s \u2192 [Ar] <strong>3d\u2076</strong></p><p>Fe\u00B3\u207A: [Ar] 4s\u00B2 3d\u2076 \u2192 remove 2 from 4s, 1 from 3d \u2192 [Ar] <strong>3d\u2075</strong> (half-filled, extra stable!)</p><p>Cu\u00B2\u207A: [Ar] 4s\u00B9 3d\u00B9\u2070 \u2192 remove 1 from 4s, 1 from 3d \u2192 [Ar] <strong>3d\u2079</strong></p><p><strong>Anions (\u2212 ions):</strong> Add electrons to the highest occupied subshell.</p><p>Cl\u207B: [Ne] 3s\u00B2 3p\u2075 + 1e\u207B \u2192 [Ne] 3s\u00B2 3p\u2076 = [Ar]</p><p>O\u00B2\u207B: [He] 2s\u00B2 2p\u2074 + 2e\u207B \u2192 [He] 2s\u00B2 2p\u2076 = [Ne]</p><p style="margin-top:10px"><span class="rule">KEY FACTS</span></p><p>\u2022 For transition metal cations: always remove from s before d (even though s fills first!)</p><p>\u2022 Diamagnetic = all electrons paired. Paramagnetic = has unpaired electrons.</p><p>\u2022 Isoelectronic: different species with same electron configuration (e.g., Na\u207A and Ne both have 10e\u207B)</p>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 quantum numbers, subshells, Aufbau, electron configs \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

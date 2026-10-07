@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Chemical Reactions — Types & Classification</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Chemical Reactions &mdash; Types &amp; Classification</h1>
+<p class="subtitle">Deep practice &mdash; reaction types, classification, predicting products</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_95';
+
+function chemFormat(s) {
+  return s.replace(/(\d+)/g, function(m) { return m; });
+}
+
+const SECTIONS = [
+  {
+    id:1, title:"Identify Reaction Type from Equation", type:"mc",
+    instruction:"Select the correct reaction type for each equation.",
+    questions:[
+      {q:"2Na + Cl\u2082 \u2192 2NaCl", options:["Synthesis","Decomposition","Single replacement","Double replacement"], correct:0},
+      {q:"2H\u2082O \u2192 2H\u2082 + O\u2082", options:["Synthesis","Decomposition","Combustion","Single replacement"], correct:1},
+      {q:"Zn + CuSO\u2084 \u2192 ZnSO\u2084 + Cu", options:["Synthesis","Double replacement","Single replacement","Combustion"], correct:2},
+      {q:"AgNO\u2083 + NaCl \u2192 AgCl + NaNO\u2083", options:["Single replacement","Synthesis","Double replacement","Decomposition"], correct:2},
+      {q:"CH\u2084 + 2O\u2082 \u2192 CO\u2082 + 2H\u2082O", options:["Synthesis","Decomposition","Single replacement","Combustion"], correct:3},
+      {q:"HCl + NaOH \u2192 NaCl + H\u2082O", options:["Synthesis","Acid-base neutralization","Single replacement","Decomposition"], correct:1},
+      {q:"2Mg + O\u2082 \u2192 2MgO", options:["Decomposition","Single replacement","Synthesis","Double replacement"], correct:2},
+      {q:"CaCO\u2083 \u2192 CaO + CO\u2082", options:["Synthesis","Single replacement","Combustion","Decomposition"], correct:3},
+      {q:"Fe + CuCl\u2082 \u2192 FeCl\u2082 + Cu", options:["Double replacement","Single replacement","Synthesis","Combustion"], correct:1},
+      {q:"BaCl\u2082 + Na\u2082SO\u2084 \u2192 BaSO\u2084 + 2NaCl", options:["Single replacement","Synthesis","Double replacement","Decomposition"], correct:2},
+      {q:"2C\u2082H\u2086 + 7O\u2082 \u2192 4CO\u2082 + 6H\u2082O", options:["Synthesis","Combustion","Decomposition","Single replacement"], correct:1},
+      {q:"2KClO\u2083 \u2192 2KCl + 3O\u2082", options:["Synthesis","Combustion","Single replacement","Decomposition"], correct:3},
+      {q:"N\u2082 + 3H\u2082 \u2192 2NH\u2083", options:["Synthesis","Single replacement","Double replacement","Decomposition"], correct:0},
+      {q:"Na\u2082CO\u2083 + 2HCl \u2192 2NaCl + H\u2082O + CO\u2082", options:["Single replacement","Gas evolution","Synthesis","Combustion"], correct:1},
+      {q:"Pb(NO\u2083)\u2082 + 2KI \u2192 PbI\u2082 + 2KNO\u2083", options:["Single replacement","Synthesis","Combustion","Double replacement (precipitation)"], correct:3}
+    ]
+  },
+  {
+    id:2, title:"Synthesis Reactions — Fill in Products",
+    instruction:"Write the product(s) of each synthesis reaction.",
+    rows:[
+      ["1","2Na + Cl\u2082 \u2192 ___","2NaCl"],
+      ["2","2H\u2082 + O\u2082 \u2192 ___","2H2O / 2H\u2082O"],
+      ["3","2Mg + O\u2082 \u2192 ___","2MgO"],
+      ["4","N\u2082 + 3H\u2082 \u2192 ___","2NH3 / 2NH\u2083"],
+      ["5","4Fe + 3O\u2082 \u2192 ___","2Fe2O3 / 2Fe\u2082O\u2083"],
+      ["6","S + O\u2082 \u2192 ___","SO2 / SO\u2082"],
+      ["7","2K + Br\u2082 \u2192 ___","2KBr"],
+      ["8","Ca + Cl\u2082 \u2192 ___","CaCl2 / CaCl\u2082"],
+      ["9","4Al + 3O\u2082 \u2192 ___","2Al2O3 / 2Al\u2082O\u2083"],
+      ["10","C + O\u2082 \u2192 ___","CO2 / CO\u2082"],
+      ["11","2Li + F\u2082 \u2192 ___","2LiF"],
+      ["12","P\u2084 + 5O\u2082 \u2192 ___","P4O10 / 2P2O5 / P\u2084O\u2081\u2080 / 2P\u2082O\u2085"]
+    ]
+  },
+  {
+    id:3, title:"Decomposition Reactions",
+    instruction:"Write the products of each decomposition reaction.",
+    rows:[
+      ["1","2H\u2082O \u2192 ___ + ___","2H2 + O2 / 2H\u2082 + O\u2082"],
+      ["2","CaCO\u2083 \u2192 ___ + ___","CaO + CO2 / CaO + CO\u2082"],
+      ["3","2HgO \u2192 ___ + ___","2Hg + O2 / 2Hg + O\u2082"],
+      ["4","2KClO\u2083 \u2192 ___ + ___","2KCl + 3O2 / 2KCl + 3O\u2082"],
+      ["5","2NaN\u2083 \u2192 ___ + ___","2Na + 3N2 / 2Na + 3N\u2082"],
+      ["6","2H\u2082O\u2082 \u2192 ___ + ___","2H2O + O2 / 2H\u2082O + O\u2082"],
+      ["7","MgCO\u2083 \u2192 ___ + ___","MgO + CO2 / MgO + CO\u2082"],
+      ["8","2NaHCO\u2083 \u2192 ___ + ___ + ___","Na2CO3 + H2O + CO2 / Na\u2082CO\u2083 + H\u2082O + CO\u2082"],
+      ["9","2Al\u2082O\u2083 \u2192 ___ + ___","4Al + 3O2 / 4Al + 3O\u2082"],
+      ["10","Ca(OH)\u2082 \u2192 ___ + ___","CaO + H2O / CaO + H\u2082O"],
+      ["11","2Ag\u2082O \u2192 ___ + ___","4Ag + O2 / 4Ag + O\u2082"],
+      ["12","BaCO\u2083 \u2192 ___ + ___","BaO + CO2 / BaO + CO\u2082"]
+    ]
+  },
+  {
+    id:4, title:"Single Replacement with Activity Series", type:"mc",
+    instruction:"Use the activity series (Li > K > Ba > Ca > Na > Mg > Al > Zn > Fe > Ni > Sn > Pb > H\u2082 > Cu > Hg > Ag > Pt > Au) to determine if the reaction occurs.",
+    questions:[
+      {q:"Zn + CuSO\u2084 \u2192 ?", options:["Reaction occurs: ZnSO\u2084 + Cu","No reaction (Zn is below Cu)","Reaction occurs: CuZn + SO\u2084","No reaction (both are metals)"], correct:0},
+      {q:"Cu + ZnSO\u2084 \u2192 ?", options:["Reaction occurs: CuSO\u2084 + Zn","Reaction occurs: CuZn + SO\u2084","No reaction (Cu is below Zn in activity series)","Reaction occurs with heat"], correct:2},
+      {q:"Fe + HCl \u2192 ?", options:["No reaction","Reaction occurs: FeCl\u2082 + H\u2082","Reaction occurs: FeCl\u2083 + H\u2082","Fe dissolves but no gas"], correct:1},
+      {q:"Cu + HCl \u2192 ?", options:["Reaction occurs: CuCl\u2082 + H\u2082","No reaction (Cu is below H\u2082 in activity series)","Reaction occurs slowly","Produces CuCl only"], correct:1},
+      {q:"Mg + FeCl\u2082 \u2192 ?", options:["No reaction","Reaction occurs: MgCl\u2082 + Fe","Reaction occurs: MgFe + Cl\u2082","Reaction occurs: Mg\u2082Fe + 2Cl"], correct:1},
+      {q:"Ag + NaCl \u2192 ?", options:["Reaction occurs: AgCl + Na","No reaction (Ag is far below Na)","Reaction occurs with heating","Produces AgNa + Cl"], correct:1},
+      {q:"Al + Fe\u2082O\u2083 \u2192 ?", options:["No reaction","Reaction occurs: Al\u2082O\u2083 + 2Fe (thermite)","Reaction occurs: AlFe + O\u2082","Both dissolve"], correct:1},
+      {q:"Sn + Pb(NO\u2083)\u2082 \u2192 ?", options:["Reaction occurs: Sn(NO\u2083)\u2082 + Pb","No reaction (Sn is below Pb)","Reaction occurs: SnPb + NO\u2083","Double replacement occurs"], correct:0},
+      {q:"Pt + AgNO\u2083 \u2192 ?", options:["Reaction occurs: Pt(NO\u2083)\u2082 + Ag","Reaction occurs: PtAg + NO\u2083","No reaction (Pt is below Ag)","Slow reaction"], correct:2},
+      {q:"Na + H\u2082O \u2192 ?", options:["No reaction","Reaction occurs: NaOH + H\u2082","Na dissolves with no gas","Only in hot water"], correct:1},
+      {q:"Ni + CuSO\u2084 \u2192 ?", options:["No reaction","Reaction occurs: NiSO\u2084 + Cu","Reaction occurs: NiCu + SO\u2084","Both remain unchanged"], correct:1},
+      {q:"Au + HCl \u2192 ?", options:["Reaction occurs: AuCl\u2083 + H\u2082","Reaction occurs slowly","No reaction (Au is the least reactive metal)","Produces AuH + Cl\u2082"], correct:2}
+    ]
+  },
+  {
+    id:5, title:"Double Replacement Reactions",
+    instruction:"Write the products of each double replacement reaction.",
+    rows:[
+      ["1","AgNO\u2083 + NaCl \u2192 ___","AgCl + NaNO3 / AgCl + NaNO\u2083"],
+      ["2","BaCl\u2082 + Na\u2082SO\u2084 \u2192 ___","BaSO4 + 2NaCl / BaSO\u2084 + 2NaCl"],
+      ["3","Pb(NO\u2083)\u2082 + 2KI \u2192 ___","PbI2 + 2KNO3 / PbI\u2082 + 2KNO\u2083"],
+      ["4","CaCl\u2082 + Na\u2082CO\u2083 \u2192 ___","CaCO3 + 2NaCl / CaCO\u2083 + 2NaCl"],
+      ["5","FeCl\u2083 + 3NaOH \u2192 ___","Fe(OH)3 + 3NaCl / Fe(OH)\u2083 + 3NaCl"],
+      ["6","CuSO\u2084 + 2NaOH \u2192 ___","Cu(OH)2 + Na2SO4 / Cu(OH)\u2082 + Na\u2082SO\u2084"],
+      ["7","Na\u2082S + Pb(NO\u2083)\u2082 \u2192 ___","PbS + 2NaNO3 / PbS + 2NaNO\u2083"],
+      ["8","K\u2082CrO\u2084 + Pb(NO\u2083)\u2082 \u2192 ___","PbCrO4 + 2KNO3 / PbCrO\u2084 + 2KNO\u2083"],
+      ["9","AlCl\u2083 + 3AgNO\u2083 \u2192 ___","3AgCl + Al(NO3)3 / 3AgCl + Al(NO\u2083)\u2083"],
+      ["10","NiCl\u2082 + Na\u2082S \u2192 ___","NiS + 2NaCl"],
+      ["11","ZnSO\u2084 + 2NaOH \u2192 ___","Zn(OH)2 + Na2SO4 / Zn(OH)\u2082 + Na\u2082SO\u2084"],
+      ["12","MgCl\u2082 + 2AgNO\u2083 \u2192 ___","2AgCl + Mg(NO3)2 / 2AgCl + Mg(NO\u2083)\u2082"]
+    ]
+  },
+  {
+    id:6, title:"Combustion Reactions",
+    instruction:"Write the balanced products for each combustion reaction. Assume complete combustion.",
+    rows:[
+      ["1","CH\u2084 + 2O\u2082 \u2192 ___","CO2 + 2H2O / CO\u2082 + 2H\u2082O"],
+      ["2","2C\u2082H\u2086 + 7O\u2082 \u2192 ___","4CO2 + 6H2O / 4CO\u2082 + 6H\u2082O"],
+      ["3","C\u2083H\u2088 + 5O\u2082 \u2192 ___","3CO2 + 4H2O / 3CO\u2082 + 4H\u2082O"],
+      ["4","2C\u2082H\u2082 + 5O\u2082 \u2192 ___","4CO2 + 2H2O / 4CO\u2082 + 2H\u2082O"],
+      ["5","C\u2086H\u2081\u2082O\u2086 + 6O\u2082 \u2192 ___","6CO2 + 6H2O / 6CO\u2082 + 6H\u2082O"],
+      ["6","2C\u2084H\u2081\u2080 + 13O\u2082 \u2192 ___","8CO2 + 10H2O / 8CO\u2082 + 10H\u2082O"],
+      ["7","2CH\u2083OH + 3O\u2082 \u2192 ___","2CO2 + 4H2O / 2CO\u2082 + 4H\u2082O"],
+      ["8","C\u2082H\u2085OH + 3O\u2082 \u2192 ___","2CO2 + 3H2O / 2CO\u2082 + 3H\u2082O"],
+      ["9","What are the products of complete combustion of any hydrocarbon?","CO2 + H2O / CO\u2082 + H\u2082O / carbon dioxide and water"],
+      ["10","Incomplete combustion can produce ___ instead of CO\u2082","CO / carbon monoxide"],
+      ["11","C\u2087H\u2081\u2086 + 11O\u2082 \u2192 ___","7CO2 + 8H2O / 7CO\u2082 + 8H\u2082O"],
+      ["12","2C\u2088H\u2081\u2088 + 25O\u2082 \u2192 ___","16CO2 + 18H2O / 16CO\u2082 + 18H\u2082O"]
+    ]
+  },
+  {
+    id:7, title:"Acid-Base Neutralization",
+    instruction:"Write the products of each neutralization reaction (acid + base \u2192 salt + water).",
+    rows:[
+      ["1","HCl + NaOH \u2192 ___","NaCl + H2O / NaCl + H\u2082O"],
+      ["2","H\u2082SO\u2084 + 2NaOH \u2192 ___","Na2SO4 + 2H2O / Na\u2082SO\u2084 + 2H\u2082O"],
+      ["3","HNO\u2083 + KOH \u2192 ___","KNO3 + H2O / KNO\u2083 + H\u2082O"],
+      ["4","2HCl + Ca(OH)\u2082 \u2192 ___","CaCl2 + 2H2O / CaCl\u2082 + 2H\u2082O"],
+      ["5","H\u2082SO\u2084 + 2KOH \u2192 ___","K2SO4 + 2H2O / K\u2082SO\u2084 + 2H\u2082O"],
+      ["6","HBr + NaOH \u2192 ___","NaBr + H2O / NaBr + H\u2082O"],
+      ["7","3HCl + Al(OH)\u2083 \u2192 ___","AlCl3 + 3H2O / AlCl\u2083 + 3H\u2082O"],
+      ["8","H\u2083PO\u2084 + 3NaOH \u2192 ___","Na3PO4 + 3H2O / Na\u2083PO\u2084 + 3H\u2082O"],
+      ["9","2HNO\u2083 + Ba(OH)\u2082 \u2192 ___","Ba(NO3)2 + 2H2O / Ba(NO\u2083)\u2082 + 2H\u2082O"],
+      ["10","HCl + LiOH \u2192 ___","LiCl + H2O / LiCl + H\u2082O"],
+      ["11","H\u2082SO\u2084 + Mg(OH)\u2082 \u2192 ___","MgSO4 + 2H2O / MgSO\u2084 + 2H\u2082O"],
+      ["12","2HF + Ca(OH)\u2082 \u2192 ___","CaF2 + 2H2O / CaF\u2082 + 2H\u2082O"]
+    ]
+  },
+  {
+    id:8, title:"Precipitation Reactions", type:"mc",
+    instruction:"Identify whether a precipitate forms and what it is.",
+    questions:[
+      {q:"AgNO\u2083(aq) + NaCl(aq) \u2192 ?", options:["No precipitate","AgCl precipitates (white solid)","NaNO\u2083 precipitates","Both products precipitate"], correct:1},
+      {q:"BaCl\u2082(aq) + Na\u2082SO\u2084(aq) \u2192 ?", options:["NaCl precipitates","No precipitate","BaSO\u2084 precipitates (white solid)","BaCl\u2082 precipitates"], correct:2},
+      {q:"Pb(NO\u2083)\u2082(aq) + 2KI(aq) \u2192 ?", options:["KNO\u2083 precipitates","PbI\u2082 precipitates (yellow solid)","No precipitate","Both precipitate"], correct:1},
+      {q:"NaCl(aq) + KNO\u2083(aq) \u2192 ?", options:["NaNO\u2083 precipitates","KCl precipitates","No precipitate (all products soluble)","Both precipitate"], correct:2},
+      {q:"CuSO\u2084(aq) + 2NaOH(aq) \u2192 ?", options:["Cu(OH)\u2082 precipitates (blue solid)","Na\u2082SO\u2084 precipitates","No precipitate","CuO precipitates"], correct:0},
+      {q:"FeCl\u2083(aq) + 3NaOH(aq) \u2192 ?", options:["NaCl precipitates","No precipitate","Fe(OH)\u2083 precipitates (brown solid)","FeCl\u2083 precipitates"], correct:2},
+      {q:"CaCl\u2082(aq) + Na\u2082CO\u2083(aq) \u2192 ?", options:["No precipitate","NaCl precipitates","CaCO\u2083 precipitates (white solid)","CaCl\u2082 precipitates"], correct:2},
+      {q:"Na\u2082SO\u2084(aq) + KCl(aq) \u2192 ?", options:["K\u2082SO\u2084 precipitates","NaCl precipitates","No precipitate (all products soluble)","Both precipitate"], correct:2},
+      {q:"ZnCl\u2082(aq) + Na\u2082S(aq) \u2192 ?", options:["ZnS precipitates (white solid)","NaCl precipitates","No precipitate","ZnCl\u2082 precipitates"], correct:0},
+      {q:"Which rule: most sulfates are soluble EXCEPT ___", options:["BaSO\u2084, PbSO\u2084, CaSO\u2084","NaSO\u2084, KSO\u2084","All sulfates are soluble","FeSO\u2084, CuSO\u2084"], correct:0},
+      {q:"Which rule: all nitrates (NO\u2083\u207B) are ___", options:["Insoluble","Soluble","Depends on the cation","Only soluble in hot water"], correct:1},
+      {q:"Which rule: most hydroxides are ___ except Group 1 and Ba(OH)\u2082", options:["Soluble","Insoluble","Amphoteric","Volatile"], correct:1}
+    ]
+  },
+  {
+    id:9, title:"Gas Evolution Reactions",
+    instruction:"Write the products, including the gas that evolves.",
+    rows:[
+      ["1","Na\u2082CO\u2083 + 2HCl \u2192 ___","2NaCl + H2O + CO2 / 2NaCl + H\u2082O + CO\u2082"],
+      ["2","CaCO\u2083 + 2HCl \u2192 ___","CaCl2 + H2O + CO2 / CaCl\u2082 + H\u2082O + CO\u2082"],
+      ["3","NaHCO\u2083 + HCl \u2192 ___","NaCl + H2O + CO2 / NaCl + H\u2082O + CO\u2082"],
+      ["4","Na\u2082S + 2HCl \u2192 ___","2NaCl + H2S / 2NaCl + H\u2082S"],
+      ["5","Na\u2082SO\u2083 + 2HCl \u2192 ___","2NaCl + H2O + SO2 / 2NaCl + H\u2082O + SO\u2082"],
+      ["6","NH\u2084Cl + NaOH \u2192 ___","NaCl + H2O + NH3 / NaCl + H\u2082O + NH\u2083"],
+      ["7","Zn + 2HCl \u2192 ___","ZnCl2 + H2 / ZnCl\u2082 + H\u2082"],
+      ["8","K\u2082CO\u2083 + 2HNO\u2083 \u2192 ___","2KNO3 + H2O + CO2 / 2KNO\u2083 + H\u2082O + CO\u2082"],
+      ["9","The gas produced when acid reacts with carbonate is ___","CO2 / carbon dioxide / CO\u2082"],
+      ["10","The gas produced when acid reacts with sulfide is ___","H2S / hydrogen sulfide / H\u2082S"],
+      ["11","The gas produced when acid reacts with active metal is ___","H2 / hydrogen / H\u2082"],
+      ["12","The gas produced when base reacts with ammonium salt is ___","NH3 / ammonia / NH\u2083"]
+    ]
+  },
+  {
+    id:10, title:"Mixed: Classify These Reactions", type:"mc",
+    instruction:"Classify each reaction into the correct type.",
+    questions:[
+      {q:"2Fe + 3Cl\u2082 \u2192 2FeCl\u2083", options:["Synthesis","Decomposition","Single replacement","Combustion"], correct:0},
+      {q:"Mg(OH)\u2082 \u2192 MgO + H\u2082O", options:["Synthesis","Decomposition","Single replacement","Double replacement"], correct:1},
+      {q:"Li + H\u2082O \u2192 LiOH + H\u2082", options:["Synthesis","Decomposition","Single replacement","Double replacement"], correct:2},
+      {q:"H\u2082SO\u2084 + 2NaOH \u2192 Na\u2082SO\u2084 + 2H\u2082O", options:["Single replacement","Combustion","Decomposition","Acid-base neutralization"], correct:3},
+      {q:"C\u2082H\u2085OH + 3O\u2082 \u2192 2CO\u2082 + 3H\u2082O", options:["Synthesis","Decomposition","Single replacement","Combustion"], correct:3},
+      {q:"2NaI + Cl\u2082 \u2192 2NaCl + I\u2082", options:["Synthesis","Double replacement","Single replacement","Decomposition"], correct:2},
+      {q:"SO\u2083 + H\u2082O \u2192 H\u2082SO\u2084", options:["Synthesis","Decomposition","Combustion","Neutralization"], correct:0},
+      {q:"NaOH + NH\u2084Cl \u2192 NaCl + H\u2082O + NH\u2083", options:["Synthesis","Single replacement","Gas evolution","Combustion"], correct:2},
+      {q:"Fe\u2082O\u2083 + 3CO \u2192 2Fe + 3CO\u2082", options:["Synthesis","Decomposition","Redox (single replacement type)","Combustion"], correct:2},
+      {q:"Pb(NO\u2083)\u2082 + 2NaCl \u2192 PbCl\u2082 + 2NaNO\u2083", options:["Single replacement","Synthesis","Double replacement (precipitation)","Gas evolution"], correct:2},
+      {q:"2H\u2082O\u2082 \u2192 2H\u2082O + O\u2082", options:["Synthesis","Decomposition","Single replacement","Combustion"], correct:1},
+      {q:"4Na + O\u2082 \u2192 2Na\u2082O", options:["Single replacement","Decomposition","Synthesis","Combustion"], correct:2}
+    ]
+  },
+  {
+    id:11, title:"Mixed: Predict if Reaction Occurs", type:"mc",
+    instruction:"Determine whether each proposed reaction will actually occur.",
+    questions:[
+      {q:"Au + HCl \u2192 AuCl\u2083 + H\u2082?", options:["Reaction occurs","No reaction (Au is below H\u2082 in activity series)","Only at high temperature","Only with concentrated HCl"], correct:1},
+      {q:"Mg + FeSO\u2084 \u2192 MgSO\u2084 + Fe?", options:["No reaction","Reaction occurs (Mg is above Fe)","Only in acidic solution","Only with heating"], correct:1},
+      {q:"Cu + AgNO\u2083 \u2192 Cu(NO\u2083)\u2082 + Ag?", options:["No reaction","Reaction occurs (Cu is above Ag)","Only with excess Cu","Only at high temperature"], correct:1},
+      {q:"Pb + NaCl \u2192 PbCl\u2082 + Na?", options:["Reaction occurs","No reaction (Pb is below Na)","Only in water","Produces gas"], correct:1},
+      {q:"NaCl(aq) + KBr(aq) \u2192 NaBr + KCl?", options:["No reaction (all products soluble, no driving force)","Reaction occurs","Precipitate forms","Gas evolves"], correct:0},
+      {q:"Ba(NO\u2083)\u2082(aq) + K\u2082SO\u2084(aq) \u2192 BaSO\u2084 + 2KNO\u2083?", options:["No reaction","Reaction occurs (BaSO\u2084 is insoluble)","Only at low temperature","Products are all soluble"], correct:1},
+      {q:"AgNO\u2083(aq) + NaNO\u2083(aq) \u2192 ?", options:["AgNa forms","NaNO\u2083 precipitates","No reaction (no exchange of ions produces insoluble product)","Ag precipitates"], correct:2},
+      {q:"Sn + Pb(NO\u2083)\u2082 \u2192 Sn(NO\u2083)\u2082 + Pb?", options:["No reaction","Reaction occurs (Sn is above Pb)","Only with heat","Produces gas"], correct:1},
+      {q:"Ag + Cu(NO\u2083)\u2082 \u2192 AgNO\u2083 + Cu?", options:["Reaction occurs","No reaction (Ag is below Cu)","Only in water","Only with catalyst"], correct:1},
+      {q:"2Al + 3CuCl\u2082 \u2192 2AlCl\u2083 + 3Cu?", options:["No reaction","Reaction occurs (Al is above Cu)","Only with excess Al","Only at high temperature"], correct:1},
+      {q:"Pt + FeCl\u2082 \u2192 PtCl\u2082 + Fe?", options:["Reaction occurs","No reaction (Pt is below Fe)","Only with concentrated solution","Only in acidic solution"], correct:1},
+      {q:"H\u2082 + CuO \u2192 Cu + H\u2082O?", options:["No reaction","Reaction occurs (H\u2082 reduces CuO)","Only at very high temperature","Produces CO\u2082 instead"], correct:1}
+    ]
+  },
+  {
+    id:12, title:"Comprehensive Review",
+    instruction:"Mixed questions covering all reaction types. Fill in the blank.",
+    rows:[
+      ["1","In a synthesis reaction, two or more substances combine to form ___ product(s)","one / a single / 1"],
+      ["2","In a decomposition reaction, one compound breaks into ___ simpler substances","two or more / multiple / 2 or more"],
+      ["3","In single replacement, a more ___ element replaces a less reactive one","active / reactive"],
+      ["4","The activity series ranks metals by their ___","reactivity / activity / tendency to lose electrons"],
+      ["5","In double replacement, the ___ of two compounds switch places","cations / positive ions / ions"],
+      ["6","A precipitation reaction produces an ___ solid","insoluble"],
+      ["7","Complete combustion of hydrocarbons always produces ___ and ___","CO2 and H2O / carbon dioxide and water"],
+      ["8","Acid + base \u2192 ___ + water","salt"],
+      ["9","A gas evolution reaction is driven by the formation of a ___","gas / gaseous product"],
+      ["10","Carbonates react with acids to produce ___ gas","CO2 / carbon dioxide"],
+      ["11","The driving forces for double replacement are: precipitate, ___, or water formation","gas / gas formation / gas evolution"],
+      ["12","To predict single replacement, you must consult the ___","activity series"],
+      ["13","All Group 1 (alkali metal) compounds are ___ in water","soluble"],
+      ["14","All nitrate (NO\u2083\u207B) salts are ___ in water","soluble"],
+      ["15","Most hydroxides are insoluble except those of Group 1 and ___, Sr(OH)\u2082, Ba(OH)\u2082","Ca(OH)2 / Ca(OH)\u2082 / calcium hydroxide"]
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Chemical Reaction Types &mdash; Complete Reference</h3>' +
+'<table><tr><th>Type</th><th>General Pattern</th><th>Example</th><th>Clue</th></tr>' +
+'<tr><td><span class="rule">Synthesis</span></td><td>A + B &rarr; AB</td><td>2Na + Cl\u2082 &rarr; 2NaCl</td><td>Two+ reactants, one product</td></tr>' +
+'<tr><td><span class="rule">Decomposition</span></td><td>AB &rarr; A + B</td><td>2H\u2082O &rarr; 2H\u2082 + O\u2082</td><td>One reactant, two+ products</td></tr>' +
+'<tr><td><span class="rule">Single Replacement</span></td><td>A + BC &rarr; AC + B</td><td>Zn + CuSO\u2084 &rarr; ZnSO\u2084 + Cu</td><td>Element + compound; check activity series</td></tr>' +
+'<tr><td><span class="rule">Double Replacement</span></td><td>AB + CD &rarr; AD + CB</td><td>AgNO\u2083 + NaCl &rarr; AgCl + NaNO\u2083</td><td>Two compounds swap ions; needs driving force</td></tr>' +
+'<tr><td><span class="rule">Combustion</span></td><td>C\u2093H\u2093 + O\u2082 &rarr; CO\u2082 + H\u2082O</td><td>CH\u2084 + 2O\u2082 &rarr; CO\u2082 + 2H\u2082O</td><td>Fuel + O\u2082; produces CO\u2082 + H\u2082O</td></tr></table>' +
+'<h3>Special Subtypes</h3>' +
+'<p><span class="rule">Acid-Base Neutralization:</span> acid + base &rarr; salt + water (a type of double replacement)</p>' +
+'<p><span class="rule">Precipitation:</span> double replacement where an insoluble product forms</p>' +
+'<p><span class="rule">Gas Evolution:</span> double replacement where a gas is produced (CO\u2082, H\u2082S, SO\u2082, NH\u2083)</p>' +
+'<h3>Activity Series (most to least reactive)</h3>' +
+'<p>Li &gt; K &gt; Ba &gt; Ca &gt; Na &gt; Mg &gt; Al &gt; Zn &gt; Fe &gt; Ni &gt; Sn &gt; Pb &gt; <span class="rule">H\u2082</span> &gt; Cu &gt; Hg &gt; Ag &gt; Pt &gt; Au</p>' +
+'<p>A metal can replace any metal <em>below</em> it. Metals above H\u2082 react with acids to produce H\u2082 gas.</p>' +
+'<h3>Driving Forces for Double Replacement</h3>' +
+'<ol><li>Formation of a <span class="rule">precipitate</span> (insoluble solid)</li>' +
+'<li>Formation of a <span class="rule">gas</span></li>' +
+'<li>Formation of <span class="rule">water</span> (neutralization)</li></ol>';
+
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 reaction types, classification, predicting products \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

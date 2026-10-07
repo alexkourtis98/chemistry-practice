@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice 57 — Alcohols, Ethers & Phenols</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Practice 57 &mdash; Alcohols, Ethers &amp; Phenols</h1>
+<p class="subtitle">Deep practice &mdash; naming, classification, reactions, hydrogen bonding</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_57';
+const SECTIONS = [
+  {
+    id:1, title:"Alcohol Classification",
+    instruction:"Fill in the blank for each question about alcohol classification.",
+    rows:[
+      ["1","The functional group of alcohols is ___","-OH / hydroxyl / OH"],
+      ["2","A primary (1\u00B0) alcohol has the -OH on a carbon bonded to ___ other carbon(s)","1 / one"],
+      ["3","A secondary (2\u00B0) alcohol has the -OH on a carbon bonded to ___ other carbons","2 / two"],
+      ["4","A tertiary (3\u00B0) alcohol has the -OH on a carbon bonded to ___ other carbons","3 / three"],
+      ["5","CH\u2083OH is called ___ (IUPAC)","methanol"],
+      ["6","CH\u2083CH\u2082OH is called ___ (IUPAC)","ethanol"],
+      ["7","Ethanol is classified as a ___ alcohol (1\u00B0/2\u00B0/3\u00B0)","primary / 1"],
+      ["8","2-propanol (isopropyl alcohol) is a ___ alcohol (1\u00B0/2\u00B0/3\u00B0)","secondary / 2"],
+      ["9","2-methyl-2-propanol (tert-butanol) is a ___ alcohol (1\u00B0/2\u00B0/3\u00B0)","tertiary / 3"],
+      ["10","Cyclohexanol is a ___ alcohol (1\u00B0/2\u00B0/3\u00B0)","secondary / 2"],
+      ["11","Benzyl alcohol (C\u2086H\u2085CH\u2082OH) is a ___ alcohol (1\u00B0/2\u00B0/3\u00B0)","primary / 1"],
+      ["12","1-methylcyclohexanol is a ___ alcohol (1\u00B0/2\u00B0/3\u00B0)","tertiary / 3"],
+      ["13","An alcohol with two -OH groups is called a ___","diol / glycol"],
+      ["14","An alcohol with three -OH groups is called a ___","triol"],
+      ["15","Glycerol (propane-1,2,3-triol) has ___ -OH groups","3 / three"]
+    ]
+  },
+  {
+    id:2, title:"Naming Alcohols",
+    instruction:"Fill in the IUPAC name or common name for each alcohol.",
+    rows:[
+      ["1","The IUPAC suffix for alcohols is ___","-ol / ol"],
+      ["2","CH\u2083CH\u2082CH\u2082OH is called ___","1-propanol / propan-1-ol"],
+      ["3","CH\u2083CH(OH)CH\u2083 is called ___","2-propanol / propan-2-ol / isopropanol"],
+      ["4","CH\u2083CH\u2082CH\u2082CH\u2082OH is called ___","1-butanol / butan-1-ol"],
+      ["5","The common name for methanol is ___ alcohol","methyl / wood"],
+      ["6","The common name for ethanol is ___ alcohol","ethyl / grain"],
+      ["7","HOCH\u2082CH\u2082OH (two -OH groups) is called ___","ethylene glycol / ethane-1,2-diol / 1,2-ethanediol"],
+      ["8","To number the chain for naming, start from the end ___ to the -OH group","closest / nearest"],
+      ["9","CH\u2083CH(OH)CH\u2082CH\u2083 is called ___","2-butanol / butan-2-ol"],
+      ["10","(CH\u2083)\u2083COH is called ___","2-methyl-2-propanol / tert-butanol / t-butanol"],
+      ["11","CH\u2082=CHCH\u2082OH is called ___","2-propen-1-ol / allyl alcohol"],
+      ["12","A cyclic alcohol with 5 carbons is called ___","cyclopentanol"],
+      ["13","CH\u2083CH(OH)CH(OH)CH\u2083 is a ___","diol / butanediol"],
+      ["14","The IUPAC name for glycerol is ___","propane-1,2,3-triol"],
+      ["15","When both -OH and C=C are present, the ___ gets priority for numbering","-OH / hydroxyl / alcohol"],
+      ["16","3-methyl-1-butanol has the -OH on carbon number ___","1"]
+    ]
+  },
+  {
+    id:3, title:"Alcohol Properties", type:"mc",
+    instruction:"Select the correct answer about alcohol properties.",
+    questions:[
+      {q:"Alcohols have higher boiling points than alkanes of similar MW because of:", options:["London forces","Dipole-dipole only","Hydrogen bonding","Ionic bonds"], correct:2},
+      {q:"Which alcohol is most soluble in water?", options:["1-octanol","1-hexanol","1-butanol","Methanol"], correct:3},
+      {q:"As the carbon chain length increases, water solubility of alcohols:", options:["Increases","Decreases","Stays the same","First increases then decreases"], correct:1},
+      {q:"Methanol is toxic because it is metabolized to:", options:["Ethanol","Formaldehyde and formic acid","Acetone","Carbon dioxide"], correct:1},
+      {q:"The boiling point order is:", options:["Alkane > alcohol > water","Alcohol > alkane > water","Water > alcohol > alkane","Alkane > water > alcohol"], correct:2},
+      {q:"Alcohols with 1-3 carbons are ___ with water:", options:["Immiscible","Slightly soluble","Miscible (fully soluble)","Insoluble"], correct:2},
+      {q:"Diols have ___ boiling points than comparable monoalcohols:", options:["Lower","Similar","Higher","Unpredictable"], correct:2},
+      {q:"Glycerol is very viscous because:", options:["It is large","It forms extensive H-bond networks with 3 -OH groups","It is ionic","It is nonpolar"], correct:1},
+      {q:"Which has the highest boiling point?", options:["Dimethyl ether (CH\u2083OCH\u2083)","Ethanol (CH\u2083CH\u2082OH)","Ethane (C\u2082H\u2086)","Propane (C\u2083H\u2088)"], correct:1},
+      {q:"Ethylene glycol is used as:", options:["A fuel","An antifreeze","A sweetener","A disinfectant"], correct:1},
+      {q:"The density of most alcohols is ___ than water:", options:["Greater","Less","Equal","Much greater"], correct:1},
+      {q:"1-butanol is ___ soluble in water than 1-propanol:", options:["More","Less","Equally","Not at all"], correct:1}
+    ]
+  },
+  {
+    id:4, title:"Alcohol Reactions - Oxidation",
+    instruction:"Fill in the blank for each alcohol oxidation question.",
+    rows:[
+      ["1","Oxidation of a 1\u00B0 alcohol first produces an ___","aldehyde"],
+      ["2","Further oxidation of an aldehyde produces a ___ acid","carboxylic"],
+      ["3","Oxidation of a 2\u00B0 alcohol produces a ___","ketone"],
+      ["4","A 3\u00B0 alcohol ___ (does/does not) undergo oxidation easily","does not"],
+      ["5","CH\u2083CH\u2082OH + [O] \u2192 CH\u2083CHO. The product is ___ (name)","acetaldehyde / ethanal"],
+      ["6","CH\u2083CHO + [O] \u2192 CH\u2083COOH. The product is ___ (name)","acetic acid / ethanoic acid"],
+      ["7","2-propanol + [O] \u2192 ___","acetone / propanone"],
+      ["8","Common oxidizing agents for alcohols include K\u2082Cr\u2082O\u2087 and ___","KMnO4 / CrO3 / PCC / Jones reagent"],
+      ["9","PCC (pyridinium chlorochromate) is a mild oxidant that stops at the ___ stage","aldehyde"],
+      ["10","K\u2082Cr\u2082O\u2087/H\u2082SO\u2084 fully oxidizes 1\u00B0 alcohols to ___ acids","carboxylic"],
+      ["11","When Cr\u2076\u207A (orange) is reduced, it forms Cr\u2083\u207A which is ___ colored","green"],
+      ["12","This color change (orange to green) is the basis of the ___ (breath test for alcohol)","breathalyzer / breathalyser"],
+      ["13","1-propanol + [O] first produces ___","propanal"],
+      ["14","Propanal + [O] produces ___","propanoic acid"],
+      ["15","Cyclohexanol + [O] produces ___","cyclohexanone"]
+    ]
+  },
+  {
+    id:5, title:"Alcohol Reactions - Dehydration and Lucas Test",
+    instruction:"Fill in the blank for each alcohol reaction.",
+    rows:[
+      ["1","Dehydration of an alcohol (removal of H\u2082O) produces an ___","alkene"],
+      ["2","The dehydration of ethanol produces ___","ethylene / ethene / CH2=CH2"],
+      ["3","Acid catalyst + heat is needed for ___ of alcohols","dehydration"],
+      ["4","Dehydration follows ___ rule (more substituted alkene is major product)","Zaitsev / Zaitsev's / Saytzeff"],
+      ["5","2-butanol dehydration gives mainly ___-2-ene (the more substituted product)","but / 2-butene"],
+      ["6","Tertiary alcohols dehydrate ___ (fastest/slowest) of the three types","fastest"],
+      ["7","Primary alcohols dehydrate ___ (fastest/slowest)","slowest"],
+      ["8","The Lucas test uses ___ reagent (ZnCl\u2082/HCl) to classify alcohols","Lucas"],
+      ["9","In the Lucas test, 3\u00B0 alcohols react ___ (immediately/slowly/not at all)","immediately"],
+      ["10","In the Lucas test, 2\u00B0 alcohols react within ___ minutes","5 / 5-10"],
+      ["11","In the Lucas test, 1\u00B0 alcohols show ___ reaction at room temperature","no / no visible"],
+      ["12","The Lucas test detects cloudiness due to formation of an alkyl ___","chloride / halide"]
+    ]
+  },
+  {
+    id:6, title:"Ethers and Williamson Synthesis",
+    instruction:"Fill in the blank for each question about ethers.",
+    rows:[
+      ["1","The general formula for ethers is ___","R-O-R' / ROR' / R-O-R"],
+      ["2","The most famous ether, CH\u2083CH\u2082OCH\u2082CH\u2083, is called ___ ether","diethyl"],
+      ["3","Ethers have ___ (higher/lower) boiling points than alcohols of similar MW","lower"],
+      ["4","Ethers cannot form hydrogen bonds with ___ (themselves/water)","themselves"],
+      ["5","To name simple ethers, list both alkyl groups alphabetically and add the word ___","ether"],
+      ["6","CH\u2083OCH\u2083 is called ___ ether","dimethyl"],
+      ["7","The Williamson ether synthesis reacts an alkoxide ion (RO\u207B) with an ___ (RX)","alkyl halide"],
+      ["8","Williamson synthesis: CH\u2083O\u207BNa\u207A + CH\u2083CH\u2082Br \u2192 ___ + NaBr","CH3OCH2CH3 / methyl ethyl ether / methoxyethane"],
+      ["9","Williamson synthesis works best with ___ (primary/tertiary) alkyl halides","primary"],
+      ["10","With tertiary alkyl halides, Williamson synthesis gives mainly ___ products","elimination / E2 / alkene"],
+      ["11","THF (tetrahydrofuran) is a cyclic ___","ether"],
+      ["12","Ethers are relatively ___ (reactive/unreactive) and used as solvents","unreactive / inert"],
+      ["13","Diethyl ether is highly ___ (flammable/nonflammable)","flammable"],
+      ["14","Ethers can form explosive ___ upon exposure to air over time","peroxides"],
+      ["15","MTBE (methyl tert-butyl ether) was used as a gasoline ___","additive / oxygenate"]
+    ]
+  },
+  {
+    id:7, title:"Phenols", type:"mc",
+    instruction:"Select the correct answer about phenols.",
+    questions:[
+      {q:"A phenol has an -OH group attached directly to a:", options:["Alkyl chain","Benzene ring","Carbonyl group","Ether linkage"], correct:1},
+      {q:"Compared to alcohols, phenols are:", options:["Less acidic","Equally acidic","More acidic","Not acidic at all"], correct:2},
+      {q:"Phenols are more acidic than alcohols because:", options:["The -OH bond is weaker","The phenoxide ion is stabilized by resonance","Phenols are larger molecules","Phenols have more H atoms"], correct:1},
+      {q:"Phenol (C\u2086H\u2085OH) was historically used as:", options:["A fuel","An antiseptic/disinfectant","A sweetener","A fertilizer"], correct:1},
+      {q:"BHT (butylated hydroxytoluene) is a phenol used as:", options:["A fuel additive","A food antioxidant/preservative","An antibiotic","A solvent"], correct:1},
+      {q:"The Ka of phenol is about 10\u207B\u00B9\u2070, making it a:", options:["Strong acid","Moderate acid","Weak acid","Not an acid"], correct:2},
+      {q:"The pKa of a typical alcohol is about:", options:["5","10","16","25"], correct:2},
+      {q:"The pKa of phenol is about:", options:["5","10","16","25"], correct:1},
+      {q:"Electron-withdrawing groups on the ring make phenol:", options:["Less acidic","More acidic","Neutral","A base"], correct:1},
+      {q:"p-Nitrophenol is ___ acidic than phenol:", options:["Less","Equally","More","Not"], correct:2},
+      {q:"Hydroquinone (1,4-benzenediol) has ___ -OH groups on the ring:", options:["1","2","3","4"], correct:1},
+      {q:"Phenol dissolves in NaOH solution because it forms:", options:["An ester","Sodium phenoxide (a salt)","An ether","An aldehyde"], correct:1}
+    ]
+  },
+  {
+    id:8, title:"Hydrogen Bonding and Boiling Points", type:"mc",
+    instruction:"Select the correct answer comparing boiling points and intermolecular forces.",
+    questions:[
+      {q:"Rank by increasing boiling point: propane, 1-propanol, ethylene glycol:", options:["1-propanol < propane < ethylene glycol","Propane < 1-propanol < ethylene glycol","Ethylene glycol < 1-propanol < propane","All are the same"], correct:1},
+      {q:"Rank by increasing boiling point: dimethyl ether, ethanol, water:", options:["Ethanol < dimethyl ether < water","Dimethyl ether < ethanol < water","Water < ethanol < dimethyl ether","Dimethyl ether < water < ethanol"], correct:1},
+      {q:"Methanol (MW 32) boils at 65\u00B0C while propane (MW 44) boils at -42\u00B0C. This is because:", options:["Methanol is lighter","Methanol has H-bonding","Propane is ionic","Methanol is nonpolar"], correct:1},
+      {q:"Butanol is miscible with:", options:["Water only","Hexane only","Both water and hexane partially","Neither"], correct:2},
+      {q:"tert-Butanol has a higher melting point than 1-butanol because:", options:["It is heavier","Its symmetric shape packs into crystals more easily","It has more H-bonds","It is ionic"], correct:1},
+      {q:"Which has the lowest boiling point?", options:["1-butanol (117\u00B0C)","Diethyl ether (35\u00B0C)","Butane (-1\u00B0C)","Butanoic acid (164\u00B0C)"], correct:2}
+    ]
+  },
+  {
+    id:9, title:"Oxidation Series Word Arrange", type:"arrange",
+    instruction:"Arrange words to form correct statements about alcohol chemistry.",
+    sentences:[
+      {prompt:"1\u00B0 alcohol oxidation series:", words:["primary","alcohol","\u2192","aldehyde","\u2192","carboxylic","acid"]},
+      {prompt:"2\u00B0 alcohol oxidation:", words:["secondary","alcohol","\u2192","ketone"]},
+      {prompt:"3\u00B0 alcohol oxidation result:", words:["tertiary","alcohol","\u2192","no","reaction"]},
+      {prompt:"Dehydration product rule:", words:["Zaitsev","rule:","more","substituted","alkene","is","major","product"]},
+      {prompt:"Williamson ether synthesis:", words:["alkoxide","ion","+","primary","alkyl","halide","\u2192","ether"]},
+      {prompt:"Why phenols are more acidic:", words:["phenoxide","ion","stabilized","by","resonance","with","aromatic","ring"]},
+      {prompt:"Alcohol H-bonding effect:", words:["hydrogen","bonding","increases","boiling","point","above","comparable","alkanes"]},
+      {prompt:"Lucas test order of reactivity:", words:["3\u00B0","fastest,","2\u00B0","moderate,","1\u00B0","no","reaction"]}
+    ]
+  },
+  {
+    id:10, title:"Mixed Review",
+    instruction:"Fill in the blank with the correct term.",
+    rows:[
+      ["1","CH\u2083OH, CH\u2083CH\u2082OH, and CH\u2083CH\u2082CH\u2082OH are all ___ (functional group class)","alcohols"],
+      ["2","The -OH group on a benzene ring makes it a ___","phenol"],
+      ["3","R-O-R' is the general structure of an ___","ether"],
+      ["4","Oxidation: 1\u00B0 alcohol \u2192 ___ \u2192 carboxylic acid","aldehyde"],
+      ["5","Oxidation: 2\u00B0 alcohol \u2192 ___","ketone"],
+      ["6","Diethyl ether has a ___ (higher/lower) boiling point than 1-butanol","lower"],
+      ["7","Alcohols with short carbon chains are ___ in water","soluble / miscible"],
+      ["8","The product of alcohol dehydration is an ___","alkene"],
+      ["9","Ethanol is produced by ___ of sugars","fermentation"],
+      ["10","Methanol poisoning is treated by administering ___ (which competes for the same enzyme)","ethanol / fomepizole"],
+      ["11","Isopropyl alcohol (2-propanol) is commonly called ___ alcohol","rubbing"],
+      ["12","Phenol has a characteristic ___ (sweet/spicy/medicinal) smell","medicinal / sweet"],
+      ["13","Glycerol is used in ___ and cosmetics as a moisturizer","soap / pharmaceutical / food"],
+      ["14","Ethers are good solvents because they dissolve many organics but are relatively ___","unreactive / inert"],
+      ["15","The combustion of ethanol: C\u2082H\u2085OH + 3O\u2082 \u2192 2___ + 3H\u2082O","CO2"]
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Alcohols, Ethers & Phenols Reference</h3>' +
+'<p><span class="rule">Alcohol Classification:</span></p>' +
+'<table><tr><th>Type</th><th>-OH bonded to</th><th>Example</th><th>Oxidation Product</th></tr>' +
+'<tr><td>1\u00B0 (primary)</td><td>C with 1 other C attached</td><td>CH\u2083CH\u2082OH (ethanol)</td><td>Aldehyde \u2192 Carboxylic acid</td></tr>' +
+'<tr><td>2\u00B0 (secondary)</td><td>C with 2 other C\u2019s attached</td><td>(CH\u2083)\u2082CHOH (2-propanol)</td><td>Ketone</td></tr>' +
+'<tr><td>3\u00B0 (tertiary)</td><td>C with 3 other C\u2019s attached</td><td>(CH\u2083)\u2083COH (t-butanol)</td><td>NO reaction (resistant)</td></tr></table>' +
+'<p><span class="rule">Naming:</span> Find longest chain containing -OH. Replace -e with -ol. Number from end closest to -OH. Examples: methanol, ethanol, propan-1-ol, propan-2-ol. Diols = 2 -OH groups, triols = 3 -OH groups (glycerol = propane-1,2,3-triol).</p>' +
+'<p><span class="rule">Oxidation Series:</span></p>' +
+'<p>1\u00B0 alcohol \u2192 aldehyde (with PCC, mild oxidant) \u2192 carboxylic acid (with K\u2082Cr\u2082O\u2087/H\u2082SO\u2084 or KMnO\u2084, strong oxidant)</p>' +
+'<p>2\u00B0 alcohol \u2192 ketone (any oxidant)</p>' +
+'<p>3\u00B0 alcohol \u2192 no reaction (no H on -OH carbon to lose)</p>' +
+'<p>Cr\u2076\u207A (orange) \u2192 Cr\u00B3\u207A (green): color change basis of breathalyzer test.</p>' +
+'<p><span class="rule">Dehydration:</span> Alcohol + H\u2082SO\u2084 (acid catalyst) + heat \u2192 Alkene + H\u2082O. Follows Zaitsev\u2019s rule (more substituted alkene = major product). Ease of dehydration: 3\u00B0 > 2\u00B0 > 1\u00B0.</p>' +
+'<p><span class="rule">Hydrogen Bonding & Properties:</span> Alcohols form H-bonds \u2192 much higher BP than comparable alkanes. Water solubility: short chain (1-3 C) = fully miscible, decreases as chain length increases (nonpolar tail dominates). BP order: water > alcohol > ether > alkane (for similar MW).</p>' +
+'<p><span class="rule">Common Alcohols:</span> Methanol (CH\u2083OH, toxic \u2192 metabolized to formaldehyde + formic acid, causes blindness/death). Ethanol (C\u2082H\u2085OH, drinking alcohol, produced by fermentation). Ethylene glycol (HOCH\u2082CH\u2082OH, antifreeze, sweet but toxic). Glycerol (propane-1,2,3-triol, viscous, 3 -OH groups, used in soap/cosmetics). Isopropanol (rubbing alcohol).</p>' +
+'<p><span class="rule">Ethers (R-O-R\u2019):</span></p>' +
+'<p>General formula R-O-R\u2019. Lower BP than alcohols of same MW because ethers CANNOT H-bond with themselves (but can accept H-bonds from water). Relatively unreactive, good solvents. Naming: list both alkyl groups alphabetically + "ether" (e.g., diethyl ether). Diethyl ether is highly flammable and forms explosive peroxides on air exposure. THF = cyclic ether. MTBE = gasoline additive.</p>' +
+'<p><span class="rule">Williamson Ether Synthesis:</span> Alkoxide ion (RO\u207B) + primary alkyl halide (R\u2019X) \u2192 Ether (R-O-R\u2019) + X\u207B. Works best with primary RX. Tertiary RX gives elimination (E2) instead.</p>' +
+'<p><span class="rule">Phenol (C\u2086H\u2085OH):</span></p>' +
+'<p>-OH directly on benzene ring. MORE acidic than aliphatic alcohols (pKa ~10 vs ~16 for alcohols). Why? The phenoxide ion (C\u2086H\u2085O\u207B) is stabilized by resonance with the aromatic ring \u2192 negative charge delocalized over the ring. Electron-withdrawing groups on ring (e.g., -NO\u2082) increase acidity further. Dissolves in NaOH (forms sodium phenoxide salt). Historically used as antiseptic. BHT = food antioxidant/preservative. Hydroquinone = 1,4-benzenediol (2 -OH groups on ring).</p>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 naming, classification, reactions, hydrogen bonding \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

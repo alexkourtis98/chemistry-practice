@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Electronegativity & Bond Polarity</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Electronegativity & Bond Polarity</h1>
+<p class="subtitle">Deep practice &mdash; EN values, polar/nonpolar bonds, dipole moments</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_70';
+const SECTIONS = [
+  {
+    id:1, title:"Fill: EN trends",
+    instruction:"Answer the electronegativity trend question.",
+    rows:[
+      ["1","Which has higher EN: O or S?","O / oxygen"],
+      ["2","EN increases going ___ across a period","left to right / right"],
+      ["3","EN decreases going ___ down a group","down / top to bottom"],
+      ["4","Which has higher EN: F or Cl?","F / fluorine"],
+      ["5","Which has higher EN: N or P?","N / nitrogen"],
+      ["6","The most electronegative element is ___","F / fluorine"],
+      ["7","Which has higher EN: C or Si?","C / carbon"],
+      ["8","Which has higher EN: O or N?","O / oxygen"],
+      ["9","Which has higher EN: Cl or Br?","Cl / chlorine"],
+      ["10","Which has higher EN: F or O?","F / fluorine"],
+      ["11","The least electronegative element (most electropositive) is ___","Cs / cesium / Fr / francium"],
+      ["12","EN generally ___ as atomic radius increases","decreases"],
+      ["13","Which has higher EN: S or Se?","S / sulfur"],
+      ["14","Which has higher EN: Li or F?","F / fluorine"],
+      ["15","Which has higher EN: Na or Cl?","Cl / chlorine"],
+      ["16","Noble gases typically have ___ electronegativity","no / undefined / high / very high"],
+      ["17","Which has higher EN: Be or B?","B / boron"],
+      ["18","EN is related to an atom's ability to ___ electrons in a bond","attract / pull"],
+      ["19","Which has higher EN: P or S?","S / sulfur"],
+      ["20","Metals generally have ___ EN compared to nonmetals","lower / low"]
+    ]
+  },
+  {
+    id:2, title:"Fill: Bond type classification by \u0394EN",
+    instruction:"Classify the bond type based on the \u0394EN value. Use: nonpolar covalent, polar covalent, or ionic.",
+    rows:[
+      ["1","\u0394EN = 0.0","nonpolar covalent / nonpolar"],
+      ["2","\u0394EN = 0.2","nonpolar covalent / nonpolar"],
+      ["3","\u0394EN = 0.4","nonpolar covalent / nonpolar"],
+      ["4","\u0394EN = 0.5","polar covalent / polar"],
+      ["5","\u0394EN = 0.8","polar covalent / polar"],
+      ["6","\u0394EN = 1.0","polar covalent / polar"],
+      ["7","\u0394EN = 1.4","polar covalent / polar"],
+      ["8","\u0394EN = 1.7","polar covalent / polar"],
+      ["9","\u0394EN = 1.8","ionic"],
+      ["10","\u0394EN = 2.0","ionic"],
+      ["11","\u0394EN = 2.5","ionic"],
+      ["12","\u0394EN = 3.0","ionic"],
+      ["13","\u0394EN = 3.3","ionic"],
+      ["14","H\u2082 (H\u2212H) bond type?","nonpolar covalent / nonpolar"],
+      ["15","NaCl bond type?","ionic"],
+      ["16","H\u2212F bond type?","polar covalent / polar"],
+      ["17","O\u2082 (O=O) bond type?","nonpolar covalent / nonpolar"],
+      ["18","K\u2212Br bond type?","ionic"],
+      ["19","C\u2212H bond type?","nonpolar covalent / nonpolar"],
+      ["20","Ca\u2212O bond type?","ionic"]
+    ]
+  },
+  {
+    id:3, title:"MC: Electronegativity concepts", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Who developed the most commonly used EN scale?", options:["Mulliken","Pauling","Allred-Rochow","Sanderson"], correct:1},
+      {q:"What is the EN value of fluorine on the Pauling scale?", options:["3.0","3.5","4.0","4.5"], correct:2},
+      {q:"EN increases going ___ in the periodic table.", options:["Down and to the left","Up and to the right","Down and to the right","Up and to the left"], correct:1},
+      {q:"Which pair has the greatest \u0394EN?", options:["C\u2212H","O\u2212H","Na\u2212Cl","F\u2212F"], correct:2},
+      {q:"A bond with \u0394EN = 0 is:", options:["Ionic","Polar covalent","Nonpolar covalent","Metallic"], correct:2},
+      {q:"Which element has EN = 3.5 (Pauling scale)?", options:["N","O","F","Cl"], correct:1},
+      {q:"EN is the ability of an atom in a bond to:", options:["Donate electrons","Share electrons equally","Attract shared electrons","Repel electrons"], correct:2},
+      {q:"Which halogen has the lowest EN?", options:["F","Cl","Br","I"], correct:3},
+      {q:"EN generally correlates with:", options:["Atomic radius (direct)","Ionization energy (direct)","Atomic mass","Neutron number"], correct:1},
+      {q:"Across period 2, EN order is:", options:["Li < Be < B < C < N < O < F","F < O < N < C < B < Be < Li","Li < C < O < F < N < Be < B","All are equal"], correct:0},
+      {q:"What is the EN of hydrogen?", options:["1.0","2.2","3.0","0.9"], correct:1},
+      {q:"The \u0394EN between Na (0.9) and Cl (3.2) is:", options:["1.3","2.1","2.3","4.1"], correct:2},
+      {q:"Which bond is most polar?", options:["C\u2212H","N\u2212H","O\u2212H","F\u2212H"], correct:3},
+      {q:"EN of carbon on the Pauling scale is approximately:", options:["1.5","2.0","2.5","3.0"], correct:2},
+      {q:"Metals tend to have EN values:", options:["Above 3.0","Between 2.0 and 3.0","Below 2.0","Equal to nonmetals"], correct:2},
+      {q:"Which of these is NOT a factor affecting EN?", options:["Nuclear charge","Atomic radius","Shielding","Neutron number"], correct:3},
+      {q:"EN of nitrogen is approximately:", options:["2.0","2.5","3.0","3.5"], correct:2},
+      {q:"In a bond between identical atoms, \u0394EN is:", options:["Very large","1.0","0","Cannot determine"], correct:2},
+      {q:"Which alkaline earth metal has the highest EN?", options:["Be","Mg","Ca","Ba"], correct:0},
+      {q:"Electronegativity was first proposed by:", options:["Dalton","Bohr","Pauling","Lewis"], correct:2}
+    ]
+  },
+  {
+    id:4, title:"Fill: Calculate \u0394EN and classify",
+    instruction:"Calculate \u0394EN from the given values, then classify the bond.",
+    rows:[
+      ["1","H\u2212Cl (H=2.2, Cl=3.2): \u0394EN=?","1.0"],
+      ["2","H\u2212Cl bond type?","polar covalent / polar"],
+      ["3","Na\u2212Cl (Na=0.9, Cl=3.2): \u0394EN=?","2.3"],
+      ["4","Na\u2212Cl bond type?","ionic"],
+      ["5","C\u2212O (C=2.5, O=3.5): \u0394EN=?","1.0"],
+      ["6","C\u2212O bond type?","polar covalent / polar"],
+      ["7","H\u2212F (H=2.2, F=4.0): \u0394EN=?","1.8"],
+      ["8","H\u2212F bond type?","ionic / polar covalent"],
+      ["9","C\u2212H (C=2.5, H=2.2): \u0394EN=?","0.3"],
+      ["10","C\u2212H bond type?","nonpolar covalent / nonpolar"],
+      ["11","N\u2212H (N=3.0, H=2.2): \u0394EN=?","0.8"],
+      ["12","N\u2212H bond type?","polar covalent / polar"],
+      ["13","K\u2212F (K=0.8, F=4.0): \u0394EN=?","3.2"],
+      ["14","K\u2212F bond type?","ionic"],
+      ["15","O\u2212H (O=3.5, H=2.2): \u0394EN=?","1.3"]
+    ]
+  },
+  {
+    id:5, title:"MC: Polar vs nonpolar molecules", type:"mc",
+    instruction:"Select the correct answer about molecular polarity.",
+    questions:[
+      {q:"CO\u2082 is nonpolar because:", options:["It has no polar bonds","The dipoles cancel due to linear geometry","Carbon is not electronegative","Oxygen atoms repel each other"], correct:1},
+      {q:"H\u2082O is polar because:", options:["O\u2212H bonds are nonpolar","It is linear","Its bent shape gives a net dipole","Hydrogen is more electronegative than oxygen"], correct:2},
+      {q:"Which molecule is nonpolar?", options:["HCl","H\u2082O","NH\u2083","CCl\u2084"], correct:3},
+      {q:"CH\u2084 is nonpolar because:", options:["C\u2212H bonds are nonpolar","Tetrahedral symmetry cancels dipoles","It contains no electrons","Carbon has no EN"], correct:1},
+      {q:"BF\u2083 is nonpolar because:", options:["B\u2212F bonds are nonpolar","Trigonal planar symmetry cancels dipoles","Fluorine has low EN","Boron is a metal"], correct:1},
+      {q:"Which molecule is polar?", options:["CO\u2082","BF\u2083","NF\u2083","CH\u2084"], correct:2},
+      {q:"A molecule can have polar bonds but be nonpolar if:", options:["It has an odd number of atoms","The bond dipoles cancel due to symmetry","All atoms are the same","It is a gas at room temperature"], correct:1},
+      {q:"SO\u2082 is polar because:", options:["S\u2212O bonds are nonpolar","It is linear","Its bent shape gives a net dipole","Sulfur is more EN than oxygen"], correct:2},
+      {q:"Which is more polar: HF or HCl?", options:["HCl","HF","They are equal","Cannot determine"], correct:1},
+      {q:"PCl\u2085 is nonpolar because:", options:["P\u2212Cl bonds are nonpolar","Trigonal bipyramidal symmetry cancels dipoles","Phosphorus is a metal","Chlorine has low EN"], correct:1},
+      {q:"SF\u2086 is nonpolar because:", options:["S\u2212F bonds are nonpolar","Octahedral symmetry cancels dipoles","Sulfur has no EN","Fluorine is not electronegative"], correct:1},
+      {q:"Which determines if a molecule is polar?", options:["Bond polarity only","Molecular geometry only","Both bond polarity and geometry","Number of atoms only"], correct:2},
+      {q:"CHCl\u2083 is polar because:", options:["All bonds are the same","The molecule lacks symmetry","Carbon has high EN","Chlorine is nonpolar"], correct:1},
+      {q:"N\u2082 is nonpolar because:", options:["Nitrogen has low EN","Both atoms are identical so \u0394EN = 0","It is a gas","Nitrogen has no electrons"], correct:1},
+      {q:"XeF\u2082 is nonpolar because:", options:["Xe\u2212F bonds are nonpolar","Linear geometry cancels dipoles","Xenon is a noble gas with no bonds","Fluorine repels xenon"], correct:1}
+    ]
+  },
+  {
+    id:6, title:"Fill: Dipole moment direction",
+    instruction:"Indicate where the dipole arrow points or the partial charge location.",
+    rows:[
+      ["1","In H\u2212F, the dipole arrow points toward ___","F / fluorine"],
+      ["2","In H\u2212Cl, the \u03b4\u207b is on ___","Cl / chlorine"],
+      ["3","In H\u2212Cl, the \u03b4\u207a is on ___","H / hydrogen"],
+      ["4","In O\u2212H, the dipole arrow points toward ___","O / oxygen"],
+      ["5","In N\u2212H, the \u03b4\u207b is on ___","N / nitrogen"],
+      ["6","In C\u2212O, electrons are pulled toward ___","O / oxygen"],
+      ["7","In Na\u2212Cl, electron transfer goes from ___ to ___","Na to Cl / sodium to chlorine"],
+      ["8","The dipole moment arrow points from ___ to ___ charge","positive to negative / + to - / \u03b4+ to \u03b4-"],
+      ["9","In C\u2212F, the \u03b4\u207b is on ___","F / fluorine"],
+      ["10","In a polar bond, electron density shifts toward the atom with ___ EN","higher / greater / more"]
+    ]
+  },
+  {
+    id:7, title:"MC: Bond comparison", type:"mc",
+    instruction:"Select the correct answer comparing bond polarity.",
+    questions:[
+      {q:"Which bond is more polar: H\u2212F or H\u2212Cl?", options:["H\u2212Cl","H\u2212F","They are equally polar","Neither is polar"], correct:1},
+      {q:"Rank from least to most polar: C\u2212H, O\u2212H, N\u2212H", options:["O\u2212H < N\u2212H < C\u2212H","C\u2212H < N\u2212H < O\u2212H","N\u2212H < C\u2212H < O\u2212H","C\u2212H < O\u2212H < N\u2212H"], correct:1},
+      {q:"Which bond is most ionic in character?", options:["H\u2212F","Na\u2212F","C\u2212F","N\u2212F"], correct:1},
+      {q:"Which bond is least polar?", options:["C\u2212H","C\u2212O","C\u2212N","C\u2212F"], correct:0},
+      {q:"The bond in Cl\u2082 is:", options:["Polar covalent","Nonpolar covalent","Ionic","Metallic"], correct:1},
+      {q:"Which has a greater \u0394EN: Li\u2212F or Na\u2212F?", options:["Li\u2212F","Na\u2212F","They are equal","Cannot determine"], correct:1},
+      {q:"Which bond is more polar: C=O or C\u2212O?", options:["C=O is more polar","C\u2212O is more polar","They have the same \u0394EN","Double bonds are always nonpolar"], correct:2},
+      {q:"Which has a pure covalent bond?", options:["HCl","NaCl","O\u2082","H\u2082O"], correct:2},
+      {q:"Rank bond polarity: H\u2212F, H\u2212Br, H\u2212I", options:["H\u2212I > H\u2212Br > H\u2212F","H\u2212F > H\u2212Br > H\u2212I","H\u2212Br > H\u2212F > H\u2212I","All equal"], correct:1},
+      {q:"A bond between two atoms with EN 2.5 and 3.0 is:", options:["Nonpolar covalent","Polar covalent","Ionic","Cannot determine"], correct:1}
+    ]
+  },
+  {
+    id:8, title:"Fill: EN values of common elements",
+    instruction:"Write the approximate Pauling EN value.",
+    rows:[
+      ["1","EN of F","4.0 / 3.98"],
+      ["2","EN of O","3.5 / 3.44"],
+      ["3","EN of N","3.0 / 3.04"],
+      ["4","EN of Cl","3.2 / 3.16"],
+      ["5","EN of C","2.5 / 2.55"],
+      ["6","EN of H","2.2 / 2.20"],
+      ["7","EN of S","2.5 / 2.58"],
+      ["8","EN of Na","0.9 / 0.93"],
+      ["9","EN of K","0.8 / 0.82"],
+      ["10","EN of Li","1.0 / 0.98"]
+    ]
+  },
+  {
+    id:9, title:"Arrange: Build EN rules", type:"arrange",
+    instruction:"Click the words in the correct order to build the statement.",
+    sentences:[
+      {prompt:"Electronegativity increases across a period", words:["Electronegativity","increases","from left","to right","across","a period"]},
+      {prompt:"Fluorine is the most electronegative element", words:["Fluorine","is","the most","electronegative","element"]},
+      {prompt:"Bond polarity depends on the EN difference", words:["Bond","polarity","depends on","the EN","difference"]},
+      {prompt:"Dipole moment points toward the more EN atom", words:["Dipole moment","points","toward","the more","EN atom"]},
+      {prompt:"Symmetric molecules can be nonpolar despite polar bonds", words:["Symmetric","molecules","can be","nonpolar","despite","polar bonds"]}
+    ]
+  },
+  {
+    id:10, title:"MC: Molecular polarity", type:"mc",
+    instruction:"Select the correct answer about whether each molecule is polar or nonpolar.",
+    questions:[
+      {q:"Is CO\u2082 polar or nonpolar?", options:["Polar","Nonpolar"], correct:1},
+      {q:"Is H\u2082O polar or nonpolar?", options:["Polar","Nonpolar"], correct:0},
+      {q:"Is NH\u2083 polar or nonpolar?", options:["Polar","Nonpolar"], correct:0},
+      {q:"Is CH\u2084 polar or nonpolar?", options:["Polar","Nonpolar"], correct:1},
+      {q:"Is HF polar or nonpolar?", options:["Polar","Nonpolar"], correct:0},
+      {q:"Is BeCl\u2082 polar or nonpolar?", options:["Polar","Nonpolar"], correct:1},
+      {q:"Is SO\u2082 polar or nonpolar?", options:["Polar","Nonpolar"], correct:0},
+      {q:"Is BF\u2083 polar or nonpolar?", options:["Polar","Nonpolar"], correct:1},
+      {q:"Is PF\u2085 polar or nonpolar?", options:["Polar","Nonpolar"], correct:1},
+      {q:"Is OF\u2082 polar or nonpolar?", options:["Polar","Nonpolar"], correct:0}
+    ]
+  },
+  {
+    id:11, title:"Fill: Classify bonds in molecules",
+    instruction:"Classify the specific bond as nonpolar covalent, polar covalent, or ionic.",
+    rows:[
+      ["1","The O\u2212H bond in water is ___","polar covalent / polar"],
+      ["2","The C\u2212H bond in methane is ___","nonpolar covalent / nonpolar"],
+      ["3","The Na\u2212Cl bond in table salt is ___","ionic"],
+      ["4","The N\u2212H bond in ammonia is ___","polar covalent / polar"],
+      ["5","The O=O bond in O\u2082 is ___","nonpolar covalent / nonpolar"],
+      ["6","The H\u2212F bond in hydrogen fluoride is ___","polar covalent / polar"],
+      ["7","The C=O bond in CO\u2082 is ___","polar covalent / polar"],
+      ["8","The K\u2212Br bond in KBr is ___","ionic"],
+      ["9","The N\u2261N bond in N\u2082 is ___","nonpolar covalent / nonpolar"],
+      ["10","The C\u2212Cl bond in CCl\u2084 is ___","polar covalent / polar"]
+    ]
+  },
+  {
+    id:12, title:"MC: Tricky EN questions", type:"mc",
+    instruction:"These are designed to be challenging. Think carefully.",
+    questions:[
+      {q:"Noble gases (He, Ne, Ar) typically have EN values that are:", options:["Very high","Very low","Not defined / not assigned","Equal to fluorine"], correct:2},
+      {q:"In a metallic bond, EN considerations are:", options:["Critical","Not applicable \u2014 metallic bonds involve delocalized electrons","The same as ionic bonds","Higher than covalent bonds"], correct:1},
+      {q:"Percent ionic character of a bond increases as:", options:["\u0394EN decreases","\u0394EN increases","Both atoms have high EN","Both atoms have low EN"], correct:1},
+      {q:"A bond with \u0394EN = 1.7 is technically classified as:", options:["Nonpolar covalent","Polar covalent","Ionic","50% ionic"], correct:1},
+      {q:"Which has greater ionic character: HF or HCl?", options:["HCl","HF","They are equal","Neither has ionic character"], correct:1},
+      {q:"If two atoms have EN of 2.5 and 2.5, the bond is:", options:["Polar covalent","Nonpolar covalent","Ionic","Metallic"], correct:1},
+      {q:"The EN of francium (Fr) is approximately:", options:["0.7","1.5","2.5","4.0"], correct:0},
+      {q:"Can a molecule with only polar bonds be nonpolar overall?", options:["Never","Yes, if geometry causes dipoles to cancel","Only in gases","Only with double bonds"], correct:1},
+      {q:"Which period 2 element has EN closest to 2.0?", options:["Li","Be","B","C"], correct:2},
+      {q:"Electronegativity is measured for atoms:", options:["In isolation","In chemical bonds","In the nucleus only","Only for metals"], correct:1}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Electronegativity & Bond Polarity \u2014 Complete Reference</h3>' +
+'<h3>Pauling Electronegativity Scale</h3>' +
+'<table><tr><th>Element</th><th>EN</th><th>Element</th><th>EN</th></tr>' +
+'<tr><td>F</td><td><span class="rule">4.0</span></td><td>H</td><td>2.2</td></tr>' +
+'<tr><td>O</td><td><span class="rule">3.5</span></td><td>C</td><td>2.5</td></tr>' +
+'<tr><td>N</td><td>3.0</td><td>S</td><td>2.5</td></tr>' +
+'<tr><td>Cl</td><td>3.2</td><td>Na</td><td>0.9</td></tr>' +
+'<tr><td>Br</td><td>2.8</td><td>K</td><td>0.8</td></tr>' +
+'<tr><td>I</td><td>2.5</td><td>Li</td><td>1.0</td></tr></table>' +
+'<h3>EN Trends</h3>' +
+'<ul>' +
+'<li><span class="rule">Increases</span> from left to right across a period (more nuclear charge, smaller radius)</li>' +
+'<li><span class="rule">Decreases</span> from top to bottom down a group (larger radius, more shielding)</li>' +
+'<li>Most electronegative: <span class="rule">F (4.0)</span></li>' +
+'<li>Least electronegative (most electropositive): <span class="rule">Fr or Cs (~0.7)</span></li>' +
+'</ul>' +
+'<h3>Bond Classification by \u0394EN</h3>' +
+'<table><tr><th>\u0394EN Range</th><th>Bond Type</th><th>Electron Behavior</th></tr>' +
+'<tr><td><span class="rule">0 \u2013 0.4</span></td><td>Nonpolar covalent</td><td>Electrons shared equally</td></tr>' +
+'<tr><td><span class="rule">0.5 \u2013 1.7</span></td><td>Polar covalent</td><td>Electrons shared unequally</td></tr>' +
+'<tr><td><span class="rule">1.8+</span></td><td>Ionic</td><td>Electrons transferred</td></tr></table>' +
+'<h3>Dipole Moment</h3>' +
+'<ul>' +
+'<li><span class="rule">Dipole moment</span> = measure of bond polarity (units: Debye, D)</li>' +
+'<li>Arrow points from \u03b4+ to \u03b4\u207b (toward more EN atom)</li>' +
+'<li>Greater \u0394EN = greater dipole moment</li>' +
+'</ul>' +
+'<h3>Molecular Polarity vs Bond Polarity</h3>' +
+'<ul>' +
+'<li>A molecule is <span class="rule">polar</span> if it has a net dipole moment</li>' +
+'<li>A molecule is <span class="rule">nonpolar</span> if bond dipoles cancel due to symmetry</li>' +
+'<li>Examples: CO\u2082 (linear, nonpolar), H\u2082O (bent, polar), CCl\u2084 (tetrahedral, nonpolar), NH\u2083 (trigonal pyramidal, polar)</li>' +
+'</ul>' +
+'<h3>Common Mistakes</h3>' +
+'<ul>' +
+'<li>Polar bonds \u2260 polar molecule (geometry matters!)</li>' +
+'<li>\u0394EN = 1.7 is still polar covalent, not ionic</li>' +
+'<li>Noble gases typically have no EN value assigned</li>' +
+'<li>EN is for atoms in bonds, not isolated atoms</li>' +
+'</ul>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 EN values, polar/nonpolar bonds, dipole moments \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

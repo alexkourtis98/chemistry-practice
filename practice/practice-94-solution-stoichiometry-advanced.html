@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Solution Stoichiometry (Advanced)</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Solution Stoichiometry (Advanced)</h1>
+<p class="subtitle">Deep practice &mdash; solubility rules, precipitation, net ionic equations, activity series</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_94';
+const SECTIONS = [
+  {
+    id:1, title:"Fill: Solubility rules",
+    instruction:"State whether each compound is soluble (S) or insoluble (I) in water.",
+    rows:[
+      ["1","NaCl","S / soluble"],
+      ["2","AgCl","I / insoluble"],
+      ["3","BaSO\u2084","I / insoluble"],
+      ["4","Na\u2082SO\u2084","S / soluble"],
+      ["5","PbCl\u2082","I / insoluble"],
+      ["6","KNO\u2083","S / soluble"],
+      ["7","CaCO\u2083","I / insoluble"],
+      ["8","NH\u2084Cl","S / soluble"],
+      ["9","Fe(OH)\u2083","I / insoluble"],
+      ["10","NaOH","S / soluble"],
+      ["11","PbSO\u2084","I / insoluble"],
+      ["12","SrSO\u2084","I / insoluble"],
+      ["13","Hg\u2082Cl\u2082","I / insoluble"],
+      ["14","K\u2082CO\u2083","S / soluble"],
+      ["15","AgNO\u2083","S / soluble"]
+    ]
+  },
+  {
+    id:2, title:"Fill: Solubility rules - categories",
+    instruction:"Complete each solubility rule.",
+    rows:[
+      ["1","All ___ (Group 1A) salts are soluble","alkali metal / Group 1 / Group 1A"],
+      ["2","All ___ salts are soluble","ammonium / NH\u2084\u207A"],
+      ["3","All ___ (NO\u2083\u207B) salts are soluble","nitrate"],
+      ["4","All ___ salts are soluble","acetate / CH\u2083COO\u207B / C\u2082H\u2083O\u2082\u207B"],
+      ["5","Most chloride salts are soluble EXCEPT AgCl, PbCl\u2082, and ___","Hg\u2082Cl\u2082 / mercury(I) chloride"],
+      ["6","Most sulfate salts are soluble EXCEPT BaSO\u2084, PbSO\u2084, and ___","SrSO\u2084 / strontium sulfate"],
+      ["7","CaSO\u2084 is ___ (slightly soluble/insoluble)","slightly soluble / sparingly soluble"],
+      ["8","Most ___ (OH\u207B) are insoluble except NaOH, KOH, Ba(OH)\u2082","hydroxide / hydroxides"],
+      ["9","Most ___ (CO\u2083\u00B2\u207B) are insoluble except Na\u2082CO\u2083, K\u2082CO\u2083, (NH\u2084)\u2082CO\u2083","carbonate / carbonates"],
+      ["10","Most ___ (PO\u2084\u00B3\u207B) are insoluble except Na\u2083PO\u2084, K\u2083PO\u2084, (NH\u2084)\u2083PO\u2084","phosphate / phosphates"],
+      ["11","Most ___ (S\u00B2\u207B) are insoluble except Na\u2082S, K\u2082S, (NH\u2084)\u2082S","sulfide / sulfides"],
+      ["12","All bromide salts are soluble EXCEPT AgBr, PbBr\u2082, and ___","Hg\u2082Br\u2082 / mercury(I) bromide"],
+      ["13","All iodide salts are soluble EXCEPT AgI, PbI\u2082, and ___","Hg\u2082I\u2082 / mercury(I) iodide"],
+      ["14","Ba(OH)\u2082 is ___ (soluble/insoluble)","soluble / S"],
+      ["15","Ca(OH)\u2082 is ___ (slightly soluble/insoluble)","slightly soluble / sparingly soluble"]
+    ]
+  },
+  {
+    id:3, title:"MC: Predict precipitation reactions", type:"mc",
+    instruction:"Select the correct answer about precipitation.",
+    questions:[
+      {q:"Mixing NaCl(aq) + AgNO\u2083(aq) produces:", options:["No precipitate","AgCl(s) precipitate","NaNO\u2083(s) precipitate","AgNa(s) precipitate"], correct:1},
+      {q:"Mixing Na\u2082SO\u2084(aq) + BaCl\u2082(aq) produces:", options:["NaCl(s)","BaSO\u2084(s) precipitate","No precipitate","Na\u2082Cl\u2082(s)"], correct:1},
+      {q:"Mixing KNO\u2083(aq) + NaCl(aq) produces:", options:["KCl(s)","NaNO\u2083(s)","No precipitate (all products soluble)","KNaCl(s)"], correct:2},
+      {q:"Mixing Pb(NO\u2083)\u2082(aq) + 2KI(aq) produces:", options:["PbI\u2082(s) precipitate (yellow)","KNO\u2083(s)","No precipitate","PbK\u2082(s)"], correct:0},
+      {q:"Mixing FeCl\u2083(aq) + 3NaOH(aq) produces:", options:["Fe(OH)\u2083(s) precipitate (brown)","NaCl(s)","No precipitate","FeNa(s)"], correct:0},
+      {q:"Mixing Na\u2082CO\u2083(aq) + CaCl\u2082(aq) produces:", options:["No precipitate","NaCl(s)","CaCO\u2083(s) precipitate","CaNa\u2082(s)"], correct:2},
+      {q:"Mixing NH\u2084NO\u2083(aq) + KCl(aq) produces:", options:["NH\u2084Cl(s)","KNO\u2083(s)","No precipitate (all products soluble)","NH\u2084K(s)"], correct:2},
+      {q:"Mixing CuSO\u2084(aq) + Na\u2082S(aq) produces:", options:["No precipitate","CuS(s) precipitate (black)","Na\u2082SO\u2084(s)","CuNa\u2082(s)"], correct:1},
+      {q:"Mixing Ba(NO\u2083)\u2082(aq) + Na\u2082SO\u2084(aq) produces:", options:["BaSO\u2084(s) precipitate (white)","NaNO\u2083(s)","No precipitate","BaNa(s)"], correct:0},
+      {q:"Mixing AgNO\u2083(aq) + NaBr(aq) produces:", options:["No precipitate","AgBr(s) precipitate (pale yellow)","NaNO\u2083(s)","AgNa(s)"], correct:1},
+      {q:"Mixing MgCl\u2082(aq) + 2NaOH(aq) produces:", options:["No precipitate","Mg(OH)\u2082(s) precipitate (white)","NaCl(s)","MgNa(s)"], correct:1},
+      {q:"Mixing K\u2082SO\u2084(aq) + NaCl(aq) produces:", options:["KCl(s)","Na\u2082SO\u2084(s)","No precipitate","K\u2082Na(s)"], correct:2},
+      {q:"Mixing Al(NO\u2083)\u2083(aq) + 3NaOH(aq) produces:", options:["Al(OH)\u2083(s) precipitate","NaNO\u2083(s)","No precipitate","AlNa(s)"], correct:0},
+      {q:"Mixing Ca(NO\u2083)\u2082(aq) + Na\u2082CO\u2083(aq) produces:", options:["CaCO\u2083(s) precipitate","NaNO\u2083(s)","No precipitate","CaNa(s)"], correct:0},
+      {q:"Mixing Pb(NO\u2083)\u2082(aq) + Na\u2082SO\u2084(aq) produces:", options:["PbSO\u2084(s) precipitate (white)","NaNO\u2083(s)","No precipitate","PbNa(s)"], correct:0}
+    ]
+  },
+  {
+    id:4, title:"Fill: Ionic equations terminology",
+    instruction:"Complete each definition.",
+    rows:[
+      ["1","A molecular equation shows all reactants and products as ___ formulas","complete / molecular / whole"],
+      ["2","A complete ionic equation shows all ___ electrolytes as separated ions","strong / soluble"],
+      ["3","A net ionic equation shows only the ions that ___ in the reaction","participate / change / react"],
+      ["4","Ions that appear unchanged on both sides are called ___ ions","spectator"],
+      ["5","Spectator ions are ___ (included/excluded) from the net ionic equation","excluded / removed / not included"],
+      ["6","Strong electrolytes are written as ___ in ionic equations","ions / separated ions / dissociated ions"],
+      ["7","Weak electrolytes are written as ___ (molecules/ions) in ionic equations","molecules / undissociated / molecular form"],
+      ["8","Precipitates (solids) are written as ___ formulas, not as ions","molecular / complete / whole"],
+      ["9","Water is written as ___ (molecule/ions) in ionic equations","molecule / H\u2082O / molecular form"],
+      ["10","Gases are written as ___ formulas in ionic equations","molecular / complete"],
+      ["11","The (aq) symbol means dissolved in ___","water / aqueous solution"],
+      ["12","The (s) symbol means the substance is a ___","solid / precipitate"],
+      ["13","The (l) symbol means the substance is a ___","liquid"],
+      ["14","The (g) symbol means the substance is a ___","gas"],
+      ["15","Net ionic equations must be balanced for both ___ and charge","atoms / mass"]
+    ]
+  },
+  {
+    id:5, title:"MC: Net ionic equations", type:"mc",
+    instruction:"Select the correct net ionic equation.",
+    questions:[
+      {q:"AgNO\u2083(aq) + NaCl(aq) \u2192 AgCl(s) + NaNO\u2083(aq). Net ionic:", options:["Ag\u207A(aq) + Cl\u207B(aq) \u2192 AgCl(s)","Na\u207A + NO\u2083\u207B \u2192 NaNO\u2083","AgNO\u2083 + NaCl \u2192 AgCl + NaNO\u2083","No reaction"], correct:0},
+      {q:"BaCl\u2082(aq) + Na\u2082SO\u2084(aq) \u2192 BaSO\u2084(s) + 2NaCl(aq). Net ionic:", options:["Ba\u00B2\u207A + 2Cl\u207B \u2192 BaCl\u2082","Ba\u00B2\u207A(aq) + SO\u2084\u00B2\u207B(aq) \u2192 BaSO\u2084(s)","Na\u207A + Cl\u207B \u2192 NaCl","2Na\u207A + SO\u2084\u00B2\u207B \u2192 Na\u2082SO\u2084"], correct:1},
+      {q:"Pb(NO\u2083)\u2082(aq) + 2KI(aq) \u2192 PbI\u2082(s) + 2KNO\u2083(aq). Net ionic:", options:["K\u207A + NO\u2083\u207B \u2192 KNO\u2083","Pb\u00B2\u207A(aq) + 2I\u207B(aq) \u2192 PbI\u2082(s)","Pb\u00B2\u207A + 2NO\u2083\u207B \u2192 Pb(NO\u2083)\u2082","No net ionic equation"], correct:1},
+      {q:"Spectator ions in: AgNO\u2083(aq) + NaCl(aq) \u2192 AgCl(s) + NaNO\u2083(aq) are:", options:["Ag\u207A and Cl\u207B","Na\u207A and NO\u2083\u207B","Ag\u207A and Na\u207A","Cl\u207B and NO\u2083\u207B"], correct:1},
+      {q:"HCl(aq) + NaOH(aq) \u2192 NaCl(aq) + H\u2082O(l). Net ionic:", options:["Na\u207A + Cl\u207B \u2192 NaCl","H\u207A(aq) + OH\u207B(aq) \u2192 H\u2082O(l)","HCl + NaOH \u2192 NaCl + H\u2082O","No reaction"], correct:1},
+      {q:"CaCO\u2083(s) + 2HCl(aq) \u2192 CaCl\u2082(aq) + H\u2082O(l) + CO\u2082(g). Net ionic:", options:["Ca\u00B2\u207A + CO\u2083\u00B2\u207B \u2192 CaCO\u2083","CaCO\u2083(s) + 2H\u207A(aq) \u2192 Ca\u00B2\u207A(aq) + H\u2082O(l) + CO\u2082(g)","2Cl\u207B \u2192 Cl\u2082","No reaction"], correct:1},
+      {q:"Mixing KNO\u2083(aq) + NaCl(aq): the net ionic equation is:", options:["K\u207A + Cl\u207B \u2192 KCl","Na\u207A + NO\u2083\u207B \u2192 NaNO\u2083","No reaction (no precipitate, no gas, no water)","All ions react"], correct:2},
+      {q:"FeCl\u2083(aq) + 3NaOH(aq) \u2192 Fe(OH)\u2083(s) + 3NaCl(aq). Net ionic:", options:["Fe\u00B3\u207A(aq) + 3OH\u207B(aq) \u2192 Fe(OH)\u2083(s)","Na\u207A + Cl\u207B \u2192 NaCl","Fe\u00B3\u207A + 3Cl\u207B \u2192 FeCl\u2083","3Na\u207A + 3OH\u207B \u2192 3NaOH"], correct:0},
+      {q:"Na\u2082S(aq) + CuCl\u2082(aq) \u2192 CuS(s) + 2NaCl(aq). Net ionic:", options:["Na\u207A + Cl\u207B \u2192 NaCl","Cu\u00B2\u207A(aq) + S\u00B2\u207B(aq) \u2192 CuS(s)","S\u00B2\u207B + 2Cl\u207B \u2192 SCl\u2082","No reaction"], correct:1},
+      {q:"The net ionic equation for any strong acid + strong base neutralization is:", options:["H\u207A(aq) + OH\u207B(aq) \u2192 H\u2082O(l)","HA + BOH \u2192 BA + H\u2082O","Acid + Base \u2192 Salt + Water","H\u2082O \u2192 H\u207A + OH\u207B"], correct:0},
+      {q:"When a precipitate and gas both form, the net ionic excludes:", options:["The precipitate","The gas","The spectator ions","All solid products"], correct:2},
+      {q:"For weak acid CH\u2083COOH neutralization: CH\u2083COOH(aq) + OH\u207B(aq) \u2192", options:["CH\u2083COO\u207B(aq) + H\u2082O(l)","CH\u2083COOH(aq) + H\u2082O(l)","CH\u2083COO\u207B + H\u207A","No reaction"], correct:0},
+      {q:"A molecular equation shows:", options:["Only ions","Only molecules","Complete formulas for all substances","Only the net reacting species"], correct:2},
+      {q:"Which is a strong electrolyte?", options:["CH\u2083COOH","NH\u2083","NaCl","C\u2086H\u2082O\u2086 (glucose)"], correct:2},
+      {q:"Which is NOT written as ions in ionic equations?", options:["NaCl(aq)","HCl(aq)","AgCl(s)","KNO\u2083(aq)"], correct:2}
+    ]
+  },
+  {
+    id:6, title:"Fill: Write net ionic equations",
+    instruction:"Write the net ionic equation (use chemical notation).",
+    rows:[
+      ["1","AgNO\u2083(aq) + NaBr(aq) \u2192 AgBr(s) + NaNO\u2083(aq). Net ionic: ___ \u2192 AgBr(s)","Ag\u207A(aq) + Br\u207B(aq) / Ag+ + Br-"],
+      ["2","BaCl\u2082 + Na\u2082SO\u2084 \u2192 BaSO\u2084(s) + NaCl. Net ionic: ___ \u2192 BaSO\u2084(s)","Ba\u00B2\u207A(aq) + SO\u2084\u00B2\u207B(aq) / Ba2+ + SO42-"],
+      ["3","CuSO\u2084 + 2NaOH \u2192 Cu(OH)\u2082(s) + Na\u2082SO\u2084. Net ionic: ___ \u2192 Cu(OH)\u2082(s)","Cu\u00B2\u207A(aq) + 2OH\u207B(aq) / Cu2+ + 2OH-"],
+      ["4","Pb(NO\u2083)\u2082 + Na\u2082S \u2192 PbS(s) + NaNO\u2083. Net ionic: ___ \u2192 PbS(s)","Pb\u00B2\u207A(aq) + S\u00B2\u207B(aq) / Pb2+ + S2-"],
+      ["5","HCl + NaOH \u2192 NaCl + H\u2082O. Net ionic:","H\u207A(aq) + OH\u207B(aq) \u2192 H\u2082O(l) / H+ + OH- -> H2O"],
+      ["6","Spectator ions in Q1 (AgNO\u2083 + NaBr): ___","Na\u207A, NO\u2083\u207B / Na+ and NO3-"],
+      ["7","Spectator ions in Q2 (BaCl\u2082 + Na\u2082SO\u2084): ___","Na\u207A, Cl\u207B / Na+ and Cl-"],
+      ["8","Spectator ions in Q3 (CuSO\u2084 + NaOH): ___","Na\u207A, SO\u2084\u00B2\u207B / Na+ and SO42-"],
+      ["9","Ca(NO\u2083)\u2082 + Na\u2082CO\u2083 \u2192 CaCO\u2083(s) + NaNO\u2083. Net ionic: ___ \u2192 CaCO\u2083(s)","Ca\u00B2\u207A(aq) + CO\u2083\u00B2\u207B(aq) / Ca2+ + CO32-"],
+      ["10","Spectator ions in Q9: ___","Na\u207A, NO\u2083\u207B / Na+ and NO3-"],
+      ["11","ZnCl\u2082 + 2NaOH \u2192 Zn(OH)\u2082(s) + NaCl. Net ionic: ___ \u2192 Zn(OH)\u2082(s)","Zn\u00B2\u207A(aq) + 2OH\u207B(aq) / Zn2+ + 2OH-"],
+      ["12","Mixing NaCl + KNO\u2083: net ionic = ___","no reaction / NR / none"],
+      ["13","Mixing Na\u2082SO\u2084 + KCl: net ionic = ___","no reaction / NR / none"],
+      ["14","FeCl\u2082 + Na\u2082S \u2192 FeS(s) + NaCl. Net ionic: ___ \u2192 FeS(s)","Fe\u00B2\u207A(aq) + S\u00B2\u207B(aq) / Fe2+ + S2-"],
+      ["15","MgCl\u2082 + 2NaOH \u2192 Mg(OH)\u2082(s) + NaCl. Net ionic: ___ \u2192 Mg(OH)\u2082(s)","Mg\u00B2\u207A(aq) + 2OH\u207B(aq) / Mg2+ + 2OH-"]
+    ]
+  },
+  {
+    id:7, title:"MC: Activity series and single replacement", type:"mc",
+    instruction:"Select the correct answer about the activity series.",
+    questions:[
+      {q:"In the activity series, a metal higher on the list can:", options:["Dissolve in any acid","Displace a metal lower on the list from solution","Be displaced by any metal","Never react"], correct:1},
+      {q:"Zn(s) + CuSO\u2084(aq) \u2192 ZnSO\u2084(aq) + Cu(s). This occurs because:", options:["Cu is more active than Zn","Zn is more active than Cu","They are equally active","ZnSO\u2084 is insoluble"], correct:1},
+      {q:"Cu(s) + ZnSO\u2084(aq) \u2192 ?", options:["CuSO\u2084 + Zn","No reaction (Cu is less active than Zn)","CuZn + SO\u2084","Cu\u2082SO\u2084 + Zn"], correct:1},
+      {q:"Which metal is most active?", options:["Gold (Au)","Copper (Cu)","Lithium (Li)","Iron (Fe)"], correct:2},
+      {q:"Which metal is least active?", options:["Potassium (K)","Silver (Ag)","Gold (Au)","Platinum (Pt)"], correct:3},
+      {q:"Fe(s) + CuSO\u2084(aq) \u2192 ?", options:["No reaction","FeSO\u2084(aq) + Cu(s)","Fe\u2082(SO\u2084)\u2083 + Cu","CuFe + SO\u2084"], correct:1},
+      {q:"Ag(s) + FeSO\u2084(aq) \u2192 ?", options:["AgSO\u2084 + Fe","Ag\u2082SO\u2084 + Fe","No reaction (Ag is less active than Fe)","AgFe + SO\u2084"], correct:2},
+      {q:"Metals above hydrogen in the activity series can:", options:["Never dissolve in acid","Dissolve in acids to produce H\u2082 gas","Only react with bases","React with water to produce O\u2082"], correct:1},
+      {q:"Cu(s) + HCl(aq) \u2192 ?", options:["CuCl\u2082 + H\u2082","No reaction (Cu is below H in activity series)","CuH + Cl\u2082","CuCl + H"], correct:1},
+      {q:"Zn(s) + 2HCl(aq) \u2192 ?", options:["No reaction","ZnCl\u2082(aq) + H\u2082(g)","ZnH\u2082 + Cl\u2082","Zn(OH)\u2082 + HCl"], correct:1},
+      {q:"The order from most to least active: Li, K, Na, Ca, Mg, Al, Zn, Fe, ___, H, Cu, Ag, Au:", options:["Ni","Pb","Sn","All of these are between Fe and H"], correct:3},
+      {q:"Mg(s) + 2AgNO\u2083(aq) \u2192 ?", options:["No reaction","Mg(NO\u2083)\u2082(aq) + 2Ag(s)","MgAg + NO\u2083","Mg\u2082Ag + 2NO\u2083"], correct:1},
+      {q:"Na(s) reacts vigorously with water because Na is:", options:["Below H in activity series","Very high in activity series (above H)","A noble metal","Inert"], correct:1},
+      {q:"2Na(s) + 2H\u2082O(l) \u2192", options:["NaO + H\u2082","2NaOH(aq) + H\u2082(g)","Na\u2082O\u2082 + H\u2082","No reaction"], correct:1},
+      {q:"Au does not dissolve in HCl because:", options:["Au is above H in activity series","Au is below H in activity series (less active)","HCl is not an acid","Au is too heavy"], correct:1}
+    ]
+  },
+  {
+    id:8, title:"Fill: Activity series predictions",
+    instruction:"Predict whether a reaction occurs. Write the products or NR (no reaction).",
+    rows:[
+      ["1","Mg(s) + FeCl\u2082(aq) \u2192 ___","MgCl\u2082(aq) + Fe(s) / MgCl2 + Fe"],
+      ["2","Cu(s) + AgNO\u2083(aq) \u2192 ___","Cu(NO\u2083)\u2082(aq) + Ag(s) / Cu(NO3)2 + Ag"],
+      ["3","Au(s) + HCl(aq) \u2192 ___","NR / no reaction"],
+      ["4","Fe(s) + 2HCl(aq) \u2192 ___","FeCl\u2082(aq) + H\u2082(g) / FeCl2 + H2"],
+      ["5","Ag(s) + CuSO\u2084(aq) \u2192 ___","NR / no reaction"],
+      ["6","Zn(s) + Pb(NO\u2083)\u2082(aq) \u2192 ___","Zn(NO\u2083)\u2082(aq) + Pb(s) / Zn(NO3)2 + Pb"],
+      ["7","Cu(s) + HCl(aq) \u2192 ___","NR / no reaction"],
+      ["8","Al(s) + 3AgNO\u2083(aq) \u2192 ___","Al(NO\u2083)\u2083(aq) + 3Ag(s) / Al(NO3)3 + 3Ag"],
+      ["9","Pt(s) + FeCl\u2082(aq) \u2192 ___","NR / no reaction"],
+      ["10","Sn(s) + CuCl\u2082(aq) \u2192 ___","SnCl\u2082(aq) + Cu(s) / SnCl2 + Cu"],
+      ["11","Ni(s) + 2HCl(aq) \u2192 ___","NiCl\u2082(aq) + H\u2082(g) / NiCl2 + H2"],
+      ["12","Pb(s) + ZnCl\u2082(aq) \u2192 ___","NR / no reaction"],
+      ["13","Ca(s) + 2H\u2082O(l) \u2192 ___","Ca(OH)\u2082(aq) + H\u2082(g) / Ca(OH)2 + H2"],
+      ["14","K(s) + H\u2082O(l) \u2192 ___","KOH(aq) + H\u2082(g) / KOH + H2"],
+      ["15","Cr(s) + CuSO\u2084(aq) \u2192 ___","CrSO\u2084(aq) + Cu(s) / Cr(SO4) + Cu / reaction occurs"]
+    ]
+  },
+  {
+    id:9, title:"Arrange: Steps for writing net ionic equations", type:"arrange",
+    instruction:"Click the words in the correct order.",
+    sentences:[
+      {prompt:"Write the balanced molecular equation first", words:["Write","the balanced","molecular equation","first"]},
+      {prompt:"Identify all strong electrolytes and write them as ions", words:["Identify","all strong electrolytes","and write them","as ions"]},
+      {prompt:"Keep precipitates and gases as molecular formulas", words:["Keep","precipitates and gases","as molecular","formulas"]},
+      {prompt:"Keep water as molecular formula not as ions", words:["Keep water","as molecular formula","not as","ions"]},
+      {prompt:"Cancel spectator ions that appear on both sides", words:["Cancel","spectator ions","that appear","on both sides"]},
+      {prompt:"The remaining species form the net ionic equation", words:["The remaining species","form","the net ionic","equation"]},
+      {prompt:"Check that atoms and charges are balanced in the final equation", words:["Check that","atoms and charges","are balanced","in the final equation"]},
+      {prompt:"Solubility rules determine which products are precipitates", words:["Solubility rules","determine","which products","are precipitates"]}
+    ]
+  },
+  {
+    id:10, title:"MC: Solubility rule application", type:"mc",
+    instruction:"Apply solubility rules to answer each question.",
+    questions:[
+      {q:"Which silver compound is soluble?", options:["AgCl","AgBr","AgI","AgNO\u2083"], correct:3},
+      {q:"Which barium compound is insoluble?", options:["BaCl\u2082","Ba(NO\u2083)\u2082","BaSO\u2084","Ba(OH)\u2082"], correct:2},
+      {q:"Which lead compound is soluble?", options:["PbCl\u2082","PbSO\u2084","PbI\u2082","Pb(NO\u2083)\u2082"], correct:3},
+      {q:"All of these are soluble EXCEPT:", options:["NaCl","KOH","NH\u2084NO\u2083","CaCO\u2083"], correct:3},
+      {q:"Which hydroxide is soluble?", options:["Fe(OH)\u2083","Al(OH)\u2083","Cu(OH)\u2082","KOH"], correct:3},
+      {q:"Which carbonate is soluble?", options:["CaCO\u2083","BaCO\u2083","Na\u2082CO\u2083","PbCO\u2083"], correct:2},
+      {q:"Which sulfate is insoluble?", options:["Na\u2082SO\u2084","K\u2082SO\u2084","(NH\u2084)\u2082SO\u2084","PbSO\u2084"], correct:3},
+      {q:"Mixing solutions of Na\u2082S and CuCl\u2082 would produce:", options:["CuS(s) - insoluble sulfide","NaCl(s)","No precipitate","CuNa(s)"], correct:0},
+      {q:"Is Ca(OH)\u2082 generally classified as:", options:["Soluble","Insoluble","Slightly soluble","Very soluble"], correct:2},
+      {q:"Mixing AgNO\u2083 and Na\u2082CrO\u2084 would produce:", options:["No precipitate","Ag\u2082CrO\u2084(s) - insoluble (red precipitate)","NaNO\u2083(s)","AgNa(s)"], correct:1}
+    ]
+  },
+  {
+    id:11, title:"Fill: Identify reaction types in solution",
+    instruction:"Identify the reaction type: precipitation (P), acid-base neutralization (AB), or gas evolution (GE).",
+    rows:[
+      ["1","AgNO\u2083 + NaCl \u2192 AgCl(s) + NaNO\u2083: type = ___","P / precipitation"],
+      ["2","HCl + NaOH \u2192 NaCl + H\u2082O: type = ___","AB / acid-base / neutralization / acid-base neutralization"],
+      ["3","Na\u2082CO\u2083 + 2HCl \u2192 2NaCl + H\u2082O + CO\u2082(g): type = ___","GE / gas evolution"],
+      ["4","BaCl\u2082 + Na\u2082SO\u2084 \u2192 BaSO\u2084(s) + 2NaCl: type = ___","P / precipitation"],
+      ["5","Na\u2082S + 2HCl \u2192 2NaCl + H\u2082S(g): type = ___","GE / gas evolution"],
+      ["6","H\u2082SO\u2084 + 2KOH \u2192 K\u2082SO\u2084 + 2H\u2082O: type = ___","AB / acid-base / neutralization / acid-base neutralization"],
+      ["7","Pb(NO\u2083)\u2082 + 2KI \u2192 PbI\u2082(s) + 2KNO\u2083: type = ___","P / precipitation"],
+      ["8","NaHCO\u2083 + HCl \u2192 NaCl + H\u2082O + CO\u2082(g): type = ___","GE / gas evolution"],
+      ["9","Ca(OH)\u2082 + 2HNO\u2083 \u2192 Ca(NO\u2083)\u2082 + 2H\u2082O: type = ___","AB / acid-base / neutralization / acid-base neutralization"],
+      ["10","FeCl\u2083 + 3NaOH \u2192 Fe(OH)\u2083(s) + 3NaCl: type = ___","P / precipitation"],
+      ["11","(NH\u2084)\u2082SO\u2084 + 2NaOH \u2192 Na\u2082SO\u2084 + 2NH\u2083(g) + 2H\u2082O: type = ___","GE / gas evolution"],
+      ["12","Zn + 2HCl \u2192 ZnCl\u2082 + H\u2082(g): type = ___","GE / gas evolution / single replacement"],
+      ["13","Na\u2082SO\u2083 + 2HCl \u2192 2NaCl + H\u2082O + SO\u2082(g): type = ___","GE / gas evolution"],
+      ["14","Ba(NO\u2083)\u2082 + Na\u2082CO\u2083 \u2192 BaCO\u2083(s) + 2NaNO\u2083: type = ___","P / precipitation"],
+      ["15","Mg(OH)\u2082 + 2HCl \u2192 MgCl\u2082 + 2H\u2082O: type = ___","AB / acid-base / neutralization / acid-base neutralization"]
+    ]
+  },
+  {
+    id:12, title:"MC: Advanced solution stoichiometry", type:"mc",
+    instruction:"Think carefully about these challenging questions.",
+    questions:[
+      {q:"When 50 mL of 0.1 M AgNO\u2083 is mixed with 50 mL of 0.1 M NaCl, the precipitate formed is:", options:["0.005 mol AgCl","0.01 mol AgCl","0.05 mol AgCl","0.001 mol AgCl"], correct:0},
+      {q:"To dissolve AgCl precipitate, you could add:", options:["More NaCl","Concentrated NH\u2083(aq) (forms soluble complex)","More water","HCl"], correct:1},
+      {q:"A solution labeled 'mixed with excess BaCl\u2082' is testing for the presence of:", options:["Chloride ions","Sulfate ions","Sodium ions","Nitrate ions"], correct:1},
+      {q:"Adding AgNO\u2083 solution is a test for the presence of:", options:["Nitrate ions","Silver ions","Halide ions (Cl\u207B, Br\u207B, I\u207B)","Sulfate ions"], correct:2},
+      {q:"AgCl is white, AgBr is pale yellow, AgI is yellow. This helps:", options:["Identify which halide is present","Measure pH","Determine molarity","Find the mass"], correct:0},
+      {q:"In a double displacement reaction, the driving force is:", options:["Temperature change only","Formation of precipitate, gas, or water","Change in color","Change in volume"], correct:1},
+      {q:"Qualitative analysis uses precipitation to identify:", options:["Concentration","Unknown ions in solution","Temperature","pH"], correct:1},
+      {q:"The Ksp (solubility product) of AgCl is 1.8 \u00D7 10\u207B\u00B9\u2070. This means:", options:["AgCl is very soluble","AgCl is very slightly soluble","AgCl dissolves completely","AgCl is a strong electrolyte"], correct:1},
+      {q:"Which produces the most precipitate: adding NaCl to AgNO\u2083, or NaBr to AgNO\u2083 (same concentrations)?", options:["NaCl (AgCl is less soluble)","NaBr (AgBr is less soluble)","Both produce the same amount","Neither produces precipitate"], correct:2},
+      {q:"Common ion effect: adding NaCl to a solution containing AgCl(s) will:", options:["Dissolve more AgCl","Decrease AgCl solubility (shift equilibrium left)","Have no effect","Increase AgCl solubility"], correct:1},
+      {q:"Au dissolves in aqua regia (3HCl + HNO\u2083) because:", options:["HCl alone can dissolve it","The combination provides Cl\u207B to complex Au and HNO\u2083 to oxidize it","NaCl is added","Au is above H in activity series"], correct:1},
+      {q:"A flame test gives a yellow color, indicating the presence of:", options:["Potassium (K\u207A)","Sodium (Na\u207A)","Calcium (Ca\u00B2\u207A)","Barium (Ba\u00B2\u207A)"], correct:1},
+      {q:"Selective precipitation separates ions by:", options:["Adding a reagent that precipitates one ion but not others","Heating the solution","Cooling the solution","Adding water"], correct:0},
+      {q:"In gravimetric analysis, the precipitate is:", options:["Dissolved and titrated","Filtered, dried, and weighed","Discarded","Used to measure pH"], correct:1},
+      {q:"The total ionic equation for HCl + NaOH shows ___ species:", options:["2","3","4 (H\u207A, Cl\u207B, Na\u207A, OH\u207B) plus H\u2082O product","6"], correct:2}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Solution Stoichiometry \u2014 Complete Reference</h3>' +
+'<h3>Solubility Rules</h3>' +
+'<table><tr><th>Always Soluble</th><th>Details</th></tr>' +
+'<tr><td><span class="rule">Group 1A salts</span></td><td>Li\u207A, Na\u207A, K\u207A, Rb\u207A, Cs\u207A</td></tr>' +
+'<tr><td><span class="rule">NH\u2084\u207A salts</span></td><td>All ammonium salts</td></tr>' +
+'<tr><td><span class="rule">NO\u2083\u207B salts</span></td><td>All nitrates</td></tr>' +
+'<tr><td><span class="rule">CH\u2083COO\u207B salts</span></td><td>All acetates</td></tr></table>' +
+'<table><tr><th>Mostly Soluble</th><th>Exceptions (Insoluble)</th></tr>' +
+'<tr><td>Cl\u207B, Br\u207B, I\u207B</td><td>Ag\u207A, Pb\u00B2\u207A, Hg\u2082\u00B2\u207A</td></tr>' +
+'<tr><td>SO\u2084\u00B2\u207B</td><td>Ba\u00B2\u207A, Pb\u00B2\u207A, Sr\u00B2\u207A (CaSO\u2084 slightly)</td></tr></table>' +
+'<table><tr><th>Mostly Insoluble</th><th>Exceptions (Soluble)</th></tr>' +
+'<tr><td>OH\u207B</td><td>Group 1A, Ba\u00B2\u207A (Ca\u00B2\u207A slightly)</td></tr>' +
+'<tr><td>CO\u2083\u00B2\u207B, PO\u2084\u00B3\u207B</td><td>Group 1A, NH\u2084\u207A</td></tr>' +
+'<tr><td>S\u00B2\u207B</td><td>Group 1A, Group 2A, NH\u2084\u207A</td></tr></table>' +
+'<h3>Types of Equations</h3>' +
+'<p><span class="rule">Molecular</span>: complete formulas for all species</p>' +
+'<p><span class="rule">Complete ionic</span>: strong electrolytes shown as ions</p>' +
+'<p><span class="rule">Net ionic</span>: only species that change (spectators removed)</p>' +
+'<h3>Activity Series (Most to Least Active)</h3>' +
+'<p>Li > K > Ba > Ca > Na > Mg > Al > Zn > Cr > Fe > Ni > Sn > Pb > <span class="rule">H</span> > Cu > Hg > Ag > Pt > Au</p>' +
+'<p>Metals above H: dissolve in acids (produce H\u2082)</p>' +
+'<p>Metals above another: displace it from solution</p>' +
+'<h3>Reaction Types in Solution</h3>' +
+'<ul>' +
+'<li><span class="rule">Precipitation</span>: insoluble product forms</li>' +
+'<li><span class="rule">Acid-Base</span>: H\u207A + OH\u207B \u2192 H\u2082O</li>' +
+'<li><span class="rule">Gas Evolution</span>: CO\u2082, H\u2082S, SO\u2082, NH\u2083, H\u2082 produced</li>' +
+'<li><span class="rule">Single Replacement</span>: more active metal displaces less active</li>' +
+'</ul>' +
+'<h3>Net Ionic Equation Steps</h3>' +
+'<ol>' +
+'<li>Write balanced molecular equation</li>' +
+'<li>Break strong electrolytes into ions</li>' +
+'<li>Keep solids, liquids, gases, weak electrolytes as formulas</li>' +
+'<li>Cancel spectator ions</li>' +
+'<li>Verify atom and charge balance</li>' +
+'</ol>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 solubility rules, precipitation, net ionic equations, activity series \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

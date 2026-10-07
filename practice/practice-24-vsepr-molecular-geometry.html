@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice 24 — VSEPR & Molecular Geometry</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:600px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Practice 24 — VSEPR & Molecular Geometry</h1>
+<p class="subtitle">Deep practice &mdash; electron domains, geometry, polarity, hybridization</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_24';
+const SECTIONS = [
+  {
+    id:1, title:"Electron Domain Geometry",
+    instruction:"Write the electron domain geometry or count electron domains.",
+    rows:[
+      ["1","2 electron domains \u2192 ___ geometry","linear"],
+      ["2","3 electron domains \u2192 ___ geometry","trigonal planar / trigonal-planar"],
+      ["3","4 electron domains \u2192 ___ geometry","tetrahedral"],
+      ["4","5 electron domains \u2192 ___ geometry","trigonal bipyramidal / trigonal-bipyramidal"],
+      ["5","6 electron domains \u2192 ___ geometry","octahedral"],
+      ["6","CO\u2082 has ___ electron domains","2"],
+      ["7","NH\u2083 has ___ electron domains","4"],
+      ["8","H\u2082O has ___ electron domains","4"],
+      ["9","BF\u2083 has ___ electron domains","3"],
+      ["10","PCl\u2085 has ___ electron domains","5"],
+      ["11","SF\u2086 has ___ electron domains","6"],
+      ["12","SO\u2082 has ___ electron domains","3"],
+      ["13","HCN has ___ electron domains on C","2"],
+      ["14","CH\u2082O (formaldehyde) has ___ electron domains on C","3"],
+      ["15","XeF\u2082 has ___ electron domains on Xe","5"],
+      ["16","XeF\u2084 has ___ electron domains on Xe","6"],
+      ["17","ClF\u2083 has ___ electron domains on Cl","5"],
+      ["18","SF\u2084 has ___ electron domains on S","5"]
+    ]
+  },
+  {
+    id:2, title:"Molecular Geometry (with lone pairs)",
+    instruction:"Write the molecular geometry for each molecule.",
+    rows:[
+      ["1","CH\u2084: molecular geometry?","tetrahedral"],
+      ["2","NH\u2083 (1 lone pair on N): geometry?","trigonal pyramidal / trigonal-pyramidal"],
+      ["3","H\u2082O (2 lone pairs on O): geometry?","bent / angular / v-shaped"],
+      ["4","BF\u2083: geometry?","trigonal planar / trigonal-planar"],
+      ["5","CO\u2082: geometry?","linear"],
+      ["6","SO\u2082 (1 lone pair on S): geometry?","bent / angular / v-shaped"],
+      ["7","PCl\u2085: geometry?","trigonal bipyramidal / trigonal-bipyramidal"],
+      ["8","SF\u2086: geometry?","octahedral"],
+      ["9","XeF\u2082 (3 lone pairs on Xe): geometry?","linear"],
+      ["10","ClF\u2083 (2 lone pairs on Cl): geometry?","T-shaped / t-shaped"],
+      ["11","SF\u2084 (1 lone pair on S): geometry?","see-saw / seesaw"],
+      ["12","IF\u2085 (1 lone pair on I): geometry?","square pyramidal / square-pyramidal"],
+      ["13","XeF\u2084 (2 lone pairs on Xe): geometry?","square planar / square-planar"],
+      ["14","H\u2082S: geometry?","bent / angular / v-shaped"],
+      ["15","HCN: geometry?","linear"],
+      ["16","SO\u2083: geometry?","trigonal planar / trigonal-planar"],
+      ["17","NF\u2083: geometry?","trigonal pyramidal / trigonal-pyramidal"],
+      ["18","CH\u2082O: geometry around C?","trigonal planar / trigonal-planar"]
+    ]
+  },
+  {
+    id:3, title:"Bond Angles",
+    instruction:"Write the bond angle or answer the question.",
+    rows:[
+      ["1","Tetrahedral bond angle?","109.5"],
+      ["2","Trigonal planar bond angle?","120"],
+      ["3","Linear bond angle?","180"],
+      ["4","H\u2082O bond angle is ___ than 109.5\u00B0 (less/more)","less"],
+      ["5","NH\u2083 bond angle is about ___\u00B0","107"],
+      ["6","Why do lone pairs compress bond angles? (lone pairs occupy ___ space)","more"],
+      ["7","Octahedral bond angle?","90"],
+      ["8","Trigonal bipyramidal equatorial bond angle?","120"],
+      ["9","H\u2082O bond angle is approximately ___\u00B0","104.5"],
+      ["10","BF\u2083 bond angle is ___\u00B0","120"],
+      ["11","CO\u2082 bond angle is ___\u00B0","180"],
+      ["12","Square planar bond angle?","90"],
+      ["13","T-shaped: the equatorial bond angle is approximately ___\u00B0","90 / less than 90"],
+      ["14","See-saw: equatorial bond angle is approximately ___\u00B0","120 / less than 120"],
+      ["15","More lone pairs on the central atom = ___ bond angles","smaller"],
+      ["16","In a trigonal bipyramidal molecule, the axial-equatorial angle is ___\u00B0","90"],
+      ["17","CH\u2084 bond angle is ___\u00B0","109.5"],
+      ["18","SF\u2086 bond angle is ___\u00B0","90"]
+    ]
+  },
+  {
+    id:4, title:"Polarity of Molecules", type:"mc",
+    instruction:"Select whether the molecule is polar or nonpolar, or choose the correct answer.",
+    questions:[
+      {q:"CO\u2082 is...",options:["Polar (dipoles add up)","Nonpolar (symmetric, dipoles cancel)","Ionic","Cannot be determined"],correct:1},
+      {q:"H\u2082O is...",options:["Nonpolar (symmetric)","Polar (bent shape, dipoles don't cancel)","Ionic","Cannot be determined"],correct:1},
+      {q:"CH\u2084 is...",options:["Polar","Nonpolar (symmetric tetrahedral)","Ionic","Depends on temperature"],correct:1},
+      {q:"NH\u2083 is...",options:["Nonpolar","Polar (trigonal pyramidal, net dipole)","Ionic","Cannot be determined"],correct:1},
+      {q:"BF\u2083 is...",options:["Polar","Nonpolar (symmetric trigonal planar)","Ionic","Depends on solvent"],correct:1},
+      {q:"CHCl\u2083 is...",options:["Nonpolar","Polar (asymmetric tetrahedral)","Ionic","Cannot be determined"],correct:1},
+      {q:"CCl\u2084 is...",options:["Polar","Nonpolar (symmetric tetrahedral)","Ionic","Depends on state"],correct:1},
+      {q:"A molecule is nonpolar when...",options:["It has no bonds","Bond dipoles cancel due to symmetry","It contains only nonmetals","It is a gas"],correct:1},
+      {q:"SO\u2082 is...",options:["Nonpolar","Polar (bent, dipoles don't cancel)","Ionic","Depends on state"],correct:1},
+      {q:"XeF\u2082 is...",options:["Polar","Nonpolar (linear, symmetric)","Ionic","Cannot be determined"],correct:1},
+      {q:"NF\u2083 is...",options:["Nonpolar","Polar (trigonal pyramidal, lone pair)","Ionic","Depends on bond length"],correct:1},
+      {q:"SF\u2086 is...",options:["Polar","Nonpolar (symmetric octahedral)","Ionic","Depends on state"],correct:1},
+      {q:"PCl\u2085 is...",options:["Polar","Nonpolar (symmetric trigonal bipyramidal)","Ionic","Cannot be determined"],correct:1},
+      {q:"CH\u2082Cl\u2082 is...",options:["Nonpolar","Polar (asymmetric, dipoles don't cancel)","Ionic","Depends on temperature"],correct:1},
+      {q:"XeF\u2084 is...",options:["Polar","Nonpolar (symmetric square planar)","Ionic","Cannot be determined"],correct:1}
+    ]
+  },
+  {
+    id:5, title:"Hybridization",
+    instruction:"Write the hybridization or identify the bond composition.",
+    rows:[
+      ["1","2 electron domains \u2192 ___ hybridization","sp"],
+      ["2","3 electron domains \u2192 ___ hybridization","sp2"],
+      ["3","4 electron domains \u2192 ___ hybridization","sp3"],
+      ["4","5 electron domains \u2192 ___ hybridization","sp3d"],
+      ["5","6 electron domains \u2192 ___ hybridization","sp3d2"],
+      ["6","Carbon in CH\u2084 is ___ hybridized","sp3"],
+      ["7","Carbon in CO\u2082 is ___ hybridized","sp"],
+      ["8","Carbon in C\u2082H\u2084 (ethene) is ___ hybridized","sp2"],
+      ["9","N in NH\u2083 is ___ hybridized","sp3"],
+      ["10","O in H\u2082O is ___ hybridized","sp3"],
+      ["11","B in BF\u2083 is ___ hybridized","sp2"],
+      ["12","S in SF\u2086 is ___ hybridized","sp3d2"],
+      ["13","P in PCl\u2085 is ___ hybridized","sp3d"],
+      ["14","C in HCN is ___ hybridized","sp"],
+      ["15","C in CH\u2082O is ___ hybridized","sp2"],
+      ["16","A double bond consists of ___ sigma and ___ pi bond(s)","1, 1 / 1 sigma and 1 pi / one sigma and one pi"],
+      ["17","A triple bond consists of ___ sigma and ___ pi bond(s)","1, 2 / 1 sigma and 2 pi / one sigma and two pi"],
+      ["18","A single bond is always a ___ bond","sigma"]
+    ]
+  },
+  {
+    id:6, title:"Sigma and Pi Bonds", type:"mc",
+    instruction:"Count sigma and pi bonds in each molecule.",
+    questions:[
+      {q:"C\u2082H\u2082 (acetylene, H-C\u2261C-H): how many sigma and pi bonds total?",options:["3 sigma, 2 pi","2 sigma, 3 pi","5 sigma, 0 pi","4 sigma, 1 pi"],correct:0},
+      {q:"C\u2082H\u2084 (ethene, H\u2082C=CH\u2082): how many sigma and pi bonds total?",options:["4 sigma, 1 pi","5 sigma, 1 pi","3 sigma, 2 pi","6 sigma, 0 pi"],correct:1},
+      {q:"CO\u2082 (O=C=O): how many sigma and pi bonds total?",options:["2 sigma, 0 pi","2 sigma, 2 pi","1 sigma, 2 pi","4 sigma, 0 pi"],correct:1},
+      {q:"CH\u2084: how many sigma bonds?",options:["2","3","4","8"],correct:2},
+      {q:"HCN: how many sigma and pi bonds?",options:["2 sigma, 2 pi","1 sigma, 3 pi","3 sigma, 0 pi","2 sigma, 1 pi"],correct:0},
+      {q:"N\u2082 (N\u2261N): how many sigma and pi bonds?",options:["1 sigma, 2 pi","3 sigma, 0 pi","2 sigma, 1 pi","0 sigma, 3 pi"],correct:0},
+      {q:"H\u2082O: how many sigma bonds?",options:["1","2","3","4"],correct:1},
+      {q:"All single bonds are ___ bonds.",options:["Pi","Sigma","Both","Neither"],correct:1},
+      {q:"Pi bonds are formed by ___ overlap of p orbitals.",options:["Head-on","Side-by-side / lateral","End-to-end","Diagonal"],correct:1},
+      {q:"Sigma bonds are formed by ___ overlap.",options:["Side-by-side","Head-on / end-to-end","Lateral","No overlap"],correct:1}
+    ]
+  },
+  {
+    id:7, title:"Identify Everything", type:"mc",
+    instruction:"For each molecule, select the answer that correctly identifies all properties.",
+    questions:[
+      {q:"SO\u2083: electron domains, geometry, hybridization, polar?",options:["3, trigonal planar, sp2, nonpolar","3, trigonal pyramidal, sp3, polar","4, tetrahedral, sp3, nonpolar","2, linear, sp, nonpolar"],correct:0},
+      {q:"H\u2082S: electron domains on S, molecular geometry, hybridization?",options:["2, linear, sp","3, trigonal planar, sp2","4, bent, sp3","4, tetrahedral, sp3"],correct:2},
+      {q:"XeF\u2082: electron domains on Xe, molecular geometry?",options:["2, linear","3, bent","4, tetrahedral","5, linear"],correct:3},
+      {q:"ClF\u2083: electron domains on Cl, molecular geometry?",options:["3, trigonal planar","4, tetrahedral","5, T-shaped","5, trigonal bipyramidal"],correct:2},
+      {q:"IF\u2085: electron domains on I, molecular geometry?",options:["5, trigonal bipyramidal","6, square pyramidal","6, octahedral","4, see-saw"],correct:1},
+      {q:"CS\u2082: electron domains, geometry, hybridization, polar?",options:["3, trigonal planar, sp2, nonpolar","2, linear, sp, nonpolar","4, tetrahedral, sp3, polar","2, bent, sp2, polar"],correct:1},
+      {q:"PF\u2083: electron domains, geometry, hybridization, polar?",options:["3, trigonal planar, sp2, nonpolar","4, trigonal pyramidal, sp3, polar","4, tetrahedral, sp3, nonpolar","3, bent, sp2, polar"],correct:1},
+      {q:"BeCl\u2082: electron domains, geometry, hybridization, polar?",options:["2, linear, sp, nonpolar","3, bent, sp2, polar","4, tetrahedral, sp3, nonpolar","2, bent, sp, polar"],correct:0},
+      {q:"SiCl\u2084: electron domains, geometry, hybridization, polar?",options:["4, tetrahedral, sp3, nonpolar","4, square planar, sp3d2, nonpolar","3, trigonal planar, sp2, nonpolar","4, tetrahedral, sp3, polar"],correct:0},
+      {q:"SeF\u2086: electron domains, geometry, hybridization, polar?",options:["6, octahedral, sp3d2, nonpolar","6, octahedral, sp3d2, polar","4, tetrahedral, sp3, polar","5, trigonal bipyramidal, sp3d, nonpolar"],correct:0}
+    ]
+  },
+  {
+    id:8, title:"Geometry Names (Word Arrange)", type:"arrange",
+    instruction:"Arrange the molecular geometries from smallest bond angle to largest.",
+    sentences:[
+      {prompt:"From smallest to largest bond angle:", words:["bent(~104.5)","trigonal-pyramidal(~107)","tetrahedral(109.5)","trigonal-planar(120)","linear(180)"]},
+      {prompt:"Arrange by increasing number of electron domains:", words:["linear(2)","trigonal-planar(3)","tetrahedral(4)","trig-bipyramidal(5)","octahedral(6)"]},
+      {prompt:"Geometries with 4 electron domains (0,1,2 lone pairs):", words:["tetrahedral","trigonal-pyramidal","bent"]},
+      {prompt:"Geometries with 5 electron domains (0,1,2,3 lone pairs):", words:["trig-bipyramidal","see-saw","T-shaped","linear"]},
+      {prompt:"Geometries with 6 electron domains (0,1,2 lone pairs):", words:["octahedral","square-pyramidal","square-planar"]}
+    ]
+  },
+  {
+    id:9, title:"Mixed Review", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Which molecule has the smallest bond angle?",options:["CH\u2084 (109.5\u00B0)","H\u2082O (~104.5\u00B0)","NH\u2083 (~107\u00B0)","BF\u2083 (120\u00B0)"],correct:1},
+      {q:"A molecule with 4 electron domains and 2 lone pairs has what geometry?",options:["Tetrahedral","Trigonal pyramidal","Bent","Linear"],correct:2},
+      {q:"Which hybridization has the largest s-character?",options:["sp","sp2","sp3","sp3d"],correct:0},
+      {q:"How many sigma and pi bonds are in a triple bond?",options:["3 sigma, 0 pi","2 sigma, 1 pi","1 sigma, 2 pi","0 sigma, 3 pi"],correct:2},
+      {q:"SF\u2084 (4 bonding pairs, 1 lone pair on S) has what geometry?",options:["Tetrahedral","Square planar","Trigonal bipyramidal","See-saw / seesaw"],correct:3},
+      {q:"Which molecule is polar despite having identical bonds?",options:["CO\u2082","CCl\u2084","NH\u2083","BF\u2083"],correct:2},
+      {q:"What is the hybridization of the central atom in XeF\u2084?",options:["sp3","sp3d","sp3d2","sp2"],correct:2},
+      {q:"Lone pairs on the central atom affect molecular geometry because they...",options:["Are invisible","Repel bonding pairs more strongly than bonding pairs repel each other","Have no effect","Attract bonding pairs"],correct:1},
+      {q:"A molecule with 5 electron domains and 2 lone pairs has what geometry?",options:["Trigonal bipyramidal","See-saw","T-shaped","Linear"],correct:2},
+      {q:"A molecule with 6 electron domains and 1 lone pair has what geometry?",options:["Octahedral","Square pyramidal","Square planar","Trigonal bipyramidal"],correct:1},
+      {q:"A molecule with 6 electron domains and 2 lone pairs has what geometry?",options:["Octahedral","Square pyramidal","Square planar","T-shaped"],correct:2},
+      {q:"Which molecule has a bond angle of 180\u00B0?",options:["H\u2082O","NH\u2083","CO\u2082","CH\u2084"],correct:2},
+      {q:"sp2 hybridization corresponds to ___ geometry.",options:["Linear","Trigonal planar","Tetrahedral","Octahedral"],correct:1},
+      {q:"The difference between electron domain geometry and molecular geometry is due to:",options:["Bond length","Lone pairs","Electronegativity","Bond order"],correct:1},
+      {q:"In VSEPR theory, a double bond is counted as ___ electron domain(s).",options:["1","2","3","4"],correct:0}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>VSEPR & Molecular Geometry - Complete Reference</h3><p><span class="rule">VSEPR Theory:</span> Valence Shell Electron Pair Repulsion. Electron domains (bonding pairs + lone pairs) arrange around the central atom to minimize repulsion. A double or triple bond counts as ONE electron domain.</p><p><span class="rule">Complete VSEPR Table:</span></p><table><tr><th>e\u207B Domains</th><th>e\u207B Geometry</th><th>Lone Pairs</th><th>Molecular Geometry</th><th>Example</th><th>Bond Angle</th><th>Hybrid</th></tr><tr><td>2</td><td>Linear</td><td>0</td><td>Linear</td><td>CO\u2082, BeCl\u2082</td><td>180\u00B0</td><td>sp</td></tr><tr><td>3</td><td>Trigonal planar</td><td>0</td><td>Trigonal planar</td><td>BF\u2083, SO\u2083</td><td>120\u00B0</td><td>sp\u00B2</td></tr><tr><td>3</td><td>Trigonal planar</td><td>1</td><td>Bent</td><td>SO\u2082, O\u2083</td><td>&lt;120\u00B0</td><td>sp\u00B2</td></tr><tr><td>4</td><td>Tetrahedral</td><td>0</td><td>Tetrahedral</td><td>CH\u2084, CCl\u2084</td><td>109.5\u00B0</td><td>sp\u00B3</td></tr><tr><td>4</td><td>Tetrahedral</td><td>1</td><td>Trigonal pyramidal</td><td>NH\u2083, NF\u2083</td><td>~107\u00B0</td><td>sp\u00B3</td></tr><tr><td>4</td><td>Tetrahedral</td><td>2</td><td>Bent</td><td>H\u2082O, H\u2082S</td><td>~104.5\u00B0</td><td>sp\u00B3</td></tr><tr><td>5</td><td>Trig. bipyramidal</td><td>0</td><td>Trig. bipyramidal</td><td>PCl\u2085</td><td>90\u00B0/120\u00B0</td><td>sp\u00B3d</td></tr><tr><td>5</td><td>Trig. bipyramidal</td><td>1</td><td>Seesaw</td><td>SF\u2084</td><td>~90\u00B0/~120\u00B0</td><td>sp\u00B3d</td></tr><tr><td>5</td><td>Trig. bipyramidal</td><td>2</td><td>T-shaped</td><td>ClF\u2083</td><td>~90\u00B0</td><td>sp\u00B3d</td></tr><tr><td>5</td><td>Trig. bipyramidal</td><td>3</td><td>Linear</td><td>XeF\u2082</td><td>180\u00B0</td><td>sp\u00B3d</td></tr><tr><td>6</td><td>Octahedral</td><td>0</td><td>Octahedral</td><td>SF\u2086</td><td>90\u00B0</td><td>sp\u00B3d\u00B2</td></tr><tr><td>6</td><td>Octahedral</td><td>1</td><td>Square pyramidal</td><td>IF\u2085, BrF\u2085</td><td>~90\u00B0</td><td>sp\u00B3d\u00B2</td></tr><tr><td>6</td><td>Octahedral</td><td>2</td><td>Square planar</td><td>XeF\u2084</td><td>90\u00B0</td><td>sp\u00B3d\u00B2</td></tr></table><p><span class="rule">Lone Pair Effects:</span> Lone pairs occupy MORE space than bonding pairs because they are held closer to the nucleus. Order of repulsion: LP-LP > LP-BP > BP-BP. This compresses bond angles below the ideal values. In trigonal bipyramidal, lone pairs always go in equatorial positions first (more room).</p><p><span class="rule">Hybridization:</span></p><table><tr><th>e\u207B Domains</th><th>Hybridization</th><th>Geometry</th><th>Orbitals Mixed</th></tr><tr><td>2</td><td>sp</td><td>Linear</td><td>1s + 1p</td></tr><tr><td>3</td><td>sp\u00B2</td><td>Trigonal planar</td><td>1s + 2p</td></tr><tr><td>4</td><td>sp\u00B3</td><td>Tetrahedral</td><td>1s + 3p</td></tr><tr><td>5</td><td>sp\u00B3d</td><td>Trig. bipyramidal</td><td>1s + 3p + 1d</td></tr><tr><td>6</td><td>sp\u00B3d\u00B2</td><td>Octahedral</td><td>1s + 3p + 2d</td></tr></table><p><span class="rule">Polarity:</span> A molecule is polar if (1) it has polar bonds AND (2) the bond dipoles do NOT cancel due to geometry. Symmetric geometries (linear with identical bonds, trigonal planar, tetrahedral, octahedral with all same substituents) are nonpolar. Asymmetric geometries (bent, trig. pyramidal, seesaw, T-shaped, square pyramidal) are typically polar.</p><p><span class="rule">Sigma (\u03C3) and Pi (\u03C0) Bonds:</span></p><table><tr><th>Bond Type</th><th>\u03C3 Bonds</th><th>\u03C0 Bonds</th><th>Overlap</th></tr><tr><td>Single</td><td>1</td><td>0</td><td>Head-on</td></tr><tr><td>Double</td><td>1</td><td>1</td><td>\u03C3: head-on, \u03C0: side-by-side</td></tr><tr><td>Triple</td><td>1</td><td>2</td><td>\u03C3: head-on, 2\u03C0: side-by-side</td></tr></table><p>\u03C3 bonds form from head-on overlap (s-s, s-p, p-p, or hybrid orbitals). \u03C0 bonds form from side-by-side overlap of unhybridized p orbitals. \u03C0 bonds restrict rotation around the bond axis.</p>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 electron domains, geometry, polarity, hybridization \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

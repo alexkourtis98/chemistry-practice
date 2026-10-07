@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice 45 — Isomerism in Chemistry</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Practice 45 &mdash; Isomerism in Chemistry</h1>
+<p class="subtitle">Deep practice &mdash; structural, geometric, optical isomers &mdash; 52 questions</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_45';
+const SECTIONS = [
+  {
+    id:1, title:"Types of Isomers",
+    instruction:"Fill in the blank with the correct term.",
+    rows:[
+      ["1","Isomers have the same ___ formula but different structures","molecular"],
+      ["2","Structural isomers differ in the ___ of atoms","connectivity / arrangement / bonding"],
+      ["3","Geometric isomers (cis/trans) differ in spatial ___ around a double bond","arrangement"],
+      ["4","Optical isomers are non-superimposable ___ images","mirror"],
+      ["5","How many structural isomers does C\u2084H\u2081\u2080 have?","2"],
+      ["6","How many structural isomers does C\u2085H\u2081\u2082 have?","3"],
+      ["7","cis-2-butene and trans-2-butene are ___ isomers","geometric / cis-trans"],
+      ["8","A carbon with 4 different groups is called a ___ center","chiral / asymmetric / stereocenter"],
+      ["9","The two main categories of isomers are structural and ___","stereoisomers / stereo"],
+      ["10","Stereoisomers have the same connectivity but different ___ arrangement","spatial / 3D"],
+      ["11","Conformational isomers differ by rotation around ___ bonds","single"],
+      ["12","Conformers are ___ (different molecules / same molecule)","same molecule"],
+      ["13","The most stable conformation of ethane is ___","staggered"],
+      ["14","The least stable conformation of ethane is ___","eclipsed"],
+      ["15","Isomers that differ in connectivity are called ___ isomers","structural / constitutional"]
+    ]
+  },
+  {
+    id:2, title:"Structural Isomers",
+    instruction:"Fill in the blank with the correct term or value.",
+    rows:[
+      ["1","n-butane and isobutane are ___ isomers","structural"],
+      ["2","C\u2083H\u2088O has two isomers: 1-propanol and ___","2-propanol / methoxyethane / methyl ethyl ether"],
+      ["3","Butanol has ___ structural isomers","4"],
+      ["4","Chain isomers differ in the ___ arrangement","carbon chain / backbone"],
+      ["5","Position isomers differ in the position of ___","functional group / substituent"],
+      ["6","Functional group isomers have different ___","functional groups"],
+      ["7","C\u2082H\u2086O: ethanol and ___ are functional group isomers","dimethyl ether / methoxymethane"],
+      ["8","Tautomers are isomers that interconvert via ___ migration","proton / hydrogen"],
+      ["9","1-propanol and 2-propanol are ___ isomers","position"],
+      ["10","Propanal (CH\u2083CH\u2082CHO) and acetone (CH\u2083COCH\u2083) are ___ isomers","functional group"],
+      ["11","C\u2084H\u2081\u2080O has ___ structural isomers (alcohols + ethers)","7"],
+      ["12","Metamerism is a type of isomerism in ___ (functional group class)","ethers / amines"],
+      ["13","C\u2083H\u2086O\u2082 can be propanediol or ___","methyl glycolate / methoxyacetic acid"],
+      ["14","1-butanol, 2-butanol, 2-methyl-1-propanol, and ___ are the 4 butanol isomers","2-methyl-2-propanol / tert-butanol"],
+      ["15","Ring-chain isomers: cyclopropane and ___ have formula C\u2083H\u2086","propene / propylene"]
+    ]
+  },
+  {
+    id:3, title:"Geometric (cis/trans) Isomers",
+    instruction:"Fill in the blank with the correct term.",
+    rows:[
+      ["1","Geometric isomerism requires restricted ___","rotation"],
+      ["2","Double bonds ___ rotate freely (do/don't)","don't"],
+      ["3","cis = same ___","side"],
+      ["4","trans = ___ sides","opposite"],
+      ["5","Does 1-butene have cis/trans isomers?","no"],
+      ["6","Does 2-butene have cis/trans isomers?","yes"],
+      ["7","cis-2-butene has ___ boiling point than trans (higher/lower)","higher"],
+      ["8","E/Z notation is the IUPAC system for ___","geometric isomers / cis/trans"],
+      ["9","For cis/trans to exist, each C of the double bond must have ___ different groups","2 / two"],
+      ["10","E = entgegen = ___ sides","opposite"],
+      ["11","Z = zusammen = ___ side","same"],
+      ["12","The E/Z system uses ___ priority rules","Cahn-Ingold-Prelog / CIP"],
+      ["13","Higher atomic number = ___ priority","higher"],
+      ["14","Does propene (CH\u2083CH=CH\u2082) show geometric isomerism?","no"],
+      ["15","Does 1,2-dichloroethene show geometric isomerism?","yes"],
+      ["16","cis-1,2-dichloroethene has ___ (higher/lower) dipole moment than trans","higher"],
+      ["17","Cyclic compounds can also show cis/trans isomerism: true or false?","true"],
+      ["18","cis-1,2-dimethylcyclohexane has both methyls on ___ side of the ring","same / the same"]
+    ]
+  },
+  {
+    id:4, title:"Chirality & Optical Isomers", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"A chiral molecule has a non-superimposable ___", options:["identical copy","mirror image","rotational form","planar structure"], correct:1},
+      {q:"Enantiomers rotate plane-polarized light in ___ directions", options:["the same","opposite","random","no"], correct:1},
+      {q:"A racemic mixture rotates plane-polarized light by how many degrees?", options:["90","180","0","45"], correct:2},
+      {q:"Which amino acid is NOT chiral?", options:["Alanine","Glycine","Leucine","Valine"], correct:1},
+      {q:"R and S are labels for ___", options:["geometric isomers","functional groups","chiral centers","tautomers"], correct:2},
+      {q:"Most biological molecules exist as:", options:["racemic mixtures","one enantiomer","both enantiomers equally","achiral forms"], correct:1},
+      {q:"How many chiral centers does 2-bromobutane have?", options:["0","1","2","3"], correct:1},
+      {q:"Diastereomers are stereoisomers that are NOT ___", options:["structural isomers","mirror images","chiral","organic"], correct:1},
+      {q:"A polarimeter measures:", options:["Melting point","Optical rotation","Boiling point","Density"], correct:1},
+      {q:"The specific rotation [alpha] is measured at the ___ line (589 nm):", options:["Hydrogen","Sodium D","Neon","Mercury"], correct:1},
+      {q:"+/- (dextrorotatory/levorotatory) refers to the ___ of light rotation:", options:["Speed","Direction","Wavelength","Intensity"], correct:1},
+      {q:"D/L and R/S naming systems are:", options:["The same thing","Different systems (D/L = configuration relative to glyceraldehyde, R/S = CIP rules)","Only for sugars","Only for amino acids"], correct:1},
+      {q:"A molecule with no chiral center is always achiral:", options:["True","False (allenes can be chiral without a chiral center)","Only for organic molecules","Only for small molecules"], correct:1},
+      {q:"Enantiomers have identical physical properties EXCEPT:", options:["Melting point","Boiling point","Optical rotation direction","Density"], correct:2},
+      {q:"A molecule with a plane of symmetry is:", options:["Always chiral","Always achiral","Sometimes chiral","Cannot determine"], correct:1}
+    ]
+  },
+  {
+    id:5, title:"Drawing & Counting Isomers",
+    instruction:"Fill in the number or term for each question about isomer counting.",
+    rows:[
+      ["1","C\u2083H\u2088 has ___ structural isomer(s)","1"],
+      ["2","C\u2084H\u2081\u2080 has ___ structural isomer(s)","2"],
+      ["3","C\u2085H\u2081\u2082 has ___ structural isomer(s)","3"],
+      ["4","C\u2086H\u2081\u2084 has ___ structural isomer(s)","5"],
+      ["5","A molecule with n chiral centers can have up to ___ stereoisomers (formula)","2^n / 2n"],
+      ["6","A molecule with 2 chiral centers can have up to ___ stereoisomers","4"],
+      ["7","C\u2087H\u2081\u2086 has ___ structural isomers","9"],
+      ["8","C\u2083H\u2087Cl has ___ structural isomers","2"],
+      ["9","C\u2084H\u2089Cl has ___ structural isomers","4"],
+      ["10","A molecule with 3 chiral centers has up to ___ stereoisomers","8"],
+      ["11","If a meso form exists, actual stereoisomers = 2^n minus ___ for each meso compound","1"],
+      ["12","2,3-butanediol has 2 chiral centers but only ___ stereoisomers (one is meso)","3"],
+      ["13","C\u2082H\u2082Cl\u2082 has ___ structural isomers","2"],
+      ["14","Tartaric acid has 2 chiral centers and ___ stereoisomers (including meso)","3"],
+      ["15","C\u2084H\u2088 has ___ structural isomers","2"]
+    ]
+  },
+  {
+    id:6, title:"Meso Compounds & Diastereomers",
+    instruction:"Fill in the blank with the correct term.",
+    rows:[
+      ["1","A meso compound has chiral centers but is overall ___","achiral / optically inactive"],
+      ["2","Meso compounds have an internal plane of ___","symmetry"],
+      ["3","Meso-tartaric acid has ___ chiral centers but is optically inactive","2 / two"],
+      ["4","Diastereomers are stereoisomers that are ___ mirror images","not / non"],
+      ["5","cis/trans isomers are a type of ___","diastereomer"],
+      ["6","Diastereomers have ___ (same/different) physical properties","different"],
+      ["7","Enantiomers have ___ (same/different) physical properties (except optical rotation)","same / identical"],
+      ["8","The relationship between D-glucose and D-galactose is ___","diastereomers / epimers"],
+      ["9","Epimers differ at only ___ chiral center(s)","one / 1"],
+      ["10","Anomers are a special type of ___ that differ at the anomeric carbon","epimer / diastereomer"]
+    ]
+  },
+  {
+    id:7, title:"Isomers in Biochemistry", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"D-glucose and L-glucose are ___", options:["structural isomers","enantiomers","geometric isomers","tautomers"], correct:1},
+      {q:"cis and trans fats differ in ___ around C=C bonds", options:["number of carbons","geometry","functional groups","chain length"], correct:1},
+      {q:"Trans fats are ___ for health than cis fats", options:["better","the same","worse","unrelated"], correct:2},
+      {q:"Most natural amino acids are in the ___ configuration", options:["D","L","R","racemic"], correct:1},
+      {q:"Thalidomide's tragedy was caused by one ___ being harmful", options:["structural isomer","tautomer","enantiomer","geometric isomer"], correct:2},
+      {q:"Enzymes are stereospecific, meaning they distinguish between:", options:["chain isomers","position isomers","enantiomers","all of the above"], correct:2},
+      {q:"Most natural sugars are in the ___ configuration:", options:["D","L","R","racemic"], correct:0},
+      {q:"Alpha-glucose and beta-glucose are:", options:["Enantiomers","Structural isomers","Anomers","Geometric isomers"], correct:2},
+      {q:"Ibuprofen: only the ___ enantiomer is pharmacologically active:", options:["R","S","Both","Neither"], correct:1},
+      {q:"Drug enantiomers can have different ___ in the body:", options:["Molecular weights","Pharmacological effects","Number of atoms","Formulas"], correct:1}
+    ]
+  },
+  {
+    id:8, title:"Mixed Review", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Which type of isomers have the same molecular formula but different connectivity?", options:["Geometric","Optical","Structural","Conformational"], correct:2},
+      {q:"cis-trans isomerism requires:", options:["A single bond","A triple bond","Restricted rotation (e.g. double bond)","A chiral center"], correct:2},
+      {q:"A carbon bonded to four different groups is called:", options:["Saturated","Unsaturated","Chiral","Aromatic"], correct:2},
+      {q:"Which pair are enantiomers?", options:["n-butane and isobutane","cis-2-butene and trans-2-butene","D-alanine and L-alanine","ethanol and dimethyl ether"], correct:2},
+      {q:"Geometric isomers have different:", options:["Molecular formulas","Spatial arrangements around a double bond","Functional groups","Number of atoms"], correct:1},
+      {q:"How many structural isomers does C\u2083H\u2087Cl have?", options:["1","2","3","4"], correct:1},
+      {q:"The E/Z system is based on:", options:["Alphabetical order","Cahn-Ingold-Prelog priority rules","Molecular weight","Boiling point"], correct:1},
+      {q:"A meso compound has chiral centers but is overall:", options:["Chiral","Optically active","Achiral","Unstable"], correct:2},
+      {q:"Which relationship: same molecular formula, same connectivity, mirror images?", options:["Structural isomers","Enantiomers","Diastereomers","Conformers"], correct:1},
+      {q:"Which relationship: same molecular formula, same connectivity, NOT mirror images?", options:["Structural isomers","Enantiomers","Diastereomers","Identical"], correct:2},
+      {q:"Allenes with two different groups on each end can be:", options:["Chiral without a chiral center","Always achiral","Only structural isomers","Geometric isomers only"], correct:0},
+      {q:"The chair and boat forms of cyclohexane are:", options:["Structural isomers","Enantiomers","Conformational isomers","Geometric isomers"], correct:2},
+      {q:"Newman projections are used to visualize:", options:["Structural isomers","Geometric isomers","Conformational isomers","Optical isomers"], correct:2}
+    ]
+  },
+  {
+    id:9, title:"Isomer Type Classification", type:"arrange",
+    instruction:"Arrange the words in the correct order.",
+    sentences:[
+      {prompt:"Isomer classification hierarchy:", words:["isomers","->","structural","OR","stereoisomers","->","enantiomers","OR","diastereomers"]},
+      {prompt:"Types of structural isomers:", words:["chain,","position,","functional","group,","tautomers"]},
+      {prompt:"Conditions for chirality:", words:["carbon","with","four","different","groups","attached"]},
+      {prompt:"Conditions for geometric isomerism:", words:["restricted","rotation,","two","different","groups","on","each","carbon"]},
+      {prompt:"Stereoisomer max formula:", words:["maximum","stereoisomers","=","2","to","the","power","n"]},
+      {prompt:"CIP priority rule:", words:["higher","atomic","number","=","higher","priority"]}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Isomer Classification</h3><p><span class="rule">Isomers:</span> Same molecular formula, different arrangement of atoms.</p><h3>1. Structural (Constitutional) Isomers</h3><p>Different connectivity of atoms.</p><p>&bull; <strong>Chain isomers:</strong> Different carbon skeleton (e.g. n-butane vs isobutane)</p><p>&bull; <strong>Position isomers:</strong> Different position of functional group (e.g. 1-propanol vs 2-propanol)</p><p>&bull; <strong>Functional group isomers:</strong> Different functional groups (e.g. ethanol C\u2082H\u2085OH vs dimethyl ether CH\u2083OCH\u2083, both C\u2082H\u2086O)</p><h3>2. Stereoisomers</h3><p>Same connectivity, different spatial arrangement.</p><p><span class="rule">Geometric (cis/trans or E/Z):</span></p><p>&bull; Requires restricted rotation (C=C or ring)</p><p>&bull; <strong>cis (Z):</strong> same-priority groups on same side</p><p>&bull; <strong>trans (E):</strong> same-priority groups on opposite sides</p><p>&bull; Requirement: each doubly-bonded carbon must have 2 different substituents</p><p><span class="rule">Optical Isomers (Enantiomers):</span></p><p>&bull; Non-superimposable mirror images</p><p>&bull; Require a <strong>chiral center</strong> (sp\u00B3 carbon with 4 different groups)</p><p>&bull; Rotate plane-polarized light in equal but opposite directions</p><p>&bull; Identical physical properties (mp, bp, solubility) except optical rotation</p><p>&bull; Different biological activity (e.g. D- vs L-amino acids, R- vs S-drugs)</p><p><span class="rule">Diastereomers:</span></p><p>&bull; Stereoisomers that are NOT mirror images</p><p>&bull; Different physical properties (mp, bp, solubility)</p><p>&bull; Include geometric isomers (cis/trans) and molecules with 2+ chiral centers that differ at some but not all</p><h3>CIP Priority Rules (R/S Assignment)</h3><p><span class="rule">Step 1:</span> Rank the 4 groups on the chiral center by atomic number of the directly attached atom (higher Z = higher priority).</p><p><span class="rule">Step 2:</span> If tied, move outward to the next atom until a difference is found.</p><p><span class="rule">Step 3:</span> Orient the molecule so the lowest-priority group (#4) points away from you.</p><p><span class="rule">Step 4:</span> Trace 1\u21922\u21923. Clockwise = <strong>R</strong> (rectus). Counterclockwise = <strong>S</strong> (sinister).</p><p>&bull; Common priority: I > Br > Cl > S > F > O > N > C > H</p><p>&bull; Double/triple bonds: treat as 2 or 3 single bonds to phantom atoms</p><h3>Meso Compounds</h3><p><span class="rule">Definition:</span> A molecule with chiral centers but an internal mirror plane, making it achiral overall.</p><p>&bull; Has 2+ chiral centers with R and S configurations that cancel each other</p><p>&bull; Optically inactive despite having chiral centers</p><p>&bull; Example: meso-tartaric acid (2R,3S) has an internal mirror plane</p><p>&bull; Reduces total stereoisomers below 2\u207F</p><h3>Relationship Flowchart</h3><p><span class="rule">Same formula?</span> No \u2192 Not isomers</p><p><span class="rule">Same formula?</span> Yes \u2192 <strong>Same connectivity?</strong></p><p>&bull; No \u2192 <strong>Structural (constitutional) isomers</strong></p><p>&bull; Yes \u2192 <strong>Mirror images?</strong></p><p>&emsp;&bull; Yes + non-superimposable \u2192 <strong>Enantiomers</strong></p><p>&emsp;&bull; Yes + superimposable (internal mirror plane) \u2192 <strong>Meso compound</strong> (same molecule)</p><p>&emsp;&bull; No \u2192 <strong>Diastereomers</strong> (includes cis/trans)</p><h3>Summary Table</h3><table><tr><th>Type</th><th>Key Feature</th><th>Example</th></tr><tr><td>Chain</td><td>Different skeleton</td><td>n-butane / isobutane</td></tr><tr><td>Position</td><td>Different substituent position</td><td>1-propanol / 2-propanol</td></tr><tr><td>Functional group</td><td>Different functional group</td><td>ethanol / dimethyl ether</td></tr><tr><td>Geometric (E/Z)</td><td>cis/trans around C=C or ring</td><td>cis-2-butene / trans-2-butene</td></tr><tr><td>Enantiomers</td><td>Non-superimposable mirror images</td><td>R-alanine / S-alanine</td></tr><tr><td>Diastereomers</td><td>Stereoisomers, NOT mirrors</td><td>(2R,3R)- vs (2R,3S)-tartaric acid</td></tr><tr><td>Meso</td><td>Chiral centers + internal mirror</td><td>meso-tartaric acid</td></tr></table><p><span class="rule">Counting rule:</span> A molecule with <em>n</em> chiral centers has up to 2<sup>n</sup> stereoisomers, but meso forms reduce this number.</p><p><span class="rule">Racemic mixture:</span> 50:50 mix of two enantiomers. Optically inactive (rotations cancel). Denoted (\u00B1) or (d,l).</p>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 structural, geometric, optical isomers \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

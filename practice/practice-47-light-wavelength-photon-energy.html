@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice 47 — Light, Wavelength & Photon Energy</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Practice 47 &mdash; Light, Wavelength &amp; Photon Energy</h1>
+<p class="subtitle">Deep practice &mdash; electromagnetic spectrum, c = &lambda;&nu;, E = h&nu;, E = hc/&lambda;</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_47';
+const SECTIONS = [
+  {
+    id:1, title:"EM Spectrum Basics",
+    instruction:"Fill in the blank with the correct term or value.",
+    rows:[
+      ["1","List the EM spectrum from longest to shortest wavelength: radio, ___, infrared, visible, ultraviolet, X-ray, gamma","microwave"],
+      ["2","As wavelength increases, frequency ___","decreases"],
+      ["3","As frequency increases, energy ___","increases"],
+      ["4","The visible light range is approximately ___ nm to 750 nm","380 / 400"],
+      ["5","The color with the longest wavelength in visible light is ___","red"],
+      ["6","The color with the shortest wavelength in visible light is ___","violet"],
+      ["7","All electromagnetic radiation travels at the speed of ___ in a vacuum","light / c"],
+      ["8","The speed of light c = ___ m/s","3.00e8 / 3.0e8 / 3e8 / 3.00 x 10^8 / 3 x 10^8"],
+      ["9","Infrared radiation has ___ wavelength than visible light","longer / greater"],
+      ["10","X-rays have ___ wavelength than ultraviolet light","shorter"],
+      ["11","The type of EM radiation used in microwave ovens is ___","microwave"],
+      ["12","Radio waves have the ___ frequency of all EM radiation","lowest"],
+      ["13","Gamma rays have the ___ energy of all EM radiation","highest"],
+      ["14","The EM radiation used for medical imaging of bones is ___","X-ray / X-rays"],
+      ["15","UV radiation from the sun causes ___ (a harmful skin effect)","sunburn / skin cancer / DNA damage"],
+      ["16","Visible light wavelengths are on the order of ___ (nm/mm/m)","nm / nanometers"],
+      ["17","Radio wave wavelengths can be ___ (cm/m/km) long","m / km / meters"],
+      ["18","Gamma ray wavelengths are on the order of ___ m","10^-12 / 1e-12 / picometers"]
+    ]
+  },
+  {
+    id:2, title:"Speed of Light Equation c = \u03BB\u03BD",
+    instruction:"Fill in the blank. Use scientific notation where appropriate (e.g. 5.0e14).",
+    rows:[
+      ["1","In c = \u03BB\u03BD, c is ___, \u03BB is ___, and \u03BD is ___","speed of light, wavelength, frequency"],
+      ["2","The unit of wavelength \u03BB is ___ (SI unit)","meters / m"],
+      ["3","The unit of frequency \u03BD is ___ (SI unit)","hertz / Hz / s^-1 / s\u207B\u00B9"],
+      ["4","If \u03BB = 500 nm, convert to meters: ___ m","5.00e-7 / 5.0e-7 / 5e-7"],
+      ["5","If \u03BD = 6.0 \u00D7 10\u00B9\u2074 Hz, what is \u03BB? ___ m (use c = 3.00 \u00D7 10\u2078 m/s)","5.0e-7 / 5.00e-7 / 5e-7"],
+      ["6","If \u03BB = 650 nm, what is \u03BD? ___ Hz","4.62e14 / 4.6e14"],
+      ["7","A radio wave has \u03BD = 1.0 \u00D7 10\u2076 Hz. Its wavelength is ___ m","300 / 3.0e2 / 3.00e2"],
+      ["8","If \u03BB = 0.01 m, this is a ___ wave","microwave"],
+      ["9","If \u03BB = 250 nm, convert to meters: ___ m","2.50e-7 / 2.5e-7"],
+      ["10","If \u03BB = 250 nm, \u03BD = ___ Hz","1.2e15 / 1.20e15"],
+      ["11","If \u03BD = 5.0 \u00D7 10\u2079 Hz, \u03BB = ___ m","0.06 / 6.0e-2 / 6e-2"],
+      ["12","If \u03BB = 10.0 \u03BCm (micrometers), convert to meters: ___ m","1.0e-5 / 1e-5"],
+      ["13","If \u03BB = 10.0 \u03BCm, \u03BD = ___ Hz","3.0e13 / 3e13"],
+      ["14","An FM radio station broadcasts at 100 MHz. \u03BB = ___ m","3.0 / 3"],
+      ["15","If \u03BB = 0.10 nm (X-ray), \u03BD = ___ Hz","3.0e18 / 3e18"],
+      ["16","Green light has \u03BB \u2248 550 nm. Its \u03BD = ___ Hz","5.45e14 / 5.5e14"],
+      ["17","If \u03BD = 4.0 \u00D7 10\u00B9\u2074 Hz, \u03BB = ___ nm","750"],
+      ["18","If \u03BD = 7.5 \u00D7 10\u00B9\u2074 Hz, \u03BB = ___ nm","400"],
+      ["19","1 \u03BCm = ___ nm","1000"],
+      ["20","1 \u00C5 (angstrom) = ___ m","1e-10 / 10^-10"]
+    ]
+  },
+  {
+    id:3, title:"Photon Energy E = h\u03BD",
+    instruction:"Calculate photon energy. h = 6.626 \u00D7 10\u207B\u00B3\u2074 J\u00B7s.",
+    rows:[
+      ["1","Planck's constant h = ___ J\u00B7s","6.626e-34 / 6.626 x 10^-34"],
+      ["2","E = h\u03BD relates energy to ___","frequency"],
+      ["3","If \u03BD = 5.0 \u00D7 10\u00B9\u2074 Hz, E = ___ J","3.3e-19 / 3.31e-19 / 3.313e-19"],
+      ["4","A photon with higher frequency has ___ energy","higher / more / greater"],
+      ["5","If E = 3.0 \u00D7 10\u207B\u00B9\u2079 J, what is \u03BD? ___ Hz","4.5e14 / 4.53e14"],
+      ["6","Gamma rays have ___ frequency and ___ energy compared to radio waves","higher, higher / high, high"],
+      ["7","If \u03BD = 1.0 \u00D7 10\u00B9\u2078 Hz (X-ray), E = ___ J","6.63e-16 / 6.6e-16"],
+      ["8","If \u03BD = 3.0 \u00D7 10\u00B9\u2072 Hz (infrared), E = ___ J","1.99e-21 / 2.0e-21"],
+      ["9","A radio photon (\u03BD = 1.0 \u00D7 10\u2076 Hz) has E = ___ J","6.63e-28 / 6.6e-28"],
+      ["10","Which has more energy: one X-ray photon or one million radio photons?","one X-ray photon / X-ray"],
+      ["11","If \u03BD = 7.5 \u00D7 10\u00B9\u2074 Hz (violet), E = ___ J","4.97e-19 / 5.0e-19"],
+      ["12","If E = 2.0 \u00D7 10\u207B\u00B9\u2079 J, \u03BD = ___ Hz","3.0e14 / 3.02e14"],
+      ["13","Energy of a photon is ___ (continuous/quantized)","quantized"],
+      ["14","The minimum packet of light energy is called a ___","photon / quantum"],
+      ["15","If \u03BD = 6.0 \u00D7 10\u00B9\u2074 Hz, the energy in eV (1 eV = 1.602\u00D710\u207B\u00B9\u2079 J): E \u2248 ___ eV","2.5 / 2.48"]
+    ]
+  },
+  {
+    id:4, title:"E = hc/\u03BB Combined",
+    instruction:"Calculate using E = hc/\u03BB. h = 6.626 \u00D7 10\u207B\u00B3\u2074 J\u00B7s, c = 3.00 \u00D7 10\u2078 m/s.",
+    rows:[
+      ["1","E = hc/\u03BB combines which two equations?","c = \u03BB\u03BD and E = h\u03BD / E = h\u03BD and c = \u03BB\u03BD"],
+      ["2","If \u03BB = 400 nm, E = ___ J","4.97e-19 / 4.97 x 10^-19 / 5.0e-19"],
+      ["3","If \u03BB = 700 nm, E = ___ J","2.84e-19 / 2.84 x 10^-19 / 2.8e-19"],
+      ["4","Which has more energy per photon: 400 nm or 700 nm light?","400 nm / 400"],
+      ["5","If E = 1.99 \u00D7 10\u207B\u00B9\u2078 J, what is \u03BB? ___ m","1.0e-8 / 1e-8 / 10 nm"],
+      ["6","UV light (\u03BB \u2248 200 nm) has ___ energy than visible light","more / higher / greater"],
+      ["7","Calculate hc = ___ J\u00B7m","1.99e-25 / 1.989e-25 / 1.99 x 10^-25"],
+      ["8","If a photon has E = 6.63 \u00D7 10\u207B\u00B9\u2079 J, its \u03BB = ___ nm","300 / 3.0e2"],
+      ["9","If \u03BB = 121.6 nm (Lyman-\u03B1), E = ___ J","1.63e-18 / 1.6e-18"],
+      ["10","If \u03BB = 486 nm (Balmer H-\u03B2), E = ___ J","4.09e-19 / 4.1e-19"],
+      ["11","If \u03BB = 656 nm (Balmer H-\u03B1), E = ___ J","3.03e-19 / 3.0e-19"],
+      ["12","If E = 9.94 \u00D7 10\u207B\u00B9\u2079 J, \u03BB = ___ nm","200"],
+      ["13","Rank by energy: 200 nm, 500 nm, 800 nm (highest first)","200, 500, 800 / 200 nm, 500 nm, 800 nm"],
+      ["14","A photon with \u03BB = 1.00 \u03BCm has E = ___ J","1.99e-19 / 2.0e-19"],
+      ["15","If \u03BB = 0.01 nm (gamma ray), E = ___ J","1.99e-14 / 2.0e-14"],
+      ["16","If E = 3.98 \u00D7 10\u207B\u00B9\u2079 J, \u03BB = ___ nm","500"],
+      ["17","The energy per photon of 589 nm sodium light = ___ J","3.37e-19 / 3.4e-19"],
+      ["18","To break a bond of 400 kJ/mol, the minimum \u03BB per photon = ___ nm (use E per molecule = 400000/6.022e23)","299 / 300"]
+    ]
+  },
+  {
+    id:5, title:"Atomic Emission & Hydrogen Line Series", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"A line emission spectrum is produced by:", options:["A hot solid","An excited gas at low pressure","White light through a prism","A black body"], correct:1},
+      {q:"Hydrogen's visible emission lines are called the ___ series", options:["Lyman","Balmer","Paschen","Brackett"], correct:1},
+      {q:"Each element has a ___ emission spectrum", options:["identical","continuous","unique","random"], correct:2},
+      {q:"In the Bohr model, light is emitted when an electron ___ energy levels", options:["jumps up between","falls down between","stays in the same","orbits within"], correct:1},
+      {q:"A continuous spectrum contains:", options:["Only specific wavelengths","Only one color","All wavelengths in a range","No visible light"], correct:2},
+      {q:"The energy of emitted light equals the ___ between energy levels", options:["sum","product","difference","ratio"], correct:2},
+      {q:"The Lyman series involves transitions to n = ___", options:["1","2","3","4"], correct:0},
+      {q:"The Balmer series involves transitions to n = ___", options:["1","2","3","4"], correct:1},
+      {q:"The Paschen series involves transitions to n = ___", options:["1","2","3","4"], correct:2},
+      {q:"The Lyman series produces ___ radiation", options:["Visible","Infrared","Ultraviolet","Microwave"], correct:2},
+      {q:"The Paschen series produces ___ radiation", options:["Visible","Infrared","Ultraviolet","X-ray"], correct:1},
+      {q:"The longest wavelength Balmer line (H-\u03B1) corresponds to the transition:", options:["n=3 to n=2","n=4 to n=2","n=2 to n=1","n=5 to n=2"], correct:0},
+      {q:"An absorption spectrum shows:", options:["Bright colored lines on dark background","Dark lines on a continuous spectrum","Only red and blue lines","A single bright line"], correct:1},
+      {q:"The Bohr model energy equation is En = -13.6/n\u00B2 eV. The ground state (n=1) energy is:", options:["-13.6 eV","-3.4 eV","-1.51 eV","0 eV"], correct:0},
+      {q:"As n increases, the energy levels get ___ together", options:["Farther","Closer","Equally spaced","Randomly spaced"], correct:1}
+    ]
+  },
+  {
+    id:6, title:"Photoelectric Effect & Work Function", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"The photoelectric effect proves that light behaves as:", options:["Only a wave","Only a particle","Both wave and particle","Neither"], correct:1},
+      {q:"Below the threshold frequency, ___ electrons are ejected regardless of intensity", options:["many","few","some","no"], correct:3},
+      {q:"Increasing light intensity above the threshold increases:", options:["Kinetic energy of electrons","Number of electrons ejected","Threshold frequency","Work function"], correct:1},
+      {q:"The work function (\u03D5) is the ___ energy needed to eject an electron", options:["maximum","average","minimum","total"], correct:2},
+      {q:"Einstein explained the photoelectric effect using:", options:["Wave theory","Quantum theory / photons","Classical mechanics","Thermodynamics"], correct:1},
+      {q:"KE of ejected electron = h\u03BD \u2212 \u03D5. If h\u03BD < \u03D5:", options:["Electron has max KE","Electron barely escapes","Electron is not ejected","Two electrons are ejected"], correct:2},
+      {q:"If the work function is 4.0 eV, the threshold frequency is approximately:", options:["9.65 \u00D7 10\u00B9\u2074 Hz","6.0 \u00D7 10\u00B9\u2074 Hz","1.0 \u00D7 10\u00B9\u2075 Hz","3.0 \u00D7 10\u00B9\u2074 Hz"], correct:0},
+      {q:"Increasing the frequency of light above threshold increases:", options:["Number of electrons","Kinetic energy of electrons","Work function","Wavelength"], correct:1},
+      {q:"The photoelectric effect is evidence for the ___ nature of light", options:["Wave","Particle","Continuous","Magnetic"], correct:1},
+      {q:"Classical wave theory predicted that any frequency of light should eject electrons if given enough:", options:["Time and intensity","Frequency","Wavelength","Photons"], correct:0},
+      {q:"A metal with a smaller work function requires ___ frequency light to eject electrons", options:["Higher","Lower","The same","No"], correct:1},
+      {q:"Cesium has a low work function (\u03D5 = 2.1 eV). Visible light ___ eject electrons from cesium", options:["Cannot","Can","Might not","Will never"], correct:1}
+    ]
+  },
+  {
+    id:7, title:"de Broglie & Wave-Particle Duality",
+    instruction:"Fill in the blank about de Broglie wavelength and duality.",
+    rows:[
+      ["1","de Broglie proposed that all matter has ___ properties","wave"],
+      ["2","The de Broglie wavelength equation is \u03BB = h/___","mv / p"],
+      ["3","As the mass of a particle increases, its wavelength ___","decreases"],
+      ["4","As the velocity of a particle increases, its wavelength ___","decreases"],
+      ["5","An electron (m = 9.11\u00D710\u207B\u00B3\u00B9 kg) at v = 1.0\u00D710\u2076 m/s has \u03BB = ___ m","7.3e-10 / 7.27e-10"],
+      ["6","A baseball (0.145 kg) at 40 m/s has \u03BB = ___ m","1.1e-34 / 1.14e-34"],
+      ["7","We observe wave behavior for ___ but not baseballs because the wavelength is too small","electrons"],
+      ["8","The Heisenberg uncertainty principle says we cannot know both ___ and ___ exactly","position, momentum / momentum, position"]
+    ]
+  },
+  {
+    id:8, title:"Bohr Model Energy Levels",
+    instruction:"Use En = -2.18 \u00D7 10\u207B\u00B9\u2078 / n\u00B2 J for hydrogen. Fill in the blank.",
+    rows:[
+      ["1","E\u2081 (ground state) = ___ J","-2.18e-18 / -2.18 x 10^-18"],
+      ["2","E\u2082 = ___ J","-5.45e-19 / -5.45 x 10^-19"],
+      ["3","E\u2083 = ___ J","-2.42e-19 / -2.42 x 10^-19"],
+      ["4","\u0394E for n=1 to n=2 = E\u2082 - E\u2081 = ___ J","1.63e-18 / 1.64e-18"],
+      ["5","The \u03BB for the n=2\u2192n=1 transition = ___ nm","121 / 122"],
+      ["6","\u0394E for n=3 to n=2 = ___ J","3.03e-19 / 3.0e-19"],
+      ["7","The \u03BB for the n=3\u2192n=2 transition = ___ nm","656"],
+      ["8","As n \u2192 \u221E, the energy approaches ___ J","0"],
+      ["9","The ionization energy of hydrogen from the ground state = ___ J","2.18e-18"],
+      ["10","The ionization energy of hydrogen = ___ eV","13.6"]
+    ]
+  },
+  {
+    id:9, title:"EM Spectrum & Concepts", type:"arrange",
+    instruction:"Arrange the words in the correct order.",
+    sentences:[
+      {prompt:"Order the EM spectrum from longest to shortest wavelength:", words:["Radio","Microwave","Infrared","Visible","Ultraviolet","X-ray","Gamma"]},
+      {prompt:"Order visible light colors from longest to shortest wavelength:", words:["Red","Orange","Yellow","Green","Blue","Violet"]},
+      {prompt:"Complete: As wavelength decreases, frequency and energy both ...", words:["increase"]},
+      {prompt:"Complete the equation: speed of light equals ...", words:["wavelength","times","frequency"]},
+      {prompt:"Order by increasing energy per photon:", words:["Radio","Microwave","Infrared","Visible","UV","X-ray","Gamma"]},
+      {prompt:"Order the hydrogen series by increasing energy:", words:["Pfund","Brackett","Paschen","Balmer","Lyman"]}
+    ]
+  },
+  {
+    id:10, title:"Mixed Calculations & Concepts",
+    instruction:"Fill in the blank. Mixed calculations and concepts.",
+    rows:[
+      ["1","Wavelength and frequency are ___ proportional","inversely"],
+      ["2","Energy and wavelength are ___ proportional","inversely"],
+      ["3","Energy and frequency are ___ proportional","directly"],
+      ["4","A photon of \u03BB = 450 nm has frequency = ___ Hz","6.67e14 / 6.7e14"],
+      ["5","A photon of \u03BB = 450 nm has energy = ___ J","4.42e-19 / 4.4e-19"],
+      ["6","1 nm = ___ m","1e-9 / 10^-9"],
+      ["7","The dual nature of light means it has both ___ and ___ properties","wave, particle / particle, wave"],
+      ["8","The equation E = h\u03BD was proposed by ___","Planck / Max Planck"],
+      ["9","A 532 nm green laser pointer: \u03BD = ___ Hz","5.64e14 / 5.6e14"],
+      ["10","Same green laser: E per photon = ___ J","3.74e-19 / 3.7e-19"],
+      ["11","A 1064 nm infrared laser: E per photon = ___ J","1.87e-19 / 1.9e-19"],
+      ["12","Ratio of green (532 nm) to IR (1064 nm) photon energy = ___","2"],
+      ["13","A sodium streetlight emits at 589 nm. This is ___ color light","yellow / orange-yellow"],
+      ["14","A photon of 300 nm is in the ___ region of the EM spectrum","ultraviolet / UV"],
+      ["15","A photon of 1500 nm is in the ___ region","infrared / IR"],
+      ["16","If you double the frequency, the energy ___","doubles"],
+      ["17","If you double the wavelength, the energy ___","halves / is halved / decreases by half"],
+      ["18","The photoelectric effect, atomic spectra, and blackbody radiation are evidence for the ___ nature of light","particle / quantum"]
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Light, Wavelength & Photon Energy</h3><h3>Electromagnetic Spectrum</h3><p><span class="rule">Long \u03BB \u2192 Short \u03BB:</span></p><p>Radio \u2192 Microwave \u2192 Infrared \u2192 <strong>Visible</strong> \u2192 Ultraviolet \u2192 X-ray \u2192 Gamma</p><table><tr><th>Region</th><th>Wavelength Range</th><th>Common Use</th></tr><tr><td>Radio</td><td>> 1 m</td><td>Broadcasting, MRI</td></tr><tr><td>Microwave</td><td>1 mm \u2013 1 m</td><td>Cooking, radar</td></tr><tr><td>Infrared</td><td>750 nm \u2013 1 mm</td><td>Heat sensing, IR spectroscopy</td></tr><tr><td>Visible</td><td>380 \u2013 750 nm</td><td>Human vision</td></tr><tr><td>Ultraviolet</td><td>10 \u2013 380 nm</td><td>Sterilization, sunburn</td></tr><tr><td>X-ray</td><td>0.01 \u2013 10 nm</td><td>Medical imaging</td></tr><tr><td>Gamma</td><td>< 0.01 nm</td><td>Cancer treatment, nuclear</td></tr></table><p><span class="rule">Unit conversion:</span> 1 nm = 10\u207B\u2079 m = 10\u207B\u2077 cm. To convert nm \u2192 m, multiply by 10\u207B\u2079.</p><h3>Key Equations</h3><table><tr><th>Equation</th><th>Variables</th></tr><tr><td>c = \u03BB\u03BD</td><td>c = 3.00 \u00D7 10\u2078 m/s, \u03BB = wavelength (m), \u03BD = frequency (Hz = s\u207B\u00B9)</td></tr><tr><td>E = h\u03BD</td><td>h = 6.626 \u00D7 10\u207B\u00B3\u2074 J\u00B7s (Planck constant)</td></tr><tr><td>E = hc/\u03BB</td><td>Combined: energy of one photon, \u03BB in meters</td></tr><tr><td>\u03BB = h/mv</td><td>de Broglie: matter has wave properties, m = mass (kg), v = velocity (m/s)</td></tr></table><p><span class="rule">Relationships:</span></p><p>\u03BB \u2191 \u2192 \u03BD \u2193 \u2192 E \u2193 (inversely proportional)</p><p>\u03BB \u2193 \u2192 \u03BD \u2191 \u2192 E \u2191</p><p><span class="rule">All EM radiation travels at c</span> in a vacuum. Only \u03BB and \u03BD change.</p><h3>Visible Light Spectrum</h3><p>~380 nm (violet) \u2192 ~450 nm (blue) \u2192 ~495 nm (green) \u2192 ~570 nm (yellow) \u2192 ~620 nm (orange) \u2192 ~750 nm (red)</p><p><span class="rule">Mnemonic:</span> <strong>ROY G BIV</strong> (Red, Orange, Yellow, Green, Blue, Indigo, Violet) from long to short \u03BB.</p><h3>Photoelectric Effect</h3><p><span class="rule">KE = h\u03BD \u2212 \u03D5</span></p><p>&bull; \u03D5 = work function = minimum energy to eject an electron from a metal surface</p><p>&bull; \u03BD\u2080 = threshold frequency: h\u03BD\u2080 = \u03D5. Below this frequency, NO electrons ejected regardless of intensity.</p><p>&bull; Increasing light intensity \u2192 more electrons (more photons), NOT higher KE</p><p>&bull; Increasing frequency \u2192 higher KE of ejected electrons</p><p>&bull; This proved light has particle nature (Einstein, 1905)</p><h3>Bohr Model (Hydrogen Atom)</h3><p><span class="rule">Energy of level n:</span> E\u2099 = \u2212 2.18 \u00D7 10\u207B\u00B9\u2078 J / n\u00B2</p><p><span class="rule">Energy of transition:</span> \u0394E = E\u2099\u2082 \u2212 E\u2099\u2081 = \u22122.18 \u00D7 10\u207B\u00B9\u2078 (1/n\u2082\u00B2 \u2212 1/n\u2081\u00B2)</p><p>&bull; \u0394E > 0: absorption (electron jumps up)</p><p>&bull; \u0394E < 0: emission (electron falls down, photon released)</p><p>&bull; |\u0394E| = h\u03BD = hc/\u03BB of the photon</p><h3>Hydrogen Emission Series</h3><table><tr><th>Series</th><th>n\u2081 (final)</th><th>Region</th></tr><tr><td>Lyman</td><td>1</td><td>Ultraviolet</td></tr><tr><td>Balmer</td><td>2</td><td>Visible</td></tr><tr><td>Paschen</td><td>3</td><td>Infrared</td></tr><tr><td>Brackett</td><td>4</td><td>Infrared</td></tr></table><p>&bull; Balmer series: only hydrogen lines visible to the eye (4 lines: red 656nm, cyan 486nm, blue 434nm, violet 410nm)</p><p>&bull; Larger jump (e.g. n=6\u21922 vs n=3\u21922) = shorter \u03BB = higher energy photon</p><h3>de Broglie Wavelength</h3><p><span class="rule">\u03BB = h / mv</span></p><p>&bull; All matter has wave-like properties, but only significant for very small masses (electrons, atoms)</p><p>&bull; Macroscopic objects: \u03BB is negligibly small</p><p>&bull; Confirmed by electron diffraction experiments (Davisson-Germer)</p>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 electromagnetic spectrum, c = \u03BB\u03BD, E = h\u03BD, E = hc/\u03BB \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

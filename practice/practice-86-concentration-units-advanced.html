@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extra Practice: Concentration Units (Advanced)</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Extra Practice: Concentration Units (Advanced)</h1>
+<p class="subtitle">Deep practice &mdash; molality, mole fraction, mass percent, ppm, normality, conversions</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_86';
+const SECTIONS = [
+  {
+    id:1, title:"Fill: Define concentration units",
+    instruction:"Complete each definition.",
+    rows:[
+      ["1","Molarity (M) = moles of solute / ___ of solution","liters / L / volume in liters"],
+      ["2","Molality (m) = moles of solute / ___ of solvent","kilograms / kg / mass in kg"],
+      ["3","Mole fraction (\u03C7) of component A = moles of A / ___","total moles / moles total"],
+      ["4","Mass percent = (mass of solute / ___) \u00D7 100%","mass of solution / total mass"],
+      ["5","Parts per million (ppm) = (mass of solute / mass of solution) \u00D7 ___","10\u2076 / 1000000 / 1,000,000"],
+      ["6","Parts per billion (ppb) = (mass of solute / mass of solution) \u00D7 ___","10\u2079 / 1000000000 / 1,000,000,000"],
+      ["7","Normality (N) = number of ___ / liters of solution","equivalents / gram equivalents"],
+      ["8","For acids, one equivalent = one mole of ___ ions","H\u207A / hydrogen"],
+      ["9","For bases, one equivalent = one mole of ___ ions","OH\u207B / hydroxide"],
+      ["10","Normality = Molarity \u00D7 n, where n is the number of ___ per formula unit","equivalents / H+ or OH-"],
+      ["11","For H\u2082SO\u2084, n = ___ (how many H\u207A it can donate)","2"],
+      ["12","For H\u2083PO\u2084, n = ___ (how many H\u207A it can donate)","3"],
+      ["13","For NaOH, n = ___","1"],
+      ["14","For Ca(OH)\u2082, n = ___","2"],
+      ["15","The sum of all mole fractions in a solution equals ___","1 / 1.00"]
+    ]
+  },
+  {
+    id:2, title:"Fill: Molality calculations",
+    instruction:"Calculate molality (m = mol solute / kg solvent). Round to 2 decimal places.",
+    rows:[
+      ["1","5.85 g NaCl (M=58.5) in 500 g water: mol NaCl = ___","0.10 / 0.1"],
+      ["2","Continuing #1: molality = 0.10 mol / 0.500 kg = ___ m","0.20 / 0.2"],
+      ["3","18.0 g glucose (C\u2086H\u2081\u2082O\u2086, M=180) in 200 g water: mol = ___","0.10 / 0.1"],
+      ["4","Continuing #3: molality = 0.10 / 0.200 = ___ m","0.50 / 0.5"],
+      ["5","36.5 g HCl (M=36.5) in 1000 g water: molality = ___ m","1.00 / 1.0 / 1"],
+      ["6","40.0 g NaOH (M=40.0) in 250 g water: mol = ___","1.00 / 1.0 / 1"],
+      ["7","Continuing #6: molality = 1.00 / 0.250 = ___ m","4.00 / 4.0 / 4"],
+      ["8","90.0 g glucose (M=180) in 500 g water: molality = ___ m","1.00 / 1.0 / 1"],
+      ["9","117 g NaCl (M=58.5) in 2.00 kg water: molality = ___ m","1.00 / 1.0 / 1"],
+      ["10","Molality is preferred over molarity for colligative property calculations because it does not depend on ___","temperature / volume / T"],
+      ["11","Unlike molarity, molality uses mass of ___ (not solution)","solvent"],
+      ["12","If a solution is very dilute and the solvent is water, molality \u2248 ___ (approximately equal to which unit?)","molarity / M"]
+    ]
+  },
+  {
+    id:3, title:"MC: Molality vs molarity", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Molality is temperature-independent because:", options:["It uses volume","Mass doesn't change with temperature","It ignores the solute","It's the same as molarity"], correct:1},
+      {q:"Molarity changes with temperature because:", options:["Mass changes","Volume changes with temperature","Moles change","The solute decomposes"], correct:1},
+      {q:"For dilute aqueous solutions (density \u2248 1 g/mL), molality \u2248 molarity because:", options:["kg of water \u2248 L of solution","They are defined the same","Temperature doesn't matter","The solute is very heavy"], correct:0},
+      {q:"A 1.00 m NaCl solution contains 1 mol NaCl in:", options:["1 L of solution","1 kg of water","1 kg of solution","1 L of water"], correct:1},
+      {q:"A 1.00 M NaCl solution contains 1 mol NaCl in:", options:["1 L of solution","1 kg of water","1 kg of solution","1 L of water"], correct:0},
+      {q:"Which is more useful for boiling point elevation calculations?", options:["Molarity","Molality","Mass percent","ppm"], correct:1},
+      {q:"If you dissolve 58.5 g NaCl in 1.00 kg of water, the molality is:", options:["0.50 m","1.00 m","2.00 m","0.585 m"], correct:1},
+      {q:"In a 2.00 m glucose solution, how many grams of glucose per kg of water?", options:["180 g","360 g","90 g","720 g"], correct:1},
+      {q:"Molality of a solution with 0.50 mol solute in 250 g solvent:", options:["0.50 m","1.00 m","2.00 m","0.25 m"], correct:2},
+      {q:"Which concentration unit has units of mol/kg?", options:["Molarity","Molality","Normality","Mole fraction"], correct:1},
+      {q:"When converting molarity to molality, you need to know the ___ of the solution:", options:["Color","Density","pH","Temperature"], correct:1},
+      {q:"For a solution with density 1.05 g/mL and M = 1.00 M (solute MW = 60), the molality is:", options:["About 1.01 m","About 0.95 m","Exactly 1.00 m","About 1.10 m"], correct:0}
+    ]
+  },
+  {
+    id:4, title:"Fill: Mole fraction calculations",
+    instruction:"Calculate mole fractions. Round to 3 decimal places.",
+    rows:[
+      ["1","2 mol ethanol + 8 mol water: \u03C7(ethanol) = 2/10 = ___","0.200 / 0.20 / 0.2"],
+      ["2","Continuing #1: \u03C7(water) = 8/10 = ___","0.800 / 0.80 / 0.8"],
+      ["3","Check: \u03C7(ethanol) + \u03C7(water) = ___","1.000 / 1.00 / 1.0 / 1"],
+      ["4","1 mol NaCl in 9 mol water: \u03C7(NaCl) = ___","0.100 / 0.10 / 0.1"],
+      ["5","0.5 mol glucose + 27.5 mol water: \u03C7(glucose) = 0.5/28 = ___","0.018 / 0.0179 / 0.02"],
+      ["6","Continuing #5: \u03C7(water) = 27.5/28 = ___","0.982 / 0.9821 / 0.98"],
+      ["7","90 g water (M=18) = ___ mol water","5.00 / 5.0 / 5"],
+      ["8","46 g ethanol (M=46) = ___ mol ethanol","1.00 / 1.0 / 1"],
+      ["9","Mix 90 g water + 46 g ethanol: \u03C7(ethanol) = 1/(1+5) = ___","0.167 / 0.17"],
+      ["10","360 g water (M=18) + 60 g urea (M=60): mol water = ___, mol urea = ___","20, 1 / 20 and 1"],
+      ["11","Continuing #10: \u03C7(urea) = 1/21 = ___","0.048 / 0.0476 / 0.05"],
+      ["12","If \u03C7(solvent) = 0.95, then \u03C7(solute) = ___","0.05 / 0.050"],
+      ["13","If \u03C7(A) = 0.3 and \u03C7(B) = 0.5, then \u03C7(C) = ___","0.2 / 0.20 / 0.200"],
+      ["14","Mole fraction has ___ units (what units?)","no / none / dimensionless / no units"]
+    ]
+  },
+  {
+    id:5, title:"MC: Mass percent, ppm, ppb", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"A solution has 10 g NaCl in 90 g water. Mass percent of NaCl:", options:["10%","11.1%","90%","10/90 = 0.111%"], correct:0},
+      {q:"A solution is 5% NaOH by mass. In 200 g of solution, mass of NaOH:", options:["5 g","10 g","100 g","40 g"], correct:1},
+      {q:"Mass percent = (mass solute / mass solution) \u00D7 100. Note: denominator is mass of ___, not solvent:", options:["Solute","Solvent","Solution","Container"], correct:2},
+      {q:"0.005 g of Pb in 1000 g of water. Concentration in ppm:", options:["5 ppm","0.5 ppm","50 ppm","0.005 ppm"], correct:0},
+      {q:"Drinking water standard for lead is 15 ppb. In mg/L (assuming density = 1 g/mL):", options:["15 mg/L","0.015 mg/L","1.5 mg/L","0.15 mg/L"], correct:1},
+      {q:"1 ppm = ___ mg/L (for dilute aqueous solutions):", options:["0.001","0.01","1","1000"], correct:2},
+      {q:"1 ppb = ___ \u03BCg/L (for dilute aqueous solutions):", options:["0.001","1","1000","0.1"], correct:1},
+      {q:"A 36.5% HCl solution means:", options:["36.5 g HCl per 100 g solution","36.5 g HCl per 100 g water","36.5 mol HCl per L","36.5% of molecules are HCl"], correct:0},
+      {q:"Blood alcohol of 0.08% means:", options:["0.08 g alcohol per 100 mL blood","0.08 mol/L","8 g per 100 mL","80 g per L"], correct:0},
+      {q:"Which is the smallest concentration unit?", options:["Mass percent","ppm","ppb","Molarity"], correct:2},
+      {q:"Environmental monitoring uses ppm/ppb because:", options:["Contaminants are present in very small amounts","It's more accurate than molarity","It's easier to calculate","All answers are correct"], correct:0},
+      {q:"If a solution is 20% sugar by mass with density 1.08 g/mL, 500 mL of solution contains ___ g sugar:", options:["100 g","108 g","216 g","540 g"], correct:1}
+    ]
+  },
+  {
+    id:6, title:"Fill: Mass percent calculations",
+    instruction:"Calculate mass percent. Round to 1 decimal place.",
+    rows:[
+      ["1","25 g NaCl + 475 g water: mass% NaCl = (25/500)\u00D7100 = ___% ","5.0 / 5.0% / 5"],
+      ["2","10 g sugar + 90 g water: mass% sugar = ___% ","10.0 / 10.0% / 10"],
+      ["3","40 g ethanol + 160 g water: mass% ethanol = ___% ","20.0 / 20.0% / 20"],
+      ["4","5.0 g KOH in 250 g solution: mass% = ___% ","2.0 / 2.0% / 2"],
+      ["5","A 15% NaCl solution: 300 g solution contains ___ g NaCl","45 / 45.0"],
+      ["6","A 25% HCl solution: 200 g solution contains ___ g HCl","50 / 50.0"],
+      ["7","A 10% glucose solution: to get 30 g glucose, you need ___ g solution","300"],
+      ["8","Mass of solvent in 500 g of 20% NaCl solution = ___ g","400"],
+      ["9","If 12 g of solute is dissolved in 88 g of solvent, mass% = ___% ","12.0 / 12.0% / 12"],
+      ["10","A 30% H\u2082O\u2082 solution: 50 g solution contains ___ g H\u2082O\u2082","15 / 15.0"],
+      ["11","Commercial sulfuric acid is 96% H\u2082SO\u2084 by mass. In 100 g: ___ g H\u2082SO\u2084 and ___ g water","96 and 4 / 96, 4"],
+      ["12","To dilute: 100 g of 40% NaCl + 100 g water gives ___% NaCl","20 / 20.0 / 20%"]
+    ]
+  },
+  {
+    id:7, title:"MC: Normality concepts", type:"mc",
+    instruction:"Select the correct answer about normality.",
+    questions:[
+      {q:"Normality (N) = equivalents per:", options:["kg solvent","mol solute","liter of solution","kg solution"], correct:2},
+      {q:"For HCl (monoprotic acid), 1 M HCl = ___ N:", options:["0.5 N","1 N","2 N","3 N"], correct:1},
+      {q:"For H\u2082SO\u2084 (diprotic acid), 1 M H\u2082SO\u2084 = ___ N:", options:["0.5 N","1 N","2 N","3 N"], correct:2},
+      {q:"For H\u2083PO\u2084 (triprotic acid), 1 M H\u2083PO\u2084 = ___ N:", options:["1 N","2 N","3 N","4 N"], correct:2},
+      {q:"For NaOH (one OH\u207B), 0.5 M NaOH = ___ N:", options:["0.25 N","0.5 N","1.0 N","1.5 N"], correct:1},
+      {q:"For Ca(OH)\u2082 (two OH\u207B), 0.5 M Ca(OH)\u2082 = ___ N:", options:["0.25 N","0.5 N","1.0 N","2.0 N"], correct:2},
+      {q:"For Ba(OH)\u2082 (two OH\u207B), 0.1 M Ba(OH)\u2082 = ___ N:", options:["0.05 N","0.1 N","0.2 N","0.3 N"], correct:2},
+      {q:"In acid-base titrations, at the equivalence point:", options:["N\u2090V\u2090 = N\u1D47V\u1D47","M\u2090 = M\u1D47","moles acid = moles base always","pH = 7 always"], correct:0},
+      {q:"For redox reactions, equivalents are based on:", options:["H\u207A transferred","OH\u207B transferred","Electrons transferred","Mass transferred"], correct:2},
+      {q:"KMnO\u2084 in acidic solution: Mn goes from +7 to +2 (gains 5 e\u207B). 0.1 M KMnO\u2084 = ___ N:", options:["0.1 N","0.2 N","0.5 N","0.5 N (5 \u00D7 0.1)"], correct:3},
+      {q:"Normality is always ___ molarity:", options:["Less than or equal to","Greater than or equal to","Equal to","Unrelated to"], correct:1},
+      {q:"Normality is less commonly used today because it depends on:", options:["Temperature","The specific reaction context","Pressure","Volume"], correct:1}
+    ]
+  },
+  {
+    id:8, title:"Fill: ppm and ppb calculations",
+    instruction:"Calculate ppm and ppb concentrations.",
+    rows:[
+      ["1","0.050 g of fluoride in 1,000,000 g of water = ___ ppm","0.050 / 0.05"],
+      ["2","2 mg/L = ___ ppm (in dilute aqueous solution)","2"],
+      ["3","50 \u03BCg/L = ___ ppb","50"],
+      ["4","0.003 g Pb in 1000 g water = ___ ppm","3"],
+      ["5","The EPA limit for arsenic in drinking water is 10 ppb = ___ mg/L","0.010 / 0.01"],
+      ["6","15 ppm = ___ mg/L","15"],
+      ["7","15 ppm = ___ g/L","0.015"],
+      ["8","500 ppb = ___ ppm","0.5 / 0.50"],
+      ["9","1 ppm = ___ ppb","1000"],
+      ["10","A water sample contains 0.0001% lead by mass. In ppm: ___","1"],
+      ["11","Fluoride in tap water is typically 0.7-1.2 ppm = ___ to ___ mg/L","0.7 to 1.2 / 0.7, 1.2"],
+      ["12","If a 500 mL water sample contains 5 \u03BCg of mercury, the concentration is ___ ppb","10"]
+    ]
+  },
+  {
+    id:9, title:"Arrange: Concentration unit relationships", type:"arrange",
+    instruction:"Click the words in the correct order.",
+    sentences:[
+      {prompt:"Molality equals moles of solute divided by kilograms of solvent", words:["Molality","equals","moles of solute","divided by","kilograms of solvent"]},
+      {prompt:"Mole fraction is dimensionless and always between zero and one", words:["Mole fraction","is","dimensionless","and always","between","zero and one"]},
+      {prompt:"Normality equals molarity multiplied by the number of equivalents", words:["Normality","equals","molarity","multiplied by","the number of","equivalents"]},
+      {prompt:"Mass percent uses mass of solution as the denominator", words:["Mass percent","uses","mass of solution","as","the denominator"]},
+      {prompt:"Parts per million is used for very dilute solutions", words:["Parts per million","is used","for","very dilute","solutions"]},
+      {prompt:"Molality does not change with temperature unlike molarity", words:["Molality","does not","change","with temperature","unlike","molarity"]},
+      {prompt:"Converting between concentration units requires solution density", words:["Converting","between","concentration units","requires","solution","density"]}
+    ]
+  },
+  {
+    id:10, title:"MC: Converting between concentration units", type:"mc",
+    instruction:"Select the correct answer for each conversion problem.",
+    questions:[
+      {q:"To convert molarity to molality, you need:", options:["Temperature only","Density of solution and MW of solute","pH of solution","Volume only"], correct:1},
+      {q:"A 1.00 M NaCl solution (density = 1.04 g/mL, MW NaCl = 58.5). Mass of 1 L solution:", options:["1000 g","1040 g","1004 g","585 g"], correct:1},
+      {q:"Continuing: mass of NaCl in 1 L = 1 mol \u00D7 58.5 g/mol = 58.5 g. Mass of water:", options:["1040 - 58.5 = 981.5 g","1000 - 58.5 = 941.5 g","1040 g","1000 g"], correct:0},
+      {q:"Continuing: molality = 1.00 mol / 0.9815 kg \u2248:", options:["0.98 m","1.00 m","1.02 m","1.04 m"], correct:2},
+      {q:"To convert mass percent to molarity, you need:", options:["Density of solution and MW of solute","Temperature only","Volume of container","Nothing, they're the same"], correct:0},
+      {q:"12.0 M HCl, density = 1.19 g/mL. Mass of 1 L = 1190 g. Mass of HCl = 12 \u00D7 36.5 = 438 g. Mass% =", options:["36.8%","12.0%","43.8%","100%"], correct:0},
+      {q:"Mole fraction to molality: if \u03C7(solute) = 0.1 in water (MW=18), then for 0.1 mol solute and 0.9 mol water:", options:["m = 0.1/0.0162 = 6.17 m","m = 0.1/0.9 = 0.111 m","m = 0.9/0.1 = 9.0 m","m = 0.1 m"], correct:0},
+      {q:"Molality to mole fraction: 1.00 m glucose in water means 1 mol glucose per 1 kg (55.5 mol) water:", options:["\u03C7 = 1/56.5 = 0.0177","\u03C7 = 1/55.5 = 0.0180","\u03C7 = 1/1 = 1.0","\u03C7 = 55.5/56.5 = 0.982"], correct:0},
+      {q:"Mass percent to mole fraction: 10% NaOH (MW=40) in water. Per 100 g: 10 g NaOH (0.25 mol), 90 g H\u2082O (5.0 mol):", options:["\u03C7(NaOH) = 0.25/5.25 = 0.048","\u03C7(NaOH) = 0.25/5.0 = 0.050","\u03C7(NaOH) = 10/100 = 0.10","\u03C7(NaOH) = 0.25/90 = 0.003"], correct:0},
+      {q:"ppm to molarity: 40 ppm Ca\u00B2\u207A (MW=40) in water \u2248 40 mg/L. Moles Ca\u00B2\u207A per liter:", options:["0.001 mol/L = 0.001 M","0.040 mol/L","1.0 mol/L","40 mol/L"], correct:0},
+      {q:"1.5 m NaCl solution. How many grams of NaCl per 500 g water?", options:["43.9 g","87.8 g","58.5 g","29.3 g"], correct:0},
+      {q:"Which requires the MOST information to calculate from a measured mass percent?", options:["Molality","Mole fraction","Molarity (needs density)","ppm"], correct:2}
+    ]
+  },
+  {
+    id:11, title:"Fill: When to use each unit",
+    instruction:"Which concentration unit is most appropriate?",
+    rows:[
+      ["1","For boiling point elevation / freezing point depression calculations, use ___","molality / m"],
+      ["2","For stoichiometry and titration calculations, use ___","molarity / M"],
+      ["3","For vapor pressure lowering (Raoult's law), use ___","mole fraction / \u03C7"],
+      ["4","For environmental trace contaminants, use ___","ppm / ppb"],
+      ["5","For acid-base equivalence point calculations, use ___","normality / N"],
+      ["6","For food labels and commercial solutions, use ___","mass percent / weight percent / % by mass"],
+      ["7","Molarity depends on temperature because ___ changes with temperature","volume / density"],
+      ["8","Molality, mole fraction, and mass percent do NOT depend on ___ ","temperature"],
+      ["9","For osmotic pressure calculations (\u03C0 = MRT), use ___","molarity / M"],
+      ["10","For preparing solutions in the lab, ___ is most practical","molarity / M"],
+      ["11","Colligative properties depend on the ___ of solute particles, not identity","number / amount / concentration"],
+      ["12","For an electrolyte, the effective concentration for colligative properties uses the ___ factor","van 't Hoff / i"]
+    ]
+  },
+  {
+    id:12, title:"MC: Comprehensive concentration review", type:"mc",
+    instruction:"Mixed challenging review questions.",
+    questions:[
+      {q:"A 0.5 m NaCl solution has a higher effective molality for colligative properties because NaCl dissociates. Effective m \u2248:", options:["0.25 m","0.5 m","1.0 m (i \u2248 2)","1.5 m"], correct:2},
+      {q:"Concentrated H\u2082SO\u2084 is 18.0 M with density 1.84 g/mL. Its mass percent is approximately:", options:["36%","49%","72%","96%"], correct:3},
+      {q:"Which solution has the highest boiling point?", options:["0.5 m glucose","0.5 m NaCl (i=2)","0.5 m CaCl\u2082 (i=3)","0.5 m Al\u2082(SO\u2084)\u2083 (i=5)"], correct:3},
+      {q:"If solution density is NOT given, which conversions are still possible?", options:["Molarity to molality","Mass percent to mole fraction","Molarity to mole fraction","ppm to molarity"], correct:1},
+      {q:"A solution is 5.0% NaCl by mass. To make 1.00 kg of this solution, you need:", options:["50 g NaCl + 950 g water","50 g NaCl + 1000 g water","5 g NaCl + 995 g water","500 g NaCl + 500 g water"], correct:0},
+      {q:"Rubbing alcohol is 70% isopropanol by mass. In a 250 g bottle:", options:["70 g isopropanol","175 g isopropanol","250 g isopropanol","17.5 g isopropanol"], correct:1},
+      {q:"1.0 m glucose in water. Approximate mole fraction of glucose: 1/(1+55.5) \u2248", options:["0.018","0.50","0.982","1.0"], correct:0},
+      {q:"Ocean water is about 3.5% NaCl by mass. In ppm:", options:["3,500 ppm","35,000 ppm","350 ppm","35 ppm"], correct:1},
+      {q:"0.10 N H\u2082SO\u2084 = ___ M H\u2082SO\u2084:", options:["0.10 M","0.050 M","0.20 M","0.025 M"], correct:1},
+      {q:"Which pair of solutions has the same number of equivalents per liter?", options:["1 M HCl and 1 M NaOH","1 M HCl and 0.5 M H\u2082SO\u2084","1 M NaOH and 1 M Ca(OH)\u2082","0.5 M HCl and 1 M H\u2082SO\u2084"], correct:1},
+      {q:"For very dilute aqueous solutions, the numerical value of ppm is approximately equal to:", options:["mg/L","\u03BCg/L","g/L","mol/L"], correct:0},
+      {q:"A chemist needs a 2.5 m NaCl solution. For 500 g water: mol NaCl needed = 2.5 \u00D7 0.500 =", options:["0.50 mol","1.00 mol","1.25 mol","2.50 mol"], correct:2},
+      {q:"Continuing: grams NaCl = 1.25 \u00D7 58.5 =", options:["58.5 g","73.1 g","146.3 g","29.3 g"], correct:1}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Concentration Units (Advanced) \u2014 Complete Reference</h3>' +
+'<h3>All Concentration Units</h3>' +
+'<table><tr><th>Unit</th><th>Formula</th><th>Units</th><th>Temp Dependent?</th></tr>' +
+'<tr><td><span class="rule">Molarity (M)</span></td><td>mol solute / L solution</td><td>mol/L</td><td>Yes</td></tr>' +
+'<tr><td><span class="rule">Molality (m)</span></td><td>mol solute / kg solvent</td><td>mol/kg</td><td>No</td></tr>' +
+'<tr><td><span class="rule">Mole fraction (\u03C7)</span></td><td>mol A / total mol</td><td>dimensionless</td><td>No</td></tr>' +
+'<tr><td><span class="rule">Mass percent</span></td><td>(mass solute / mass solution) \u00D7 100</td><td>%</td><td>No</td></tr>' +
+'<tr><td><span class="rule">ppm</span></td><td>(mass solute / mass solution) \u00D7 10\u2076</td><td>mg/L \u2248 mg/kg</td><td>No</td></tr>' +
+'<tr><td><span class="rule">ppb</span></td><td>(mass solute / mass solution) \u00D7 10\u2079</td><td>\u03BCg/L</td><td>No</td></tr>' +
+'<tr><td><span class="rule">Normality (N)</span></td><td>equivalents / L solution</td><td>eq/L</td><td>Yes</td></tr></table>' +
+'<h3>Key Relationships</h3>' +
+'<ul>' +
+'<li><span class="rule">N = M \u00D7 n</span> (n = equivalents per formula unit)</li>' +
+'<li>For acids: n = # of H\u207A ions donated</li>' +
+'<li>For bases: n = # of OH\u207B ions</li>' +
+'<li>\u03C7\u2081 + \u03C7\u2082 + ... = 1</li>' +
+'<li>1 ppm = 1 mg/L (dilute aqueous), 1 ppb = 1 \u03BCg/L</li>' +
+'</ul>' +
+'<h3>When to Use Each Unit</h3>' +
+'<table><tr><th>Application</th><th>Best Unit</th><th>Why</th></tr>' +
+'<tr><td>Colligative properties (\u0394T<sub>b</sub>, \u0394T<sub>f</sub>)</td><td><span class="rule">Molality</span></td><td>T-independent</td></tr>' +
+'<tr><td>Stoichiometry, titrations</td><td><span class="rule">Molarity</span></td><td>Volume-based, practical</td></tr>' +
+'<tr><td>Raoult\'s law</td><td><span class="rule">Mole fraction</span></td><td>Direct VP relationship</td></tr>' +
+'<tr><td>Environmental/trace analysis</td><td><span class="rule">ppm / ppb</span></td><td>Very small concentrations</td></tr>' +
+'<tr><td>Equivalence titrations</td><td><span class="rule">Normality</span></td><td>N\u2090V\u2090 = N\u1D47V\u1D47</td></tr>' +
+'<tr><td>Commercial labels</td><td><span class="rule">Mass %</span></td><td>Easy to measure</td></tr></table>' +
+'<h3>Converting Between Units</h3>' +
+'<p>Key information needed: <span class="rule">density of solution</span> and <span class="rule">molar mass of solute</span></p>' +
+'<p>General approach: start with 1 L (for M) or 1 kg solvent (for m) or 100 g solution (for mass%)</p>' +
+'<h3>Common Values</h3>' +
+'<table><tr><th>Solution</th><th>Typical Concentration</th></tr>' +
+'<tr><td>Conc. HCl</td><td>12 M, 37% by mass</td></tr>' +
+'<tr><td>Conc. H\u2082SO\u2084</td><td>18 M, 96% by mass</td></tr>' +
+'<tr><td>Conc. HNO\u2083</td><td>16 M, 70% by mass</td></tr>' +
+'<tr><td>Sea water (NaCl)</td><td>~3.5% = 35,000 ppm</td></tr>' +
+'<tr><td>Tap water fluoride</td><td>0.7-1.2 ppm</td></tr></table>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 molality, mole fraction, mass percent, ppm, normality, conversions \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

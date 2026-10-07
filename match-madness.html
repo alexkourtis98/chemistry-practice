@@ -1,0 +1,1746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Match Madness - Chemistry FYE12</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#fff;color:#3c3c3c;font-family:'DIN Round Pro','Nunito','Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;min-height:100vh;overflow-x:hidden}
+
+/* ---- BACK LINK ---- */
+a.back{color:#1CB0F6;text-decoration:none;font-weight:700;padding:16px 20px;display:inline-block;font-size:.95em}
+a.back:hover{text-decoration:underline}
+
+/* ---- SCREEN MANAGEMENT ---- */
+.screen{display:none}
+.screen.active{display:block}
+
+/* ============ LEVEL SELECT ============ */
+#levelSelect{max-width:640px;margin:0 auto;padding:0 20px 40px}
+#levelSelect h1{text-align:center;font-size:1.6em;color:#3c3c3c;font-weight:800;padding:0 0 4px;letter-spacing:-.5px}
+.ls-subtitle{text-align:center;color:#afafaf;font-size:.9em;margin-bottom:20px;font-weight:600}
+.level-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.level-card{
+  background:#fff;
+  border:2px solid #e5e5e5;
+  border-bottom:4px solid #e5e5e5;
+  border-radius:16px;
+  padding:20px 16px;
+  cursor:pointer;
+  transition:all .15s;
+  text-align:center;
+  position:relative;
+}
+.level-card:hover{background:#f7f7f7;border-color:#ddd;border-bottom-color:#ddd}
+.level-card:active{transform:translateY(2px);border-bottom-width:2px;margin-top:2px}
+.level-card.completed{border-color:#58CC02;border-bottom-color:#46a302}
+.level-card.completed:hover{border-color:#58CC02;border-bottom-color:#46a302;background:#f0fce4}
+.level-card h3{color:#3c3c3c;font-size:1.05em;font-weight:800;margin-bottom:2px}
+.level-card .level-info{color:#afafaf;font-size:.8em;font-weight:600}
+.level-card .level-stars{font-size:1.5em;margin-top:8px;line-height:1}
+.level-card .level-best{color:#58CC02;font-size:.78em;font-weight:700;margin-top:4px}
+.level-card.locked{opacity:.45;cursor:not-allowed}
+.level-card.locked:hover{background:#fff;border-color:#e5e5e5;border-bottom-color:#e5e5e5;transform:none}
+.lock-icon{font-size:1.6em;margin-top:8px;color:#ccc}
+
+.star-gold{color:#FFC800}
+.star-empty{color:#e5e5e5}
+
+.reset-all-btn{display:block;margin:24px auto 0;background:none;border:2px solid #e5e5e5;color:#afafaf;padding:10px 24px;border-radius:12px;cursor:pointer;font-size:.85em;font-weight:700;transition:all .15s}
+.reset-all-btn:hover{border-color:#FF4B4B;color:#FF4B4B}
+
+/* ============ GET READY COUNTDOWN ============ */
+#getReady{position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:100;flex-direction:column;align-items:center;justify-content:center}
+#getReady.active{display:flex}
+#getReady .countdown-number{font-size:120px;font-weight:800;color:#1CB0F6;animation:countPop .4s ease}
+#getReady .countdown-label{font-size:1.1em;color:#afafaf;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-top:8px}
+@keyframes countPop{0%{transform:scale(.5);opacity:0}60%{transform:scale(1.3)}100%{transform:scale(1);opacity:1}}
+
+/* ============ GAMEPLAY ============ */
+#gameArea{max-width:640px;margin:0 auto;padding:0 16px 20px}
+
+/* Top bar: X | progress | timer */
+.top-bar{display:flex;align-items:center;gap:12px;padding:12px 0 8px}
+.top-bar .close-btn{
+  background:none;border:none;cursor:pointer;font-size:1.4em;color:#afafaf;
+  padding:4px;line-height:1;font-weight:700;transition:color .15s;
+}
+.top-bar .close-btn:hover{color:#FF4B4B}
+.progress-wrap{flex:1;height:16px;background:#e5e5e5;border-radius:10px;overflow:hidden;position:relative}
+.progress-fill{height:100%;background:linear-gradient(90deg,#58CC02,#69e30b);border-radius:10px;transition:width .3s;width:0;position:relative}
+.progress-fill.pulse{animation:progPulse .3s ease}
+@keyframes progPulse{0%{transform:scaleY(1)}50%{transform:scaleY(1.3)}100%{transform:scaleY(1)}}
+.top-bar .timer{font-size:1.1em;font-weight:800;color:#3c3c3c;min-width:40px;text-align:right}
+.top-bar .timer.warning{animation:timerPulse .5s infinite alternate}
+.top-bar .timer.danger{color:#FF4B4B;animation:timerPulse .5s infinite alternate}
+@keyframes timerPulse{from{transform:scale(1)}to{transform:scale(1.15)}}
+
+/* Round & streak info */
+.game-info-bar{display:flex;justify-content:space-between;align-items:center;padding:0 2px 10px}
+.round-label{color:#afafaf;font-size:.85em;font-weight:700}
+.streak-display{font-size:.9em;font-weight:800;color:#FF9600;min-height:22px}
+.streak-display.glowing{animation:streakGlow .8s infinite alternate,streakBounce .4s ease;color:#58CC02}
+@keyframes streakGlow{from{text-shadow:0 0 4px rgba(88,204,2,.3)}to{text-shadow:0 0 12px rgba(88,204,2,.6)}}
+@keyframes streakBounce{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1)}}
+
+/* Match columns */
+#matchGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.match-col{display:flex;flex-direction:column;gap:8px}
+.match-col-header{text-align:center;font-size:.75em;color:#afafaf;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;padding:2px 0 4px}
+
+.match-tile{
+  background:#fff;
+  border:2px solid #e5e5e5;
+  border-bottom:4px solid #e5e5e5;
+  border-radius:12px;
+  padding:14px 10px;
+  cursor:pointer;
+  transition:all .1s;
+  text-align:center;
+  font-size:.95em;
+  font-weight:700;
+  user-select:none;
+  min-height:50px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#3c3c3c;
+  position:relative;
+}
+.match-tile:hover{background:#f7f7f7}
+.match-tile:active{transform:translateY(2px);border-bottom-width:2px}
+
+.match-tile.selected{
+  border-color:#1CB0F6;
+  border-bottom-color:#1899d6;
+  background:#ddf4ff;
+  color:#1CB0F6;
+  animation:selectedPulse 1.2s ease-in-out infinite;
+}
+@keyframes selectedPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(28,176,246,.3)}
+  50%{box-shadow:0 0 0 6px rgba(28,176,246,.15)}
+}
+.match-tile.correct{
+  border-color:#58CC02;
+  border-bottom-color:#46a302;
+  background:#d7ffb8;
+  color:#58CC02;
+  pointer-events:none;
+  animation:correctBounce .45s cubic-bezier(.34,1.56,.64,1);
+}
+.match-tile.wrong{
+  border-color:#FF4B4B;
+  border-bottom-color:#e63e3e;
+  background:#ffdfe0;
+  color:#FF4B4B;
+  animation:wrongShake .5s ease;
+}
+.match-tile.matched{
+  pointer-events:none;
+  animation:matchedFade .4s ease forwards;
+}
+@keyframes matchedFade{
+  0%{opacity:1;transform:scale(1)}
+  50%{opacity:.5;transform:scale(.9)}
+  100%{opacity:0;transform:scale(.7)}
+}
+
+@keyframes correctBounce{
+  0%{transform:scale(1);background:#d7ffb8}
+  30%{transform:scale(1.12);background:#c0ff8e}
+  60%{transform:scale(.97)}
+  100%{transform:scale(1);background:#d7ffb8}
+}
+@keyframes wrongShake{
+  0%,100%{transform:translateX(0) rotate(0);background:#ffdfe0}
+  10%{background:#ffb8ba}
+  20%{transform:translateX(-6px) rotate(-3deg)}
+  40%{transform:translateX(6px) rotate(3deg)}
+  60%{transform:translateX(-4px) rotate(-1.5deg)}
+  80%{transform:translateX(4px) rotate(1.5deg)}
+}
+
+/* Floating XP popup */
+.xp-float{
+  position:fixed;
+  font-size:.85em;
+  font-weight:800;
+  color:#FF9600;
+  pointer-events:none;
+  z-index:200;
+  animation:xpFloat .7s ease forwards;
+}
+@keyframes xpFloat{
+  0%{opacity:1;transform:translateY(0) scale(1)}
+  60%{opacity:1;transform:translateY(-30px) scale(1.1)}
+  100%{opacity:0;transform:translateY(-50px) scale(.9)}
+}
+
+/* ============ ROUND COMPLETE ============ */
+#roundComplete{max-width:420px;margin:60px auto;text-align:center;padding:20px}
+#roundComplete h2{font-size:1.5em;color:#3c3c3c;font-weight:800;margin-bottom:16px}
+.rc-xp{font-size:2em;font-weight:800;color:#FF9600;margin:12px 0}
+.rc-stat{color:#afafaf;font-size:.95em;font-weight:600;margin:4px 0}
+.rc-stat span{color:#3c3c3c;font-weight:800}
+.rc-review-note{color:#1CB0F6;font-size:.85em;font-weight:700;margin-top:12px}
+
+.rc-xp,.rc-stat,.rc-review-note{animation:slideUp .4s ease both}
+.rc-xp{animation-delay:.1s}
+.rc-stat:nth-child(3){animation-delay:.2s}
+.rc-stat:nth-child(4){animation-delay:.3s}
+.rc-stat:nth-child(5){animation-delay:.4s}
+.rc-review-note{animation-delay:.5s}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* ============ LEVEL COMPLETE ============ */
+#levelComplete{max-width:420px;margin:40px auto;text-align:center;padding:20px}
+#levelComplete h2{font-size:1.7em;color:#3c3c3c;font-weight:800}
+.lc-stars{font-size:3em;margin:20px 0;line-height:1}
+.lc-stars .star{display:inline-block;opacity:0;transform:scale(0) rotate(-30deg);transition:all .4s cubic-bezier(.34,1.56,.64,1)}
+.lc-stars .star.reveal{opacity:1;transform:scale(1) rotate(0)}
+.lc-xp{font-size:1.8em;font-weight:800;color:#FF9600;margin:8px 0}
+.lc-stat{color:#afafaf;font-size:.95em;font-weight:600;margin:4px 0}
+.lc-stat span{color:#3c3c3c;font-weight:800}
+.lc-xp,.lc-stat{animation:slideUp .4s ease both}
+.lc-xp{animation-delay:.6s}
+.lc-stat:nth-of-type(1){animation-delay:.8s}
+.lc-stat:nth-of-type(2){animation-delay:.9s}
+
+/* ============ STATS BAR ============ */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px;padding:16px;background:#f7f7f7;border-radius:14px;border:2px solid #e5e5e5}
+.stat-box{text-align:center}
+.stat-box .stat-value{font-size:1.2em;font-weight:800;color:#3c3c3c}
+.stat-box .stat-label{font-size:.72em;font-weight:700;color:#afafaf;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+
+/* ============ BUTTONS ============ */
+.btn{
+  display:inline-block;
+  background:#58CC02;
+  color:#fff;
+  border:none;
+  border-bottom:4px solid #46a302;
+  padding:13px 32px;
+  border-radius:14px;
+  cursor:pointer;
+  font-size:1em;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.5px;
+  transition:all .1s;
+  margin:8px;
+}
+.btn:hover{background:#61d800}
+.btn:active{transform:translateY(2px);border-bottom-width:1px}
+.btn.secondary{
+  background:#fff;
+  color:#afafaf;
+  border:2px solid #e5e5e5;
+  border-bottom:4px solid #e5e5e5;
+}
+.btn.secondary:hover{background:#f7f7f7;color:#777}
+.btn-wrap{margin-top:24px}
+
+/* ============ CONFETTI ============ */
+#confettiCanvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:300}
+
+/* ============ RESPONSIVE ============ */
+@media(max-width:500px){
+  .match-tile{padding:11px 8px;font-size:.88em;min-height:44px}
+  .top-bar .timer{font-size:1em}
+  #levelSelect h1{font-size:1.3em}
+  .level-grid{gap:10px}
+  .level-card{padding:16px 12px}
+  #getReady .countdown-number{font-size:80px}
+  .lc-stars{font-size:2.4em}
+}
+</style>
+</head>
+<body>
+
+<a href="index.html" class="back">&larr; Back to Exercises</a>
+
+<!-- SCREEN 1: Level Select -->
+<div id="levelSelect" class="screen active">
+  <h1>Match Madness</h1>
+  <p class="ls-subtitle">34 levels — Tap matching pairs before time runs out!</p>
+  <div class="level-grid" id="levelGrid"></div>
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-box"><div class="stat-value" id="statXP">0</div><div class="stat-label">Total XP</div></div>
+    <div class="stat-box"><div class="stat-value" id="statGames">0</div><div class="stat-label">Games</div></div>
+    <div class="stat-box"><div class="stat-value" id="statStreak">0</div><div class="stat-label">Best Streak</div></div>
+    <div class="stat-box"><div class="stat-value" id="statWords">0</div><div class="stat-label">Pairs</div></div>
+  </div>
+  <button class="reset-all-btn" onclick="resetAllProgress()">Reset All Progress</button>
+</div>
+
+<!-- SCREEN 2: Get Ready Countdown -->
+<div id="getReady" class="screen">
+  <div class="countdown-number" id="countdownNum">3</div>
+  <div class="countdown-label">Get Ready</div>
+</div>
+
+<!-- SCREEN 3: Gameplay -->
+<div id="gameArea" class="screen">
+  <div class="top-bar">
+    <button class="close-btn" onclick="confirmQuit()" title="Quit">&times;</button>
+    <div class="progress-wrap"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="timer" id="timer">60</div>
+  </div>
+  <div class="game-info-bar">
+    <div class="round-label" id="roundInfo">Round 1 / 4</div>
+    <div class="streak-display" id="streakDisplay"></div>
+  </div>
+  <div id="matchGrid">
+    <div class="match-col">
+      <div class="match-col-header" id="headerLeft">Question</div>
+      <div id="colLeft"></div>
+    </div>
+    <div class="match-col">
+      <div class="match-col-header" id="headerRight">Answer</div>
+      <div id="colRight"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 4: Round Complete -->
+<div id="roundComplete" class="screen">
+  <h2 id="rcTitle">Round Complete!</h2>
+  <div class="rc-xp" id="rcXP">+80 XP</div>
+  <div class="rc-stat">Pairs matched: <span id="rcMatched">8</span> / <span id="rcTotal">8</span></div>
+  <div class="rc-stat">Time: <span id="rcTime">0</span>s</div>
+  <div class="rc-stat">Best streak: <span id="rcStreak">0</span></div>
+  <div class="rc-review-note" id="rcReview"></div>
+  <div class="btn-wrap">
+    <button class="btn" id="btnContinue" onclick="nextRound()">CONTINUE</button>
+    <br>
+    <button class="btn secondary" onclick="backToLevels()">QUIT</button>
+  </div>
+</div>
+
+<!-- SCREEN 5: Level Complete -->
+<div id="levelComplete" class="screen">
+  <h2>Level Complete!</h2>
+  <div class="lc-stars" id="lcStars"></div>
+  <div class="lc-xp" id="lcXP">+320 XP</div>
+  <div class="lc-stat">Pairs mastered: <span id="lcMastered">0</span></div>
+  <div class="lc-stat">Pairs to review: <span id="lcReview">0</span></div>
+  <div class="btn-wrap">
+    <button class="btn" onclick="backToLevels()">CONTINUE</button>
+  </div>
+</div>
+
+<!-- Confetti canvas -->
+<canvas id="confettiCanvas"></canvas>
+
+<script>
+// ============ SOUND SYSTEM (Web Audio API) ============
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+function playTone(freq, duration, type, gain) {
+  const ctx = getAudioCtx();
+  const osc = ctx.createOscillator();
+  const g = ctx.createGain();
+  osc.type = type || 'sine';
+  osc.frequency.value = freq;
+  g.gain.value = gain || 0.15;
+  g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+  osc.connect(g);
+  g.connect(ctx.destination);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + duration);
+}
+function playCorrect() {
+  playTone(523, 0.12, 'sine', 0.12);
+  setTimeout(() => playTone(659, 0.15, 'sine', 0.12), 80);
+}
+function playWrong() {
+  playTone(150, 0.2, 'sawtooth', 0.08);
+}
+function playStreak() {
+  playTone(523, 0.1, 'sine', 0.1);
+  setTimeout(() => playTone(659, 0.1, 'sine', 0.1), 70);
+  setTimeout(() => playTone(784, 0.18, 'sine', 0.12), 140);
+}
+function playTick() {
+  playTone(800, 0.05, 'sine', 0.08);
+}
+function playRoundWin() {
+  const notes = [523, 587, 659, 784];
+  notes.forEach((f, i) => setTimeout(() => playTone(f, 0.15, 'sine', 0.1), i * 100));
+}
+function playLevelWin() {
+  const notes = [523, 587, 659, 784, 880, 1047];
+  notes.forEach((f, i) => setTimeout(() => playTone(f, 0.2, 'sine', 0.1), i * 130));
+}
+function playTimeWarn() {
+  playTone(600, 0.04, 'triangle', 0.06);
+}
+
+// ============ CHEMISTRY FORMATTING ============
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function chemFormat(s) {
+  // Subscript unicode chars
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4').replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  // Superscript unicode
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-').replace(/²/g,'2').replace(/³/g,'3');
+  // Now format: letters/parens followed by digits = subscript
+  s = s.replace(/([A-Za-z\)])(\d+)/g, '$1<sub>$2</sub>');
+  // Charges at end: like 2+, 3-, +, -
+  s = s.replace(/(\d*)([\+\-])$/g, '<sup>$1$2</sup>');
+  return s;
+}
+
+// ============ VOCABULARY BANKS ============
+const VOCAB_BANKS = [
+  {
+    name: "Subatomic Particles & Z/A",
+    desc: "Protons, neutrons, electrons, atomic & mass number",
+    leftHeader: "Question",
+    rightHeader: "Answer",
+    words: [
+      ["Positive charge?","Proton"],["Negative charge?","Electron"],["No charge?","Neutron"],
+      ["In the nucleus?","Protons & Neutrons"],["Around the nucleus?","Electrons"],
+      ["Symbol for atomic number?","Z"],["Symbol for mass number?","A"],
+      ["Z tells us # of?","Protons"],["A tells us?","Protons + Neutrons"],
+      ["A − Z = ?","Neutrons"],["Same Z, different A?","Isotopes"],
+      ["Mass of electron?","≈ 0 (1/1836)"],
+      ["¹⁴C has how many p?","6"],["¹⁴C has how many n?","8"],
+      ["Determines the element?","Atomic number Z"],["Unit of atomic mass?","u (amu)"],
+      ["Na has Z=11, A=23. n=?","12"],["Cl-35 has how many n?","18"],
+      ["Fe: Z=26, A=56. n=?","30"],["Where is most mass?","Nucleus"],
+      ["Proton charge value?","+1"],["Electron charge value?","−1"],
+      ["What is atomic weight?","Weighted avg of isotopes"],["Who discovered e⁻?","Thomson"]
+    ]
+  },
+  {
+    name: "Element Symbols ↔ Names",
+    desc: "Match chemical symbols to their element names",
+    leftHeader: "Symbol",
+    rightHeader: "Element Name",
+    words: [
+      ["H","Hydrogen"],["He","Helium"],["C","Carbon"],["N","Nitrogen"],
+      ["O","Oxygen"],["F","Fluorine"],["Ne","Neon"],["Na","Sodium"],
+      ["Mg","Magnesium"],["Al","Aluminium"],["Si","Silicon"],["P","Phosphorus"],
+      ["S","Sulfur"],["Cl","Chlorine"],["K","Potassium"],["Ca","Calcium"],
+      ["Fe","Iron"],["Cu","Copper"],["Zn","Zinc"],["Br","Bromine"],
+      ["Ag","Silver"],["Au","Gold"],["Pb","Lead"],["I","Iodine"]
+    ]
+  },
+  {
+    name: "Ion Charges (Octet Rule)",
+    desc: "What ion does each element form?",
+    leftHeader: "Element",
+    rightHeader: "Ion Formed",
+    words: [
+      ["Na (group 1)","Na⁺"],["K (group 1)","K⁺"],["Mg (group 2)","Mg²⁺"],
+      ["Ca (group 2)","Ca²⁺"],["Al (group 13)","Al³⁺"],["O (group 16)","O²⁻"],
+      ["S (group 16)","S²⁻"],["F (group 17)","F⁻"],["Cl (group 17)","Cl⁻"],
+      ["Br (group 17)","Br⁻"],["N (group 15)","N³⁻"],["P (group 15)","P³⁻"],
+      ["Li (group 1)","Li⁺"],["Ba (group 2)","Ba²⁺"],["I (group 17)","I⁻"],
+      ["Se (group 16)","Se²⁻"],["Rb (group 1)","Rb⁺"],["Sr (group 2)","Sr²⁺"],
+      ["Cs (group 1)","Cs⁺"],["Group 1 loses","1 electron"],
+      ["Group 2 loses","2 electrons"],["Group 17 gains","1 electron"],
+      ["Group 16 gains","2 electrons"],["Group 15 gains","3 electrons"]
+    ]
+  },
+  {
+    name: "Polyatomic Ions (7 Core)",
+    desc: "Name ↔ Formula of the 7 key polyatomic ions",
+    leftHeader: "Name",
+    rightHeader: "Formula",
+    words: [
+      ["Hydroxide","OH⁻"],["Nitrate","NO₃⁻"],["Ammonium","NH₄⁺"],
+      ["Carbonate","CO₃²⁻"],["Sulfate","SO₄²⁻"],["Phosphate","PO₄³⁻"],
+      ["Bicarbonate","HCO₃⁻"],
+      ["Hydroxide (GR)","OH⁻"],["Nitrate (GR)","NO₃⁻"],["Ammonium (GR)","NH₄⁺"],
+      ["Carbonate (GR)","CO₃²⁻"],["Sulfate (GR)","SO₄²⁻"],["Phosphate (GR)","PO₄³⁻"],
+      ["Bicarbonate (GR)","HCO₃⁻"],
+      ["OH⁻ charge?","−1"],["NO₃⁻ charge?","−1"],["NH₄⁺ charge?","+1"],
+      ["CO₃²⁻ charge?","−2"],["SO₄²⁻ charge?","−2"],["PO₄³⁻ charge?","−3"],
+      ["HCO₃⁻ charge?","−1"],
+      ["Only positive polyatomic?","NH₄⁺"],["# of core polyatomics?","7"],
+      ["Polyatomic = ?","Group of atoms with charge"]
+    ]
+  },
+  {
+    name: "Binary Compound Naming",
+    desc: "Match formula to compound name",
+    leftHeader: "Formula",
+    rightHeader: "Compound Name",
+    words: [
+      ["NaCl","Sodium chloride"],["MgO","Magnesium oxide"],
+      ["K₂S","Potassium sulfide"],["CaCl₂","Calcium chloride"],
+      ["Al₂O₃","Aluminium oxide"],["Na₂O","Sodium oxide"],
+      ["MgCl₂","Magnesium chloride"],["CaO","Calcium oxide"],
+      ["KBr","Potassium bromide"],["AlCl₃","Aluminium chloride"],
+      ["Mg₃N₂","Magnesium nitride"],["Na₃P","Sodium phosphide"],
+      ["CaF₂","Calcium fluoride"],["KI","Potassium iodide"],
+      ["BaS","Barium sulfide"],["Li₂O","Lithium oxide"],
+      ["BaCl₂","Barium chloride"],["SrO","Strontium oxide"],
+      ["AlN","Aluminium nitride"],["CaS","Calcium sulfide"],
+      ["NaF","Sodium fluoride"],["MgS","Magnesium sulfide"],
+      ["KCl","Potassium chloride"],["LiCl","Lithium chloride"]
+    ]
+  },
+  {
+    name: "Transition Metal & Polyatomic Naming",
+    desc: "Roman numerals and polyatomic compound names",
+    leftHeader: "Formula",
+    rightHeader: "Compound Name",
+    words: [
+      ["FeO","Iron(II) oxide"],["Fe₂O₃","Iron(III) oxide"],
+      ["FeCl₂","Iron(II) chloride"],["FeCl₃","Iron(III) chloride"],
+      ["CuCl","Copper(I) chloride"],["CuCl₂","Copper(II) chloride"],
+      ["CuO","Copper(II) oxide"],["Cu₂O","Copper(I) oxide"],
+      ["NaOH","Sodium hydroxide"],["Ca(OH)₂","Calcium hydroxide"],
+      ["Mg(OH)₂","Magnesium hydroxide"],["KNO₃","Potassium nitrate"],
+      ["Na₂CO₃","Sodium carbonate"],["K₂SO₄","Potassium sulfate"],
+      ["Ca₃(PO₄)₂","Calcium phosphate"],["Al₂(SO₄)₃","Aluminium sulfate"],
+      ["(NH₄)₂SO₄","Ammonium sulfate"],["NH₄Cl","Ammonium chloride"],
+      ["Mg(NO₃)₂","Magnesium nitrate"],["Al(OH)₃","Aluminium hydroxide"],
+      ["Fe₂(SO₄)₃","Iron(III) sulfate"],["NaHCO₃","Sodium bicarbonate"],
+      ["PbO","Lead(II) oxide"],["SnCl₂","Tin(II) chloride"]
+    ]
+  },
+  {
+    name: "Stoichiometry & Moles",
+    desc: "Mole calculations, molar mass, n=m/M",
+    leftHeader: "Problem",
+    rightHeader: "Answer",
+    words: [
+      ["1 mol = ? particles","6.022 × 10²³"],["n = ?","m / M"],["m = ?","n × M"],["M = ?","m / n"],
+      ["M of NaCl?","58.5 g/mol"],["M of H₂O?","18 g/mol"],["M of CO₂?","44 g/mol"],
+      ["M of H₂SO₄?","98 g/mol"],["M of CaCl₂?","111 g/mol"],["M of Ca(OH)₂?","74 g/mol"],
+      ["M of Fe₂O₃?","160 g/mol"],["M of Al₂O₃?","102 g/mol"],
+      ["46 g Na = ? mol","2 mol"],["36 g H₂O = ? mol","2 mol"],["6 g C = ? mol","0.5 mol"],
+      ["120 g NaCl ≈ ? mol","≈ 2.05 mol"],["222 g CaCl₂ = ? mol","2 mol"],
+      ["3 mol NaCl = ? g","175.5 g"],["0.5 mol H₂SO₄ = ? g","49 g"],
+      ["2.5 mol Al₂O₃ = ? g","255 g"],["100 g / 4 mol = M?","25 g/mol"],
+      ["Na atomic mass?","23 u"],["O atomic mass?","16 u"],["Cl atomic mass?","35.5 u"]
+    ]
+  },
+  {
+    name: "Mixed Review",
+    desc: "All topics combined — the ultimate challenge",
+    leftHeader: "Question",
+    rightHeader: "Answer",
+    words: [
+      ["Z of carbon?","6"],["Protons in Na?","11"],["Ion of Cl?","Cl⁻"],
+      ["NaCl name?","Sodium chloride"],["Formula: calcium oxide?","CaO"],
+      ["OH⁻ name?","Hydroxide"],["SO₄²⁻ charge?","−2"],["NH₄⁺ is?","Ammonium"],
+      ["FeCl₃: Fe charge?","+3"],["M of H₂O?","18 g/mol"],
+      ["36g H₂O = ? mol","2 mol"],["A − Z = ?","Neutrons"],
+      ["Group 17 = ?","Halogens"],["Group 18 = ?","Noble gases"],
+      ["Mg ion?","Mg²⁺"],["Al ion?","Al³⁺"],
+      ["Octet rule = ?","8 e⁻ in outer shell"],
+      ["Metal + nonmetal → ?","Ionic bond"],
+      ["Nonmetal + nonmetal → ?","Covalent bond"],
+      ["CuO name?","Copper(II) oxide"],
+      ["Ca₃(PO₄)₂ name?","Calcium phosphate"],
+      ["n=m/M: 98g H₂SO₄?","1 mol"],
+      ["Isotopes have same?","Z (protons)"],
+      ["e⁻ mass ≈ ?","≈ 0 (negligible)"]
+    ]
+  },
+  {
+    name: "Isotopic Abundance",
+    desc: "Match elements to their atomic mass from isotope data",
+    leftHeader: "Element / Data",
+    rightHeader: "Answer",
+    words: [
+      ["Cl avg atomic mass?","35.45 u"],["Cu avg atomic mass?","63.55 u"],
+      ["B avg atomic mass?","10.81 u"],["Li avg atomic mass?","6.94 u"],
+      ["Ag avg atomic mass?","107.87 u"],["Si avg atomic mass?","28.09 u"],
+      ["75.77% as decimal?","0.7577"],["24.23% as decimal?","0.2423"],
+      ["69.17% as decimal?","0.6917"],["30.83% as decimal?","0.3083"],
+      ["Cl: ³⁵Cl more abundant?","Yes (75.77%)"],["B: which dominates?","¹¹B (80.1%)"],
+      ["Cu: which dominates?","⁶³Cu (69.17%)"],["Li: which dominates?","⁷Li (92.41%)"],
+      ["Avg mass falls between?","Lightest & heaviest"],["1 stable isotope → mass =","Isotope mass"],
+      ["Σ(mass × fraction) = ?","Atomic weight"],["¹²C mass exactly?","12.00 u"],
+      ["H avg atomic mass?","1.008 u"],["N avg atomic mass?","14.01 u"],
+      ["Fe avg atomic mass?","55.85 u"],["Weighted avg formula?","Σ(mᵢ × fᵢ)"],
+      ["Convert % → decimal?","Divide by 100"],["U avg atomic mass?","238.03 u"]
+    ]
+  },
+  {
+    name: "Greek Prefixes & Covalent",
+    desc: "Greek prefixes + binary covalent compound names",
+    leftHeader: "Prefix / Formula",
+    rightHeader: "Number / Name",
+    words: [
+      ["mono-","1"],["di-","2"],["tri-","3"],["tetra-","4"],
+      ["penta-","5"],["hexa-","6"],["hepta-","7"],["octa-","8"],
+      ["nona-","9"],["deca-","10"],
+      ["CO₂","Carbon dioxide"],["N₂O₅","Dinitrogen pentoxide"],
+      ["SO₃","Sulfur trioxide"],["PCl₅","Phosphorus pentachloride"],
+      ["CO","Carbon monoxide"],["CCl₄","Carbon tetrachloride"],
+      ["SF₆","Sulfur hexafluoride"],["NO₂","Nitrogen dioxide"],
+      ["N₂O","Dinitrogen monoxide"],["SO₂","Sulfur dioxide"],
+      ["Drop mono for?","First element"],["Two nonmetals =?","Covalent (prefixes)"],
+      ["Metal + nonmetal =?","Ionic (no prefixes)"],["P₄O₁₀","Tetraphosphorus decoxide"]
+    ]
+  },
+  {
+    name: "Acid Names",
+    desc: "Match acid formulas to their names",
+    leftHeader: "Formula",
+    rightHeader: "Acid Name",
+    words: [
+      ["HCl","Hydrochloric acid"],["HBr","Hydrobromic acid"],
+      ["HF","Hydrofluoric acid"],["HI","Hydroiodic acid"],
+      ["H₂S","Hydrosulfuric acid"],["H₂SO₄","Sulfuric acid"],
+      ["HNO₃","Nitric acid"],["H₃PO₄","Phosphoric acid"],
+      ["H₂CO₃","Carbonic acid"],["H₂SO₃","Sulfurous acid"],
+      ["HNO₂","Nitrous acid"],["HClO₃","Chloric acid"],
+      ["-ide anion →","hydro___ic acid"],["-ate anion →","___ic acid"],
+      ["-ite anion →","___ous acid"],["Acids start with?","Hydrogen (H)"],
+      ["Binary acid prefix?","hydro-"],["HCl anion?","Cl⁻ (chloride)"],
+      ["H₂SO₄ anion?","SO₄²⁻ (sulfate)"],["H₂SO₃ anion?","SO₃²⁻ (sulfite)"],
+      ["HNO₃ anion?","NO₃⁻ (nitrate)"],["HNO₂ anion?","NO₂⁻ (nitrite)"],
+      ["-ate → -ic mnemonic?","I ate something ICky"],["-ite → -ous mnemonic?","Not right for US"]
+    ]
+  },
+  {
+    name: "Ultimate Review (Ch1+Ch2)",
+    desc: "All topics from both chapters — the final boss",
+    leftHeader: "Question",
+    rightHeader: "Answer",
+    words: [
+      ["Z of Fe?","26"],["A − Z = ?","Neutrons"],
+      ["¹⁴C and ¹⁴N?","Isobars"],["³⁵Cl and ³⁷Cl?","Isotopes"],
+      ["Tritium neutrons?","2"],["Deuterium symbol?","D or ²H"],
+      ["SnCl₄: Sn charge?","+4"],["PbO: Pb charge?","+2"],
+      ["Ag always forms?","Ag⁺"],["Zn always forms?","Zn²⁺"],
+      ["CO₂ name?","Carbon dioxide"],["N₂O₅ name?","Dinitrogen pentoxide"],
+      ["HCl acid name?","Hydrochloric acid"],["H₂SO₄ acid name?","Sulfuric acid"],
+      ["HNO₂ acid name?","Nitrous acid"],["H₂SO₃ acid name?","Sulfurous acid"],
+      ["CrCl₃: Cr charge?","+3"],["MnO₂: Mn charge?","+4"],
+      ["n = m / M: 36g H₂O?","2 mol"],["M of Al₂O₃?","102 g/mol"],
+      ["Ca(NO₃)₂: total O?","6"],["Formula: NH₄⁺ + SO₄²⁻?","(NH₄)₂SO₄"],
+      ["Cl atomic weight?","35.45 u"],["1 mol = ? particles?","6.022 × 10²³"]
+    ]
+  },
+  {
+    name: "Quantum Numbers & Electron Config",
+    desc: "Quantum numbers, orbitals, electron configurations",
+    leftHeader: "Term",
+    rightHeader: "Definition",
+    words: [
+      ["n","Principal quantum number"],["l","Angular momentum quantum number"],
+      ["ml","Magnetic quantum number"],["ms","Spin quantum number"],
+      ["1s²2s²2p⁶","Neon electron config"],["sp³","Tetrahedral hybridization"],
+      ["Aufbau","Fill lowest energy first"],["Hund's rule","One e⁻ per orbital before pairing"],
+      ["Pauli exclusion","No two e⁻ same 4 quantum numbers"],["s orbital","Spherical shape"],
+      ["p orbital","Dumbbell shape"],["d orbital","Cloverleaf shape"],
+      ["Degenerate","Same energy level"],["Paramagnetic","Has unpaired electrons"],
+      ["Diamagnetic","All electrons paired"],["Ground state","Lowest energy configuration"],
+      ["3d⁵","Chromium exception (half-filled)"],["Shielding","Inner electrons block nuclear charge"],
+      ["Effective nuclear charge","Zeff = Z - shielding"],["Valence shell","Outermost occupied shell"],
+      ["Core electrons","Inner shell electrons"],["Noble gas notation","[Ar] 4s² 3d¹⁰"],
+      ["Orbital diagram","Boxes with arrows for e⁻"],["Heisenberg","Cannot know position + momentum exactly"]
+    ]
+  },
+  {
+    name: "Chemical Bonding & Geometry",
+    desc: "Lewis structures, VSEPR, molecular shapes, bond types",
+    leftHeader: "Term",
+    rightHeader: "Definition",
+    words: [
+      ["Lewis structure","Dots for valence electrons"],["VSEPR","Electron pairs repel to predict shape"],
+      ["Linear","180° bond angle"],["Trigonal planar","120° bond angle"],
+      ["Tetrahedral","109.5° bond angle"],["Bent","< 109.5°, lone pairs present"],
+      ["Trigonal pyramidal","Like tetrahedral with 1 lone pair"],["Lone pair","Non-bonding electron pair"],
+      ["Bond order","# bonds between two atoms"],["Sigma bond","Head-on overlap"],
+      ["Pi bond","Side-by-side overlap"],["sp","Linear hybridization"],
+      ["sp²","Trigonal planar hybridization"],["sp³","Tetrahedral hybridization"],
+      ["Polar bond","Unequal electron sharing"],["Nonpolar bond","Equal electron sharing"],
+      ["Dipole moment","Measure of bond polarity"],["Resonance","Multiple valid Lewis structures"],
+      ["Formal charge","FC = V - N - B/2"],["Octet exception","B, P, S can have < or > 8"],
+      ["Double bond","1 sigma + 1 pi"],["Triple bond","1 sigma + 2 pi"],
+      ["Coordinate bond","Both electrons from one atom"],["Electronegativity","Ability to attract bonding electrons"]
+    ]
+  },
+  {
+    name: "Reactions & Stoichiometry",
+    desc: "Reaction types, yields, mole ratios, solutions",
+    leftHeader: "Term",
+    rightHeader: "Definition",
+    words: [
+      ["Synthesis","A + B → AB"],["Decomposition","AB → A + B"],
+      ["Single replacement","A + BC → AC + B"],["Double replacement","AB + CD → AD + CB"],
+      ["Combustion","Fuel + O₂ → CO₂ + H₂O"],["Limiting reagent","Reactant that runs out first"],
+      ["Excess reagent","Reactant left over"],["Percent yield","(actual/theoretical) × 100"],
+      ["Theoretical yield","Maximum possible product"],["Actual yield","Amount actually obtained"],
+      ["Empirical formula","Simplest whole number ratio"],["Molecular formula","Actual number of atoms"],
+      ["Coefficient","Number before formula in equation"],["Balanced equation","Same atoms on both sides"],
+      ["Mole ratio","Ratio from balanced equation"],["Stoichiometry","Quantitative relationships in reactions"],
+      ["Avogadro's number","6.022 × 10²³"],["STP","0°C and 1 atm"],
+      ["Molar volume","22.4 L/mol at STP"],["Molarity","mol solute / L solution"],
+      ["Dilution","M₁V₁ = M₂V₂"],["Titration","Finding unknown concentration"],
+      ["Indicator","Changes color at endpoint"],["Equivalence point","Stoichiometric amounts react"]
+    ]
+  },
+  {
+    name: "Acids, Bases & Equilibrium",
+    desc: "Acid-base theories, pH, equilibrium, thermodynamics",
+    leftHeader: "Term",
+    rightHeader: "Definition",
+    words: [
+      ["Arrhenius acid","Produces H⁺ in water"],["Arrhenius base","Produces OH⁻ in water"],
+      ["Brønsted acid","Proton donor"],["Brønsted base","Proton acceptor"],
+      ["Lewis acid","Electron pair acceptor"],["Lewis base","Electron pair donor"],
+      ["pH","-log[H⁺]"],["pOH","-log[OH⁻]"],
+      ["pH + pOH","= 14 at 25°C"],["Strong acid","100% ionization"],
+      ["Weak acid","Partial ionization"],["Ka","Acid dissociation constant"],
+      ["Kb","Base dissociation constant"],["Buffer","Resists pH changes"],
+      ["Conjugate pair","Differ by one H⁺"],["Kc","Equilibrium constant (concentration)"],
+      ["Kp","Equilibrium constant (pressure)"],["Le Chatelier","System shifts to oppose change"],
+      ["Exothermic","Releases heat (ΔH < 0)"],["Endothermic","Absorbs heat (ΔH > 0)"],
+      ["Catalyst","Speeds up reaction, not consumed"],["Activation energy","Minimum energy to react"],
+      ["Rate law","Rate = k[A]ⁿ[B]ᵐ"],["Equilibrium","Forward rate = reverse rate"]
+    ]
+  },
+  {
+    name: "Organic Chemistry",
+    desc: "Hydrocarbons, functional groups, isomers, naming",
+    leftHeader: "Term",
+    rightHeader: "Definition",
+    words: [
+      ["Alkane","CₙH₂ₙ₊₂, single bonds only"],["Alkene","CₙH₂ₙ, has C=C double bond"],
+      ["Alkyne","CₙH₂ₙ₋₂, has C≡C triple bond"],["Methane","CH₄"],
+      ["Ethene","C₂H₄ / H₂C=CH₂"],["Ethyne","C₂H₂ / HC≡CH"],
+      ["Benzene","C₆H₆, aromatic ring"],["Hydroxyl","-OH (alcohol group)"],
+      ["Carbonyl","C=O (in aldehydes/ketones)"],["Carboxyl","-COOH (in carboxylic acids)"],
+      ["Amino","-NH₂ (in amines)"],["Ester","-COO- (from acid + alcohol)"],
+      ["Amide","-CONH₂ (from acid + amine)"],["Aldehyde","R-CHO"],
+      ["Ketone","R-CO-R'"],["Ether","R-O-R'"],
+      ["Isomers","Same formula, different structure"],["Cis isomer","Same side of double bond"],
+      ["Trans isomer","Opposite sides of double bond"],["Enantiomers","Non-superimposable mirror images"],
+      ["Chiral center","Carbon with 4 different groups"],["IUPAC","Systematic naming rules"],
+      ["Polymer","Large molecule from repeating units"],["Monomer","Small molecule that polymerizes"]
+    ]
+  },
+  {
+    name: "Advanced Topics (Nuclear, Electro, Thermo)",
+    desc: "Nuclear chemistry, electrochemistry, thermodynamics",
+    leftHeader: "Term",
+    rightHeader: "Definition",
+    words: [
+      ["Alpha decay","Emits ⁴₂He nucleus"],["Beta decay","Neutron → proton + electron"],
+      ["Gamma ray","High-energy electromagnetic radiation"],["Half-life","Time for half to decay"],
+      ["Fission","Heavy nucleus splits"],["Fusion","Light nuclei combine"],
+      ["Galvanic cell","Spontaneous redox → electricity"],["Electrolytic cell","Uses electricity → non-spontaneous"],
+      ["Anode","Oxidation occurs here"],["Cathode","Reduction occurs here"],
+      ["E°cell","Standard cell potential"],["Salt bridge","Maintains charge balance"],
+      ["Faraday's law","Charge = nFe"],["Ligand","Molecule/ion bonded to central metal"],
+      ["Coordination number","Number of bonds to central metal"],["Crystal field theory","d-orbital splitting by ligands"],
+      ["High spin","Maximum unpaired electrons"],["Low spin","Maximum paired electrons"],
+      ["ΔH","Enthalpy change"],["ΔS","Entropy change"],
+      ["ΔG","Gibbs free energy = ΔH - TΔS"],["Spontaneous","ΔG < 0"],
+      ["Hess's law","ΔH is path-independent"],["q = mcΔT","Heat = mass × specific heat × ΔT"]
+    ]
+  },
+  {
+    name: "Chemistry Fundamentals",
+    desc: "Sig figs, scientific notation, units, density, temperature",
+    leftHeader: "Question",
+    rightHeader: "Answer",
+    words: [
+      ["Sig figs in 0.00340?","3"],["Sig figs in 1200?","2"],["Sig figs in 1.00?","3"],
+      ["0.0056 in sci notation?","5.6 × 10⁻³"],["Density formula?","d = m/V"],
+      ["K = °C + ?","273.15"],["°F = (9/5)°C + ?","32"],["SI unit of mass?","kilogram (kg)"],
+      ["1 L = ? mL","1000"],["Prefix for 10⁻³?","milli-"],["Prefix for 10³?","kilo-"],
+      ["Accuracy means?","Close to true value"],["Precision means?","Reproducible results"],
+      ["Sig figs in 100.0?","4"],["Leading zeros are?","Not significant"],
+      ["Trailing zeros w/ decimal?","Significant"],["1 nm = ? m","10⁻⁹"],
+      ["Water density?","1.0 g/mL"],["0°C = ? K","273.15 K"],
+      ["d = 2g, V = 4mL → density?","0.5 g/mL"],
+      ["Captured zeros are?","Significant"],["Physical quantity SI: temp?","Kelvin"],
+      ["100°C = ? K","373.15 K"],["Exact numbers have?","Infinite sig figs"]
+    ]
+  },
+  {
+    name: "Bond Polarity & Electronegativity",
+    desc: "EN values, bond types, dipole moments, polar molecules",
+    leftHeader: "Term / Question",
+    rightHeader: "Answer",
+    words: [
+      ["Most EN element?","F (fluorine)"],["EN of F?","4.0"],["EN of O?","3.5"],
+      ["ΔEN 0-0.4 =?","Nonpolar covalent"],["ΔEN 0.5-1.7 =?","Polar covalent"],
+      ["ΔEN ≥ 1.8 =?","Ionic bond"],["EN trend across period?","Increases (left → right)"],
+      ["EN trend down group?","Decreases"],["CO₂ polar?","No (symmetric linear)"],
+      ["H₂O polar?","Yes (bent shape)"],["Dipole arrow points?","δ+ toward δ−"],
+      ["EN of N?","3.0"],["EN of C?","2.5"],["EN of H?","2.2"],
+      ["H-F bond type?","Polar covalent"],["Cl-Cl bond type?","Nonpolar covalent"],
+      ["Na-Cl bond type?","Ionic"],["EN of Cl?","3.2"],
+      ["Pauling scale measures?","Electronegativity"],["CH₄ polar?","No (symmetric tetrahedral)"],
+      ["NH₃ polar?","Yes (trigonal pyramidal)"],["BF₃ polar?","No (symmetric trigonal planar)"],
+      ["Dipole moment unit?","Debye (D)"],["Noble gas EN?","Very low / not defined"]
+    ]
+  },
+  {
+    name: "Gibbs Free Energy & Entropy",
+    desc: "ΔG, ΔH, ΔS, spontaneity, thermodynamic terms",
+    leftHeader: "Term / Question",
+    rightHeader: "Answer",
+    words: [
+      ["ΔG < 0 means?","Spontaneous"],["ΔG > 0 means?","Non-spontaneous"],
+      ["ΔG = 0 means?","At equilibrium"],["ΔG formula?","ΔH − TΔS"],
+      ["ΔH < 0 means?","Exothermic"],["ΔH > 0 means?","Endothermic"],
+      ["Entropy symbol?","S"],["Entropy increases?","More disorder"],
+      ["S: gas vs liquid?","Gas > liquid"],["S: solid vs liquid?","Liquid > solid"],
+      ["2nd law?","S(universe) always increases"],["3rd law?","S = 0 at 0 K (perfect crystal)"],
+      ["−ΔH, +ΔS → spontaneous?","Always"],["++ΔH, −ΔS → spontaneous?","Never"],
+      ["−ΔH, −ΔS → spontaneous?","At low T"],["++ΔH, +ΔS → spontaneous?","At high T"],
+      ["Enthalpy = ?","Heat at constant pressure"],["Exergonic = ?","ΔG < 0"],
+      ["Endergonic = ?","ΔG > 0"],["ΔG° = −RT ln K","Standard free energy ↔ K"],
+      ["K > 1 → ΔG°?","Negative"],["K < 1 → ΔG°?","Positive"],
+      ["Gibbs free energy unit?","kJ/mol"],["What is T in ΔG=ΔH−TΔS?","Temperature in Kelvin"]
+    ]
+  },
+  {
+    name: "Spectroscopy & Functional Groups",
+    desc: "IR peaks, MS fragmentation, functional group identification",
+    leftHeader: "IR Peak / MS Loss",
+    rightHeader: "Functional Group",
+    words: [
+      ["3200-3550 cm⁻¹ (broad)","O-H alcohol"],["2500-3300 cm⁻¹ (v. broad)","O-H carboxylic acid"],
+      ["3300-3500 cm⁻¹","N-H amine"],["1700-1750 cm⁻¹","C=O carbonyl"],
+      ["2100-2260 cm⁻¹","C≡C or C≡N"],["2850-3000 cm⁻¹","C-H stretch"],
+      ["1600-1680 cm⁻¹","C=C alkene"],["M−15 in MS","Loss of CH₃"],
+      ["M−17 in MS","Loss of OH"],["M−18 in MS","Loss of H₂O"],
+      ["M−28 in MS","Loss of CO"],["M−29 in MS","Loss of CHO"],
+      ["M−45 in MS","Loss of OEt"],["Base peak =","Most abundant ion"],
+      ["M⁺ peak =","Molecular ion"],["Fingerprint region","Below 1500 cm⁻¹"],
+      ["Cl isotope M:M+2?","3:1 ratio"],["Br isotope M:M+2?","1:1 ratio"],
+      ["Nitrogen rule?","Odd MW = odd # of N"],["IR measures?","Bond vibrations"],
+      ["MS measures?","Mass-to-charge (m/z)"],["Higher wavenumber =","Stronger/lighter bond"],
+      ["Sharp vs broad O-H?","Free vs H-bonded"],["~2720 cm⁻¹ =","Aldehyde C-H"]
+    ]
+  },
+  {
+    name: "Crystal Types & Solids",
+    desc: "Ionic, molecular, metallic, network covalent solids, unit cells",
+    leftHeader: "Term / Property",
+    rightHeader: "Answer",
+    words: [
+      ["Ionic solid example?","NaCl"],["Molecular solid example?","Ice (H₂O)"],
+      ["Network covalent example?","Diamond"],["Metallic solid example?","Copper"],
+      ["Highest melting point type?","Network covalent"],["Conducts as solid?","Metallic"],
+      ["Conducts when dissolved?","Ionic"],["Held by IMFs?","Molecular solid"],
+      ["FCC atoms per unit cell?","4"],["BCC atoms per unit cell?","2"],
+      ["SC atoms per unit cell?","1"],["FCC packing efficiency?","74%"],
+      ["BCC packing efficiency?","68%"],["SC packing efficiency?","52%"],
+      ["Amorphous solid example?","Glass"],["Crystalline means?","Ordered repeating pattern"],
+      ["Ionic solid: hard but?","Brittle"],["Metallic: malleable because?","Delocalized electrons"],
+      ["Coordination # in FCC?","12"],["Coordination # in BCC?","8"],
+      ["Coordination # in SC?","6"],["SiO₂ is what type?","Network covalent"],
+      ["Dry ice (CO₂) type?","Molecular solid"],["Graphite conducts because?","Delocalized π electrons"]
+    ]
+  },
+  {
+    name: "Rate Laws & Kinetics",
+    desc: "Reaction orders, half-life, Arrhenius, activation energy",
+    leftHeader: "Term / Question",
+    rightHeader: "Answer",
+    words: [
+      ["1st order plot?","ln[A] vs t"],["2nd order plot?","1/[A] vs t"],
+      ["0th order plot?","[A] vs t"],["1st order t½?","ln2/k"],
+      ["2nd order t½?","1/(k[A]₀)"],["0th order t½?","[A]₀/(2k)"],
+      ["k units, 1st order?","s⁻¹"],["k units, 2nd order?","M⁻¹s⁻¹"],
+      ["k units, 0th order?","M/s"],["Arrhenius equation?","k = Ae^(-Ea/RT)"],
+      ["Ea is?","Activation energy"],["A in Arrhenius?","Frequency factor"],
+      ["Rate-determining step?","Slowest step"],["Catalyst does what?","Lowers Ea"],
+      ["Higher T → k?","Increases"],["R in Arrhenius?","8.314 J/(mol·K)"],
+      ["Molecularity: 2 reactants?","Bimolecular"],["Elementary step rate law?","From stoichiometry"],
+      ["Intermediate is?","Formed then consumed"],["Transition state is?","Energy maximum"],
+      ["Enzyme = biological?","Catalyst"],["Rate = k[A]⁰ means?","Zero-order in A"],
+      ["Doubling [A] quadruples rate?","Second order"],["Doubling [A] doubles rate?","First order"]
+    ]
+  },
+  {
+    name: "Electrochemistry Advanced",
+    desc: "Nernst equation, cell notation, electrolysis, Faraday",
+    leftHeader: "Term / Question",
+    rightHeader: "Answer",
+    words: [
+      ["Nernst equation?","E = E° - (RT/nF)lnQ"],["F (Faraday constant)?","96485 C/mol"],
+      ["Cell notation separator?","|| (salt bridge)"],["Anode in cell notation?","Left side"],
+      ["Cathode in cell notation?","Right side"],["E°cell > 0 means?","Spontaneous"],
+      ["Electrolysis needs?","External power"],["ΔG° = -nFE°","Relates energy to potential"],
+      ["Concentration cell E°?","Zero"],["Plating uses?","Electrolysis"],
+      ["n in Nernst?","Moles of electrons"],["Q > K in Nernst?","E < E°"],
+      ["Q < K in Nernst?","E > E°"],["Faraday's law: m =?","MIt/(nF)"],
+      ["1 Faraday = 1 mol of?","Electrons"],["Coulombs = ?","Amperes × seconds"],
+      ["Reducing agent is?","Oxidized (at anode)"],["Oxidizing agent is?","Reduced (at cathode)"],
+      ["Standard conditions?","1 M, 1 atm, 25°C"],["SHE potential?","0.00 V"],
+      ["More positive E° = ?","Stronger oxidizing agent"],["More negative E° = ?","Stronger reducing agent"],
+      ["Electrolysis of water gives?","H₂ + O₂"],["Lead-acid battery type?","Galvanic (rechargeable)"]
+    ]
+  },
+  {
+    name: "Atomic Theory & Quantum",
+    desc: "Photoelectric effect, de Broglie, Heisenberg, Bohr, quantum numbers",
+    leftHeader: "Term / Question",
+    rightHeader: "Answer",
+    words: [
+      ["Photoelectric: E = ?","hν (photon energy)"],["Work function symbol?","φ (phi)"],
+      ["KE_max = ?","hν − φ"],["de Broglie: λ = ?","h/mv"],
+      ["Heisenberg: can't know both?","Position & momentum"],["Bohr model: e⁻ in?","Fixed orbits"],
+      ["Quantum model: e⁻ in?","Orbitals (probability)"],["h (Planck's constant)?","6.626 × 10⁻³⁴ J·s"],
+      ["Threshold frequency: below it?","No e⁻ ejected"],["More intensity = more?","Electrons (not KE)"],
+      ["Higher frequency = more?","KE of electrons"],["c = λν: c = ?","3 × 10⁸ m/s"],
+      ["E = hc/λ: shorter λ = ?","Higher energy"],["Wave-particle duality?","Light is both"],
+      ["Diffraction proves?","Wave nature"],["Photoelectric proves?","Particle nature"],
+      ["Bohr worked for?","Hydrogen only"],["Quantum # n?","Principal (shell)"],
+      ["Quantum # l?","Angular momentum (shape)"],["Quantum # ml?","Magnetic (orientation)"],
+      ["Quantum # ms?","Spin (+½ or −½)"],["Uncertainty principle: ΔxΔp ≥ ?","h/(4π)"],
+      ["Max e⁻ per shell?","2n²"],["Ground state = ?","Lowest energy"]
+    ]
+  },
+  {
+    name: "Chemical Reaction Types",
+    desc: "Synthesis, decomposition, single/double replacement, combustion, redox basics",
+    leftHeader: "Term",
+    rightHeader: "Definition",
+    words: [
+      ["Synthesis","A + B → AB"],["Decomposition","AB → A + B"],
+      ["Single Replacement","A + BC → AC + B"],["Double Replacement","AB + CD → AD + CB"],
+      ["Combustion","Fuel + O₂ → CO₂ + H₂O"],["Neutralization","Acid + base → salt + water"],
+      ["Precipitation","Insoluble product forms"],["Gas Evolution","Gas escapes reaction"],
+      ["Exothermic","Releases heat"],["Endothermic","Absorbs heat"],
+      ["Reactants","Starting materials"],["Products","Substances formed"],
+      ["Catalyst","Speeds up reaction"],["Coefficient","Number before formula"],
+      ["Subscript","Number in formula"],["Balanced","Same atoms both sides"],
+      ["Activity Series","Metal reactivity ranking"],["Spectator Ion","Unchanged in reaction"],
+      ["Net Ionic","Shows only reacting species"],["Oxidation","Loss of electrons"],
+      ["Reduction","Gain of electrons"],["Redox","Electron transfer reaction"],
+      ["Aqueous","Dissolved in water"],["Precipitate","Insoluble solid formed"]
+    ]
+  },
+  {
+    name: "Acid-Base Chemistry",
+    desc: "Arrhenius, Brønsted-Lowry, Lewis, pH, buffers, titration",
+    leftHeader: "Term",
+    rightHeader: "Definition",
+    words: [
+      ["Arrhenius Acid","Produces H⁺ in water"],["Arrhenius Base","Produces OH⁻ in water"],
+      ["Brønsted-Lowry Acid","Proton donor"],["Brønsted-Lowry Base","Proton acceptor"],
+      ["Lewis Acid","Electron pair acceptor"],["Lewis Base","Electron pair donor"],
+      ["Conjugate Acid","Base + H⁺"],["Conjugate Base","Acid − H⁺"],
+      ["Strong Acid","100% dissociation"],["Weak Acid","Partial dissociation"],
+      ["Amphoteric","Acts as acid or base"],["pH","−log[H⁺]"],
+      ["pOH","−log[OH⁻]"],["Ka","Acid dissociation constant"],
+      ["Kb","Base dissociation constant"],["Kw","1.0 × 10⁻¹⁴"],
+      ["Buffer","Resists pH change"],["Titration","Adding known to unknown"],
+      ["Equivalence Point","Moles acid = moles base"],["Indicator","Changes color at pH"],
+      ["Neutralization","Acid + base → salt + water"],["Monoprotic","Donates 1 H⁺"],
+      ["Diprotic","Donates 2 H⁺"],["Hydrolysis","Salt ion reacts with water"]
+    ]
+  },
+  {
+    name: "Electronegativity & Polarity",
+    desc: "EN trends, bond polarity, molecular polarity, dipole moments",
+    leftHeader: "Term / Molecule",
+    rightHeader: "Description",
+    words: [
+      ["Electronegativity","Ability to attract bond electrons"],["Nonpolar Covalent","ΔEN < 0.5"],
+      ["Polar Covalent","ΔEN 0.5 – 1.7"],["Ionic Bond","ΔEN > 1.7"],
+      ["Dipole Moment","Measure of bond polarity"],["δ⁺","Partial positive charge"],
+      ["δ⁻","Partial negative charge"],["Most EN Element","Fluorine (4.0)"],
+      ["Pauling Scale","EN measurement scale"],["Polar Molecule","Asymmetric dipoles"],
+      ["Nonpolar Molecule","Symmetric dipoles cancel"],["CO₂","Nonpolar (linear, cancels)"],
+      ["H₂O","Polar (bent, doesn't cancel)"],["NH₃","Polar (trigonal pyramidal)"],
+      ["CH₄","Nonpolar (tetrahedral, symmetric)"],["CCl₄","Nonpolar (tetrahedral, symmetric)"],
+      ["BF₃","Nonpolar (trigonal planar)"],["SO₂","Polar (bent shape)"],
+      ["HCl","Polar (different atoms)"],["SF₆","Nonpolar (octahedral)"],
+      ["Like Dissolves Like","Polarity matching"],["Miscible","Liquids mix completely"],
+      ["Immiscible","Liquids don't mix"],["Dipole Arrow","Points toward δ⁻"]
+    ]
+  },
+  {
+    name: "Matter & Intermolecular Forces",
+    desc: "Matter classification, LDF, dipole-dipole, H-bonding, physical properties",
+    leftHeader: "Term",
+    rightHeader: "Definition",
+    words: [
+      ["Element","One type of atom"],["Compound","2+ elements chemically bonded"],
+      ["Molecule","2+ atoms bonded together"],["Mixture","Physically combined substances"],
+      ["Homogeneous","Uniform composition"],["Heterogeneous","Non-uniform composition"],
+      ["Pure Substance","Element or compound"],["Solution","Homogeneous mixture"],
+      ["Ion","Charged atom or group"],["Allotrope","Same element, different form"],
+      ["London Dispersion","Temporary dipole forces"],["Dipole-Dipole","Polar molecule attraction"],
+      ["Hydrogen Bonding","H with F, O, or N"],["Ion-Dipole","Ion + polar molecule"],
+      ["Intramolecular","Forces within molecule"],["Intermolecular","Forces between molecules"],
+      ["Boiling Point","Stronger IMF = higher"],["Vapor Pressure","Stronger IMF = lower"],
+      ["Viscosity","Resistance to flow"],["Surface Tension","IMF at liquid surface"],
+      ["Volatile","Evaporates easily (weak IMF)"],["Capillary Action","Liquid rises in tube"],
+      ["Cohesion","Attraction between same molecules"],["Adhesion","Attraction between different molecules"]
+    ]
+  },
+  {
+    name: "Polyatomic Ions Extended",
+    desc: "All polyatomic ions: core 7 + extended set with formulas and charges",
+    leftHeader: "Name",
+    rightHeader: "Formula",
+    words: [
+      ["Hydroxide","OH⁻"],["Nitrate","NO₃⁻"],["Ammonium","NH₄⁺"],
+      ["Carbonate","CO₃²⁻"],["Sulfate","SO₄²⁻"],["Phosphate","PO₄³⁻"],
+      ["Bicarbonate","HCO₃⁻"],["Permanganate","MnO₄⁻"],["Chromate","CrO₄²⁻"],
+      ["Dichromate","Cr₂O₇²⁻"],["Cyanide","CN⁻"],["Acetate","CH₃COO⁻"],
+      ["Chlorate","ClO₃⁻"],["Perchlorate","ClO₄⁻"],["Oxalate","C₂O₄²⁻"],
+      ["Nitrite","NO₂⁻"],["Sulfite","SO₃²⁻"],["Hypochlorite","ClO⁻"],
+      ["Chlorite","ClO₂⁻"],["Thiocyanate","SCN⁻"],
+      ["Dihydrogen phosphate","H₂PO₄⁻"],["Hydrogen phosphate","HPO₄²⁻"],
+      ["Hydrogen sulfate","HSO₄⁻"],["Hydrogen sulfite","HSO₃⁻"]
+    ]
+  },
+  {
+    name: "Periodic Table Groups & Blocks",
+    desc: "Group names, element blocks (s/p/d/f), and key element properties",
+    leftHeader: "Element / Group",
+    rightHeader: "Property",
+    words: [
+      ["Group 1","Alkali metals"],["Group 2","Alkaline earth metals"],
+      ["Group 17","Halogens"],["Group 18","Noble gases"],
+      ["Na, K, Li","s-block"],["Fe, Cu, Zn","d-block"],
+      ["C, N, O, Cl","p-block"],["Ce, U","f-block"],
+      ["B, Si, Ge","Metalloids"],["F","Most electronegative"],
+      ["Fr / Cs","Most metallic"],["He","Smallest noble gas"],
+      ["H₂, N₂, O₂, F₂, Cl₂, Br₂, I₂","Diatomic elements"],
+      ["Across a period","Radius decreases"],["Down a group","Radius increases"],
+      ["Across a period","IE increases"],["Down a group","IE decreases"],
+      ["Across a period","EN increases"],["Down a group","Metallic character increases"],
+      ["Ne, Ar, Kr","Full valence shell"],
+      ["Groups 3-12","Transition metals"],["Period 1","Only H and He"],
+      ["Metals","Left side of PT"],["Nonmetals","Right side of PT"]
+    ]
+  },
+  {
+    name: "Chemical Reaction Types",
+    desc: "Synthesis, decomposition, single/double replacement, combustion, redox",
+    leftHeader: "Reaction",
+    rightHeader: "Type",
+    words: [
+      ["A + B → AB","Synthesis"],["AB → A + B","Decomposition"],
+      ["A + BC → AC + B","Single replacement"],["AB + CD → AD + CB","Double replacement"],
+      ["CₓHᵧ + O₂ → CO₂ + H₂O","Combustion"],
+      ["2Na + Cl₂ → 2NaCl","Synthesis"],["2H₂O → 2H₂ + O₂","Decomposition"],
+      ["Zn + CuSO₄ → ZnSO₄ + Cu","Single replacement"],
+      ["AgNO₃ + NaCl → AgCl + NaNO₃","Double replacement"],
+      ["CH₄ + 2O₂ → CO₂ + 2H₂O","Combustion"],
+      ["Loss of electrons","Oxidation"],["Gain of electrons","Reduction"],
+      ["Gets reduced","Oxidizing agent"],["Gets oxidized","Reducing agent"],
+      ["OIL RIG","Oxidation Is Loss, Reduction Is Gain"],
+      ["Free element","Oxidation # = 0"],["O in compounds","Usually −2"],
+      ["H in compounds","Usually +1"],
+      ["HCl + NaOH → NaCl + H₂O","Neutralization"],
+      ["Fe + O₂ → Fe₂O₃","Synthesis (rusting)"],
+      ["CaCO₃ → CaO + CO₂","Decomposition"],
+      ["Mg + 2HCl → MgCl₂ + H₂","Single replacement"],
+      ["BaCl₂ + Na₂SO₄ → BaSO₄ + 2NaCl","Double replacement"],
+      ["C₃H₈ + 5O₂ → 3CO₂ + 4H₂O","Combustion"]
+    ]
+  },
+  {
+    name: "Intramolecular vs Intermolecular",
+    desc: "Distinguish bonds within molecules from forces between molecules",
+    leftHeader: "Force / Bond",
+    rightHeader: "Category",
+    words: [
+      ["Covalent bond","Intramolecular"],["Ionic bond","Intramolecular"],
+      ["Metallic bond","Intramolecular"],["Hydrogen bonding","Intermolecular"],
+      ["London dispersion","Intermolecular"],["Dipole-dipole","Intermolecular"],
+      ["Ion-dipole","Intermolecular"],["Double bond","Intramolecular"],
+      ["Triple bond","Intramolecular"],["Van der Waals","Intermolecular"],
+      ["Boiling breaks","Intermolecular forces"],["Decomposition breaks","Intramolecular bonds"],
+      ["Melting ice breaks","H-bonds (intermolecular)"],["Splitting H₂O breaks","O-H bonds (intramolecular)"],
+      ["Between H₂O molecules","Hydrogen bonding"],["Within an O₂ molecule","Covalent bond"],
+      ["Between Ar atoms (liquid)","London dispersion"],["Na⁺ in water","Ion-dipole"],
+      ["Between HCl molecules","Dipole-dipole"],["In a copper wire","Metallic bond"],
+      ["Between CO₂ molecules","London dispersion"],["In NaCl crystal","Ionic bond"],
+      ["Strongest IMF","Ion-dipole"],["Weakest IMF","London dispersion"]
+    ]
+  }
+];
+
+const PAIRS_PER_ROUND = 8;
+const ROUNDS_PER_LEVEL = 4;
+const TIME_PER_ROUND = 60;
+const STORAGE_KEY = 'fye12_match_madness_v2';
+const OLD_STORAGE_KEY = 'fye12_match_madness';
+
+// ============ STATE ============
+let currentLevel = 0;
+let currentRound = 0;
+let timerInterval = null;
+let timeLeft = 0;
+let roundStartTime = 0;
+
+// Per-round state
+let roundPairs = [];
+let selectedTile = null;
+let matchedCount = 0;
+let totalPairs = 0;
+let streak = 0;
+let bestStreak = 0;
+let roundXP = 0;
+
+// Per-level session state (spaced repetition)
+let levelXP = 0;
+let levelMatchedTotal = 0;
+let levelPairsTotal = 0;
+let levelBestStreak = 0;
+let unseenQueue = [];
+let reviewQueue = [];
+let masteredSet = [];
+let wrongThisLevel = [];
+
+// ============ PROGRESS / localStorage + server ============
+const DEFAULT_STATS = {totalXP:0,totalGames:0,totalMatches:0,totalWrong:0,bestStreak:0,totalTimePlayed:0,wordsLearned:0};
+
+function getProgress() {
+  try {
+    const d = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    if (!d.levels) d.levels = {};
+    if (!d.stats) d.stats = {...DEFAULT_STATS};
+    return d;
+  } catch(e) { return { levels: {}, stats: {...DEFAULT_STATS} }; }
+}
+
+function saveProgress(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  // Fire-and-forget server sync
+  fetch('/api/match-progress', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(data)
+  }).catch(() => {});
+}
+
+function saveLevelResult(level, stars, xp) {
+  const prog = getProgress();
+  if (!prog.levels) prog.levels = {};
+  const prev = prog.levels[level];
+  if (!prev || prev.stars < stars) {
+    prog.levels[level] = { stars, xp, mastered: [...new Set(masteredSet)], wrong: [...new Set(wrongThisLevel)] };
+  }
+
+  // Update cumulative stats
+  const s = prog.stats;
+  s.totalGames++;
+  s.totalXP += levelXP;
+  if (levelBestStreak > s.bestStreak) s.bestStreak = levelBestStreak;
+
+  // Count unique mastered pairs across all levels
+  const allMastered = new Set();
+  for (const key of Object.keys(prog.levels)) {
+    const lv = prog.levels[key];
+    if (lv.mastered) lv.mastered.forEach(w => allMastered.add(Array.isArray(w) ? w[0]+'|'+w[1] : w));
+  }
+  s.wordsLearned = allMastered.size;
+
+  saveProgress(prog);
+}
+
+function updateRoundStats(matched, wrong, elapsed) {
+  const prog = getProgress();
+  const s = prog.stats;
+  s.totalMatches += matched;
+  s.totalWrong += wrong;
+  s.totalTimePlayed += elapsed;
+  saveProgress(prog);
+}
+
+async function loadProgressFromServer() {
+  try {
+    const res = await fetch('/api/match-progress');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data && data.levels && Object.keys(data.levels).length > 0) {
+      if (!data.stats) data.stats = {...DEFAULT_STATS};
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+  } catch(e) {}
+}
+
+function migrateOldProgress() {
+  try {
+    const old = JSON.parse(localStorage.getItem(OLD_STORAGE_KEY));
+    if (!old) return;
+    const existing = getProgress();
+    if (Object.keys(existing.levels).length > 0) return;
+    const prog = { levels: {}, stats: {...DEFAULT_STATS} };
+    for (const key of Object.keys(old)) {
+      prog.levels[key] = { stars: old[key].stars, xp: old[key].score || 0, mastered: [], wrong: [] };
+    }
+    saveProgress(prog);
+  } catch(e) {}
+}
+
+function resetAllProgress() {
+  if (!confirm('Reset all Match Madness progress?')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(OLD_STORAGE_KEY);
+  fetch('/api/match-progress', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({})
+  }).catch(() => {});
+  renderLevels();
+}
+
+function renderStats() {
+  const prog = getProgress();
+  const s = prog.stats || DEFAULT_STATS;
+  document.getElementById('statXP').textContent = s.totalXP;
+  document.getElementById('statGames').textContent = s.totalGames;
+  document.getElementById('statStreak').textContent = s.bestStreak;
+  document.getElementById('statWords').textContent = s.wordsLearned;
+}
+
+// ============ SCREEN MANAGEMENT ============
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ============ LEVEL SELECT ============
+function renderLevels() {
+  showScreen('levelSelect');
+  const grid = document.getElementById('levelGrid');
+  const prog = getProgress();
+  grid.innerHTML = '';
+  VOCAB_BANKS.forEach((bank, i) => {
+    const data = prog.levels[i];
+    const unlocked = i === 0 || prog.levels[i - 1];
+    const card = document.createElement('div');
+    card.className = 'level-card' + (data && data.stars >= 3 ? ' completed' : '') + (!unlocked ? ' locked' : '');
+
+    let starsHTML;
+    if (!unlocked) {
+      starsHTML = '<div class="lock-icon">&#x1F512;</div>';
+    } else if (data && data.stars > 0) {
+      starsHTML = '<div class="level-stars">'
+        + '<span class="star-gold">&#9733;</span>'.repeat(data.stars)
+        + '<span class="star-empty">&#9733;</span>'.repeat(3 - data.stars)
+        + '</div>';
+    } else {
+      starsHTML = '<div class="level-stars">'
+        + '<span class="star-empty">&#9733;</span>'.repeat(3)
+        + '</div>';
+    }
+
+    card.innerHTML = `
+      <h3>Level ${i + 1}</h3>
+      <div class="level-info">${bank.name}</div>
+      <div class="level-info">${bank.desc}</div>
+      ${starsHTML}
+      ${data ? '<div class="level-best">' + data.xp + ' XP</div>' : ''}
+    `;
+    if (unlocked) card.onclick = () => startLevel(i);
+    grid.appendChild(card);
+  });
+  renderStats();
+}
+
+// ============ GET READY COUNTDOWN ============
+function showCountdown(callback) {
+  showScreen('getReady');
+  const numEl = document.getElementById('countdownNum');
+  let count = 3;
+  numEl.textContent = count;
+  numEl.style.animation = 'none';
+  void numEl.offsetWidth;
+  numEl.style.animation = 'countPop .4s ease';
+  playTick();
+
+  const iv = setInterval(() => {
+    count--;
+    if (count <= 0) {
+      clearInterval(iv);
+      callback();
+      return;
+    }
+    numEl.textContent = count;
+    numEl.style.animation = 'none';
+    void numEl.offsetWidth;
+    numEl.style.animation = 'countPop .4s ease';
+    playTick();
+  }, 600);
+}
+
+// ============ START LEVEL ============
+function startLevel(level) {
+  currentLevel = level;
+  currentRound = 0;
+  levelXP = 0;
+  levelMatchedTotal = 0;
+  levelPairsTotal = 0;
+  levelBestStreak = 0;
+  masteredSet = [];
+  wrongThisLevel = [];
+
+  // Shuffle all words into unseen queue
+  const bank = VOCAB_BANKS[level].words;
+  unseenQueue = shuffle([...bank]);
+  reviewQueue = [];
+
+  showCountdown(() => {
+    showScreen('gameArea');
+    startRound();
+  });
+}
+
+// ============ SPACED REPETITION PAIR SELECTION ============
+function selectRoundPairs() {
+  const pairs = [];
+  const reviewCount = Math.min(Math.floor(PAIRS_PER_ROUND * 0.25), reviewQueue.length);
+  const newCount = PAIRS_PER_ROUND - reviewCount;
+
+  // Pull from review queue first
+  for (let i = 0; i < reviewCount; i++) {
+    pairs.push(reviewQueue.shift());
+  }
+
+  // Pull new words from unseen
+  let added = 0;
+  while (added < newCount && unseenQueue.length > 0) {
+    pairs.push(unseenQueue.shift());
+    added++;
+  }
+
+  // If not enough unseen, recycle from mastered (exclude current round pairs)
+  if (pairs.length < PAIRS_PER_ROUND) {
+    const recyclePool = shuffle(masteredSet.filter(m =>
+      !pairs.some(p => p[0] === m[0] && p[1] === m[1])
+    ));
+    while (pairs.length < PAIRS_PER_ROUND && recyclePool.length > 0) {
+      pairs.push(recyclePool.shift());
+    }
+  }
+
+  // Still not enough? pull from review again
+  while (pairs.length < PAIRS_PER_ROUND && reviewQueue.length > 0) {
+    pairs.push(reviewQueue.shift());
+  }
+
+  return shuffle(pairs);
+}
+
+// ============ START ROUND ============
+function startRound() {
+  roundPairs = selectRoundPairs();
+  totalPairs = roundPairs.length;
+  matchedCount = 0;
+  streak = 0;
+  bestStreak = 0;
+  roundXP = 0;
+  selectedTile = null;
+  timeLeft = TIME_PER_ROUND;
+
+  // Set column headers from vocab bank
+  document.getElementById('headerLeft').textContent = VOCAB_BANKS[currentLevel].leftHeader;
+  document.getElementById('headerRight').textContent = VOCAB_BANKS[currentLevel].rightHeader;
+
+  document.getElementById('roundInfo').textContent = `Round ${currentRound + 1} / ${ROUNDS_PER_LEVEL}`;
+  document.getElementById('streakDisplay').textContent = '';
+  document.getElementById('streakDisplay').classList.remove('glowing');
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('progressFill').classList.remove('pulse');
+  document.getElementById('timer').textContent = timeLeft;
+  document.getElementById('timer').className = 'timer';
+
+  // Shuffle left/right independently
+  const leftItems = roundPairs.map((p, i) => ({ text: p[0], idx: i, side: 'left' }));
+  const rightItems = roundPairs.map((p, i) => ({ text: p[1], idx: i, side: 'right' }));
+  shuffle(leftItems);
+  shuffle(rightItems);
+
+  const colLeft = document.getElementById('colLeft');
+  const colRight = document.getElementById('colRight');
+  colLeft.innerHTML = '';
+  colRight.innerHTML = '';
+
+  leftItems.forEach(item => {
+    const tile = createTile(item);
+    colLeft.appendChild(tile);
+  });
+  rightItems.forEach(item => {
+    const tile = createTile(item);
+    colRight.appendChild(tile);
+  });
+
+  roundStartTime = Date.now();
+  clearInterval(timerInterval);
+  timerInterval = setInterval(tick, 1000);
+}
+
+function createTile(item) {
+  const tile = document.createElement('div');
+  tile.className = 'match-tile';
+  tile.innerHTML = chemFormat(escHtml(item.text));
+  tile.dataset.idx = item.idx;
+  tile.dataset.side = item.side;
+  tile.onclick = () => selectTile(tile);
+  return tile;
+}
+
+// ============ TIMER ============
+function tick() {
+  timeLeft--;
+  const timerEl = document.getElementById('timer');
+  timerEl.textContent = timeLeft;
+  if (timeLeft <= 5) {
+    timerEl.className = 'timer danger';
+    playTimeWarn();
+  } else if (timeLeft <= 10) {
+    timerEl.className = 'timer warning';
+  }
+  if (timeLeft <= 0) {
+    clearInterval(timerInterval);
+    endRound(false);
+  }
+}
+
+// ============ TILE SELECTION ============
+function selectTile(tile) {
+  if (tile.classList.contains('matched') || tile.classList.contains('correct')) return;
+
+  // Deselect same tile
+  if (selectedTile === tile) {
+    tile.classList.remove('selected');
+    selectedTile = null;
+    return;
+  }
+
+  // Nothing selected yet
+  if (!selectedTile) {
+    tile.classList.add('selected');
+    selectedTile = tile;
+    return;
+  }
+
+  // Same side, switch selection
+  if (selectedTile.dataset.side === tile.dataset.side) {
+    selectedTile.classList.remove('selected');
+    tile.classList.add('selected');
+    selectedTile = tile;
+    return;
+  }
+
+  // Two tiles from different sides, check match
+  const idx1 = parseInt(selectedTile.dataset.idx);
+  const idx2 = parseInt(tile.dataset.idx);
+
+  if (idx1 === idx2) {
+    // CORRECT
+    handleCorrectMatch(selectedTile, tile, idx1);
+  } else {
+    // WRONG
+    handleWrongMatch(selectedTile, tile, idx1, idx2);
+  }
+}
+
+function handleCorrectMatch(tile1, tile2, pairIdx) {
+  tile1.classList.remove('selected');
+  tile1.classList.add('correct');
+  tile2.classList.add('correct');
+
+  streak++;
+  if (streak > bestStreak) bestStreak = streak;
+
+  if (streak >= 3) playStreak();
+  else playCorrect();
+  matchedCount++;
+
+  // XP: +10 base, +5 speed bonus (<3s since round start or last match), +2 per streak beyond 2
+  let xp = 10;
+  const elapsed = (Date.now() - roundStartTime) / 1000;
+  if (elapsed < 3 * matchedCount) xp += 5; // quick match bonus
+  if (streak > 2) xp += (streak - 2) * 2;
+  roundXP += xp;
+
+  // Spaced rep: add to mastered, remove from wrong
+  const pair = roundPairs[pairIdx];
+  const pairKey = pair[0] + '|' + pair[1];
+  if (!masteredSet.some(m => m[0] === pair[0] && m[1] === pair[1])) {
+    masteredSet.push(pair);
+  }
+  wrongThisLevel = wrongThisLevel.filter(w => w[0] !== pair[0] || w[1] !== pair[1]);
+
+  // Floating XP
+  showFloatingXP(tile2, '+' + xp + ' XP');
+
+  // Streak display
+  updateStreakDisplay();
+
+  // Progress bar
+  const pf = document.getElementById('progressFill');
+  pf.style.width = (matchedCount / totalPairs * 100) + '%';
+  pf.classList.remove('pulse');
+  void pf.offsetWidth;
+  pf.classList.add('pulse');
+
+  // Fade out tiles
+  const t1 = tile1, t2 = tile2;
+  setTimeout(() => {
+    t1.classList.remove('correct');
+    t1.classList.add('matched');
+    t2.classList.remove('correct');
+    t2.classList.add('matched');
+  }, 380);
+
+  selectedTile = null;
+
+  if (matchedCount === totalPairs) {
+    clearInterval(timerInterval);
+    // Time bonus
+    roundXP += timeLeft * 2;
+    setTimeout(() => endRound(true), 450);
+  }
+}
+
+function handleWrongMatch(tile1, tile2, idx1, idx2) {
+  tile1.classList.remove('selected');
+  tile1.classList.add('wrong');
+  tile2.classList.add('wrong');
+  playWrong();
+
+  streak = 0;
+  updateStreakDisplay();
+
+  // Add both pairs to review queue for spaced repetition
+  [idx1, idx2].forEach(idx => {
+    const pair = roundPairs[idx];
+    if (pair && !reviewQueue.some(r => r[0] === pair[0] && r[1] === pair[1])) {
+      reviewQueue.push(pair);
+    }
+    if (pair && !wrongThisLevel.some(w => w[0] === pair[0] && w[1] === pair[1])) {
+      wrongThisLevel.push(pair);
+    }
+  });
+
+  const t1 = tile1, t2 = tile2;
+  setTimeout(() => {
+    t1.classList.remove('wrong');
+    t2.classList.remove('wrong');
+  }, 500);
+
+  selectedTile = null;
+}
+
+// ============ FLOATING XP ============
+function showFloatingXP(tile, text) {
+  const rect = tile.getBoundingClientRect();
+  const el = document.createElement('div');
+  el.className = 'xp-float';
+  el.textContent = text;
+  el.style.left = (rect.left + rect.width / 2 - 20) + 'px';
+  el.style.top = (rect.top - 5) + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 750);
+}
+
+// ============ STREAK DISPLAY ============
+function updateStreakDisplay() {
+  const sd = document.getElementById('streakDisplay');
+  if (streak >= 3) {
+    sd.textContent = streak + ' streak!';
+    sd.classList.add('glowing');
+  } else if (streak >= 2) {
+    sd.textContent = streak + ' in a row';
+    sd.classList.remove('glowing');
+  } else {
+    sd.textContent = '';
+    sd.classList.remove('glowing');
+  }
+}
+
+// ============ END ROUND ============
+function endRound(completed) {
+  const elapsed = Math.round((Date.now() - roundStartTime) / 1000);
+  levelXP += roundXP;
+  levelMatchedTotal += matchedCount;
+  levelPairsTotal += totalPairs;
+  if (bestStreak > levelBestStreak) levelBestStreak = bestStreak;
+  currentRound++;
+
+  // Track round stats (wrong count = pairs that ended up in reviewQueue from this round)
+  const wrongCount = roundPairs.filter(p => wrongThisLevel.some(w => w[0] === p[0] && w[1] === p[1])).length;
+  updateRoundStats(matchedCount, wrongCount, elapsed);
+
+  const isLastRound = currentRound >= ROUNDS_PER_LEVEL;
+
+  if (isLastRound) {
+    showLevelComplete();
+  } else {
+    showRoundComplete(elapsed);
+  }
+}
+
+function showRoundComplete(elapsed) {
+  showScreen('roundComplete');
+  playRoundWin();
+  document.getElementById('rcTitle').textContent = 'Round ' + currentRound + ' Complete!';
+  document.getElementById('rcXP').textContent = '+' + roundXP + ' XP';
+  document.getElementById('rcMatched').textContent = matchedCount;
+  document.getElementById('rcTotal').textContent = totalPairs;
+  document.getElementById('rcTime').textContent = elapsed;
+  document.getElementById('rcStreak').textContent = bestStreak;
+
+  const reviewNote = document.getElementById('rcReview');
+  if (reviewQueue.length > 0) {
+    reviewNote.textContent = reviewQueue.length + ' pair' + (reviewQueue.length > 1 ? 's' : '') + ' queued for review';
+  } else {
+    reviewNote.textContent = 'All pairs matched perfectly!';
+  }
+
+  document.getElementById('btnContinue').textContent = 'CONTINUE';
+  document.getElementById('btnContinue').onclick = nextRound;
+}
+
+function showLevelComplete() {
+  // Calculate stars: based on % matched correctly across all rounds
+  const pct = levelPairsTotal > 0 ? levelMatchedTotal / levelPairsTotal : 0;
+  const stars = pct >= 0.9 ? 3 : pct >= 0.7 ? 2 : pct >= 0.5 ? 1 : 0;
+
+  saveLevelResult(currentLevel, stars, levelXP);
+  playLevelWin();
+
+  showScreen('levelComplete');
+  document.getElementById('lcXP').textContent = '+' + levelXP + ' XP';
+  document.getElementById('lcMastered').textContent = masteredSet.length;
+  document.getElementById('lcReview').textContent = wrongThisLevel.length;
+
+  // Animated stars
+  const starsEl = document.getElementById('lcStars');
+  starsEl.innerHTML = '';
+  for (let i = 0; i < 3; i++) {
+    const span = document.createElement('span');
+    span.className = 'star';
+    span.innerHTML = '&#9733;';
+    span.style.color = i < stars ? '#FFC800' : '#e5e5e5';
+    starsEl.appendChild(span);
+    setTimeout(() => span.classList.add('reveal'), 300 + i * 300);
+  }
+
+  // Confetti
+  if (stars >= 2) {
+    setTimeout(launchConfetti, 200);
+  }
+}
+
+// ============ NEXT ROUND ============
+function nextRound() {
+  showCountdown(() => {
+    showScreen('gameArea');
+    startRound();
+  });
+}
+
+function confirmQuit() {
+  if (confirm('Quit this level? Progress for this session will be lost.')) {
+    clearInterval(timerInterval);
+    backToLevels();
+  }
+}
+
+function backToLevels() {
+  clearInterval(timerInterval);
+  renderLevels();
+}
+
+// ============ CONFETTI ============
+function launchConfetti() {
+  const canvas = document.getElementById('confettiCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const colors = ['#58CC02','#1CB0F6','#FF9600','#FFC800','#FF4B4B','#CE82FF'];
+  const pieces = [];
+
+  for (let i = 0; i < 70; i++) {
+    pieces.push({
+      x: Math.random() * canvas.width,
+      y: -10 - Math.random() * 200,
+      w: 6 + Math.random() * 6,
+      h: 10 + Math.random() * 8,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      vy: 2 + Math.random() * 3,
+      vx: (Math.random() - 0.5) * 2,
+      rot: Math.random() * 360,
+      vr: (Math.random() - 0.5) * 8,
+      opacity: 1
+    });
+  }
+
+  let frame = 0;
+  const maxFrames = 180;
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    frame++;
+
+    if (frame > maxFrames * 0.6) {
+      pieces.forEach(p => p.opacity = Math.max(0, p.opacity - 0.02));
+    }
+
+    let alive = false;
+    pieces.forEach(p => {
+      if (p.opacity <= 0) return;
+      alive = true;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.05; // gravity
+      p.rot += p.vr;
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot * Math.PI / 180);
+      ctx.globalAlpha = p.opacity;
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    });
+
+    if (alive && frame < maxFrames) {
+      requestAnimationFrame(draw);
+    } else {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+
+  requestAnimationFrame(draw);
+}
+
+// ============ UTILS ============
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ============ INIT ============
+(async function init() {
+  await loadProgressFromServer();
+  migrateOldProgress();
+  renderLevels();
+})();
+</script>
+</body>
+</html>

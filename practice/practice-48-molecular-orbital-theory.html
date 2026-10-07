@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice 48 — Molecular Orbital Theory</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Practice 48 &mdash; Molecular Orbital Theory</h1>
+<p class="subtitle">Deep practice &mdash; MO diagrams, bond order, &sigma; and &pi; orbitals, paramagnetism</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_48';
+const SECTIONS = [
+  {
+    id:1, title:"MO Basics",
+    instruction:"Fill in the blank with the correct term.",
+    rows:[
+      ["1","In MO theory, atomic orbitals combine to form ___ orbitals","molecular"],
+      ["2","When two AOs combine constructively, they form a ___ MO","bonding"],
+      ["3","When two AOs combine destructively, they form an ___ MO","antibonding"],
+      ["4","A bonding MO is ___ in energy than the original AOs","lower"],
+      ["5","An antibonding MO is ___ in energy than the original AOs","higher"],
+      ["6","Antibonding orbitals are labeled with a ___","* / asterisk / star"],
+      ["7","\u03C3 (sigma) MOs have electron density ___ the internuclear axis","along / on / between"],
+      ["8","\u03C0 (pi) MOs have electron density ___ and ___ the internuclear axis","above, below"],
+      ["9","The number of MOs formed equals the number of ___ that combine","AOs / atomic orbitals"],
+      ["10","Two 1s AOs combine to form one \u03C3(1s) and one ___","\u03C3*(1s)"],
+      ["11","Electrons fill MOs according to the ___ principle (lowest energy first)","Aufbau / aufbau"],
+      ["12","Each MO can hold a maximum of ___ electrons","2"],
+      ["13","Electrons fill degenerate MOs singly first, following ___'s rule","Hund / Hund"],
+      ["14","A \u03C3 bond has ___ symmetry around the bond axis","cylindrical / rotational"],
+      ["15","A node between the nuclei in an antibonding MO means electron density is ___ there","zero / absent"]
+    ]
+  },
+  {
+    id:2, title:"Bond Order Calculation",
+    instruction:"Bond order = (bonding e\u207B \u2212 antibonding e\u207B) / 2. Calculate bond order.",
+    rows:[
+      ["1","H\u2082 has ___ bonding e\u207B and ___ antibonding e\u207B","2, 0"],
+      ["2","Bond order of H\u2082 = ___","1"],
+      ["3","He\u2082 has ___ bonding e\u207B and ___ antibonding e\u207B","2, 2"],
+      ["4","Bond order of He\u2082 = ___","0"],
+      ["5","Does He\u2082 exist as a stable molecule? ___","no"],
+      ["6","N\u2082 has bond order = ___","3"],
+      ["7","O\u2082 has bond order = ___","2"],
+      ["8","F\u2082 has bond order = ___","1"],
+      ["9","H\u2082\u207A has ___ total electron(s)","1"],
+      ["10","Bond order of H\u2082\u207A = ___","0.5"],
+      ["11","He\u2082\u207A has ___ total electrons","3"],
+      ["12","Bond order of He\u2082\u207A = ___","0.5"],
+      ["13","Does He\u2082\u207A exist? ___","yes"],
+      ["14","Higher bond order means ___ bond and ___ bond length","stronger, shorter"],
+      ["15","Ne\u2082 has ___ total electrons and bond order ___","20, 0"],
+      ["16","Does Ne\u2082 exist? ___","no"],
+      ["17","Li\u2082 has bond order = ___","1"],
+      ["18","A molecule with bond order 0 is ___","unstable / does not exist"]
+    ]
+  },
+  {
+    id:3, title:"MO Diagrams for Period 2",
+    instruction:"Fill in the blank about MO electron filling for period 2 diatomics.",
+    rows:[
+      ["1","For O\u2082 and F\u2082, the MO filling order is \u03C32s, \u03C3*2s, \u03C32p, ___, \u03C0*2p, \u03C3*2p","\u03C02p / pi2p"],
+      ["2","For B\u2082, C\u2082, N\u2082, the \u03C0 orbitals fill ___ the \u03C3(2p)","before"],
+      ["3","Li\u2082 has bond order ___ and ___ exist","1, does"],
+      ["4","Be\u2082 has bond order ___ and ___ exist","0, does not / 0, doesn't"],
+      ["5","B\u2082 has bond order = ___","1"],
+      ["6","C\u2082 has bond order = ___","2"],
+      ["7","B\u2082 has ___ total valence electrons in MOs","6 / 10"],
+      ["8","The \u03C3/\u03C0 ordering switch occurs between ___ and ___","N\u2082, O\u2082 / N2 and O2"],
+      ["9","For Li\u2082 through N\u2082: \u03C0(2p) is ___ in energy than \u03C3(2p)","lower"],
+      ["10","For O\u2082 and F\u2082: \u03C3(2p) is ___ in energy than \u03C0(2p)","lower"],
+      ["11","N\u2082 has ___ total electrons","14"],
+      ["12","N\u2082 electron config: (\u03C31s)\u00B2(\u03C3*1s)\u00B2(\u03C32s)\u00B2(\u03C3*2s)\u00B2(\u03C02p)\u2074(___)\u00B2","\u03C32p / sigma2p"],
+      ["13","O\u2082 has ___ total electrons","16"],
+      ["14","F\u2082 has ___ total electrons","18"],
+      ["15","F\u2082 has ___ bonding and ___ antibonding electrons","10, 8 / 8, 6"],
+      ["16","The reason for the \u03C3/\u03C0 switch is ___ mixing of 2s and 2p orbitals","s-p / sp"]
+    ]
+  },
+  {
+    id:4, title:"Paramagnetism & Diamagnetism", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"A paramagnetic substance has:", options:["All electrons paired","At least one unpaired electron","No electrons","Only antibonding electrons"], correct:1},
+      {q:"O\u2082 is paramagnetic. This is explained by:", options:["Lewis structure","VSEPR theory","MO theory","Hybridization"], correct:2},
+      {q:"In the MO diagram of O\u2082, the unpaired electrons are in:", options:["\u03C3(2p)","\u03C0(2p)","\u03C0*(2p)","\u03C3*(2p)"], correct:2},
+      {q:"How many unpaired electrons does O\u2082 have?", options:["0","1","2","4"], correct:2},
+      {q:"Diamagnetic molecules are ___ repelled by a magnetic field", options:["strongly","weakly","not","extremely"], correct:1},
+      {q:"N\u2082 is:", options:["Paramagnetic","Diamagnetic","Neither","Both"], correct:1},
+      {q:"B\u2082 is:", options:["Diamagnetic","Paramagnetic (2 unpaired e\u207B in \u03C0 2p)","Ionic","Non-existent"], correct:1},
+      {q:"C\u2082 is:", options:["Paramagnetic","Diamagnetic","Ferromagnetic","Non-existent"], correct:1},
+      {q:"F\u2082 is:", options:["Paramagnetic","Diamagnetic","Ferromagnetic","Non-existent"], correct:1},
+      {q:"How many unpaired electrons does B\u2082 have?", options:["0","1","2","3"], correct:2},
+      {q:"How many unpaired electrons does N\u2082 have?", options:["0","1","2","3"], correct:0},
+      {q:"Li\u2082 is:", options:["Paramagnetic","Diamagnetic","Ionic","Non-existent"], correct:1},
+      {q:"O\u2082\u207B has ___ unpaired electron(s)", options:["0","1","2","3"], correct:1},
+      {q:"O\u2082\u00B2\u207B (peroxide ion) is:", options:["Paramagnetic","Diamagnetic","Does not exist","Triply bonded"], correct:1},
+      {q:"Paramagnetism is detected by:", options:["Weighing in a magnetic field","Color change","Conductivity","Melting point"], correct:0}
+    ]
+  },
+  {
+    id:5, title:"Heteronuclear Diatomics",
+    instruction:"Fill in the blank about heteronuclear diatomic molecules.",
+    rows:[
+      ["1","In heteronuclear diatomics, the MO diagram is ___ (symmetric/asymmetric)","asymmetric"],
+      ["2","CO is isoelectronic with ___ (same number of electrons)","N\u2082"],
+      ["3","CO has bond order = ___","3"],
+      ["4","In HF, the bonding MO is closer in energy to the ___ orbital","F / fluorine"],
+      ["5","NO has ___ total electrons","15"],
+      ["6","NO has bond order = ___","2.5"],
+      ["7","NO is ___ (paramagnetic/diamagnetic)","paramagnetic"],
+      ["8","NO has ___ unpaired electron(s)","1"],
+      ["9","CN\u207B is isoelectronic with ___","N\u2082 / CO"],
+      ["10","CN\u207B has bond order = ___","3"],
+      ["11","In heteronuclear MOs, the bonding orbital has more character of the ___ electronegative atom","more"],
+      ["12","HF has ___ total electrons","10"],
+      ["13","The antibonding MO in HF has more character of the ___ atom","H / hydrogen"],
+      ["14","CO has a ___ dipole moment than expected from electronegativity alone (larger/smaller)","smaller"],
+      ["15","NO\u207A has bond order = ___","3"],
+      ["16","NO\u207A is isoelectronic with ___","N\u2082 / CO"]
+    ]
+  },
+  {
+    id:6, title:"Comparing VB and MO Theory", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Which theory can explain the paramagnetism of O\u2082?", options:["Valence Bond only","Molecular Orbital only","Both equally","Neither"], correct:1},
+      {q:"In VB theory, bonds form by:", options:["Orbital delocalization","Overlap of atomic orbitals","Constructive interference","Electron transfer"], correct:1},
+      {q:"In MO theory, electrons are:", options:["Localized between two atoms","Delocalized over the entire molecule","Fixed in atomic orbitals","Only in antibonding orbitals"], correct:1},
+      {q:"Hybridization is a concept from:", options:["MO theory","VB theory","Both theories","Crystal field theory"], correct:1},
+      {q:"Bond order in MO theory can be a:", options:["Whole number only","Fraction (e.g. 1.5, 2.5)","Negative number only","Complex number"], correct:1},
+      {q:"VB theory predicts O\u2082 is:", options:["Paramagnetic","Diamagnetic","Ionic","Metallic"], correct:1},
+      {q:"Which theory treats bonding as a whole-molecule phenomenon?", options:["VB theory","MO theory","Lewis structures","VSEPR"], correct:1},
+      {q:"The main advantage of MO theory is explaining:", options:["Molecular shape","Bond angles","Magnetic properties and bond order","Polarity only"], correct:2},
+      {q:"Lewis structures fail to predict:", options:["Molecular formula","Paramagnetism of O\u2082","Number of bonds in H\u2082","Octet rule"], correct:1},
+      {q:"In MO theory, a triple bond consists of:", options:["Three \u03C3 bonds","One \u03C3 and two \u03C0","Two \u03C3 and one \u03C0","Three \u03C0 bonds"], correct:1},
+      {q:"The Lewis structure of O\u2082 shows a double bond. MO theory shows bond order:", options:["1","2","3","2.5"], correct:1},
+      {q:"Which can explain bond orders of 0.5 or 1.5?", options:["Lewis structures","VB theory","MO theory","VSEPR"], correct:2}
+    ]
+  },
+  {
+    id:7, title:"Bond Order for Ions & Species",
+    instruction:"Calculate bond order for ions. Bond order = (bonding e\u207B \u2212 antibonding e\u207B) / 2.",
+    rows:[
+      ["1","O\u2082\u207A has ___ total electrons","15"],
+      ["2","Bond order of O\u2082\u207A = ___","2.5"],
+      ["3","O\u2082\u207B has ___ total electrons","17"],
+      ["4","Bond order of O\u2082\u207B = ___","1.5"],
+      ["5","O\u2082\u00B2\u207B has bond order = ___","1"],
+      ["6","N\u2082\u207A has bond order = ___","2.5"],
+      ["7","Rank bond strength: O\u2082\u207A, O\u2082, O\u2082\u207B (strongest first)","O\u2082\u207A, O\u2082, O\u2082\u207B"],
+      ["8","A bond order of 0 means the molecule ___ exist","does not / doesn't"],
+      ["9","N\u2082\u207A has ___ total electrons","13"],
+      ["10","N\u2082\u207A is ___ (paramagnetic/diamagnetic)","paramagnetic"],
+      ["11","C\u2082\u00B2\u207B has ___ total electrons","14"],
+      ["12","C\u2082\u00B2\u207B is isoelectronic with ___","N\u2082"],
+      ["13","Bond order of C\u2082\u00B2\u207B = ___","3"],
+      ["14","F\u2082\u207A has ___ total electrons","17"],
+      ["15","Bond order of F\u2082\u207A = ___","1.5"],
+      ["16","Rank bond length: O\u2082\u207A, O\u2082, O\u2082\u207B, O\u2082\u00B2\u207B (shortest first)","O\u2082\u207A, O\u2082, O\u2082\u207B, O\u2082\u00B2\u207B"],
+      ["17","B\u2082\u207A has bond order = ___","0.5"],
+      ["18","B\u2082\u207B has ___ total electrons","11"],
+      ["19","Bond order of B\u2082\u207B = ___","1.5"]
+    ]
+  },
+  {
+    id:8, title:"MO Filling Order", type:"arrange",
+    instruction:"Arrange the MOs in correct filling order (lowest energy first).",
+    sentences:[
+      {prompt:"MO filling order for O\u2082 and F\u2082 (from 2s and 2p):", words:["\u03C3(2s)","\u03C3*(2s)","\u03C3(2p)","\u03C0(2p)","\u03C0*(2p)","\u03C3*(2p)"]},
+      {prompt:"MO filling order for B\u2082, C\u2082, N\u2082 (from 2s and 2p):", words:["\u03C3(2s)","\u03C3*(2s)","\u03C0(2p)","\u03C3(2p)","\u03C0*(2p)","\u03C3*(2p)"]},
+      {prompt:"Order the Period 2 homonuclear diatomics by increasing bond order:", words:["Li\u2082(1)","B\u2082(1)","F\u2082(1)","C\u2082(2)","O\u2082(2)","N\u2082(3)"]},
+      {prompt:"Order O\u2082 species by increasing bond order:", words:["O\u2082\u00B2\u207B(1)","O\u2082\u207B(1.5)","O\u2082(2)","O\u2082\u207A(2.5)"]},
+      {prompt:"Order by increasing bond length (shortest first):", words:["N\u2082(BO=3)","O\u2082(BO=2)","F\u2082(BO=1)"]},
+      {prompt:"Order from most stable to least stable:", words:["N\u2082(BO=3)","O\u2082(BO=2)","F\u2082(BO=1)","Be\u2082(BO=0)"]}
+    ]
+  },
+  {
+    id:9, title:"Comprehensive Review", type:"mc",
+    instruction:"Mixed MO theory questions.",
+    questions:[
+      {q:"How many MOs are formed from two 2p AOs overlapping end-to-end?", options:["1","2","3","6"], correct:1},
+      {q:"How many MOs are formed from four 2p AOs overlapping side-by-side?", options:["1","2","4","8"], correct:2},
+      {q:"Which molecule has the strongest bond?", options:["Li\u2082","B\u2082","N\u2082","O\u2082"], correct:2},
+      {q:"Which molecule has the shortest bond?", options:["Li\u2082","N\u2082","O\u2082","F\u2082"], correct:1},
+      {q:"Removing an electron from a bonding MO ___ bond order", options:["Increases","Decreases","Does not change","Doubles"], correct:1},
+      {q:"Removing an electron from an antibonding MO ___ bond order", options:["Increases","Decreases","Does not change","Halves"], correct:0},
+      {q:"NO is paramagnetic because it has:", options:["An even number of electrons","An odd number of electrons (15)","No bonds","Only \u03C3 bonds"], correct:1},
+      {q:"The bond order of CO is the same as:", options:["O\u2082","F\u2082","N\u2082","B\u2082"], correct:2},
+      {q:"Which Period 2 diatomic does NOT exist?", options:["Li\u2082","Be\u2082","B\u2082","C\u2082"], correct:1},
+      {q:"Adding an electron to O\u2082 weakens the bond because it goes into:", options:["A bonding MO","An antibonding MO","A nonbonding MO","The nucleus"], correct:1}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Molecular Orbital Theory</h3><h3>Core Idea: LCAO</h3><p><span class="rule">Linear Combination of Atomic Orbitals (LCAO):</span> When atoms bond, their atomic orbitals combine mathematically to form molecular orbitals (MOs) that belong to the entire molecule.</p><p>&bull; n atomic orbitals \u2192 n molecular orbitals</p><p>&bull; <strong>Bonding MO (\u03C3, \u03C0):</strong> Constructive overlap, lower energy than original AOs, electron density between nuclei</p><p>&bull; <strong>Antibonding MO (\u03C3*, \u03C0*):</strong> Destructive overlap, higher energy than original AOs, node between nuclei</p><h3>Bond Order</h3><p><span class="rule">Bond Order = (bonding e\u207B \u2212 antibonding e\u207B) / 2</span></p><p>&bull; Bond order > 0 \u2192 molecule is stable (exists)</p><p>&bull; <strong>Bond order = 0 \u2192 molecule does NOT exist</strong> (e.g. He\u2082, Ne\u2082)</p><p>&bull; Higher bond order = stronger bond = shorter bond length = higher bond energy</p><p>&bull; Bond order can be fractional (e.g. O\u2082\u207B has BO = 1.5)</p><h3>MO Energy Orders (Period 2)</h3><p><span class="rule">For O\u2082, F\u2082, Ne\u2082 (Z \u2265 8):</span></p><p>\u03C31s &lt; \u03C3*1s &lt; \u03C32s &lt; \u03C3*2s &lt; <strong>\u03C32p &lt; \u03C02p</strong> &lt; \u03C0*2p &lt; \u03C3*2p</p><p><span class="rule">For Li\u2082, Be\u2082, B\u2082, C\u2082, N\u2082 (Z &lt; 8):</span></p><p>\u03C31s &lt; \u03C3*1s &lt; \u03C32s &lt; \u03C3*2s &lt; <strong>\u03C02p &lt; \u03C32p</strong> &lt; \u03C0*2p &lt; \u03C3*2p</p><p><span class="rule">Key difference:</span> For lighter elements, the \u03C02p orbitals are lower in energy than \u03C32p (due to s-p mixing). The switchover occurs between N\u2082 and O\u2082.</p><h3>Period 2 Homonuclear Diatomics</h3><table><tr><th>Molecule</th><th>Total e\u207B</th><th>Bond Order</th><th>Magnetic</th><th>Exists?</th></tr><tr><td>Li\u2082</td><td>6</td><td>1</td><td>Diamagnetic</td><td>Yes</td></tr><tr><td>Be\u2082</td><td>8</td><td>0</td><td>\u2014</td><td>No</td></tr><tr><td>B\u2082</td><td>10</td><td>1</td><td>Paramagnetic</td><td>Yes</td></tr><tr><td>C\u2082</td><td>12</td><td>2</td><td>Diamagnetic</td><td>Yes</td></tr><tr><td>N\u2082</td><td>14</td><td>3</td><td>Diamagnetic</td><td>Yes</td></tr><tr><td>O\u2082</td><td>16</td><td>2</td><td>Paramagnetic</td><td>Yes</td></tr><tr><td>F\u2082</td><td>18</td><td>1</td><td>Diamagnetic</td><td>Yes</td></tr><tr><td>Ne\u2082</td><td>20</td><td>0</td><td>\u2014</td><td>No</td></tr></table><h3>Why O\u2082 is Paramagnetic</h3><p><span class="rule">Key insight:</span> O\u2082 has 16 electrons. After filling through \u03C02p, the last 2 electrons go into the two degenerate \u03C0*2p orbitals. By <strong>Hund\u2019s rule</strong>, they occupy separate orbitals with parallel spins \u2192 2 unpaired electrons.</p><p>&bull; This was a triumph of MO theory: Lewis structures and VB theory predict O\u2082 is diamagnetic (all paired), but experimentally O\u2082 is paramagnetic (attracted to magnets).</p><p>&bull; Only MO theory correctly explains this.</p><h3>Ions and Fractional Bond Orders</h3><table><tr><th>Species</th><th>e\u207B</th><th>Bond Order</th><th>Magnetic</th></tr><tr><td>O\u2082\u207A</td><td>15</td><td>2.5</td><td>Paramagnetic</td></tr><tr><td>O\u2082</td><td>16</td><td>2</td><td>Paramagnetic</td></tr><tr><td>O\u2082\u207B</td><td>17</td><td>1.5</td><td>Paramagnetic</td></tr><tr><td>O\u2082\u00B2\u207B</td><td>18</td><td>1</td><td>Diamagnetic</td></tr></table><p>&bull; As bond order decreases: bond gets weaker, bond length increases</p><h3>Magnetism</h3><p><span class="rule">Paramagnetic:</span> Has unpaired electrons. Attracted to an external magnetic field.</p><p><span class="rule">Diamagnetic:</span> All electrons paired. Weakly repelled by an external magnetic field.</p><p>&bull; To determine: fill the MO diagram, check for unpaired e\u207B in the highest occupied MOs.</p>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 MO diagrams, bond order, \u03C3 and \u03C0 orbitals, paramagnetism \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

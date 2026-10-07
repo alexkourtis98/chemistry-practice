@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice 50 — Phase Diagrams & Changes of State</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Practice 50 &mdash; Phase Diagrams &amp; Changes of State</h1>
+<p class="subtitle">Deep practice &mdash; phase transitions, heating curves, triple point, critical point</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_50';
+const SECTIONS = [
+  {
+    id:1, title:"Phase Transitions",
+    instruction:"Fill in the blank with the correct term for each phase change.",
+    rows:[
+      ["1","Solid \u2192 Liquid is called ___","melting / fusion"],
+      ["2","Liquid \u2192 Solid is called ___","freezing / solidification"],
+      ["3","Liquid \u2192 Gas is called ___","boiling / vaporization / evaporation"],
+      ["4","Gas \u2192 Liquid is called ___","condensation"],
+      ["5","Solid \u2192 Gas (directly) is called ___","sublimation"],
+      ["6","Gas \u2192 Solid (directly) is called ___","deposition"],
+      ["7","Melting and freezing occur at the same temperature called the ___","melting point / freezing point"],
+      ["8","During a phase change, temperature ___ (increases/stays constant/decreases)","stays constant"],
+      ["9","The reverse of sublimation is ___","deposition"],
+      ["10","The reverse of condensation is ___","vaporization / evaporation / boiling"],
+      ["11","Evaporation occurs at temperatures ___ the boiling point","below"],
+      ["12","Boiling occurs when vapor pressure equals ___ pressure","atmospheric / external"],
+      ["13","An example of sublimation in daily life: ___ disappearing without melting","dry ice / ice / snow / mothballs"],
+      ["14","An example of deposition: ___ forming on a cold window in winter","frost"],
+      ["15","The energy absorbed during melting is called the heat of ___","fusion"],
+      ["16","The energy absorbed during vaporization is called the heat of ___","vaporization"]
+    ]
+  },
+  {
+    id:2, title:"Heating Curves",
+    instruction:"Fill in the blank about heating curves and energy calculations.",
+    rows:[
+      ["1","On a heating curve, flat (horizontal) regions represent ___","phase changes / phase transitions"],
+      ["2","On a heating curve, sloped (diagonal) regions represent ___","temperature change / heating"],
+      ["3","During sloped regions, use the equation q = ___","mc\u0394T"],
+      ["4","During flat regions (melting), use the equation q = ___","n\u0394Hfus / m\u0394Hfus"],
+      ["5","During flat regions (boiling), use the equation q = ___","n\u0394Hvap / m\u0394Hvap"],
+      ["6","\u0394Hfus for water = ___ kJ/mol","6.01 / 6.02"],
+      ["7","\u0394Hvap for water = ___ kJ/mol","40.67 / 40.7"],
+      ["8","\u0394Hvap is much ___ than \u0394Hfus because breaking all IMFs requires more energy","larger / greater / bigger"],
+      ["9","A heating curve has ___ flat regions for a pure substance","2 / two"],
+      ["10","The first flat region (at lower T) corresponds to ___","melting / fusion"],
+      ["11","The second flat region (at higher T) corresponds to ___","boiling / vaporization"],
+      ["12","During cooling, the flat regions represent ___ and ___","condensation, freezing / freezing, condensation"],
+      ["13","The slope of the liquid region depends on the ___ of the liquid","specific heat / heat capacity"],
+      ["14","A substance with a large specific heat has a ___ slope on the heating curve","smaller / gentler / less steep"],
+      ["15","If a heating curve plateau is longer, it means the ___ of that phase change is larger","enthalpy / heat"]
+    ]
+  },
+  {
+    id:3, title:"Phase Diagram Reading", type:"mc",
+    instruction:"Select the correct answer about phase diagrams.",
+    questions:[
+      {q:"The triple point is where:", options:["Solid and liquid coexist","Liquid and gas coexist","All three phases coexist","No phases exist"], correct:2},
+      {q:"The critical point is the end of the:", options:["Solid-liquid line","Liquid-gas line","Solid-gas line","Triple point line"], correct:1},
+      {q:"Above the critical temperature, the substance exists as a:", options:["Solid","Liquid","Gas","Supercritical fluid"], correct:3},
+      {q:"The normal boiling point is the temperature at which vapor pressure equals:", options:["0 atm","0.5 atm","1 atm","2 atm"], correct:2},
+      {q:"On a phase diagram, moving up (increasing pressure) at constant temperature can cause:", options:["Only melting","Only boiling","Condensation or freezing","Only sublimation"], correct:2},
+      {q:"The solid-liquid boundary line has a positive slope for:", options:["Water only","Most substances","No substances","Only metals"], correct:1},
+      {q:"At pressures below the triple point, heating a solid will cause it to:", options:["Melt","Boil","Sublime","Condense"], correct:2},
+      {q:"The normal freezing point of water is at ___ \u00B0C and 1 atm:", options:["100","0","-273","37"], correct:1},
+      {q:"The x-axis of a phase diagram is:", options:["Pressure","Volume","Temperature","Density"], correct:2},
+      {q:"The y-axis of a phase diagram is:", options:["Temperature","Pressure","Volume","Energy"], correct:1},
+      {q:"A substance at a point inside the liquid region is:", options:["Entirely liquid","Mixture of solid and liquid","Mixture of liquid and gas","At the triple point"], correct:0},
+      {q:"CO\u2082 at 1 atm cannot exist as a liquid because 1 atm is:", options:["Above the triple point pressure","Below the triple point pressure","At the critical pressure","Above the critical pressure"], correct:1},
+      {q:"Supercritical CO\u2082 is used as a solvent because it has properties of:", options:["Only a gas","Only a liquid","Both gas and liquid","A solid"], correct:2},
+      {q:"Freeze-drying works by:", options:["Melting then boiling","Sublimation at low pressure","Condensation","Deposition"], correct:1}
+    ]
+  },
+  {
+    id:4, title:"Multi-Step Heat Calculations",
+    instruction:"Calculate heat. c(ice) = 2.09 J/(g\u00B7\u00B0C), c(water) = 4.18 J/(g\u00B7\u00B0C), c(steam) = 2.01 J/(g\u00B7\u00B0C). \u0394Hfus = 334 J/g, \u0394Hvap = 2260 J/g.",
+    rows:[
+      ["1","Heat to warm 100 g ice from -10\u00B0C to 0\u00B0C: q = ___ J","2090"],
+      ["2","Heat to melt 100 g ice at 0\u00B0C: q = ___ J","33400 / 33,400"],
+      ["3","Heat to warm 100 g water from 0\u00B0C to 100\u00B0C: q = ___ J","41800 / 41,800"],
+      ["4","Heat to boil 100 g water at 100\u00B0C: q = ___ J","226000 / 226,000"],
+      ["5","Heat to warm 100 g steam from 100\u00B0C to 110\u00B0C: q = ___ J","2010"],
+      ["6","Total heat to convert 100 g ice at -10\u00B0C to steam at 110\u00B0C = ___ J (approx)","305300 / 305,300 / 305000 / 305,000"],
+      ["7","Which step requires the most energy?","boiling / vaporization"],
+      ["8","Heat to melt 2.0 mol of ice (36 g) at 0\u00B0C using \u0394Hfus = 6.01 kJ/mol: q = ___ kJ","12.02 / 12.0 / 12"],
+      ["9","Heat to warm 50 g ice from -20\u00B0C to 0\u00B0C: q = ___ J","2090"],
+      ["10","Heat to melt 50 g ice at 0\u00B0C: q = ___ J","16700 / 16,700"],
+      ["11","Heat to warm 50 g water from 0\u00B0C to 50\u00B0C: q = ___ J","10450 / 10,450"],
+      ["12","Total for Q9-11 (ice at -20\u00B0C to water at 50\u00B0C) = ___ J","29240 / 29,240 / 29200"],
+      ["13","Heat to warm 200 g water from 25\u00B0C to 100\u00B0C: q = ___ J","62700 / 62,700"],
+      ["14","Heat to boil 200 g water at 100\u00B0C: q = ___ J","452000 / 452,000"],
+      ["15","Heat to warm 200 g steam from 100\u00B0C to 150\u00B0C: q = ___ J","20100 / 20,100"],
+      ["16","Total for Q13-15 = ___ J (approx)","534800 / 535,000 / 534000"],
+      ["17","Heat released when 50 g steam at 100\u00B0C condenses to water at 100\u00B0C = ___ J","113000 / 113,000"],
+      ["18","Steam burns are worse than water burns because condensation releases ___ additional energy","\u0394Hvap / heat of vaporization / 2260 J/g"]
+    ]
+  },
+  {
+    id:5, title:"Clausius-Clapeyron & Vapor Pressure",
+    instruction:"Fill in the blank about vapor pressure and temperature.",
+    rows:[
+      ["1","Vapor pressure ___ with increasing temperature","increases"],
+      ["2","The Clausius-Clapeyron equation relates vapor pressure to ___","temperature"],
+      ["3","ln(P\u2082/P\u2081) = -\u0394Hvap/R \u00D7 (1/T\u2082 - 1/T\u2081). R = ___ J/(mol\u00B7K)","8.314"],
+      ["4","Temperature in the Clausius-Clapeyron equation must be in ___","Kelvin / K"],
+      ["5","A liquid with a high \u0394Hvap has ___ (higher/lower) vapor pressure at a given T","lower"],
+      ["6","At the boiling point, the vapor pressure equals the ___","atmospheric pressure / external pressure"],
+      ["7","Volatile liquids have ___ vapor pressures","high"],
+      ["8","A liquid with weak IMFs has a ___ vapor pressure","high / higher"],
+      ["9","Ether is more volatile than water because it has ___ IMFs","weaker"],
+      ["10","At higher altitude (lower atmospheric pressure), water boils at a ___ temperature","lower"],
+      ["11","A pressure cooker raises the boiling point by ___ the pressure","increasing"],
+      ["12","Dynamic equilibrium in a closed container means the rate of evaporation equals the rate of ___","condensation"],
+      ["13","25\u00B0C = ___ K","298"],
+      ["14","100\u00B0C = ___ K","373"],
+      ["15","If VP at 25\u00B0C = 23.8 mmHg and \u0394Hvap = 40.7 kJ/mol, the VP at 50\u00B0C is ___ than 23.8 mmHg","higher / greater"]
+    ]
+  },
+  {
+    id:6, title:"Water vs CO\u2082 Phase Diagrams", type:"mc",
+    instruction:"Select the correct answer about phase diagrams of water and CO\u2082.",
+    questions:[
+      {q:"Water's solid-liquid boundary line has a ___ slope", options:["Positive","Negative","Zero","Undefined"], correct:1},
+      {q:"The negative slope means increasing pressure ___ the melting point of ice", options:["Raises","Lowers","Does not change","Doubles"], correct:1},
+      {q:"Ice floats on water because solid water is ___ dense than liquid water", options:["More","Less","Equally","Infinitely"], correct:1},
+      {q:"Ice is less dense due to the ___ structure of hydrogen bonds", options:["Random","Compact","Open hexagonal","Linear"], correct:2},
+      {q:"The triple point of water is at approximately:", options:["0\u00B0C, 1 atm","0.01\u00B0C, 0.006 atm","100\u00B0C, 1 atm","-273\u00B0C, 0 atm"], correct:1},
+      {q:"The critical point of water is at approximately:", options:["100\u00B0C, 1 atm","374\u00B0C, 218 atm","0\u00B0C, 1 atm","200\u00B0C, 50 atm"], correct:1},
+      {q:"CO\u2082 triple point is at:", options:["-78\u00B0C, 1 atm","-56.4\u00B0C, 5.11 atm","31\u00B0C, 73 atm","0\u00B0C, 1 atm"], correct:1},
+      {q:"CO\u2082 at 1 atm directly goes from solid to gas because 1 atm is:", options:["Above the triple point pressure","Below the triple point pressure (5.11 atm)","At the critical point","Below absolute zero"], correct:1},
+      {q:"The critical point of CO\u2082 is at:", options:["-56.4\u00B0C, 5.11 atm","31.1\u00B0C, 72.9 atm","100\u00B0C, 1 atm","374\u00B0C, 218 atm"], correct:1},
+      {q:"Supercritical CO\u2082 is used to decaffeinate coffee. It acts as a ___ at 31+\u00B0C and 73+ atm:", options:["Gas","Liquid","Solid","Solvent with gas-like diffusion and liquid-like density"], correct:3},
+      {q:"Most substances have a solid-liquid line with ___ slope:", options:["Negative","Positive","Zero","Variable"], correct:1},
+      {q:"Water is unusual because its solid phase is ___ dense than the liquid:", options:["More","Less","Equally","Infinitely more"], correct:1}
+    ]
+  },
+  {
+    id:7, title:"Endothermic/Exothermic & Enthalpy",
+    instruction:"Mixed problems on phase changes, enthalpy, and energy.",
+    rows:[
+      ["1","An endothermic phase change absorbs heat. Melting is ___ (endothermic/exothermic)","endothermic"],
+      ["2","Condensation is ___ (endothermic/exothermic)","exothermic"],
+      ["3","Freezing is ___ (endothermic/exothermic)","exothermic"],
+      ["4","Sublimation is ___ (endothermic/exothermic)","endothermic"],
+      ["5","\u0394Hsub = \u0394Hfus + ___","\u0394Hvap"],
+      ["6","Dry ice (solid CO\u2082) undergoes ___ at atmospheric pressure","sublimation"],
+      ["7","\u0394Hfreezing = ___ \u0394Hfus","-"],
+      ["8","\u0394Hcondensation = ___ \u0394Hvap","-"],
+      ["9","\u0394Hdeposition = ___ \u0394Hsub","-"],
+      ["10","Sweating cools you because evaporation is ___ (endothermic/exothermic)","endothermic"],
+      ["11","Water droplets forming on a cold glass is an example of ___","condensation"],
+      ["12","Naphthalene (mothballs) slowly disappearing is an example of ___","sublimation"],
+      ["13","Rank the 3 endothermic transitions by energy required (least to most): fusion, sublimation, vaporization","fusion, vaporization, sublimation"],
+      ["14","The specific heat of liquid water (4.18 J/g\u00B7\u00B0C) is ___ than most liquids (higher/lower)","higher"],
+      ["15","Water's high specific heat is due to strong ___ bonding","hydrogen"],
+      ["16","The heat capacity of ice (2.09 J/g\u00B7\u00B0C) is ___ than that of liquid water","lower / less"],
+      ["17","The heat capacity of steam (2.01 J/g\u00B7\u00B0C) is ___ than that of liquid water","lower / less"],
+      ["18","A cooling curve is the ___ of a heating curve","reverse / mirror / opposite"]
+    ]
+  },
+  {
+    id:9, title:"Specific Heat & Enthalpy Problems", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Which requires more energy: melting 1 g of ice or boiling 1 g of water?", options:["Melting (334 J/g)","Boiling (2260 J/g)","They are equal","Cannot determine"], correct:1},
+      {q:"The ratio \u0394Hvap/\u0394Hfus for water is approximately:", options:["1:1","3:1","7:1","10:1"], correct:2},
+      {q:"On a heating curve, the temperature plateaus because:", options:["The substance is no longer absorbing heat","All energy goes to breaking/forming IMFs","The thermometer is broken","The heat source stopped"], correct:1},
+      {q:"Which step in heating ice to steam takes the longest plateau?", options:["Melting","Boiling","Both are equal","Neither has a plateau"], correct:1},
+      {q:"100\u00B0C steam causes worse burns than 100\u00B0C water because:", options:["Steam is hotter","Steam releases \u0394Hvap when it condenses","Steam has lower specific heat","Steam is more viscous"], correct:1},
+      {q:"Lyophilization (freeze-drying) removes water by:", options:["Boiling at high temperature","Sublimation at low pressure","Evaporation at room temperature","Chemical decomposition"], correct:1},
+      {q:"At the triple point, which processes can occur simultaneously?", options:["Only melting and boiling","Melting, boiling, and sublimation","Only sublimation","No processes can occur"], correct:1},
+      {q:"Increasing external pressure on a liquid generally ___ its boiling point:", options:["Raises","Lowers","Does not change","Eliminates"], correct:0}
+    ]
+  },
+  {
+    id:8, title:"Phase Transitions & Diagrams", type:"arrange",
+    instruction:"Arrange in the correct order.",
+    sentences:[
+      {prompt:"Order the phases of water by increasing temperature at 1 atm:", words:["solid (ice)","liquid (water)","gas (steam)"]},
+      {prompt:"Order the 5 steps to heat ice at -20\u00B0C to steam at 120\u00B0C:", words:["heat ice","melt ice","heat water","boil water","heat steam"]},
+      {prompt:"Order by increasing energy required per gram of water:", words:["\u0394Hfus (334 J/g)","\u0394Hvap (2260 J/g)"]},
+      {prompt:"Order the phase transitions from least to most energy:", words:["melting","vaporization","sublimation"]},
+      {prompt:"On a heating curve, identify the flat regions in order:", words:["melting plateau","boiling plateau"]},
+      {prompt:"Order sublimation examples:", words:["dry ice at 1 atm,","freeze-drying food,","frost disappearing"]}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>Phase Diagrams & Changes of State</h3><h3>Phase Transitions</h3><table><tr><th>Transition</th><th>Name</th><th>Endo/Exo</th><th>\u0394H Sign</th></tr><tr><td>Solid \u2192 Liquid</td><td>Melting (fusion)</td><td>Endothermic</td><td>+</td></tr><tr><td>Liquid \u2192 Solid</td><td>Freezing</td><td>Exothermic</td><td>\u2212</td></tr><tr><td>Liquid \u2192 Gas</td><td>Vaporization (boiling)</td><td>Endothermic</td><td>+</td></tr><tr><td>Gas \u2192 Liquid</td><td>Condensation</td><td>Exothermic</td><td>\u2212</td></tr><tr><td>Solid \u2192 Gas</td><td>Sublimation</td><td>Endothermic</td><td>+</td></tr><tr><td>Gas \u2192 Solid</td><td>Deposition</td><td>Exothermic</td><td>\u2212</td></tr></table><p><span class="rule">Rule:</span> \u0394H\u209B\u1D64\u2097 = \u0394H\u2092\u1D64\u209B + \u0394H\u1D65\u2090\u209A (sublimation = fusion + vaporization)</p><h3>Heating Curve (5 Regions)</h3><p><span class="rule">Sloped regions</span> (temperature changes): q = mc\u0394T</p><p><span class="rule">Flat regions</span> (phase changes, T constant): q = n\u0394H or q = m\u0394H (per gram)</p><p>Order: solid heating \u2192 melting (flat) \u2192 liquid heating \u2192 boiling (flat) \u2192 gas heating</p><h3>Water Constants</h3><table><tr><th>Property</th><th>Value</th></tr><tr><td>c(ice)</td><td>2.09 J/(g\u00B7\u00B0C)</td></tr><tr><td>c(water)</td><td>4.184 J/(g\u00B7\u00B0C)</td></tr><tr><td>c(steam)</td><td>2.01 J/(g\u00B7\u00B0C)</td></tr><tr><td>\u0394H\u2092\u1D64\u209B</td><td>6.01 kJ/mol = 334 J/g</td></tr><tr><td>\u0394H\u1D65\u2090\u209A</td><td>40.67 kJ/mol = 2260 J/g</td></tr><tr><td>Normal FP</td><td>0 \u00B0C (273.15 K)</td></tr><tr><td>Normal BP</td><td>100 \u00B0C (373.15 K)</td></tr></table><p><span class="rule">Note:</span> c(water) is unusually high due to extensive hydrogen bonding. That is why water is an excellent heat sink and moderates climate.</p><p><span class="rule">Normal BP/FP:</span> Defined as the boiling/freezing point at exactly <strong>1 atm</strong> (101.325 kPa) pressure.</p><h3>Heating Curve Calculation Example</h3><p>Total energy to convert ice at -10\u00B0C to steam at 120\u00B0C:</p><p>q\u2081 = mc\u2091\u1D63\u2091\u0394T\u2081 (heat ice to 0\u00B0C)</p><p>q\u2082 = m\u0394H\u2092\u1D64\u209B (melt ice at 0\u00B0C)</p><p>q\u2083 = mc\u2098\u2090\u209C\u2091\u1D63\u0394T\u2082 (heat water to 100\u00B0C)</p><p>q\u2084 = m\u0394H\u1D65\u2090\u209A (boil water at 100\u00B0C)</p><p>q\u2085 = mc\u209B\u209C\u2091\u2090\u2098\u0394T\u2083 (heat steam to 120\u00B0C)</p><p>q\u209C\u2092\u209C\u2090\u2097 = q\u2081 + q\u2082 + q\u2083 + q\u2084 + q\u2085</p><h3>Phase Diagram Features</h3><p><strong>Triple point:</strong> All 3 phases coexist in equilibrium (water: 0.01\u00B0C, 0.006 atm)</p><p><strong>Critical point:</strong> End of liquid-gas boundary; above this T and P, only supercritical fluid exists (water: 374\u00B0C, 218 atm)</p><p><strong>Solid-liquid line:</strong> Separates solid and liquid phases</p><p><strong>Liquid-gas line:</strong> Separates liquid and gas (ends at critical point)</p><p><strong>Solid-gas line:</strong> Separates solid and gas (sublimation curve)</p><h3>Water vs Typical Substance</h3><p><span class="rule">Water is unusual:</span> Its solid-liquid line has a <strong>negative slope</strong> (tilts left).</p><p>&bull; Meaning: increasing pressure on ice \u2192 ice melts (unlike most substances)</p><p>&bull; Reason: ice is LESS dense than liquid water due to the open hexagonal hydrogen-bonding network</p><p>&bull; This is why ice floats, ice skating works, and pipes burst when frozen</p><p><span class="rule">Most substances:</span> Solid-liquid line has a positive slope (solid is denser than liquid).</p><p>&bull; CO\u2082: triple point at 5.11 atm, so CO\u2082 sublimes at 1 atm (dry ice)</p><h3>Clausius-Clapeyron Equation</h3><p><span class="rule">ln(P\u2082/P\u2081) = \u2212\u0394H\u1D65\u2090\u209A/R \u00D7 (1/T\u2082 \u2212 1/T\u2081)</span></p><p>&bull; R = 8.314 J/(mol\u00B7K), T in Kelvin, P in same units</p><p>&bull; Relates vapor pressure to temperature</p><p>&bull; Can find BP at different pressures, or \u0394Hvap from two P-T data points</p>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 phase transitions, heating curves, triple point, critical point \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>

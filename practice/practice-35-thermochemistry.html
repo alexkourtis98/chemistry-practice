@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice 35 — Thermochemistry</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;padding:0 0 60px}
+h1{text-align:center;padding:30px 20px 10px;font-size:1.8em;color:#f5f5f5;letter-spacing:1px}
+.subtitle{text-align:center;color:#888;font-size:.95em;margin-bottom:20px}
+#scorebar{position:sticky;top:0;z-index:100;background:#16213e;border-bottom:2px solid #c85028;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:1.05em}
+#scorebar .score{color:#c85028;font-weight:700;font-size:1.2em}
+#scorebar .pct{color:#888;font-size:.9em;margin-left:10px}
+#scorebar button{background:#c85028;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.9em;margin-left:8px}
+#scorebar button:hover{background:#e06030}
+#scorebar a{color:#c85028;text-decoration:none;font-weight:600}
+#scorebar a:hover{text-decoration:underline}
+#saveStatus{margin-left:12px;font-size:.82em;color:#2ecc71;opacity:0;transition:opacity .4s}
+#saveStatus.show{opacity:1}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.exercise{background:#16213e;border-radius:10px;margin:20px 0;overflow:hidden;border:1px solid #233}
+.exercise-header{background:#0f3460;padding:14px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.exercise-header:hover{background:#1a4a80}
+.exercise-header h2{font-size:1.1em;color:#f5f5f5;margin:0}
+.exercise-header .arrow{color:#c85028;font-size:1.2em;transition:transform .2s}
+.exercise-header .arrow.open{transform:rotate(90deg)}
+.exercise-body{padding:20px;display:none}
+.exercise-body.open{display:block}
+.instruction{color:#aaa;font-size:.9em;margin-bottom:14px;font-style:italic}
+.rule-box{background:#1a1a2e;border-left:3px solid #c85028;padding:8px 14px;margin:10px 0;font-size:.88em;color:#bbb}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{background:#0f3460;color:#ddd;padding:8px 10px;text-align:left;font-size:.85em;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid #233;font-size:.9em;vertical-align:middle}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+td.num{color:#666;width:40px;text-align:center}
+input[type="text"]{background:#1a1a2e;border:2px solid #333;color:#e0e0e0;padding:6px 10px;border-radius:4px;font-size:.9em;width:100%;transition:border-color .2s,background .2s}
+input[type="text"]:focus{border-color:#c85028;outline:none}
+input[type="text"].correct{border-color:#2ecc71;background:rgba(46,204,113,.1);color:#2ecc71}
+input[type="text"].wrong{border-color:#e74c3c;background:rgba(231,76,60,.1);color:#e74c3c}
+input[type="text"].answered{opacity:.8;cursor:default}
+.answer-reveal{color:#c85028;font-size:.82em;margin-top:3px;display:none}
+.answer-reveal.show{display:block}
+.hint-text{color:#888;font-size:.82em;margin-top:2px;display:none;font-style:italic}
+.hint-text.show{display:block}
+.checkmark{color:#2ecc71;margin-left:6px;font-weight:700}
+.ex-cell{position:relative}
+.mc-group{margin:16px 0}
+.mc-q{font-weight:600;margin-bottom:8px;color:#f0f0f0}
+.mc-option{display:block;padding:8px 14px;margin:4px 0;border-radius:4px;cursor:pointer;border:2px solid #333;transition:all .2s;font-size:.9em}
+.mc-option:hover{border-color:#c85028;background:rgba(200,80,40,.08)}
+.mc-option input[type="radio"]{margin-right:8px;accent-color:#c85028}
+.mc-option.correct-choice{border-color:#2ecc71;background:rgba(46,204,113,.12);color:#2ecc71}
+.mc-option.wrong-choice{border-color:#e74c3c;background:rgba(231,76,60,.08);color:#e74c3c}
+.mc-option.reveal-correct{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.mc-option.locked{pointer-events:none;opacity:.85}
+.arrange-group{margin:18px 0;padding:12px 0;border-bottom:1px solid #233}
+.arrange-prompt{font-weight:600;margin-bottom:10px;color:#f0f0f0;font-size:.95em}
+.arrange-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;border:2px dashed #333;border-radius:8px;padding:10px;margin:8px 0;background:rgba(0,0,0,.15);transition:border-color .3s,background .3s}
+.arrange-answer:empty::before{content:'Click words below to build the sentence...';color:#555;font-size:.85em;font-style:italic}
+.arrange-bank{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;min-height:44px}
+.word-chip{display:inline-block;padding:8px 16px;background:#0f3460;border:2px solid #333;border-radius:6px;cursor:pointer;color:#e0e0e0;font-size:.92em;transition:all .2s;user-select:none}
+.word-chip:hover{border-color:#c85028;background:rgba(200,80,40,.15)}
+.word-chip.placed{opacity:.25;pointer-events:none}
+.word-chip.in-answer{background:#1a3a5e;border-color:#c85028}
+.word-chip.in-answer:hover{background:#0f3460;border-color:#e74c3c}
+.arrange-check-btn{background:#c85028;color:#fff;border:none;padding:7px 18px;border-radius:4px;cursor:pointer;font-size:.9em;margin-top:6px;transition:background .2s}
+.arrange-check-btn:hover{background:#e06030}
+.arrange-group.correct .arrange-answer{border-color:#2ecc71;background:rgba(46,204,113,.06)}
+.arrange-group.wrong .arrange-answer{border-color:#e74c3c;background:rgba(231,76,60,.04)}
+.arrange-group.correct .arrange-check-btn,.arrange-group.wrong .arrange-check-btn{display:none}
+.arrange-group.answered .word-chip{pointer-events:none;cursor:default}
+.arrange-group.answered .word-chip:hover{border-color:#333;background:#0f3460}
+.arrange-group.answered .word-chip.in-answer:hover{border-color:#c85028;background:#1a3a5e}
+.arrange-reveal{color:#c85028;font-size:.84em;margin-top:6px;display:none}
+.arrange-group.wrong .arrange-reveal{display:block}
+.arrange-group.correct .arrange-prompt::after{content:' \2713';color:#2ecc71;font-weight:700}
+.arrange-retry-btn{background:#333;color:#e0e0e0;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:.85em;margin-top:6px;margin-left:8px;display:none}
+.arrange-group.wrong .arrange-retry-btn{display:inline-block}
+.arrange-retry-btn:hover{background:#444}
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid #c85028;color:#c85028;font-size:.75em;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .2s;font-style:italic;font-family:Georgia,serif}
+.info-icon:hover{background:#c85028;color:#fff}
+.theory-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.theory-overlay.show{display:flex}
+.theory-content{background:#16213e;border:1px solid #c85028;border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;position:relative;color:#e0e0e0;font-size:.92em;line-height:1.6}
+.theory-content h3{color:#f5f5f5;margin:0 0 12px;font-size:1.1em}
+.theory-content .close-theory{position:absolute;top:10px;right:14px;color:#888;cursor:pointer;font-size:1.3em;line-height:1}
+.theory-content .close-theory:hover{color:#c85028}
+.theory-content table{width:100%;margin:8px 0}
+.theory-content th{background:#0f3460;padding:6px 10px;font-size:.85em;text-align:left}
+.theory-content td{padding:5px 10px;border-bottom:1px solid #233;font-size:.88em}
+.theory-content .rule{color:#c85028;font-weight:600}
+.theory-content p{margin:6px 0}
+@media(max-width:600px){
+  h1{font-size:1.4em}
+  .exercise-header h2{font-size:.95em}
+  td,th{padding:6px;font-size:.82em}
+  input[type="text"]{font-size:.85em;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="scorebar">
+  <div><a href="../index.html">&larr; Back</a> &nbsp; Score: <span class="score" id="scoreDisplay">0 / 0</span><span class="pct" id="pctDisplay"></span><span id="saveStatus"></span></div>
+  <div>
+    <button onclick="saveProgress()">Save (Ctrl+S)</button>
+    <button onclick="resetAll()">Reset All</button>
+  </div>
+</div>
+
+<h1>Practice 35 &mdash; Thermochemistry</h1>
+<p class="subtitle">Deep practice &mdash; heat, enthalpy, Hess's Law, bond energies</p>
+
+<div class="container" id="app"></div>
+
+<script>
+const PAGE_ID = 'fye12_practice_35';
+const SECTIONS = [
+  {
+    id:1, title:"Basic Concepts",
+    instruction:"Fill in the blank for each statement.",
+    rows:[
+      ["1","The study of heat changes in chemical reactions is ___","thermochemistry"],
+      ["2","An exothermic reaction ___ heat","releases / gives off"],
+      ["3","An endothermic reaction ___ heat","absorbs"],
+      ["4","\u0394H is negative for ___ reactions","exothermic"],
+      ["5","\u0394H is positive for ___ reactions","endothermic"],
+      ["6","The SI unit of energy is the ___","joule / J"],
+      ["7","1 calorie = ___ joules","4.184"],
+      ["8","System = reaction, surroundings = ___","everything else / environment"],
+      ["9","1 kJ = ___ J","1000"],
+      ["10","Energy cannot be created or destroyed (law of ___)","conservation of energy"],
+      ["11","Heat flows from ___ to cold objects","hot / warmer"],
+      ["12","The first law of thermodynamics: \u0394E = q + ___","w / work"],
+      ["13","At constant pressure, \u0394H = ___","q\u209a / q at constant pressure / heat at constant pressure"],
+      ["14","Enthalpy is represented by the symbol ___","H"],
+      ["15","The standard state for gases is ___ atm","1"],
+      ["16","Enthalpy is an ___ property (extensive/intensive)","extensive"]
+    ]
+  },
+  {
+    id:2, title:"Calorimetry: q = mc\u0394T",
+    instruction:"Fill in the blank. Show numeric answers without units unless specified.",
+    rows:[
+      ["1","q = m \u00D7 c \u00D7 ___","\u0394T / delta T"],
+      ["2","Specific heat of water = ___ J/(g\u00B7\u00B0C)","4.184"],
+      ["3","100g water heated from 20\u00B0C to 30\u00B0C. q = ?","4184 / 4184 J"],
+      ["4","If q = 8368 J, m = 200g water, \u0394T = ?","10 / 10\u00B0C"],
+      ["5","50g water cooled from 80\u00B0C to 30\u00B0C. q = ?","-10460 / 10460 J lost"],
+      ["6","In coffee-cup calorimetry, we assume all heat goes to ___","water"],
+      ["7","Negative q means heat was ___","released / lost"],
+      ["8","Positive q means heat was ___","absorbed / gained"],
+      ["9","500g water heated from 25\u00B0C to 75\u00B0C. q = ?","104600 / 104600 J"],
+      ["10","If q = 20920 J, m = 100g water, c = 4.184, \u0394T = ?","50 / 50\u00B0C"],
+      ["11","150g water at 10\u00B0C absorbs 6276 J. Final T = ?","20 / 20\u00B0C"],
+      ["12","Heat lost by metal = heat ___ by water","gained / absorbed"],
+      ["13","If 10g metal (c=0.45) cools from 100\u00B0C to 25\u00B0C, q(metal) = ?","-337.5 / 337.5"],
+      ["14","Specific heat of iron \u2248 ___ J/(g\u00B7\u00B0C)","0.449 / 0.45"],
+      ["15","Specific heat of aluminum \u2248 ___ J/(g\u00B7\u00B0C)","0.897 / 0.90"],
+      ["16","A higher specific heat means the substance heats up ___ (faster/slower)","slower"],
+      ["17","Water has a ___ specific heat compared to most substances (high/low)","high"],
+      ["18","200g water at 80\u00B0C mixed with 200g water at 20\u00B0C. Final T = ___","50 / 50\u00B0C"]
+    ]
+  },
+  {
+    id:3, title:"Enthalpy of Reaction",
+    instruction:"Fill in the blank for each enthalpy concept.",
+    rows:[
+      ["1","\u0394H\u00B0rxn = \u03A3 \u0394H\u00B0f(products) \u2212 \u03A3 \u0394H\u00B0f(___)",  "reactants"],
+      ["2","\u0394H\u00B0f of any element in standard state = ___","0"],
+      ["3","Standard conditions: T = ___ K, P = 1 atm","298 / 25\u00B0C"],
+      ["4","Combustion of CH\u2084: \u0394H = \u2212890 kJ. This reaction is ___","exothermic"],
+      ["5","\u0394H\u00B0f(H\u2082O(l)) = \u2212286 kJ/mol. Forming water ___ energy","releases"],
+      ["6","If a reaction is reversed, \u0394H ___","changes sign / becomes opposite"],
+      ["7","If coefficients are doubled, \u0394H is ___","doubled"],
+      ["8","\u0394H\u00B0f(CO\u2082) = \u2212393.5 kJ/mol. CO\u2082 is ___ stable than C + O\u2082","more"],
+      ["9","The standard enthalpy of formation is for forming 1 mol of compound from its ___","elements"],
+      ["10","\u0394H\u00B0f of N\u2082(g) = ___","0"],
+      ["11","\u0394H\u00B0f of H\u2082(g) = ___","0"],
+      ["12","\u0394H\u00B0f of C(graphite) = ___","0"],
+      ["13","More negative \u0394H\u00B0f means the compound is ___ stable","more"],
+      ["14","If \u0394H\u00B0rxn is negative, the products are ___ in energy than the reactants","lower"],
+      ["15","\u0394H of vaporization of water \u2248 +___ kJ/mol","40.7 / 44 / 40"],
+      ["16","\u0394H of fusion of ice \u2248 +___ kJ/mol","6.01 / 6"],
+      ["17","Combustion reactions are always ___ (exothermic/endothermic)","exothermic"],
+      ["18","Neutralization (acid + base) is ___ (exothermic/endothermic)","exothermic"]
+    ]
+  },
+  {
+    id:4, title:"Hess's Law",
+    instruction:"Fill in the blank for each Hess's Law question.",
+    rows:[
+      ["1","Hess's Law: \u0394H for overall = ___ of \u0394H for steps","sum"],
+      ["2","If A\u2192B \u0394H=100, B\u2192C \u0394H=\u221250, then A\u2192C \u0394H=?","50"],
+      ["3","If A\u2192B \u0394H=200, then B\u2192A \u0394H=?","-200"],
+      ["4","If 2A\u21922B \u0394H=400, then A\u2192B \u0394H=?","200"],
+      ["5","Hess's Law works because enthalpy is a ___ function","state"],
+      ["6","State function depends only on initial and ___ states","final"],
+      ["7","If A\u2192B \u0394H=\u2212100, B\u2192C \u0394H=\u2212200, C\u2192D \u0394H=+50, then A\u2192D \u0394H=?","-250"],
+      ["8","If 3A\u21923B \u0394H=\u2212600, then A\u2192B \u0394H=?","-200"],
+      ["9","If A\u2192B \u0394H=+300, and we need 2A\u21922B, \u0394H=?","+600 / 600"],
+      ["10","If A\u2192B \u0394H=\u2212150, and reverse + double: 2B\u21922A, \u0394H=?","+300 / 300"],
+      ["11","To use Hess's Law, you may ___ and ___ given equations","reverse, multiply / flip, scale"],
+      ["12","Path independence means the total \u0394H is the same regardless of ___","path / route / steps"]
+    ]
+  },
+  {
+    id:5, title:"Bond Energies",
+    instruction:"Fill in the blank for each bond energy concept.",
+    rows:[
+      ["1","\u0394H \u2248 \u03A3(bonds broken) \u2212 \u03A3(bonds ___)","formed"],
+      ["2","Breaking bonds ___ energy (endo/exo)","requires / endothermic / absorbs"],
+      ["3","Forming bonds ___ energy","releases / exothermic"],
+      ["4","Stronger bonds have ___ bond energies","higher / larger"],
+      ["5","C=C bond energy is ___ than C\u2212C (higher/lower)","higher"],
+      ["6","Triple bonds are ___ than double bonds","stronger"],
+      ["7","H\u2212H bond energy \u2248 ___ kJ/mol","436"],
+      ["8","O=O bond energy \u2248 ___ kJ/mol","498 / 495"],
+      ["9","C\u2212H bond energy \u2248 ___ kJ/mol","413 / 412"],
+      ["10","C\u2212C bond energy \u2248 ___ kJ/mol","347 / 348"],
+      ["11","C=C bond energy \u2248 ___ kJ/mol","614 / 612"],
+      ["12","C\u2261C bond energy \u2248 ___ kJ/mol","839 / 837"],
+      ["13","If bonds broken = 2000 kJ, bonds formed = 2500 kJ, \u0394H = ___","-500"],
+      ["14","If bonds broken = 1200 kJ, bonds formed = 900 kJ, \u0394H = ___","+300 / 300"],
+      ["15","Exothermic reaction: bonds formed are ___ than bonds broken (stronger/weaker)","stronger"],
+      ["16","Bond energy calculations give ___ values (exact/approximate)","approximate"]
+    ]
+  },
+  {
+    id:6, title:"Calculation Problems", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"How much heat is needed to raise 250g of water from 22\u00B0C to 98\u00B0C? (c = 4.184 J/g\u00B7\u00B0C)", options:["79,496 J","79,000 J","1,046 J","39,748 J"], correct:0},
+      {q:"A reaction has \u0394H = \u2212250 kJ. If the reaction is reversed AND coefficients tripled, \u0394H = ?", options:["\u2212750 kJ","+750 kJ","+250 kJ","\u2212250 kJ"], correct:1},
+      {q:"Given: C + O\u2082 \u2192 CO\u2082 (\u0394H = \u2212393 kJ) and CO + \u00BDO\u2082 \u2192 CO\u2082 (\u0394H = \u2212283 kJ). Find \u0394H for C + \u00BDO\u2082 \u2192 CO.", options:["\u2212110 kJ","+110 kJ","\u2212676 kJ","\u2212283 kJ"], correct:0},
+      {q:"A 50g metal at 100\u00B0C is placed in 200g water at 20\u00B0C. Final T = 22\u00B0C. What is q(water)?", options:["1673.6 J","8368 J","3340.8 J","16736 J"], correct:0},
+      {q:"If breaking bonds requires 1500 kJ and forming bonds releases 1800 kJ, \u0394H = ?", options:["+300 kJ","\u2212300 kJ","+3300 kJ","\u22121500 kJ"], correct:1},
+      {q:"\u0394H\u00B0f of O\u2082(g) is:", options:["\u2212393.5 kJ/mol","\u2212286 kJ/mol","0 kJ/mol","+142 kJ/mol"], correct:2},
+      {q:"Given \u0394H\u00B0f: CO\u2082 = \u2212393.5, H\u2082O = \u2212286, CH\u2084 = \u221275. Find \u0394H for CH\u2084 + 2O\u2082 \u2192 CO\u2082 + 2H\u2082O:", options:["\u2212890.5 kJ","\u2212604.5 kJ","+890.5 kJ","\u2212965 kJ"], correct:0},
+      {q:"300g water absorbs 12,552 J. What is \u0394T?", options:["5\u00B0C","10\u00B0C","15\u00B0C","20\u00B0C"], correct:1},
+      {q:"How much heat to raise 1 kg water by 1\u00B0C?", options:["4.184 J","41.84 J","418.4 J","4184 J"], correct:3},
+      {q:"A 100g copper piece (c = 0.385) at 200\u00B0C is placed in 500g water at 20\u00B0C. The system will reach thermal equilibrium when:", options:["T(Cu) = T(water)","q(Cu) + q(water) = 0","Both A and B","Neither A nor B"], correct:2},
+      {q:"If \u0394H\u00B0f(NH\u2083) = \u221246 kJ/mol, for N\u2082 + 3H\u2082 \u2192 2NH\u2083, \u0394H = ?", options:["\u221246 kJ","\u221292 kJ","+92 kJ","\u221223 kJ"], correct:1},
+      {q:"Which has the largest magnitude of \u0394H\u00B0f?", options:["O\u2082(g)","H\u2082O(l) (\u2212286)","CO\u2082(g) (\u2212393.5)","Fe(s)"], correct:2}
+    ]
+  },
+  {
+    id:7, title:"Mixed Review", type:"mc",
+    instruction:"Select the correct answer.",
+    questions:[
+      {q:"Which process is endothermic?", options:["Combustion of methane","Ice melting","Water vapor condensing","Iron rusting"], correct:1},
+      {q:"In an exothermic reaction, the products have ___ energy than the reactants.", options:["More","Less","The same","Cannot determine"], correct:1},
+      {q:"A bomb calorimeter measures:", options:["Only work done","Heat at constant pressure","Heat at constant volume","Entropy change"], correct:2},
+      {q:"Which has a \u0394H\u00B0f = 0?", options:["H\u2082O(l)","CO\u2082(g)","Na(s)","NaCl(s)"], correct:2},
+      {q:"If \u0394H is negative and temperature of surroundings increases, the reaction is:", options:["Endothermic","Exothermic","At equilibrium","Impossible to determine"], correct:1},
+      {q:"Hess's Law is a consequence of enthalpy being a:", options:["Path function","State function","Vector quantity","Dimensionless number"], correct:1},
+      {q:"Which requires energy input?", options:["Forming H\u2212H bond","Breaking O=O bond","Both forming and breaking bonds","Neither"], correct:1},
+      {q:"The enthalpy diagram for an exothermic reaction shows products:", options:["Above reactants","At the same level as reactants","Below reactants","At the transition state"], correct:2},
+      {q:"Photosynthesis is:", options:["Exothermic","Endothermic","Neither","Both"], correct:1},
+      {q:"Cellular respiration is:", options:["Exothermic","Endothermic","Neither","Both"], correct:0},
+      {q:"Which phase change is exothermic?", options:["Melting","Evaporation","Condensation","Sublimation"], correct:2},
+      {q:"Which phase change is endothermic?", options:["Freezing","Condensation","Deposition","Boiling"], correct:3},
+      {q:"Dissolving NaOH in water feels hot. The process is:", options:["Endothermic","Exothermic","Adiabatic","Isothermal"], correct:1},
+      {q:"Dissolving NH\u2084NO\u2083 in water feels cold. The process is:", options:["Endothermic","Exothermic","Adiabatic","Isothermal"], correct:0},
+      {q:"\u0394H of a reaction is independent of the ___ taken:", options:["Temperature","Path","Pressure","Catalyst"], correct:1}
+    ]
+  },
+  {
+    id:8, title:"Enthalpy Diagrams & Sign Conventions",
+    instruction:"Fill in the blank about enthalpy diagrams.",
+    rows:[
+      ["1","On an enthalpy diagram, the y-axis shows ___","enthalpy / H / energy"],
+      ["2","Exothermic: products are ___ on the diagram than reactants","lower / below"],
+      ["3","Endothermic: products are ___ on the diagram than reactants","higher / above"],
+      ["4","The arrow pointing downward on an enthalpy diagram means \u0394H is ___","negative"],
+      ["5","The arrow pointing upward means \u0394H is ___","positive"],
+      ["6","\u0394H = H(products) \u2212 H(___)","reactants"],
+      ["7","If H(products) = 200 kJ and H(reactants) = 500 kJ, \u0394H = ___","-300"],
+      ["8","If H(products) = 800 kJ and H(reactants) = 300 kJ, \u0394H = ___","+500 / 500"],
+      ["9","The height of the hump in an enthalpy diagram represents ___","activation energy / Ea"],
+      ["10","The difference between reactant level and product level is ___","\u0394H / enthalpy change"]
+    ]
+  },
+  {
+    id:9, title:"Word Arrange: Hess's Law & Concepts", type:"arrange",
+    instruction:"Arrange the words to form the correct statement.",
+    sentences:[
+      {prompt:"State Hess's Law:", words:["The","total","enthalpy","change","is","independent","of","the","pathway","taken"]},
+      {prompt:"Definition of exothermic:", words:["A","reaction","that","releases","heat","to","the","surroundings"]},
+      {prompt:"Calorimetry formula:", words:["q","=","m","\u00D7","c","\u00D7","\u0394T"]},
+      {prompt:"Bond energy rule:", words:["\u0394H","=","bonds","broken","\u2212","bonds","formed"]},
+      {prompt:"Standard enthalpy of formation:", words:["\u0394H\u00B0f","of","any","element","in","standard","state","equals","zero"]},
+      {prompt:"Enthalpy of reaction formula:", words:["\u0394H\u00B0rxn","=","\u03A3\u0394H\u00B0f(products)","\u2212","\u03A3\u0394H\u00B0f(reactants)"]},
+      {prompt:"First law of thermodynamics:", words:["Energy","cannot","be","created","or","destroyed"]},
+      {prompt:"In an exothermic reaction:", words:["Products","are","lower","in","energy","than","reactants"]}
+    ]
+  }
+];
+
+let score = 0;
+let totalInputs = 0;
+
+function countInputs() {
+  let c = 0;
+  for (const s of SECTIONS) {
+    if (s.type === 'mc') c += s.questions.length;
+    else if (s.type === 'arrange') c += s.sentences.length;
+    else c += s.rows.length;
+  }
+  return c;
+}
+totalInputs = countInputs();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score + ' / ' + totalInputs;
+  const pct = totalInputs > 0 ? Math.round(score / totalInputs * 100) : 0;
+  document.getElementById('pctDisplay').textContent = '(' + pct + '%)';
+  saveProgress(true);
+}
+
+function normalizeForCompare(s) {
+  s = s.trim().toLowerCase().replace(/\s+/g,' ');
+  s = s.replace(/ά/g,'α').replace(/έ/g,'ε').replace(/ή/g,'η').replace(/ί/g,'ι')
+       .replace(/ό/g,'ο').replace(/ύ/g,'υ').replace(/ώ/g,'ω').replace(/ΐ/g,'ι').replace(/ΰ/g,'υ');
+  s = s.replace(/₀/g,'0').replace(/₁/g,'1').replace(/₂/g,'2').replace(/₃/g,'3').replace(/₄/g,'4')
+       .replace(/₅/g,'5').replace(/₆/g,'6').replace(/₇/g,'7').replace(/₈/g,'8').replace(/₉/g,'9');
+  s = s.replace(/⁺/g,'+').replace(/⁻/g,'-');
+  return s;
+}
+
+function checkAnswer(inputEl) {
+  if (inputEl.classList.contains('correct')) return;
+  if (inputEl.classList.contains('wrong')) {
+    inputEl.classList.remove('wrong');
+    inputEl.readOnly = false;
+    inputEl.classList.remove('answered');
+    const rev = inputEl.parentElement.querySelector('.answer-reveal');
+    if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = inputEl.parentElement.querySelector('.hint-text');
+    if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  }
+  const userVal = normalizeForCompare(inputEl.value);
+  if (!userVal) return;
+  const answers = inputEl.dataset.answer.split('/').map(a => normalizeForCompare(a));
+  const revealEl = inputEl.parentElement.querySelector('.answer-reveal');
+  let matched = false;
+  for (const ans of answers) {
+    if (userVal === ans) { matched = true; break; }
+    const uNP = userVal.replace(/[?.!,]/g,'').trim();
+    const aNP = ans.replace(/[?.!,]/g,'').trim();
+    if (uNP === aNP) { matched = true; break; }
+  }
+  if (matched) {
+    inputEl.readOnly = true;
+    inputEl.classList.add('answered','correct');
+    score++;
+    const cm = document.createElement('span');
+    cm.className = 'checkmark'; cm.textContent = ' \u2713';
+    inputEl.parentElement.appendChild(cm);
+  } else {
+    inputEl.classList.add('wrong');
+    if (revealEl) { revealEl.textContent = '\u2192 ' + inputEl.dataset.answer.split('/')[0].trim(); revealEl.classList.add('show'); }
+  }
+  updateScore();
+  if (matched) focusNext(inputEl);
+}
+
+function focusNext(el) {
+  const all = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = all.indexOf(el);
+  for (let i = idx+1; i < all.length; i++) { if (!all[i].classList.contains('correct')) { ensureVisibleAndFocus(all[i]); return; } }
+}
+
+function ensureVisibleAndFocus(input) {
+  const body = input.closest('.exercise-body');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    const id = body.id.replace('body-','');
+    const arrow = document.getElementById('arrow-' + id);
+    if (arrow) arrow.classList.add('open');
+  }
+  input.focus();
+  input.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function toggleExercise(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildTable(section) {
+  let html = '<table><thead><tr><th>#</th><th>Prompt</th><th>Your Answer</th></tr></thead><tbody>';
+  for (const row of section.rows) {
+    html += '<tr><td class="num">' + row[0] + '</td><td>' + escHtml(row[1]) + '</td>';
+    html += '<td class="ex-cell"><input type="text" data-answer="' + escAttr(row[2]) + '" autocomplete="off" spellcheck="false"><div class="answer-reveal"></div></td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildMC(section) {
+  let html = '';
+  section.questions.forEach((q, qi) => {
+    const name = 'mc_' + section.id + '_' + qi;
+    html += '<div class="mc-group" data-correct="' + q.correct + '" data-name="' + name + '">';
+    html += '<div class="mc-q">' + (qi+1) + '. ' + escHtml(q.q) + '</div>';
+    q.options.forEach((opt, oi) => {
+      html += '<label class="mc-option" data-idx="' + oi + '"><input type="radio" name="' + name + '" value="' + oi + '"> ' + escHtml(opt) + '</label>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function buildArrange(section) {
+  let html = '';
+  section.sentences.forEach((s, si) => {
+    const gid = 'arrange_' + section.id + '_' + si;
+    const correctStr = s.words.join(' ');
+    const shuffled = shuffleArray(s.words);
+    html += '<div class="arrange-group" id="' + gid + '" data-correct="' + escAttr(correctStr) + '">';
+    html += '<div class="arrange-prompt">' + (si+1) + '. ' + escHtml(s.prompt) + '</div>';
+    html += '<div class="arrange-answer" id="' + gid + '_answer"></div>';
+    html += '<div class="arrange-bank" id="' + gid + '_bank">';
+    shuffled.forEach(function(w) {
+      html += '<span class="word-chip" data-word="' + escAttr(w) + '" data-gid="' + gid + '" onclick="arrangeClick(this)">' + escHtml(w) + '</span>';
+    });
+    html += '</div>';
+    html += '<button class="arrange-check-btn" onclick="checkArrange(\'' + gid + '\')">Check \u21B5</button>';
+    html += '<button class="arrange-retry-btn" onclick="retryArrange(\'' + gid + '\')">Retry</button>';
+    html += '<div class="arrange-reveal"></div>';
+    html += '</div>';
+  });
+  return html;
+}
+
+function arrangeClick(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  if (chip.parentElement === bank) {
+    chip.classList.add('placed');
+    var clone = chip.cloneNode(true);
+    clone.classList.remove('placed');
+    clone.classList.add('in-answer');
+    clone.onclick = function() { arrangeRemove(this); };
+    answer.appendChild(clone);
+  }
+}
+
+function arrangeRemove(chip) {
+  var gid = chip.dataset.gid;
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var bank = document.getElementById(gid + '_bank');
+  var word = chip.dataset.word;
+  var allPlaced = bank.querySelectorAll('.word-chip.placed');
+  for (var k = 0; k < allPlaced.length; k++) {
+    if (allPlaced[k].dataset.word === word) { allPlaced[k].classList.remove('placed'); break; }
+  }
+  chip.remove();
+}
+
+function checkArrange(gid) {
+  var group = document.getElementById(gid);
+  if (group.classList.contains('answered')) return;
+  var answer = document.getElementById(gid + '_answer');
+  var chips = answer.querySelectorAll('.word-chip');
+  if (chips.length === 0) return;
+  var userWords = Array.from(chips).map(function(c) { return c.dataset.word; }).join(' ');
+  var correct = group.dataset.correct;
+  group.classList.add('answered');
+  if (userWords === correct) {
+    group.classList.add('correct');
+    score++;
+  } else {
+    group.classList.add('wrong');
+    var reveal = group.querySelector('.arrange-reveal');
+    reveal.textContent = '\u2192 ' + correct;
+  }
+  updateScore();
+}
+
+function retryArrange(gid) {
+  var group = document.getElementById(gid);
+  if (!group.classList.contains('wrong')) return;
+  group.classList.remove('answered','wrong');
+  var answer = document.getElementById(gid + '_answer');
+  var bank = document.getElementById(gid + '_bank');
+  answer.innerHTML = '';
+  bank.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+  var reveal = group.querySelector('.arrange-reveal');
+  if (reveal) { reveal.textContent = ''; }
+  saveProgress(true);
+}
+
+const SECTION_THEORY = '<h3>1. Core Concepts & Sign Conventions</h3><table><tr><th>Term</th><th>Meaning</th></tr><tr><td>System</td><td>The reaction itself</td></tr><tr><td>Surroundings</td><td>Everything outside the system</td></tr><tr><td>Exothermic</td><td>\u0394H &lt; 0, system releases heat, surroundings get warmer</td></tr><tr><td>Endothermic</td><td>\u0394H &gt; 0, system absorbs heat, surroundings get cooler</td></tr><tr><td>State function</td><td>Depends only on initial and final state, NOT the path (H, E, S, G)</td></tr><tr><td>Path function</td><td>Depends on how the process occurs (q, w)</td></tr></table><p><span class="rule">First Law:</span> \u0394E = q + w (energy is conserved). At constant pressure: \u0394H = q\u209a</p><p><span class="rule">Standard state:</span> 25\u00B0C (298 K), 1 atm, 1 M solutions. Symbol: \u00B0 superscript.</p><h3>2. Calorimetry: q = mc\u0394T</h3><p><span class="rule">Formula:</span> q = m \u00D7 c \u00D7 \u0394T, where q = heat (J), m = mass (g), c = specific heat (J/g\u00B7\u00B0C), \u0394T = T\u2082 \u2212 T\u2081</p><table><tr><th>Substance</th><th>Specific Heat (J/g\u00B7\u00B0C)</th></tr><tr><td>Water (liquid)</td><td>4.184</td></tr><tr><td>Aluminum</td><td>0.897</td></tr><tr><td>Iron</td><td>0.449</td></tr><tr><td>Copper</td><td>0.385</td></tr><tr><td>Gold</td><td>0.129</td></tr></table><p><span class="rule">Coffee-cup calorimeter:</span> Measures \u0394H at constant pressure (open). Assumes all heat transfers to water: q\u1D63\u2093\u2099 = \u2212q\u2083\u2092\u2097\u2099</p><p><span class="rule">Bomb calorimeter:</span> Measures \u0394E at constant volume (sealed). q\u1D63\u2093\u2099 = \u2212C\u0394T, where C = calorimeter constant (J/\u00B0C)</p><p><span class="rule">Worked example:</span> 250g water heated 22\u00B0C \u2192 98\u00B0C: q = 250 \u00D7 4.184 \u00D7 76 = 79,496 J \u2248 79.5 kJ</p><h3>3. Enthalpy of Reaction (\u0394H\u00B0rxn)</h3><p><span class="rule">From formation enthalpies:</span> \u0394H\u00B0rxn = \u03A3 \u0394H\u00B0f(products) \u2212 \u03A3 \u0394H\u00B0f(reactants)</p><p><span class="rule">Rule:</span> \u0394H\u00B0f of any element in its standard state = 0 (O\u2082(g), H\u2082(g), C(graphite), Na(s), Fe(s), etc.)</p><table><tr><th>Compound</th><th>\u0394H\u00B0f (kJ/mol)</th></tr><tr><td>H\u2082O(l)</td><td>\u2212285.8</td></tr><tr><td>H\u2082O(g)</td><td>\u2212241.8</td></tr><tr><td>CO\u2082(g)</td><td>\u2212393.5</td></tr><tr><td>CH\u2084(g)</td><td>\u221274.8</td></tr><tr><td>NH\u2083(g)</td><td>\u221246.1</td></tr><tr><td>NaCl(s)</td><td>\u2212411.2</td></tr></table><p><span class="rule">Worked example:</span> CH\u2084 + 2O\u2082 \u2192 CO\u2082 + 2H\u2082O(l): \u0394H = [\u2212393.5 + 2(\u2212285.8)] \u2212 [\u221274.8 + 0] = \u2212890.3 kJ</p><h3>4. Hess\'s Law</h3><p><span class="rule">Principle:</span> \u0394H for an overall reaction = sum of \u0394H for individual steps (because H is a state function).</p><p><span class="rule">Manipulation rules:</span></p><p>1. Reversing a reaction \u2192 change sign of \u0394H</p><p>2. Multiplying coefficients by n \u2192 multiply \u0394H by n</p><p>3. Dividing coefficients by n \u2192 divide \u0394H by n</p><p><span class="rule">Worked example:</span> Find \u0394H for C + \u00BDO\u2082 \u2192 CO</p><p>Given: (1) C + O\u2082 \u2192 CO\u2082, \u0394H = \u2212393 kJ; (2) CO + \u00BDO\u2082 \u2192 CO\u2082, \u0394H = \u2212283 kJ</p><p>Use (1) as is, reverse (2): CO\u2082 \u2192 CO + \u00BDO\u2082, \u0394H = +283 kJ</p><p>Sum: C + O\u2082 + CO\u2082 \u2192 CO\u2082 + CO + \u00BDO\u2082 \u2192 simplifies to C + \u00BDO\u2082 \u2192 CO, \u0394H = \u2212110 kJ</p><h3>5. Bond Energies</h3><p><span class="rule">Formula:</span> \u0394H \u2248 \u03A3(bonds broken) \u2212 \u03A3(bonds formed)</p><p>Breaking bonds = endothermic (+), Forming bonds = exothermic (\u2212)</p><table><tr><th>Bond</th><th>Energy (kJ/mol)</th></tr><tr><td>H\u2212H</td><td>436</td></tr><tr><td>O=O</td><td>498</td></tr><tr><td>C\u2212H</td><td>413</td></tr><tr><td>C\u2212C</td><td>347</td></tr><tr><td>C=C</td><td>614</td></tr><tr><td>C\u2261C</td><td>839</td></tr><tr><td>O\u2212H</td><td>463</td></tr><tr><td>C=O</td><td>799</td></tr><tr><td>N\u2261N</td><td>945</td></tr></table><p><span class="rule">Tip:</span> If total bonds formed &gt; total bonds broken \u2192 exothermic. Bond energy calculations give approximate values only.</p><h3>6. Common Mistakes</h3><p>1. Forgetting that \u0394H\u00B0f of elements in standard state = 0</p><p>2. Using wrong sign when reversing Hess\'s Law steps</p><p>3. Forgetting to multiply \u0394H\u00B0f by the stoichiometric coefficient</p><p>4. Mixing up q(system) and q(surroundings): they are equal and opposite</p><p>5. Confusing specific heat (per gram) with molar heat capacity (per mole)</p>';
+function showTheory() { document.getElementById('theoryBody').innerHTML = SECTION_THEORY; document.getElementById('theoryOverlay').classList.add('show'); }
+function hideTheory() { document.getElementById('theoryOverlay').classList.remove('show'); }
+
+const app = document.getElementById('app');
+for (const s of SECTIONS) {
+  let bodyHtml = '';
+  if (s.instruction) bodyHtml += '<p class="instruction">' + escHtml(s.instruction) + '</p>';
+  if (s.rule) bodyHtml += '<div class="rule-box">' + escHtml(s.rule) + '</div>';
+  if (s.type === 'mc') bodyHtml += buildMC(s);
+  else if (s.type === 'arrange') bodyHtml += buildArrange(s);
+  else bodyHtml += buildTable(s);
+
+  app.innerHTML += `
+    <div class="exercise">
+      <div class="exercise-header" onclick="toggleExercise(${s.id})">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <h2>Section ${s.id} - ${escHtml(s.title)}</h2>
+          <span class="info-icon" onclick="event.stopPropagation();showTheory()" title="Theory">i</span>
+        </div>
+        <span class="arrow" id="arrow-${s.id}">\u25B6</span>
+      </div>
+      <div class="exercise-body" id="body-${s.id}">
+        ${bodyHtml}
+      </div>
+    </div>`;
+}
+
+toggleExercise(1);
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  score = 0;
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    el.value = ''; el.readOnly = false;
+    el.classList.remove('answered','correct','wrong');
+    const cm = el.parentElement.querySelector('.checkmark'); if (cm) cm.remove();
+    const rev = el.parentElement.querySelector('.answer-reveal'); if (rev) { rev.classList.remove('show'); rev.textContent = ''; }
+    const hint = el.parentElement.querySelector('.hint-text'); if (hint) { hint.classList.remove('show'); hint.textContent = ''; delete hint.dataset.level; }
+  });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.mc-option').forEach(el => { el.classList.remove('correct-choice','wrong-choice','reveal-correct','locked','answered'); });
+  document.querySelectorAll('.mc-group').forEach(el => el.classList.remove('answered'));
+  document.querySelectorAll('.arrange-group').forEach(function(g) {
+    g.classList.remove('answered','correct','wrong');
+    g.querySelector('.arrange-answer').innerHTML = '';
+    g.querySelectorAll('.word-chip.placed').forEach(function(c) { c.classList.remove('placed'); });
+    var rev = g.querySelector('.arrange-reveal'); if (rev) rev.textContent = '';
+  });
+  localStorage.removeItem(PAGE_ID);
+  updateScore();
+}
+
+function saveProgress(silent) {
+  const data = {score: score, total: totalInputs, inputs: [], radios: [], arranges: [], openExercises: []};
+  document.querySelectorAll('input[type="text"]').forEach(el => {
+    data.inputs.push({value: el.value, correct: el.classList.contains('correct'), wrong: el.classList.contains('wrong')});
+  });
+  document.querySelectorAll('.mc-group').forEach(group => {
+    const sel = group.querySelector('input[type="radio"]:checked');
+    data.radios.push({answered: group.classList.contains('answered'), selected: sel ? parseInt(sel.value) : null});
+  });
+  document.querySelectorAll('.arrange-group').forEach(group => {
+    const chips = group.querySelector('.arrange-answer').querySelectorAll('.word-chip');
+    data.arranges.push({answered: group.classList.contains('answered'), correct: group.classList.contains('correct'), wrong: group.classList.contains('wrong'), words: Array.from(chips).map(function(c){return c.dataset.word;})});
+  });
+  document.querySelectorAll('.exercise-body').forEach(body => {
+    if (body.classList.contains('open')) data.openExercises.push(body.id);
+  });
+  localStorage.setItem(PAGE_ID, JSON.stringify(data));
+  if (!silent) {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saved!'; status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem(PAGE_ID);
+  if (!raw) { updateScore(); return; }
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { updateScore(); return; }
+  score = 0;
+  const inputs = document.querySelectorAll('input[type="text"]');
+  inputs.forEach((el, i) => {
+    if (!data.inputs[i]) return;
+    const saved = data.inputs[i];
+    el.value = saved.value;
+    if (saved.correct) {
+      el.readOnly = true; el.classList.add('answered','correct'); score++;
+      const cm = document.createElement('span'); cm.className = 'checkmark'; cm.textContent = ' \u2713';
+      el.parentElement.appendChild(cm);
+    } else if (saved.wrong) {
+      el.classList.add('wrong');
+      const rev = el.parentElement.querySelector('.answer-reveal');
+      if (rev) { rev.textContent = '\u2192 ' + el.dataset.answer.split('/')[0].trim(); rev.classList.add('show'); }
+    }
+  });
+  const mcGroups = document.querySelectorAll('.mc-group');
+  mcGroups.forEach((group, i) => {
+    if (!data.radios[i] || !data.radios[i].answered) return;
+    const saved = data.radios[i];
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const options = group.querySelectorAll('.mc-option');
+    const radio = group.querySelector('input[value="' + saved.selected + '"]');
+    if (radio) radio.checked = true;
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (saved.selected === correctIdx) { options[saved.selected].classList.add('correct-choice'); score++; }
+    else { options[saved.selected].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+  });
+  const arrangeGroups = document.querySelectorAll('.arrange-group');
+  if (data.arranges) {
+    arrangeGroups.forEach(function(group, i) {
+      if (!data.arranges[i]) return;
+      const saved = data.arranges[i];
+      if (saved.words && saved.words.length > 0) {
+        const bank = group.querySelector('.arrange-bank');
+        const answer = group.querySelector('.arrange-answer');
+        saved.words.forEach(function(w) {
+          var bankChips = bank.querySelectorAll('.word-chip:not(.placed)');
+          for (var k = 0; k < bankChips.length; k++) {
+            if (bankChips[k].dataset.word === w) {
+              bankChips[k].classList.add('placed');
+              var clone = bankChips[k].cloneNode(true);
+              clone.classList.remove('placed');
+              clone.classList.add('in-answer');
+              clone.onclick = function() { arrangeRemove(this); };
+              answer.appendChild(clone);
+              break;
+            }
+          }
+        });
+      }
+      if (saved.answered) {
+        group.classList.add('answered');
+        if (saved.correct) { group.classList.add('correct'); score++; }
+        else if (saved.wrong) {
+          group.classList.add('wrong');
+          var reveal = group.querySelector('.arrange-reveal');
+          if (reveal) reveal.textContent = '\u2192 ' + group.dataset.correct;
+        }
+      }
+    });
+  }
+  if (data.openExercises) {
+    document.querySelectorAll('.exercise-body').forEach(body => {
+      const id = body.id.replace('body-','');
+      const arrow = document.getElementById('arrow-' + id);
+      if (data.openExercises.includes(body.id)) { body.classList.add('open'); if (arrow) arrow.classList.add('open'); }
+      else { body.classList.remove('open'); if (arrow) arrow.classList.remove('open'); }
+    });
+  }
+  updateScore();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProgress(); return; }
+  if (e.ctrlKey && e.key === 'i' && e.target.matches('input[type="text"]')) {
+    e.preventDefault();
+    if (e.target.classList.contains('correct')) return;
+    const answer = e.target.dataset.answer; if (!answer) return;
+    const primary = answer.split('/')[0].trim();
+    let hintEl = e.target.parentElement.querySelector('.hint-text');
+    if (!hintEl) { hintEl = document.createElement('div'); hintEl.className = 'hint-text'; e.target.parentElement.appendChild(hintEl); }
+    if (hintEl.dataset.level === '1') { hintEl.textContent = '\u2192 ' + primary; hintEl.dataset.level = '2'; }
+    else { const hintLen = Math.min(3, Math.ceil(primary.length * 0.3)); hintEl.textContent = 'Hint: ' + primary.substring(0, hintLen) + '...'; hintEl.dataset.level = '1'; }
+    hintEl.classList.add('show'); return;
+  }
+  if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); window.scrollBy({top: e.key === 'ArrowDown' ? 400 : -400, behavior:'smooth'}); return; }
+  if (e.key === 'Tab' && e.target.matches('input[type="text"]')) {
+    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+    const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+    const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+    if (nextIdx >= 0 && nextIdx < allInputs.length) { e.preventDefault(); ensureVisibleAndFocus(allInputs[nextIdx]); }
+    return;
+  }
+  if (!e.target.matches('input[type="text"]')) return;
+  if (e.key === 'Enter') { e.preventDefault(); checkAnswer(e.target); return; }
+  const allInputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const idx = allInputs.indexOf(e.target); if (idx === -1) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+  else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) { e.preventDefault(); if (idx < allInputs.length - 1) ensureVisibleAndFocus(allInputs[idx + 1]); }
+  else if (e.key === 'ArrowLeft' && e.target.selectionStart === 0) { e.preventDefault(); if (idx > 0) ensureVisibleAndFocus(allInputs[idx - 1]); }
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.matches('input[type="radio"]')) {
+    const group = e.target.closest('.mc-group');
+    if (!group || group.classList.contains('answered')) return;
+    group.classList.add('answered');
+    const correctIdx = parseInt(group.dataset.correct);
+    const selectedIdx = parseInt(e.target.value);
+    const options = group.querySelectorAll('.mc-option');
+    options.forEach(opt => { opt.classList.add('locked'); opt.querySelector('input').disabled = true; });
+    if (selectedIdx === correctIdx) { options[selectedIdx].classList.add('correct-choice'); score++; }
+    else { options[selectedIdx].classList.add('wrong-choice'); options[correctIdx].classList.add('reveal-correct'); }
+    updateScore();
+  }
+});
+
+loadProgress();
+document.querySelector('.subtitle').textContent = 'Deep practice \u2014 heat, enthalpy, Hess\u2019s Law, bond energies \u2014 ' + totalInputs + ' questions';
+setTimeout(() => { const first = document.querySelector('input[type="text"]:not(.correct)'); if (first) ensureVisibleAndFocus(first); }, 100);
+</script>
+<div class="theory-overlay" id="theoryOverlay" onclick="if(event.target===this)hideTheory()">
+  <div class="theory-content">
+    <span class="close-theory" onclick="hideTheory()">&times;</span>
+    <div id="theoryBody"></div>
+  </div>
+</div>
+</body>
+</html>
